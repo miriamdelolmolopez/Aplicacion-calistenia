@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import NavegacionInferior from "./NavegacionInferior";
 import "./globals.css";
 
 const titulos = Cormorant_Garamond({
@@ -26,7 +27,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${titulos.variable} ${cuerpo.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <NavegacionInferior />
+      </body>
     </html>
   );
 }

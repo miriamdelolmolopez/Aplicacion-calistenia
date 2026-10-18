@@ -65,8 +65,9 @@
 
 .tarjeta {
   background: var(--blanco);
-  border: 1px solid var(--linea);
+  border: 1px solid rgba(221, 214, 200, 0.6);
   border-radius: var(--radio);
+  box-shadow: var(--sombra);
   padding: 20px;
   display: flex;
   flex-direction: column;

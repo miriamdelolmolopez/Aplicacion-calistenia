@@ -1,13 +1,16 @@
-.pagina {
+.portada {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 16px 20px 32px;
   max-width: 480px;
   margin: 0 auto;
+  color: var(--blanco);
+  background-size: cover;
+  background-position: center;
 }
 
-.barra {
+.arriba {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -19,7 +22,7 @@
   align-items: center;
   min-height: 44px;
   padding: 0 4px;
-  color: var(--oliva-oscuro);
+  color: var(--blanco);
   font-weight: 600;
   text-decoration: none;
 }
@@ -28,10 +31,14 @@
   min-height: 44px;
   padding: 0 14px;
   font: inherit;
+  color: var(--blanco);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+}
+
+.idioma select option {
   color: var(--carbon);
-  background: var(--blanco);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio);
 }
 
 .oculto {
@@ -60,19 +67,17 @@
 
 .centro h1 {
   margin: 0;
-  font-size: 2.4rem;
+  font-size: 2.6rem;
+  color: var(--blanco);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.3);
 }
 
 .lema {
-  margin: 0 0 32px;
-  color: var(--secundario);
+  margin: 0;
   font-size: 0.95rem;
-}
-
-.intro {
-  margin: 0 0 16px;
-  font-size: 1.5rem;
-  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.92;
 }
 
 .botones {
@@ -92,7 +97,8 @@
   color: var(--blanco);
   font-weight: 600;
   text-decoration: none;
-  border-radius: var(--radio);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .boton:hover {
@@ -102,14 +108,16 @@
 .botonSecundario {
   flex-direction: column;
   padding: 10px 20px;
-  color: var(--oliva-oscuro);
-  background: var(--blanco);
-  border: 2px solid var(--oliva-oscuro);
+  color: var(--blanco);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: none;
   text-align: center;
+  backdrop-filter: blur(6px);
 }
 
 .botonSecundario:hover {
-  background: var(--relleno);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .botonSecundario small {
@@ -117,14 +125,5 @@
   margin-top: 2px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--secundario);
-}
-
-.enlaceSecundario {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  margin-top: 16px;
-  color: var(--oliva-oscuro);
-  font-weight: 600;
+  opacity: 0.9;
 }

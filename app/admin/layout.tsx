@@ -1,14 +1,4 @@
-import MenuLateral from "../MenuLateral";
-
-// Todas las pantallas de Administración llevan arriba el botón del menú (las tres rayitas).
+// El menú de Administración está en la barra de abajo (NavegacionInferior, en el layout raíz).
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
-  return (
-    <>
-      <style>{`@media print { .menu-admin { display: none !important; } }`}</style>
-      <div className="menu-admin" style={{ maxWidth: 720, margin: "0 auto", padding: "12px 20px 0" }}>
-        <MenuLateral />
-      </div>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

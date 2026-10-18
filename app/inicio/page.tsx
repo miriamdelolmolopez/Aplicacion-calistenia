@@ -14,6 +14,7 @@ import { useIdioma } from "../useIdioma";
 import { RUTAS, seccionesDe, useMiPerfil, type Seccion } from "../useMiPerfil";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
+import { fondoFoto, type FotoNombre } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 
 type Proxima = { empieza_en: string; nombre: string };
@@ -63,10 +64,13 @@ async function cargarExtra(userId: string): Promise<Extra> {
   };
 }
 
-const ACCESOS: Record<Exclude<Seccion, "inicio">, { texto: ClaveTexto; descripcion: ClaveTexto; color: string }> = {
-  reservar: { texto: "navReservar", descripcion: "descReservar", color: "oliva" },
-  rutina: { texto: "miRutina", descripcion: "descRutina", color: "carbon" },
-  progreso: { texto: "miProgreso", descripcion: "descProgreso", color: "olivaOscuro" },
+const ACCESOS: Record<
+  Exclude<Seccion, "inicio">,
+  { texto: ClaveTexto; descripcion: ClaveTexto; color: string; foto?: FotoNombre }
+> = {
+  reservar: { texto: "navReservar", descripcion: "descReservar", color: "oliva", foto: "calistenia" },
+  rutina: { texto: "miRutina", descripcion: "descRutina", color: "carbon", foto: "online" },
+  progreso: { texto: "miProgreso", descripcion: "descProgreso", color: "olivaOscuro", foto: "progreso" },
   pagos: { texto: "navPagos", descripcion: "descPagos", color: "arena" },
   perfil: { texto: "navCuenta", descripcion: "descCuenta", color: "arena" },
   ajustes: { texto: "navAjustes", descripcion: "descAjustes", color: "arena" },
@@ -113,11 +117,12 @@ export default function Inicio() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior />
-      <div className={styles.cabecera}>
+      <section className={estilos.hero} style={{ backgroundImage: fondoFoto("inicio") }}>
         <h1>
           {t.hola}, {perfil.nombre}
         </h1>
-      </div>
+        <p>{t.lema}</p>
+      </section>
 
       <div className={estilos.contenido}>
         {extra.cumples.length > 0 && (
@@ -196,7 +201,12 @@ export default function Inicio() {
             .map((s) => {
               const a = ACCESOS[s];
               return (
-                <Link key={s} href={RUTAS[s]} className={`${estilos.cuadro} ${estilos[a.color]}`}>
+                <Link
+                  key={s}
+                  href={RUTAS[s]}
+                  className={`${estilos.cuadro} ${estilos[a.color]}`}
+                  style={a.foto ? { backgroundImage: fondoFoto(a.foto) } : undefined}
+                >
                   <Icono nombre={s} tamano={30} />
                   <strong>{t[a.texto]}</strong>
                   <span>{t[a.descripcion]}</span>

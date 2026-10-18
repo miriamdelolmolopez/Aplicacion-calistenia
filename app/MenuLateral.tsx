@@ -3,12 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Icono from "./Icono";
 import estilos from "./menu.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
-import { RUTAS, seccionesDe, useMiPerfil, type Seccion } from "./useMiPerfil";
+import { RUTAS, seccionesDe, type MiPerfil, type Seccion } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
 
 const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
@@ -22,81 +22,79 @@ const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   admin: "panelAdmin",
 };
 
-// Botón de las tres rayitas y panel lateral con las opciones de cada persona.
-// Solo aparece si ha iniciado sesión.
-export default function MenuLateral() {
+// Panel lateral con todas las opciones de cada persona. Lo abre el botón «Más»
+// de la barra de abajo (NavegacionInferior).
+export default function MenuLateral({
+  perfil,
+  abierto,
+  onCerrar,
+}: {
+  perfil: MiPerfil;
+  abierto: boolean;
+  onCerrar: () => void;
+}) {
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const router = useRouter();
-  const perfil = useMiPerfil();
-  const [abierto, setAbierto] = useState(false);
 
   useEffect(() => {
     if (!abierto) return;
-    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && setAbierto(false);
+    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
     document.addEventListener("keydown", alPulsar);
     return () => document.removeEventListener("keydown", alPulsar);
-  }, [abierto]);
+  }, [abierto, onCerrar]);
 
-  if (!perfil || perfil === "anonimo") return null;
+  if (!abierto) return null;
 
   async function salir() {
     await createClient().auth.signOut();
-    setAbierto(false);
+    onCerrar();
     router.push("/");
   }
 
   return (
-    <>
-      <button type="button" className={estilos.boton} aria-label={t.menuAbrir} onClick={() => setAbierto(true)}>
-        <Icono nombre="menu" />
-      </button>
-
-      {abierto && (
-        <div className={estilos.capa} onClick={() => setAbierto(false)}>
-          <nav className={estilos.panel} aria-label={t.menuAbrir} onClick={(e) => e.stopPropagation()}>
-            <div className={estilos.cabecera}>
-              <Image src="/logos/logo_olive.png" alt="" width={48} height={43} />
-              <div>
-                <strong>{perfil.nombre || "Miriam del Olmo"}</strong>
-                <span>{t[`rol_${perfil.rol}` as ClaveTexto]}</span>
-              </div>
-              <button type="button" className={estilos.cerrar} aria-label={t.menuCerrar} onClick={() => setAbierto(false)}>
-                <Icono nombre="cerrar" />
-              </button>
-            </div>
-
-            <ul className={estilos.lista}>
-              {seccionesDe(perfil)
-                .filter((s) => s !== "ajustes")
-                .map((s) => (
-                <li key={s}>
-                  <Link href={RUTAS[s]} className={estilos.enlace} onClick={() => setAbierto(false)}>
-                    <Icono nombre={s} />
-                    {t[CLAVE_TEXTO[s]]}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            <div className={estilos.pie}>
-              <button type="button" className={`${estilos.enlace} ${estilos.salir}`} onClick={salir}>
-                <Icono nombre="salir" />
-                {t.salir}
-              </button>
-              <Link
-                href={RUTAS.ajustes}
-                className={estilos.engranaje}
-                aria-label={t.navAjustes}
-                title={t.navAjustes}
-                onClick={() => setAbierto(false)}
-              >
-                <Icono nombre="ajustes" tamano={26} />
-              </Link>
-            </div>
-          </nav>
+    <div className={estilos.capa} onClick={onCerrar}>
+      <nav className={estilos.panel} aria-label={t.menuAbrir} onClick={(e) => e.stopPropagation()}>
+        <div className={estilos.cabecera}>
+          <Image src="/logos/logo_olive.png" alt="" width={48} height={43} />
+          <div>
+            <strong>{perfil.nombre || "Miriam del Olmo"}</strong>
+            <span>{t[`rol_${perfil.rol}` as ClaveTexto]}</span>
+          </div>
+          <button type="button" className={estilos.cerrar} aria-label={t.menuCerrar} onClick={onCerrar}>
+            <Icono nombre="cerrar" />
+          </button>
         </div>
-      )}
-    </>
+
+        <ul className={estilos.lista}>
+          {seccionesDe(perfil)
+            .filter((s) => s !== "ajustes")
+            .map((s) => (
+              <li key={s}>
+                <Link href={RUTAS[s]} className={estilos.enlace} onClick={onCerrar}>
+                  <Icono nombre={s} />
+                  {t[CLAVE_TEXTO[s]]}
+                </Link>
+              </li>
+            ))}
+        </ul>
+
+        <div className={estilos.pie}>
+          <button type="button" className={`${estilos.enlace} ${estilos.salir}`} onClick={salir}>
+            <Icono nombre="salir" />
+            {t.salir}
+          </button>
+          <Link
+            href={RUTAS.ajustes}
+            className={estilos.engranaje}
+            aria-label={t.navAjustes}
+            title={t.navAjustes}
+            onClick={onCerrar}
+          >
+            <Icono nombre="ajustes" tamano={26} />
+          </Link>
+        </div>
+      </nav>
+    </div>
   );
 }

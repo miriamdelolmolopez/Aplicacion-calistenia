@@ -1,0 +1,58 @@
+.barra {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  justify-content: space-around;
+  gap: 2px;
+  width: min(456px, calc(100vw - 24px));
+  padding: 8px 6px;
+  transform: translateX(-50%);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 28px;
+  box-shadow: 0 8px 28px rgba(43, 43, 42, 0.14);
+}
+
+.pestana {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 2px 0;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--secundario);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 34px;
+  border-radius: 17px;
+  transition: background 0.15s;
+}
+
+.activa {
+  color: var(--oliva-oscuro);
+}
+
+.activa .icono {
+  background: #e4e7d2;
+}
+
+@media print {
+  .barra {
+    display: none;
+  }
+}

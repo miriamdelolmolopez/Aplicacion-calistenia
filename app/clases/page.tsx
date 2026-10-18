@@ -12,6 +12,7 @@ import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
 import { descargarIcs } from "@/lib/calendario";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
+import { fondoFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 import {
   cancelarMiReserva,
@@ -344,7 +345,7 @@ export default function Clases() {
 
             return (
               <section key={c.id} id={`clase-${c.id}`} className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""}`}>
-                <div className={estilos.titulo}>
+                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo)) }}>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                 </div>

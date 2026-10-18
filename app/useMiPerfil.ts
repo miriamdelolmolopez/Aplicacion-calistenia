@@ -39,12 +39,13 @@ async function cargarPerfil(): Promise<Estado> {
   };
 }
 
-export function useMiPerfil(): Estado {
+// `recargarCon`: si cambia (por ejemplo la ruta), se vuelve a leer el perfil.
+export function useMiPerfil(recargarCon?: string): Estado {
   const [perfil, setPerfil] = useState<Estado>(null);
 
   useEffect(() => {
     cargarPerfil().then(setPerfil);
-  }, []);
+  }, [recargarCon]);
 
   return perfil;
 }
