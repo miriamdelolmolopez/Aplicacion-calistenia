@@ -1,34 +1,19 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import BarraSuperior from "./BarraSuperior";
 import styles from "./page.module.css";
-import { IDIOMAS, textos, type Idioma } from "./textos";
+import { textos } from "./textos";
 import { useIdioma } from "./useIdioma";
 
 export default function Inicio() {
-  const [idioma, cambiarIdioma] = useIdioma();
+  const [idioma] = useIdioma();
   const t = textos[idioma];
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
-        <a href="#" className={styles.entrar}>
-          {t.entrar}
-        </a>
-        <label className={styles.idioma}>
-          <span className={styles.oculto}>{t.idioma}</span>
-          <select
-            value={idioma}
-            onChange={(e) => cambiarIdioma(e.target.value as Idioma)}
-          >
-            {IDIOMAS.map((i) => (
-              <option key={i.codigo} value={i.codigo}>
-                {i.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-      </header>
+      <BarraSuperior izquierda={{ href: "/entrar", texto: "entrar" }} />
 
       <section className={styles.centro}>
         <Image
@@ -54,6 +39,10 @@ export default function Inicio() {
             {t.academia}
           </a>
         </nav>
+
+        <Link href="/registro" className={styles.enlaceSecundario}>
+          {t.pruebaEnlace}
+        </Link>
       </section>
     </main>
   );

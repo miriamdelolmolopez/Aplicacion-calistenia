@@ -30,6 +30,13 @@
 - Política de lluvia: el bono se amplía una semana.
 - Clase de prueba: una por persona.
 
+## Acceso y registro (Fase 3)
+- **Invitado / clase de prueba:** se autorregistra con correo y contraseña. Si luego pasa a alumno de grupales, no se vuelve a registrar: Miriam le cambia el tipo.
+- **Alumnos actuales de grupales, individuales presenciales y online:** los da de alta Miriam; reciben una invitación por correo y crean su contraseña.
+- **Una misma persona puede tener varios servicios a la vez** (grupal, individual, online).
+- **Primer acceso:** obligatorio rellenar datos y aceptar privacidad y términos.
+- "Continuar con Google": se deja para el final de la fase o para más adelante.
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.

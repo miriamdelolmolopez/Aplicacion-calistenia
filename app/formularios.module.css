@@ -1,0 +1,207 @@
+.pagina {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+}
+
+.enlaceBarra {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--oliva-oscuro);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.idioma select {
+  min-height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.cabecera {
+  text-align: center;
+  margin: 24px 0 20px;
+}
+
+.logo {
+  width: 72px;
+  height: auto;
+}
+
+.cabecera h1 {
+  margin: 8px 0 4px;
+  font-size: 2rem;
+}
+
+.cabecera p {
+  margin: 0;
+  color: var(--secundario);
+  font-size: 0.95rem;
+}
+
+.tarjeta {
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label,
+.campo legend {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ayuda {
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.campo input {
+  min-height: 48px;
+  padding: 0 14px;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}
+
+.campo input[aria-invalid="true"] {
+  border-color: #9b2c2c;
+}
+
+.error {
+  color: #9b2c2c;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.aviso {
+  background: var(--relleno);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.grupo {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grupo legend {
+  font-family: var(--font-titulos), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.casilla {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 0.9rem;
+}
+
+.casilla input {
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--oliva-oscuro);
+  flex-shrink: 0;
+}
+
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 20px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+  border: 0;
+  border-radius: var(--radio);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.boton:hover:not(:disabled) {
+  background: var(--oliva);
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.botonSecundario {
+  background: transparent;
+  color: var(--oliva-oscuro);
+  border: 1px solid var(--oliva-oscuro);
+}
+
+.botonSecundario:hover:not(:disabled) {
+  background: var(--relleno);
+}
+
+.enlaces {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.enlaces a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--oliva-oscuro);
+  font-weight: 600;
+}
+
+.lista {
+  margin: 0;
+  padding-left: 20px;
+}
