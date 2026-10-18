@@ -22,7 +22,8 @@ type Persona = {
   email: string | null;
   nombre: string | null;
   idioma: Idioma;
-  avisos_email: boolean;
+  avisos_reserva: boolean;
+  avisos_bono: boolean;
 };
 
 type Clase = {
@@ -41,7 +42,7 @@ async function personas(ids: string[]): Promise<Persona[]> {
   if (ids.length === 0) return [];
   const { data } = await createAdminClient()
     .from("profiles")
-    .select("id, email, nombre, idioma, avisos_email")
+    .select("id, email, nombre, idioma, avisos_reserva, avisos_bono")
     .in("id", ids);
   return (data ?? []) as Persona[];
 }
@@ -69,7 +70,7 @@ async function protegido(nombre: string, tarea: () => Promise<void>) {
 export function avisarReserva(userId: string, sesionId: string) {
   return protegido("reserva", async () => {
     const [[persona], c] = await Promise.all([personas([userId]), clase(sesionId)]);
-    if (!persona || !c || !enviable(persona.email) || !persona.avisos_email) return;
+    if (!persona || !c || !enviable(persona.email) || !persona.avisos_reserva) return;
     await enviarCorreo(
       correoReserva({ para: persona.email, idioma: persona.idioma, nombrePersona: persona.nombre ?? "", clase: info(c) }),
     );
@@ -181,7 +182,7 @@ export async function avisarBonosPorCaducar(): Promise<number> {
 
     for (const b of bonos) {
       const p = porId.get(b.user_id);
-      if (!p || !enviable(p.email) || !p.avisos_email) continue;
+      if (!p || !enviable(p.email) || !p.avisos_bono) continue;
       if (!(await reclamar("bono_caduca", b.id, p.id))) continue;
       const ok = await enviarCorreo(
         correoBonoCaduca({

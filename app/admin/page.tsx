@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import Avatar from "../Avatar";
+import { marcarBorradoAtendido } from "./acciones";
 import EditorPersona from "./EditorPersona";
 import FormularioAlta from "./FormularioAlta";
 import styles from "./admin.module.css";
@@ -25,6 +28,7 @@ type Fila = {
   apellidos: string | null;
   telefono: string | null;
   rol: string;
+  foto_path: string | null;
   perfil_servicios: { servicio: string }[];
 };
 
@@ -33,9 +37,27 @@ export default async function Administracion() {
 
   const { data } = await supabase
     .from("profiles")
-    .select("id, email, nombre, apellidos, telefono, rol, perfil_servicios(servicio)")
+    .select("id, email, nombre, apellidos, telefono, rol, foto_path, perfil_servicios(servicio)")
     .order("creado_en", { ascending: false });
   const personas = (data ?? []) as Fila[];
+
+  // Fotos (privadas): enlaces temporales solo para esta pantalla.
+  const rutas = personas.map((p) => p.foto_path).filter((r): r is string => !!r);
+  const { data: firmadas } = rutas.length
+    ? await createAdminClient().storage.from("avatares").createSignedUrls(rutas, 3600)
+    : { data: [] };
+  const fotoDe = (p: Fila) => firmadas?.find((f) => f.path === p.foto_path)?.signedUrl ?? null;
+
+  const { data: peticiones } = await supabase
+    .from("solicitudes_borrado")
+    .select("id, creada_en, profiles(nombre, apellidos, email)")
+    .eq("atendida", false)
+    .order("creada_en");
+  const pendientesBorrado = (peticiones ?? []) as unknown as {
+    id: string;
+    creada_en: string;
+    profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null;
+  }[];
 
   return (
     <main className={styles.pagina}>
@@ -61,6 +83,27 @@ export default async function Administracion() {
         </Link>
       </nav>
 
+      {pendientesBorrado.length > 0 && (
+        <section className={styles.tarjeta}>
+          <h2>Peticiones de borrado de cuenta ({pendientesBorrado.length})</h2>
+          <p className={styles.ayuda}>
+            Borra sus datos personales (los pagos se conservan) y marca la petición como atendida.
+          </p>
+          {pendientesBorrado.map((s) => (
+            <form key={s.id} action={marcarBorradoAtendido} className={styles.personaCabecera}>
+              <input type="hidden" name="id" value={s.id} />
+              <div>
+                <strong>{[s.profiles?.nombre, s.profiles?.apellidos].filter(Boolean).join(" ") || "(sin nombre)"}</strong>
+                <div className={styles.ayuda}>{s.profiles?.email}</div>
+              </div>
+              <button type="submit" className={styles.boton}>
+                Marcar como atendida
+              </button>
+            </form>
+          ))}
+        </section>
+      )}
+
       <FormularioAlta />
 
       <section className={styles.tarjeta}>
@@ -73,10 +116,13 @@ export default async function Administracion() {
             return (
               <li key={p.id} className={styles.persona}>
                 <div className={styles.personaCabecera}>
-                  <div>
-                    <strong>{nombre || "(sin nombre todavía)"}</strong>
-                    <div className={styles.ayuda}>{p.email}</div>
-                    {p.telefono && <div className={styles.ayuda}>{p.telefono}</div>}
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <Avatar nombre={nombre || p.email || ""} url={fotoDe(p)} tamano={48} />
+                    <div>
+                      <strong>{nombre || "(sin nombre todavía)"}</strong>
+                      <div className={styles.ayuda}>{p.email}</div>
+                      {p.telefono && <div className={styles.ayuda}>{p.telefono}</div>}
+                    </div>
                   </div>
                   <span className={styles.etiqueta}>{ROLES[p.rol] ?? p.rol}</span>
                 </div>

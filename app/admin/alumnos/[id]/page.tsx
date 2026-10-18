@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
+import Medidas from "../../../perfil/Medidas";
 import Progreso from "../../../progreso/Progreso";
 import styles from "../../admin.module.css";
 
@@ -28,6 +29,8 @@ export default async function FichaAlumna({ params }: { params: Promise<{ id: st
         </Link>
       </header>
       <Progreso userId={persona.id} admin />
+      <h2 style={{ margin: "24px 0 8px" }}>Medidas</h2>
+      <Medidas userId={persona.id} soloLectura />
     </main>
   );
 }

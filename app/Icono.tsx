@@ -20,12 +20,19 @@ const DIBUJOS = {
       <path d="M12 14c0-3 2-5 6-5 0 3-2 5-6 5Z" />
     </>
   ),
-  cuenta: (
+  perfil: (
     <>
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
     </>
   ),
+  pagos: (
+    <>
+      <rect x="2" y="6" width="20" height="13" rx="2" />
+      <path d="M2 11h20M6 16h4" />
+    </>
+  ),
+  ajustes: <path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6" />,
   admin: <path d="M12 3 4 6v6c0 5 4 8 8 9 4-1 8-4 8-9V6Z" />,
   salir: <path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9" />,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,

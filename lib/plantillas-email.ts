@@ -162,6 +162,21 @@ export function correoBonoCaduca(p: { para: string; idioma: Idioma; nombrePerson
   return { para: p.para, asunto: titulo, ...m };
 }
 
+// Aviso para Miriam: una persona pide que se borre su cuenta.
+export function correoSolicitudBorrado(p: { para: string; nombre: string; correo: string }): Correo {
+  const titulo = "Petición de borrado de cuenta";
+  const m = marco({
+    idioma: "es",
+    titulo,
+    parrafos: [
+      `<strong>${escapar(p.nombre)}</strong> (${escapar(p.correo)}) ha pedido que se borre su cuenta.`,
+      "Los pagos se conservan por la contabilidad; se borran sus datos personales. Cuando lo hayas hecho, márcala como atendida en el panel.",
+    ],
+    boton: { texto: "Ir al panel", ruta: "/admin" },
+  });
+  return { para: p.para, asunto: titulo, ...m };
+}
+
 // Aviso para Miriam (siempre en español).
 export function correoMinimoNoAlcanzado(p: { para: string; clase: ClaseInfo; apuntados: number; minimo: number }): Correo {
   const cuando = escapar(fechaHora(p.clase.empieza_en, "es"));

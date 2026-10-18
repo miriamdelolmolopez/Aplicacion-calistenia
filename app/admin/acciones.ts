@@ -108,6 +108,16 @@ export async function cambiarPersona(_previo: Estado, formData: FormData): Promi
   return { mensaje: "Cambios guardados." };
 }
 
+// Marca como atendida una petición de borrado de cuenta (ya la has gestionado).
+export async function marcarBorradoAtendido(formData: FormData): Promise<void> {
+  await requireAdmin();
+  await createAdminClient()
+    .from("solicitudes_borrado")
+    .update({ atendida: true })
+    .eq("id", String(formData.get("id") ?? ""));
+  revalidatePath("/admin");
+}
+
 // Enlace nuevo para que una persona elija contraseña (alta caducada u olvido).
 export async function enlaceNuevo(_previo: Estado, formData: FormData): Promise<Estado> {
   await requireAdmin();

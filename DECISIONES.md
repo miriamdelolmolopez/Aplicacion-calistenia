@@ -112,6 +112,16 @@
 - **Valoración en Google:** solo para quien viene a clases presenciales en Fuengirola; al terminar una clase se le ofrece un enlace a la ficha de Google de Miriam, sin filtrar solo a quien esté contento (Google lo prohíbe). Para online: testimonio dentro de la app que Miriam puede publicar con permiso.
 - **Feedback y vídeos del alumno online:** aconsejado: mensajes dentro de la app ligados a un ejercicio o entreno, con vídeo como enlace (Loom, YouTube no listado, Drive) mientras no haya almacenamiento de vídeo propio; WhatsApp sigue como complemento con un botón en la app. Mensajes entre alumnas: más adelante, con permiso de cada persona, opción de bloquear y denunciar.
 
+## Bloque 2 · Perfil, Ajustes y Mis pagos (decisiones)
+- **Perfil** (sustituye a «Mi cuenta»): foto (subir, cambiar, quitar; se recorta cuadrada y se reduce en el móvil), datos personales editables por la persona excepto el **DNI/NIE** (solo Miriam), cambio de contraseña, medidas corporales y sus bonos/plan.
+- **Fotos:** privadas (almacenamiento privado con enlaces temporales). Las ven la propia persona, Miriam y **solo las alumnas actuales** en las clases; las **invitadas no ven quién está apuntado**, solo las plazas libres para invitados. Sin foto, círculo con iniciales.
+- **Visibilidad por defecto:** nombre, foto y cumpleaños **visibles por defecto**. Cada persona puede cambiarlo en Ajustes (foto y cumpleaños).
+- **Medidas** (todas opcionales, con fecha y gráfica; solo las ve la persona y Miriam): peso, altura, cintura, cadera, pecho, brazo, muslo. **Sin % de grasa** (no lo sabrán). Una entrada por día. Con peso y altura se calcula el **IMC** automático con una explicación breve. La categoría del IMC de adultos (OMS) no depende del sexo ni de la edad, así que no se pide el sexo; la edad solo sirve para no dar categoría a menores de 18 (se les indica consultar a su médico). Se avisa de que el IMC no distingue músculo de grasa.
+- **Ajustes:** idioma; avisos por email separados por tipo (confirmación de reserva, bono por caducar; los importantes —plaza liberada, clase cancelada— no se pueden apagar); privacidad (foto, cumpleaños); pedir el borrado de la cuenta.
+- **Borrar cuenta:** la persona lo **pide** y a Miriam le llega un aviso; lo borra ella. Los pagos se conservan (contabilidad) y los datos personales se borran.
+- **Mis pagos:** lista de pagos con fecha, bono, importe, método y estado.
+- **Menú:** «Mi cuenta» pasa a «Perfil»; se añaden «Ajustes» y «Mis pagos».
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.

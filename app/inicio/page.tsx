@@ -50,7 +50,9 @@ const ACCESOS: Record<Exclude<Seccion, "inicio">, { texto: ClaveTexto; descripci
   reservar: { texto: "navReservar", descripcion: "descReservar", color: "oliva" },
   rutina: { texto: "miRutina", descripcion: "descRutina", color: "carbon" },
   progreso: { texto: "miProgreso", descripcion: "descProgreso", color: "olivaOscuro" },
-  cuenta: { texto: "navCuenta", descripcion: "descCuenta", color: "arena" },
+  pagos: { texto: "navPagos", descripcion: "descPagos", color: "arena" },
+  perfil: { texto: "navCuenta", descripcion: "descCuenta", color: "arena" },
+  ajustes: { texto: "navAjustes", descripcion: "descAjustes", color: "arena" },
   admin: { texto: "panelAdmin", descripcion: "descAdmin", color: "carbon" },
 };
 

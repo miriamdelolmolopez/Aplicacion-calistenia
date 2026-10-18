@@ -50,7 +50,7 @@ export function useMiPerfil(): Estado {
 }
 
 // Qué secciones ve cada persona según lo que tiene contratado.
-export type Seccion = "inicio" | "reservar" | "rutina" | "progreso" | "cuenta" | "admin";
+export type Seccion = "inicio" | "reservar" | "rutina" | "progreso" | "pagos" | "perfil" | "ajustes" | "admin";
 
 export function seccionesDe(p: MiPerfil): Seccion[] {
   const online = p.servicios.includes("online") || p.planOnline;
@@ -60,7 +60,8 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
   const lista: Seccion[] = ["inicio"];
   if (p.rol === "admin" || !soloOnline) lista.push("reservar");
   if (online) lista.push("rutina", "progreso");
-  lista.push("cuenta");
+  if (p.rol !== "admin") lista.push("pagos");
+  lista.push("perfil", "ajustes");
   if (p.rol === "admin") lista.push("admin");
   return lista;
 }
@@ -70,6 +71,8 @@ export const RUTAS: Record<Seccion, string> = {
   reservar: "/clases",
   rutina: "/rutina",
   progreso: "/progreso",
-  cuenta: "/cuenta",
+  pagos: "/pagos",
+  perfil: "/perfil",
+  ajustes: "/ajustes",
   admin: "/admin",
 };

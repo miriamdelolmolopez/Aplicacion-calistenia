@@ -1,0 +1,167 @@
+.cabeceraPerfil {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cabeceraPerfil strong {
+  font-size: 1.2rem;
+}
+
+.accionesFoto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.accionesFoto label,
+.accionesFoto button {
+  cursor: pointer;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.seccion h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.dos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.imc {
+  padding: 14px;
+  background: var(--crema);
+  border-radius: 12px;
+}
+
+.imcValor {
+  margin: 4px 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.formMedidas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rejillaMedidas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.selectorMedida select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  font: inherit;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--blanco);
+}
+
+.historial summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.historial ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.historial li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.historial button {
+  border: 0;
+  background: transparent;
+  color: #8a4b2a;
+  cursor: pointer;
+}
+
+.interruptor {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.interruptor input {
+  margin-top: 4px;
+}
+
+.peligro {
+  padding-top: 14px;
+  border-top: 1px solid var(--linea);
+}
+
+.tablaPagos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pago {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}
+
+.pago small {
+  display: block;
+  color: var(--secundario);
+}
+
+.pagoDerecha {
+  text-align: right;
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: var(--relleno);
+}
+
+.etiquetaOk {
+  color: #fff;
+  background: var(--oliva);
+}

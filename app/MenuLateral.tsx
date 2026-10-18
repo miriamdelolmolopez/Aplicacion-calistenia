@@ -16,7 +16,9 @@ const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   reservar: "navReservar",
   rutina: "miRutina",
   progreso: "miProgreso",
-  cuenta: "navCuenta",
+  pagos: "navPagos",
+  perfil: "navCuenta",
+  ajustes: "navAjustes",
   admin: "panelAdmin",
 };
 
