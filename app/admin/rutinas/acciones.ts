@@ -88,9 +88,11 @@ export async function actualizarRutina(_previo: Estado, formData: FormData): Pro
   const nombre = texto(formData, "nombre");
   const nota = texto(formData, "nota");
   const entrenos = enteroOpc(formData, "entrenos_semana");
+  const semanas = enteroOpc(formData, "semanas") ?? 4;
   if (!UUID.test(id)) return { error: "Rutina no válida." };
   if (nombre.length < 2 || nombre.length > 80) return { error: "El nombre debe tener entre 2 y 80 letras." };
   if (nota.length > 1000) return { error: "La nota puede tener como máximo 1000 letras." };
+  if (!(semanas >= 1 && semanas <= 52)) return { error: "Las semanas de duración van de 1 a 52." };
   if (entrenos !== null && !(entrenos >= 1 && entrenos <= 14)) {
     return { error: "Los entrenos por semana van de 1 a 14 (o déjalo vacío)." };
   }
@@ -101,6 +103,7 @@ export async function actualizarRutina(_previo: Estado, formData: FormData): Pro
       nombre,
       nota: nota || null,
       entrenos_semana: entrenos,
+      semanas,
       actualizado_en: new Date().toISOString(),
     })
     .eq("id", id);

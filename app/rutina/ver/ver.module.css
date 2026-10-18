@@ -1,0 +1,180 @@
+.calendario,
+.semana {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 18px;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 24px;
+  box-shadow: var(--sombra);
+}
+
+.calendario h2,
+.semana h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.etiquetaEsta {
+  padding: 2px 10px;
+  font-family: var(--font-cuerpo), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+  border-radius: 999px;
+}
+
+.elegirDias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.elegirDias button {
+  min-height: 44px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--carbon);
+  background: var(--relleno);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.elegirDias button.diaActivo {
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+}
+
+.mesCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.mesCabecera button {
+  width: 40px;
+  height: 40px;
+  font-size: 1.4rem;
+  color: var(--oliva-oscuro);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.letra {
+  font-size: 0.75rem;
+  color: var(--secundario);
+}
+
+.dia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  font-size: 0.9rem;
+  border-radius: 50%;
+}
+
+.diaPrevisto {
+  border: 1.5px solid var(--oliva);
+  color: var(--oliva-oscuro);
+  font-weight: 600;
+}
+
+.diaHecho {
+  color: var(--blanco);
+  font-weight: 700;
+  background: #4f8a3a;
+}
+
+.hoy {
+  outline: 2px solid var(--carbon);
+  outline-offset: 1px;
+}
+
+.sesion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--crema);
+  border-radius: 18px;
+}
+
+.sesionHecha {
+  background: #eef4e9;
+}
+
+.sesionFila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-weight: 700;
+  color: var(--blanco);
+  background: transparent;
+  border: 2px solid var(--linea);
+  border-radius: 50%;
+}
+
+.sesionHecha .check {
+  background: #4f8a3a;
+  border-color: #4f8a3a;
+}
+
+.sesionTexto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+  color: var(--carbon);
+  text-decoration: none;
+}
+
+.sesionTexto span {
+  font-size: 0.82rem;
+  color: var(--secundario);
+}
+
+.flecha {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
+  color: var(--oliva-oscuro);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.desplegable {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--linea);
+}

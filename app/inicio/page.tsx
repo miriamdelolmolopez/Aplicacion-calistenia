@@ -257,7 +257,7 @@ export default function Inicio() {
             </Link>
           ))}
           {extra.sesionesOnline.map((s) => (
-            <Link key={s.id} href={RUTAS.rutina} className={estilos.entreno}>
+            <Link key={s.id} href={`/rutina/sesion/${s.id}`} className={estilos.entreno}>
               <span className={estilos.miniatura} style={{ backgroundImage: fondoFoto("online") }} />
               <span className={estilos.entrenoTexto}>
                 <strong>{s.nombre}</strong>

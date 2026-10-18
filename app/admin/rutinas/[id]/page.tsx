@@ -22,6 +22,7 @@ type FilaRutina = {
   nota: string | null;
   estado: string;
   entrenos_semana: number | null;
+  semanas: number;
   foto_url: string | null;
   user_id: string | null;
   profiles: Persona | null;
@@ -51,7 +52,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "id, nombre, nota, estado, entrenos_semana, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, orden, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
+      "id, nombre, nota, estado, entrenos_semana, semanas, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, orden, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -104,6 +105,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
     nota: r.nota,
     estado: r.estado,
     entrenosSemana: r.entrenos_semana,
+    semanas: r.semanas,
     esPlantilla: r.user_id === null,
     alumno: nombreDe(r.profiles),
   };

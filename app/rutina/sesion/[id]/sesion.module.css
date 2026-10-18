@@ -1,0 +1,63 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 12px;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 20px;
+  box-shadow: var(--sombra);
+}
+
+.numero {
+  flex: none;
+  width: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--secundario);
+}
+
+.miniatura {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  background-color: var(--relleno);
+  background-image: linear-gradient(160deg, #a39a7f, #6a6e47);
+  background-size: cover;
+  background-position: center;
+  border-radius: 14px;
+}
+
+.texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.texto span:last-child {
+  font-size: 0.88rem;
+  color: var(--secundario);
+}
+
+.pie {
+  position: sticky;
+  bottom: 96px;
+  padding-top: 8px;
+}
+
+.pie button {
+  width: 100%;
+  box-shadow: 0 8px 22px rgba(90, 94, 59, 0.3);
+}

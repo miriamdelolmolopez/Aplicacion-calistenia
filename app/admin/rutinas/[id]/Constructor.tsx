@@ -97,6 +97,7 @@ export type DatosRutina = {
   nota: string | null;
   estado: string;
   entrenosSemana: number | null;
+  semanas: number;
   esPlantilla: boolean;
   alumno: string | null;
 };
@@ -682,7 +683,7 @@ function CabeceraRutina({
       )}
 
       <details className={styles.detalles}>
-        <summary>Nombre, nota y entrenos por semana</summary>
+        <summary>Nombre, nota, semanas y entrenos por semana</summary>
         <form action={accionDatos} className={styles.formularioInterno}>
           <input type="hidden" name="id" value={rutina.id} />
           <div className={styles.campo}>
@@ -692,6 +693,13 @@ function CabeceraRutina({
           <div className={styles.campo}>
             <label htmlFor="rut-nota">Nota para el alumno (opcional)</label>
             <textarea id="rut-nota" name="nota" rows={3} maxLength={1000} defaultValue={rutina.nota ?? ""} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="rut-semanas">Semanas que dura la rutina</label>
+            <input id="rut-semanas" name="semanas" type="number" min={1} max={52} defaultValue={rutina.semanas} />
+            <span className={styles.ayuda}>
+              Las sesiones se repiten cada semana. La alumna ve «Semana 1», «Semana 2»… con un check al completar cada sesión.
+            </span>
           </div>
           <div className={styles.campo}>
             <label htmlFor="rut-entrenos">Entrenos por semana (opcional)</label>
