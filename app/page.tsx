@@ -21,9 +21,7 @@ export default function Inicio() {
   return (
     <main className={styles.portada} style={{ backgroundImage: fondoFoto("portada", propia) }}>
       <header className={styles.arriba}>
-        <Link href="/entrar" className={styles.entrar}>
-          {t.entrar}
-        </Link>
+        <span />
         <label className={styles.idioma}>
           <span className={styles.oculto}>{t.idioma}</span>
           <select value={idioma} onChange={(e) => cambiarIdioma(e.target.value as Idioma)}>

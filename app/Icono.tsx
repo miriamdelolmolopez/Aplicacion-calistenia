@@ -54,6 +54,12 @@ const DIBUJOS = {
       <circle cx="19" cy="12" r="1.2" />
     </>
   ),
+  saber: (
+    <>
+      <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z" />
+      <path d="M4 21V5M9 8h6" />
+    </>
+  ),
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   cerrar: <path d="M6 6l12 12M18 6 6 18" />,
 } as const;

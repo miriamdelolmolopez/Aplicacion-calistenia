@@ -5,6 +5,7 @@ import Avatar from "../Avatar";
 import { marcarBorradoAtendido } from "./acciones";
 import EditorPersona from "./EditorPersona";
 import BotonFoto from "./fotos/BotonFoto";
+import Frases, { type Frase } from "./frases/Frases";
 import FormularioAlta from "./FormularioAlta";
 import styles from "./admin.module.css";
 
@@ -65,6 +66,10 @@ export default async function Administracion() {
   }[];
 
   const { data: fotosApp } = await supabase.from("fotos_app").select("clave, url");
+  const { data: frasesDatos } = await supabase
+    .from("frases_inicio")
+    .select("id, texto_es, texto_en, activa")
+    .order("creada_en");
   const fotoApp = (clave: string) => fotosApp?.find((f) => f.clave === clave)?.url ?? null;
 
   return (
@@ -111,6 +116,8 @@ export default async function Administracion() {
         <strong>Saludo de Inicio</strong>
         <BotonFoto destino="inicio" actual={fotoApp("inicio")} />
       </section>
+
+      <Frases frases={(frasesDatos ?? []) as Frase[]} />
 
       {cumples.length > 0 && (
         <section className={styles.tarjeta}>
