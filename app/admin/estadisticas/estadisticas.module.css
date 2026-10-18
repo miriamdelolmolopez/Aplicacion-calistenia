@@ -1,0 +1,200 @@
+.periodos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.periodo {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  color: var(--carbon);
+  text-decoration: none;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+}
+
+.periodoActivo {
+  color: #fff;
+  background: var(--oliva);
+  border-color: var(--oliva);
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  text-align: center;
+  background: var(--crema);
+  border-radius: 12px;
+}
+
+.cifra strong {
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.cifra small {
+  color: var(--secundario);
+}
+
+.sube {
+  color: #3f6a2b;
+  font-weight: 600;
+}
+
+.baja {
+  color: #8a4b2a;
+  font-weight: 600;
+}
+
+.horizontales {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.horizontalCab {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.pista {
+  height: 10px;
+  margin-top: 4px;
+  background: var(--relleno);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.relleno {
+  height: 100%;
+  min-width: 2px;
+  background: var(--oliva);
+  border-radius: 999px;
+}
+
+.horizontales small {
+  color: var(--secundario);
+}
+
+.mensuales {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 160px;
+}
+
+.mes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  min-width: 0;
+  font-size: 0.7rem;
+  color: var(--secundario);
+}
+
+.columnas {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+.barra {
+  width: 45%;
+  min-height: 2px;
+  background: var(--oliva);
+  border-radius: 3px 3px 0 0;
+}
+
+.barraAnterior {
+  width: 45%;
+  min-height: 2px;
+  background: #cfd3b3;
+  border-radius: 3px 3px 0 0;
+}
+
+.leyenda {
+  display: flex;
+  gap: 14px;
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.leyenda i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.tabla th,
+.tabla td {
+  padding: 6px 4px;
+  text-align: right;
+  border-bottom: 1px solid var(--linea);
+}
+
+.tabla th:first-child,
+.tabla td:first-child {
+  text-align: left;
+}
+
+.ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: puesto;
+}
+
+.ranking li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 0.92rem;
+  background: var(--crema);
+  border-radius: 10px;
+}
+
+.fechas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+
+.fechas input {
+  padding: 8px;
+  font: inherit;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+}

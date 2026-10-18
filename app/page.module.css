@@ -99,6 +99,27 @@
   background: var(--oliva);
 }
 
+.botonSecundario {
+  flex-direction: column;
+  padding: 10px 20px;
+  color: var(--oliva-oscuro);
+  background: var(--blanco);
+  border: 2px solid var(--oliva-oscuro);
+  text-align: center;
+}
+
+.botonSecundario:hover {
+  background: var(--relleno);
+}
+
+.botonSecundario small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--secundario);
+}
+
 .enlaceSecundario {
   display: inline-flex;
   align-items: center;

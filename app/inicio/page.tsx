@@ -107,7 +107,7 @@ export default function Inicio() {
 
   const secciones = seccionesDe(perfil);
   const verReservas = secciones.includes("reservar");
-  const bonoGrupal = extra.bonos.find((b) => b.servicio !== "online" && b.estado === "activo");
+  const bonosClases = extra.bonos.filter((b) => b.servicio !== "online" && b.estado === "activo");
   const planOnline = extra.bonos.find((b) => b.servicio === "online" && b.estado === "activo");
 
   return (
@@ -162,18 +162,18 @@ export default function Inicio() {
           </section>
         )}
 
-        {bonoGrupal && (
-          <section className={estilos.tarjeta}>
+        {bonosClases.map((b) => (
+          <section key={b.id} className={estilos.tarjeta}>
             <h2>{t.tuBono}</h2>
             <p className={estilos.grande}>
-              <strong>{bonoGrupal.nombre}</strong>
+              <strong>{b.nombre}</strong>
               <span>
-                {bonoGrupal.clasesRestantes} {t.clasesDeTotal} {bonoGrupal.clasesTotal} {t.clasesRestantes}
-                {bonoGrupal.caducaEn && ` · ${t.caducaEl} ${fechaCorta(bonoGrupal.caducaEn, idioma)}`}
+                {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
+                {b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
               </span>
             </p>
           </section>
-        )}
+        ))}
 
         {planOnline && (
           <section className={estilos.tarjeta}>

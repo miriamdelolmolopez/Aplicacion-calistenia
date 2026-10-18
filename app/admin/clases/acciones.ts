@@ -220,10 +220,12 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
   await requireAdmin();
 
   const nombre = String(formData.get("nombre") ?? "").trim();
+  const servicio = String(formData.get("servicio") ?? "grupal");
   const plazas = entero(formData.get("plazas_max"));
   const minimo = entero(formData.get("minimo_alumnos"));
-  const prueba = entero(formData.get("plazas_prueba"));
+  const prueba = servicio === "individual" ? 0 : entero(formData.get("plazas_prueba"));
   const duracion = entero(formData.get("duracion_min"));
+  if (servicio !== "grupal" && servicio !== "individual") return { error: "Elige si es grupal o individual." };
   if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
   if (!(minimo >= 0 && minimo <= plazas)) return { error: "El mínimo no puede ser mayor que las plazas." };
@@ -238,6 +240,7 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
     minimo_alumnos: minimo,
     plazas_prueba: prueba,
     duracion_min: duracion,
+    servicio,
   });
   if (error) {
     return { error: error.code === "23505" ? "Ya existe un tipo de clase con ese nombre." : "No se ha podido crear." };

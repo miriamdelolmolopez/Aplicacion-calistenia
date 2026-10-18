@@ -111,12 +111,16 @@ export function FormularioTipo({
     plazas_prueba: number;
     duracion_min: number;
     activo: boolean;
+    servicio: string;
   };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
   return (
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
       <input type="hidden" name="tipoId" value={tipo.id} />
+      <p className={styles.ayuda}>
+        {tipo.servicio === "individual" ? "Entrenamiento individual: lo ven y reservan solo las alumnas individuales." : "Clase grupal."}
+      </p>
       <div className={styles.campo}>
         <label htmlFor={`no-${tipo.id}`}>Nombre</label>
         <input id={`no-${tipo.id}`} name="nombre" maxLength={60} defaultValue={tipo.nombre} />
@@ -185,6 +189,13 @@ export function NuevoTipo() {
       <div className={styles.campo}>
         <label htmlFor="nt-nombre">Nombre</label>
         <input id="nt-nombre" name="nombre" maxLength={60} required />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="nt-servicio">Para quién es</label>
+        <select id="nt-servicio" name="servicio" defaultValue="grupal">
+          <option value="grupal">Clase grupal</option>
+          <option value="individual">Entrenamiento individual (1 persona)</option>
+        </select>
       </div>
       <div className={styles.campo}>
         <label htmlFor="nt-plazas">Plazas</label>

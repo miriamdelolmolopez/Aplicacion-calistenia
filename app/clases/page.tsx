@@ -82,7 +82,7 @@ async function obtenerDatos(): Promise<Datos> {
   const { data: gastada } = await supabase.rpc("mi_prueba_gastada");
   const bonos = await obtenerMisBonos();
   // Solo cuenta el bono de clases grupales (el plan online no tiene clases).
-  const activo = bonos.find((b) => b.estado === "activo" && b.servicio === "grupal");
+  const activos = bonos.filter((b) => b.estado === "activo" && b.servicio !== "online");
 
   return {
     horas,
@@ -91,7 +91,7 @@ async function obtenerDatos(): Promise<Datos> {
     rol: perfil?.rol ?? "",
     datosCompletos: !!perfil?.datos_completos,
     pruebaGastada: gastada === true,
-    restantes: activo ? activo.clasesRestantes : null,
+    restantes: activos.length > 0 ? activos.reduce((suma, b) => suma + b.clasesRestantes, 0) : null,
     lista,
   };
 }
@@ -206,7 +206,10 @@ export default function Clases() {
   const ultimo = datos ? sumarDias(datos.hoy, datos.dias) : "";
   const primerLunes = datos ? sumarDias(datos.hoy, -diaSemana(datos.hoy)) : "";
   const numSemanas = datos ? Math.floor((diaSemana(datos.hoy) + datos.dias) / 7) + 1 : 1;
-  const diaElegido = dia ?? hoy;
+  // Al entrar se enseña hoy; si hoy no hay clases, el primer día que sí tiene.
+  const primerDiaConClases = datos && datos.lista.length > 0 ? claveDia(datos.lista[0].empieza_en) : hoy;
+  const hayHoy = !!datos && datos.lista.some((c) => claveDia(c.empieza_en) === hoy);
+  const diaElegido = dia ?? (hayHoy ? hoy : primerDiaConClases);
   const semanaActual =
     semana ?? (datos ? Math.floor((new Date(`${diaElegido}T12:00:00Z`).getTime() - new Date(`${primerLunes}T12:00:00Z`).getTime()) / (7 * 86400000)) : 0);
   const diasSemana = datos ? Array.from({ length: 7 }, (_, i) => sumarDias(primerLunes, semanaActual * 7 + i)) : [];

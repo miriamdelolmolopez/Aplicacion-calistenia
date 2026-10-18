@@ -76,6 +76,9 @@ export default async function Administracion() {
         <Link href="/admin/usuarios" className={styles.boton}>
           Usuarios
         </Link>
+        <Link href="/admin/estadisticas" className={styles.boton}>
+          Estadísticas e informes
+        </Link>
         <Link href="/admin/clases" className={styles.boton}>
           Clases y horario
         </Link>

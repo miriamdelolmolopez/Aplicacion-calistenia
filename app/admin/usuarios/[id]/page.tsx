@@ -62,7 +62,7 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
   const { data: p } = await supabase
     .from("profiles")
     .select(
-      "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, contacto_emergencia_nombre, contacto_emergencia_telefono, rol, idioma, creado_en, foto_path, perfil_servicios(servicio)",
+      "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono, rol, idioma, creado_en, foto_path, perfil_servicios(servicio)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -170,6 +170,10 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
           <div>
             <dt>Fecha de nacimiento</dt>
             <dd>{p.fecha_nacimiento ? fechaCorta(`${p.fecha_nacimiento}T12:00:00Z`) : "—"}</dd>
+          </div>
+          <div>
+            <dt>Sexo</dt>
+            <dd>{p.sexo === "mujer" ? "Mujer" : p.sexo === "hombre" ? "Hombre" : p.sexo === "otro" ? "Otro" : "Sin indicar"}</dd>
           </div>
           <div>
             <dt>Contacto de emergencia</dt>

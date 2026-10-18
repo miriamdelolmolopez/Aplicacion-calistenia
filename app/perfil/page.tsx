@@ -24,6 +24,7 @@ type Datos = {
   telefono: string;
   dni: string;
   fecha: string;
+  sexo: string;
   emNombre: string;
   emTelefono: string;
   foto: string | null;
@@ -37,7 +38,7 @@ async function cargar(): Promise<Datos | null> {
   const { data: p } = await supabase
     .from("profiles")
     .select(
-      "id, email, rol, nombre, apellidos, telefono, dni, fecha_nacimiento, contacto_emergencia_nombre, contacto_emergencia_telefono",
+      "id, email, rol, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono",
     )
     .eq("id", sesion.user.id)
     .maybeSingle();
@@ -52,6 +53,7 @@ async function cargar(): Promise<Datos | null> {
     telefono: p.telefono ?? "",
     dni: p.dni ?? "",
     fecha: p.fecha_nacimiento ?? "",
+    sexo: p.sexo ?? "",
     emNombre: p.contacto_emergencia_nombre ?? "",
     emTelefono: p.contacto_emergencia_telefono ?? "",
     foto: fotos[p.id] ?? null,
@@ -78,7 +80,7 @@ export default function Perfil() {
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null>(null);
-  const [valores, setValores] = useState({ nombre: "", apellidos: "", telefono: "", fecha: "", emNombre: "", emTelefono: "" });
+  const [valores, setValores] = useState({ nombre: "", apellidos: "", telefono: "", fecha: "", sexo: "", emNombre: "", emTelefono: "" });
   const [mensaje, setMensaje] = useState<{ ok: boolean; clave: ClaveTexto } | null>(null);
   const [foto, setFoto] = useState<"quieta" | "subiendo">("quieta");
   const [errorFoto, setErrorFoto] = useState(false);
@@ -94,6 +96,7 @@ export default function Perfil() {
           apellidos: d.apellidos,
           telefono: d.telefono,
           fecha: d.fecha,
+          sexo: d.sexo,
           emNombre: d.emNombre,
           emTelefono: d.emTelefono,
         });
@@ -155,6 +158,7 @@ export default function Perfil() {
         apellidos: valores.apellidos.trim(),
         telefono: valores.telefono.trim(),
         fecha_nacimiento: valores.fecha,
+        sexo: valores.sexo === "" ? null : valores.sexo,
         contacto_emergencia_nombre: valores.emNombre.trim(),
         contacto_emergencia_telefono: valores.emTelefono.trim(),
       })
@@ -221,6 +225,19 @@ export default function Perfil() {
         {campo("apellidos", "apellidos")}
         {campo("telefono", "telefono", "tel")}
         {campo("fecha", "fechaNacimiento", "date")}
+        <div className={styles.campo}>
+          <label htmlFor="sexo">{t.sexoLabel}</label>
+          <select
+            id="sexo"
+            value={valores.sexo}
+            onChange={(e) => setValores((v) => ({ ...v, sexo: e.target.value }))}
+          >
+            <option value="">{t.sexoNoIndicar}</option>
+            <option value="mujer">{t.sexoMujer}</option>
+            <option value="hombre">{t.sexoHombre}</option>
+            <option value="otro">{t.sexoOtro}</option>
+          </select>
+        </div>
         <div className={styles.campo}>
           <label htmlFor="dni">{t.dni}</label>
           <input id="dni" value={datos.dni} disabled readOnly />

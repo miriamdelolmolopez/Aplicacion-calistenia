@@ -27,22 +27,17 @@ export default function Inicio() {
         <h1>Miriam del Olmo</h1>
         <p className={styles.lema}>{t.lema}</p>
 
-        <h2 className={styles.intro}>{t.intro}</h2>
         <nav className={styles.botones}>
-          <a href="#" className={styles.boton}>
-            {t.online}
-          </a>
-          <a href="#" className={styles.boton}>
-            {t.presencial}
-          </a>
-          <a href="#" className={styles.boton}>
-            {t.academia}
-          </a>
+          <Link href="/entrar" className={styles.boton}>
+            {t.soyAlumno}
+          </Link>
+          <Link href="/registro" className={`${styles.boton} ${styles.botonSecundario}`}>
+            <span>
+              {t.crearCuentaPrueba}
+              <small>{t.soloGrupalesFuengirola}</small>
+            </span>
+          </Link>
         </nav>
-
-        <Link href="/registro" className={styles.enlaceSecundario}>
-          {t.pruebaEnlace}
-        </Link>
       </section>
     </main>
   );
