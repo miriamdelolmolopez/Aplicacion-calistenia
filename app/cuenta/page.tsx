@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../BarraSuperior";
@@ -91,6 +92,11 @@ export default function MiCuenta() {
               )}
             </div>
             <p className={styles.ayuda}>{t.proximamente}</p>
+            {cuenta.rol === "admin" && (
+              <Link href="/admin" className={styles.boton}>
+                {t.panelAdmin}
+              </Link>
+            )}
             <button
               className={`${styles.boton} ${styles.botonSecundario}`}
               onClick={salir}
