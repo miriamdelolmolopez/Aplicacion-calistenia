@@ -36,16 +36,34 @@ export async function cambiarPlazas(_previo: Estado, formData: FormData): Promis
 
   const id = String(formData.get("sesionId") ?? "");
   const plazas = entero(formData.get("plazas"));
+  const prueba = entero(formData.get("plazas_prueba"));
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
+  if (!(prueba >= 0 && prueba <= plazas)) {
+    return { error: "Las plazas de prueba no pueden ser más que las plazas de la clase." };
+  }
 
   const { error } = await createAdminClient()
     .from("sesiones_clase")
-    .update({ plazas })
+    .update({ plazas, plazas_prueba: prueba })
     .eq("id", id);
   if (error) return { error: "No se ha podido guardar." };
 
   revalidatePath("/admin/clases");
   return { mensaje: "Plazas guardadas." };
+}
+
+// Quita a alguien de la lista de espera de una clase.
+export async function quitarDeLista(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+
+  const { error } = await createAdminClient()
+    .from("lista_espera")
+    .delete()
+    .eq("id", String(formData.get("esperaId") ?? ""));
+  if (error) return { error: "No se ha podido quitar." };
+
+  revalidatePath("/admin/clases");
+  return { mensaje: "Quitado de la lista de espera." };
 }
 
 // Cancela la clase, devuelve su clase a todos los apuntados y amplía su bono
@@ -160,14 +178,18 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   const id = String(formData.get("tipoId") ?? "");
   const plazas = entero(formData.get("plazas_max"));
   const minimo = entero(formData.get("minimo_alumnos"));
+  const prueba = entero(formData.get("plazas_prueba"));
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
   if (!(minimo >= 0 && minimo <= plazas)) {
     return { error: "El mínimo no puede ser mayor que las plazas." };
   }
+  if (!(prueba >= 0 && prueba <= plazas)) {
+    return { error: "Las plazas de prueba no pueden ser más que las plazas de la clase." };
+  }
 
   const { error } = await createAdminClient()
     .from("tipos_clase")
-    .update({ plazas_max: plazas, minimo_alumnos: minimo })
+    .update({ plazas_max: plazas, minimo_alumnos: minimo, plazas_prueba: prueba })
     .eq("id", id);
   if (error) return { error: "No se ha podido guardar." };
 

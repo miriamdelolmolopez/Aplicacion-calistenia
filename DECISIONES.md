@@ -55,6 +55,9 @@
 - **Apuntados visibles para los alumnos:** sí, como nombre e inicial del apellido ("Marta G."). Miriam los ve completos. Hay un interruptor en el panel (ajuste "ver_apuntados") para activarlo o desactivarlo.
 - **Ajustes editables en el panel:** horas de cancelación (2), días máximos de antelación (14) y ver apuntados.
 - **Cancelar una clase:** un botón que pregunta cuántos días se amplía el bono (0 permitido), cancela la clase y devuelve su clase a todos los apuntados (adelantado desde la Parte D).
+- **Lista de espera (Parte D):** sin coste al apuntarse (la clase se descuenta al confirmar). Al liberarse una plaza, todos los de la lista ven "Confirmar plaza" en la app y entra el primero que confirme. Mientras haya lista, solo ellos pueden ocupar la plaza, hasta 2 horas antes de la clase (ajuste "espera_prioridad_horas"); después puede reservar cualquiera.
+- **Clase de prueba:** solo clases grupales (columna servicio del tipo de clase). Una por persona; se gasta si va, no se presenta o cancela con menos de 2 h; no se gasta si cancela a tiempo ni si Miriam cancela la clase. Control por DNI (único) y por teléfono (últimos 9 dígitos).
+- **Plazas de invitado:** la mitad de las plazas de la clase (redondeando hacia abajo), editable por tipo de clase y por clase. Los invitados no pueden apuntarse a la lista de espera ni reservar sin haber completado sus datos.
 - **Avisos:** hasta la Fase 6 el aviso de plaza liberada se ve dentro de la app y el de mínimo no alcanzado como alerta en el panel.
 - **Horario inicial (lunes y miércoles):** 17:30 pino intermedio (6 plazas) · 18:35 pino principiantes (6) · 19:40 calistenia (10).
 

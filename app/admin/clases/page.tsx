@@ -6,17 +6,32 @@ import { FilaClase, FormularioAjustes, FormularioTipo, GenerarClases } from "./C
 
 export const metadata = { title: "Clases · Administración" };
 
-type Tipo = { id: string; nombre: string; plazas_max: number; minimo_alumnos: number };
+type Tipo = {
+  id: string;
+  nombre: string;
+  plazas_max: number;
+  minimo_alumnos: number;
+  plazas_prueba: number;
+};
 type Persona = { nombre: string | null; apellidos: string | null; email: string | null };
-type Reserva = { id: string; estado: string; user_id: string; profiles: Persona | null };
+type Reserva = {
+  id: string;
+  estado: string;
+  user_id: string;
+  es_prueba: boolean;
+  profiles: Persona | null;
+};
+type Espera = { id: string; creado_en: string; profiles: Persona | null };
 type Clase = {
   id: string;
   empieza_en: string;
   plazas: number;
+  plazas_prueba: number;
   estado: string;
   motivo_cancelacion: string | null;
   tipos_clase: { nombre: string; minimo_alumnos: number } | null;
   reservas: Reserva[];
+  lista_espera: Espera[];
 };
 
 function nombreDe(p: Persona | null) {
@@ -29,7 +44,7 @@ export default async function AdminClases() {
 
   const { data: tiposDatos } = await supabase
     .from("tipos_clase")
-    .select("id, nombre, plazas_max, minimo_alumnos")
+    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba")
     .order("nombre");
   const tipos = (tiposDatos ?? []) as Tipo[];
 
@@ -51,7 +66,7 @@ export default async function AdminClases() {
   const { data: clasesDatos } = await supabase
     .from("sesiones_clase")
     .select(
-      "id, empieza_en, plazas, estado, motivo_cancelacion, tipos_clase(nombre, minimo_alumnos), reservas(id, estado, user_id, profiles(nombre, apellidos, email))",
+      "id, empieza_en, plazas, plazas_prueba, estado, motivo_cancelacion, tipos_clase(nombre, minimo_alumnos), reservas(id, estado, user_id, es_prueba, profiles(nombre, apellidos, email)), lista_espera(id, creado_en, profiles(nombre, apellidos, email))",
     )
     .gte("empieza_en", desde)
     .order("empieza_en")
@@ -111,7 +126,11 @@ export default async function AdminClases() {
                     reservaId: r.id,
                     userId: r.user_id,
                     nombre: nombreDe(r.profiles),
+                    prueba: r.es_prueba,
                   }));
+                const espera = [...c.lista_espera]
+                  .sort((a, b) => a.creado_en.localeCompare(b.creado_en))
+                  .map((e) => ({ esperaId: e.id, nombre: nombreDe(e.profiles) }));
                 const minimo = c.tipos_clase?.minimo_alumnos ?? 0;
                 const faltan = minimo - apuntados.length;
                 const alerta =
@@ -126,8 +145,15 @@ export default async function AdminClases() {
                         <div className={styles.ayuda}>
                           {apuntados.length}/{c.plazas} plazas
                           {apuntados.length > 0 &&
-                            ` · ${apuntados.map((a) => a.nombre).join(", ")}`}
+                            ` · ${apuntados
+                              .map((a) => a.nombre + (a.prueba ? " (prueba)" : ""))
+                              .join(", ")}`}
                         </div>
+                        {espera.length > 0 && (
+                          <div className={styles.ayuda}>
+                            Lista de espera: {espera.map((e) => e.nombre).join(", ")}
+                          </div>
+                        )}
                       </div>
                       {cancelada && <span className={styles.etiqueta}>Cancelada</span>}
                     </div>
@@ -140,9 +166,11 @@ export default async function AdminClases() {
                       clase={{
                         id: c.id,
                         plazas: c.plazas,
+                        plazasPrueba: c.plazas_prueba,
                         cancelada,
                         motivo: c.motivo_cancelacion,
                         apuntados,
+                        espera,
                         alumnos,
                       }}
                     />

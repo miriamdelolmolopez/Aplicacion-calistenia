@@ -11,6 +11,7 @@ import {
   cancelarClase,
   generarClases,
   quitarApuntado,
+  quitarDeLista,
   reactivarClase,
 } from "./acciones";
 
@@ -101,7 +102,13 @@ export function FormularioAjustes({
 export function FormularioTipo({
   tipo,
 }: {
-  tipo: { id: string; nombre: string; plazas_max: number; minimo_alumnos: number };
+  tipo: {
+    id: string;
+    nombre: string;
+    plazas_max: number;
+    minimo_alumnos: number;
+    plazas_prueba: number;
+  };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
   return (
@@ -130,6 +137,17 @@ export function FormularioTipo({
           defaultValue={tipo.minimo_alumnos}
         />
       </div>
+      <div className={styles.campo}>
+        <label htmlFor={`pp-${tipo.id}`}>Plazas para invitados (prueba)</label>
+        <input
+          id={`pp-${tipo.id}`}
+          name="plazas_prueba"
+          type="number"
+          min={0}
+          max={100}
+          defaultValue={tipo.plazas_prueba}
+        />
+      </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         Guardar
       </button>
@@ -138,14 +156,40 @@ export function FormularioTipo({
   );
 }
 
-type Apuntado = { reservaId: string; userId: string; nombre: string };
+type Apuntado = { reservaId: string; userId: string; nombre: string; prueba: boolean };
+type Espera = { esperaId: string; nombre: string };
+
+function FilaEspera({ espera, posicion }: { espera: Espera; posicion: number }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(quitarDeLista, {});
+  return (
+    <form action={accion} className={styles.apuntadoFila}>
+      <input type="hidden" name="esperaId" value={espera.esperaId} />
+      <span>
+        {posicion}. {espera.nombre}
+      </span>
+      <span className={styles.apuntadoBotones}>
+        <button
+          className={`${styles.boton} ${styles.botonSecundario}`}
+          type="submit"
+          disabled={pendiente}
+        >
+          Quitar de la lista
+        </button>
+      </span>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
 
 function FilaApuntado({ apuntado }: { apuntado: Apuntado }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(quitarApuntado, {});
   return (
     <form action={accion} className={styles.apuntadoFila}>
       <input type="hidden" name="reservaId" value={apuntado.reservaId} />
-      <span>{apuntado.nombre}</span>
+      <span>
+        {apuntado.nombre}
+        {apuntado.prueba && <span className={styles.etiquetaSuave}> Prueba</span>}
+      </span>
       <span className={styles.apuntadoBotones}>
         <button
           className={`${styles.boton} ${styles.botonSecundario}`}
@@ -209,9 +253,11 @@ export function FilaClase({
   clase: {
     id: string;
     plazas: number;
+    plazasPrueba: number;
     cancelada: boolean;
     motivo: string | null;
     apuntados: Apuntado[];
+    espera: Espera[];
     alumnos: { id: string; texto: string }[];
   };
 }) {
@@ -255,6 +301,15 @@ export function FilaClase({
             ))}
           </div>
 
+          {clase.espera.length > 0 && (
+            <div className={styles.formularioInterno}>
+              <strong>Lista de espera ({clase.espera.length})</strong>
+              {clase.espera.map((e, i) => (
+                <FilaEspera key={e.esperaId} espera={e} posicion={i + 1} />
+              ))}
+            </div>
+          )}
+
           <FormularioApuntar sesionId={clase.id} alumnos={posibles} />
 
           <form action={accionPlazas} className={styles.formularioInterno}>
@@ -268,6 +323,17 @@ export function FilaClase({
                 min={1}
                 max={100}
                 defaultValue={clase.plazas}
+              />
+            </div>
+            <div className={styles.campo}>
+              <label htmlFor={`prueba-${clase.id}`}>Plazas para invitados (prueba)</label>
+              <input
+                id={`prueba-${clase.id}`}
+                name="plazas_prueba"
+                type="number"
+                min={0}
+                max={100}
+                defaultValue={clase.plazasPrueba}
               />
             </div>
             <button className={styles.boton} type="submit" disabled={pendientePlazas}>

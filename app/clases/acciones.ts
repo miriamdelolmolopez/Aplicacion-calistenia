@@ -12,6 +12,13 @@ export type Resultado = {
 // Los mensajes de la base de datos están en español; aquí se convierten en códigos
 // para poder enseñarlos en el idioma de cada persona.
 const ERRORES: [string, string][] = [
+  ["reservada para la lista", "prioridad"],
+  ["Completa tus datos", "datos"],
+  ["Ya has usado", "pruebaUsada"],
+  ["No quedan plazas de clase de prueba", "sinPruebas"],
+  ["no admite clase de prueba", "noPrueba"],
+  ["todavía tiene plazas libres", "hayPlazas"],
+  ["apuntarse a la lista", "soloAlumnosEspera"],
   ["completa", "completa"],
   ["está cancelada", "cancelada"],
   ["ya ha empezado", "empezada"],
@@ -41,6 +48,30 @@ export async function reservarClase(sesionId: string): Promise<Resultado> {
   if (!user) return { ok: false, codigo: "sesion" };
 
   const { error } = await createAdminClient().rpc("reservar_clase", {
+    p_user: user.id,
+    p_sesion: sesionId,
+  });
+  if (error) return { ok: false, codigo: codigoDe(error.message) };
+  return { ok: true };
+}
+
+export async function unirseListaEspera(sesionId: string): Promise<Resultado> {
+  const user = await personaActual();
+  if (!user) return { ok: false, codigo: "sesion" };
+
+  const { error } = await createAdminClient().rpc("unirse_lista_espera", {
+    p_user: user.id,
+    p_sesion: sesionId,
+  });
+  if (error) return { ok: false, codigo: codigoDe(error.message) };
+  return { ok: true };
+}
+
+export async function salirListaEspera(sesionId: string): Promise<Resultado> {
+  const user = await personaActual();
+  if (!user) return { ok: false, codigo: "sesion" };
+
+  const { error } = await createAdminClient().rpc("salir_lista_espera", {
     p_user: user.id,
     p_sesion: sesionId,
   });

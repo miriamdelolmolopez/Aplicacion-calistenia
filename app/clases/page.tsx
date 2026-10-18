@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import BarraSuperior from "../BarraSuperior";
 import { obtenerMisBonos } from "../cuenta/acciones";
@@ -8,7 +9,12 @@ import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
-import { cancelarMiReserva, reservarClase } from "./acciones";
+import {
+  cancelarMiReserva,
+  reservarClase,
+  salirListaEspera,
+  unirseListaEspera,
+} from "./acciones";
 
 type Clase = {
   id: string;
@@ -19,12 +25,25 @@ type Clase = {
   ocupadas: number;
   mi_reserva: string | null;
   apuntados: string[];
+  plazas_prueba: number;
+  ocupadas_prueba: number;
+  en_espera: boolean;
+  posicion: number;
+  hay_espera: number;
+  prioridad: boolean;
   tarde: boolean; // quedan menos horas que el límite de cancelación
 };
 
 type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto };
 
-type Datos = { horas: number; esAlumno: boolean; restantes: number | null; lista: Clase[] };
+type Datos = {
+  horas: number;
+  rol: string;
+  datosCompletos: boolean;
+  pruebaGastada: boolean;
+  restantes: number | null;
+  lista: Clase[];
+};
 
 // Lee todo lo que necesita la pantalla (no cambia ningún estado).
 async function obtenerDatos(): Promise<Datos> {
@@ -38,7 +57,11 @@ async function obtenerDatos(): Promise<Datos> {
 
   const { data: sesion } = await supabase.auth.getUser();
   const { data: perfil } = sesion.user
-    ? await supabase.from("profiles").select("rol").eq("id", sesion.user.id).maybeSingle()
+    ? await supabase
+        .from("profiles")
+        .select("rol, datos_completos")
+        .eq("id", sesion.user.id)
+        .maybeSingle()
     : { data: null };
 
   const { data } = await supabase.rpc("clases_proximas", { p_dias: dias });
@@ -48,12 +71,15 @@ async function obtenerDatos(): Promise<Datos> {
     tarde: new Date(c.empieza_en).getTime() - horas * 3600 * 1000 < ahora,
   }));
 
+  const { data: gastada } = await supabase.rpc("mi_prueba_gastada");
   const bonos = await obtenerMisBonos();
   const activo = bonos.find((b) => b.estado === "activo");
 
   return {
     horas,
-    esAlumno: perfil?.rol === "alumno",
+    rol: perfil?.rol ?? "",
+    datosCompletos: !!perfil?.datos_completos,
+    pruebaGastada: gastada === true,
     restantes: activo ? activo.clasesRestantes : null,
     lista,
   };
@@ -63,60 +89,67 @@ export default function Clases() {
   const [idioma] = useIdioma();
   const t = textos[idioma];
 
-  const [clases, setClases] = useState<Clase[] | null>(null);
-  const [horas, setHoras] = useState(2);
-  const [esAlumno, setEsAlumno] = useState(false);
-  const [restantes, setRestantes] = useState<number | null>(null);
+  const [datos, setDatos] = useState<Datos | null>(null);
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [trabajando, setTrabajando] = useState<string | null>(null);
 
-  const aplicar = useCallback((d: Datos) => {
-    setHoras(d.horas);
-    setEsAlumno(d.esAlumno);
-    setRestantes(d.restantes);
-    setClases(d.lista);
-  }, []);
-
-  const cargar = useCallback(async () => aplicar(await obtenerDatos()), [aplicar]);
+  const cargar = useCallback(async () => setDatos(await obtenerDatos()), []);
 
   useEffect(() => {
-    obtenerDatos().then(aplicar);
-  }, [aplicar]);
+    obtenerDatos().then(setDatos);
+  }, []);
 
-  async function reservar(c: Clase) {
-    setAviso(null);
-    setTrabajando(c.id);
-    const r = await reservarClase(c.id);
-    setTrabajando(null);
-    setAviso(
-      r.ok
-        ? { tipo: "ok", clave: "okReservada" }
-        : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto },
-    );
-    await cargar();
-  }
+  const esAlumno = datos?.rol === "alumno";
+  const esInvitado = datos?.rol === "invitado";
 
-  async function cancelar(c: Clase) {
-    if (!c.mi_reserva) return;
+  async function ejecutar(
+    c: Clase,
+    accion: () => Promise<{ ok: boolean; codigo?: string; devuelta?: boolean }>,
+    claveOk: (devuelta?: boolean) => ClaveTexto,
+  ) {
     setAviso(null);
     setConfirmando(null);
     setTrabajando(c.id);
-    const r = await cancelarMiReserva(c.mi_reserva);
+    const r = await accion();
     setTrabajando(null);
     setAviso(
       r.ok
-        ? { tipo: "ok", clave: r.devuelta ? "okDevuelta" : "okPerdida" }
+        ? { tipo: "ok", clave: claveOk(r.devuelta) }
         : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto },
     );
     await cargar();
   }
 
+  const reservar = (c: Clase) =>
+    ejecutar(c, () => reservarClase(c.id), () => (esInvitado ? "okReservadaPrueba" : "okReservada"));
+
+  const cancelar = (c: Clase) =>
+    c.mi_reserva
+      ? ejecutar(
+          c,
+          () => cancelarMiReserva(c.mi_reserva!),
+          (devuelta) =>
+            esInvitado
+              ? devuelta
+                ? "okPruebaConservada"
+                : "okPruebaPerdida"
+              : devuelta
+                ? "okDevuelta"
+                : "okPerdida",
+        )
+      : Promise.resolve();
+
+  const unirse = (c: Clase) => ejecutar(c, () => unirseListaEspera(c.id), () => "okEsperaUnido");
+  const salir = (c: Clase) => ejecutar(c, () => salirListaEspera(c.id), () => "okEsperaSalido");
+
   const porDia = new Map<string, Clase[]>();
-  for (const c of clases ?? []) {
+  for (const c of datos?.lista ?? []) {
     const dia = claveDia(c.empieza_en);
     porDia.set(dia, [...(porDia.get(dia) ?? []), c]);
   }
+
+  const boton = { minHeight: 44 } as const;
 
   return (
     <main className={styles.pagina}>
@@ -126,15 +159,31 @@ export default function Clases() {
         <p>{t.horarioIntro}</p>
       </div>
 
-      {esAlumno && restantes !== null && (
+      {datos && esAlumno && datos.restantes !== null && (
         <p className={styles.aviso}>
-          {t.tienesClases}: <strong>{restantes}</strong>
+          {t.tienesClases}: <strong>{datos.restantes}</strong>
         </p>
       )}
-      {clases && esAlumno && restantes === null && (
+      {datos && esAlumno && datos.restantes === null && (
         <p className={styles.aviso}>{t.sinBono}</p>
       )}
-      {clases && !esAlumno && <p className={styles.aviso}>{t.soloAlumnosInfo}</p>}
+      {datos && esInvitado && (
+        <p className={styles.aviso}>
+          {datos.pruebaGastada ? (
+            t.pruebaUsada
+          ) : !datos.datosCompletos ? (
+            <>
+              {t.completaDatos}{" "}
+              <Link href="/datos">
+                <strong>{t.completarDatos}</strong>
+              </Link>
+            </>
+          ) : (
+            t.tienesPrueba
+          )}
+        </p>
+      )}
+      {datos && !esAlumno && !esInvitado && <p className={styles.aviso}>{t.soloAlumnosInfo}</p>}
       {aviso && (
         <p
           className={aviso.tipo === "error" ? styles.error : styles.aviso}
@@ -144,8 +193,8 @@ export default function Clases() {
         </p>
       )}
 
-      {clases === null && <p className={styles.aviso}>{t.cargando}</p>}
-      {clases?.length === 0 && <p className={styles.aviso}>{t.sinClases}</p>}
+      {datos === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {datos?.lista.length === 0 && <p className={styles.aviso}>{t.sinClases}</p>}
 
       {[...porDia.entries()].map(([dia, lista]) => (
         <section key={dia} className={styles.tarjeta} style={{ marginBottom: 16 }}>
@@ -159,11 +208,15 @@ export default function Clases() {
             {lista.map((c) => {
               const cancelada = c.estado === "cancelada";
               const completa = c.ocupadas >= c.plazas;
+              const libres = Math.max(c.plazas - c.ocupadas, 0);
+              const pruebaLibres = Math.max(
+                Math.min(c.plazas_prueba, c.plazas) - c.ocupadas_prueba,
+                0,
+              );
+              const puedeProbar = !!datos && esInvitado && datos.datosCompletos && !datos.pruebaGastada;
+
               return (
-                <li
-                  key={c.id}
-                  style={{ display: "flex", flexDirection: "column", gap: 8 }}
-                >
+                <li key={c.id} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <div
                     style={{
                       display: "flex",
@@ -180,23 +233,32 @@ export default function Clases() {
                       <div className={styles.ayuda}>
                         {cancelada
                           ? t.cancelada
-                          : `${Math.max(c.plazas - c.ocupadas, 0)} ${
-                              c.plazas - c.ocupadas === 1 ? t.libre : t.libres
-                            } · ${c.ocupadas}/${c.plazas} ${t.plazasTotales}`}
+                          : `${libres} ${libres === 1 ? t.libre : t.libres} · ${c.ocupadas}/${c.plazas} ${t.plazasTotales}`}
                       </div>
+                      {!cancelada && esInvitado && !completa && (
+                        <div className={styles.ayuda}>
+                          {pruebaLibres} {pruebaLibres === 1 ? t.pruebaLibre : t.pruebaLibres}
+                        </div>
+                      )}
                       {!cancelada && c.apuntados.length > 0 && (
                         <div className={styles.ayuda}>
                           {t.apuntadosLabel}: {c.apuntados.join(", ")}
                         </div>
                       )}
+                      {!cancelada && c.hay_espera > 0 && (
+                        <div className={styles.ayuda}>
+                          {t.listaEspera}: {c.hay_espera}
+                        </div>
+                      )}
                     </div>
 
+                    {/* Ya tiene reserva */}
                     {!cancelada && c.mi_reserva && confirmando !== c.id && (
                       <div style={{ textAlign: "right" }}>
                         <div className={styles.ayuda}>✓ {t.reservada}</div>
                         <button
                           className={`${styles.boton} ${styles.botonSecundario}`}
-                          style={{ minHeight: 44 }}
+                          style={boton}
                           disabled={trabajando === c.id}
                           onClick={() => setConfirmando(c.id)}
                         >
@@ -205,40 +267,102 @@ export default function Clases() {
                       </div>
                     )}
 
-                    {!cancelada && !c.mi_reserva && esAlumno && !completa && (
-                      <button
-                        className={styles.boton}
-                        style={{ minHeight: 44 }}
-                        disabled={trabajando === c.id}
-                        onClick={() => reservar(c)}
-                      >
-                        {trabajando === c.id ? t.cargando : t.reservar}
-                      </button>
+                    {/* Alumno sin reserva */}
+                    {!cancelada && !c.mi_reserva && esAlumno && (
+                      <>
+                        {completa && !c.en_espera && (
+                          <button
+                            className={styles.boton}
+                            style={boton}
+                            disabled={trabajando === c.id}
+                            onClick={() => unirse(c)}
+                          >
+                            {trabajando === c.id ? t.cargando : t.unirseEspera}
+                          </button>
+                        )}
+                        {completa && c.en_espera && (
+                          <div style={{ textAlign: "right" }}>
+                            <div className={styles.ayuda}>
+                              {t.enListaEspera} · {t.posicion} {c.posicion}
+                            </div>
+                            <button
+                              className={`${styles.boton} ${styles.botonSecundario}`}
+                              style={boton}
+                              disabled={trabajando === c.id}
+                              onClick={() => salir(c)}
+                            >
+                              {t.salirEspera}
+                            </button>
+                          </div>
+                        )}
+                        {!completa && c.prioridad && !c.en_espera && (
+                          <span className={styles.ayuda}>{t.plazaParaEspera}</span>
+                        )}
+                        {!completa && (!c.prioridad || c.en_espera) && (
+                          <div style={{ textAlign: "right" }}>
+                            {c.prioridad && c.en_espera && (
+                              <div className={styles.ayuda}>
+                                <strong>{t.hayPlaza}</strong>
+                              </div>
+                            )}
+                            <button
+                              className={styles.boton}
+                              style={boton}
+                              disabled={trabajando === c.id}
+                              onClick={() => reservar(c)}
+                            >
+                              {trabajando === c.id
+                                ? t.cargando
+                                : c.prioridad && c.en_espera
+                                  ? t.confirmarPlaza
+                                  : t.reservar}
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
 
-                    {!cancelada && !c.mi_reserva && completa && (
-                      <span className={styles.ayuda}>{t.completa}</span>
+                    {/* Invitado sin reserva */}
+                    {!cancelada && !c.mi_reserva && puedeProbar && (
+                      <>
+                        {completa ? (
+                          <span className={styles.ayuda}>{t.completa}</span>
+                        ) : pruebaLibres === 0 ? (
+                          <span className={styles.ayuda}>{t.sinPlazasPrueba}</span>
+                        ) : c.prioridad ? (
+                          <span className={styles.ayuda}>{t.plazaParaEspera}</span>
+                        ) : (
+                          <button
+                            className={styles.boton}
+                            style={boton}
+                            disabled={trabajando === c.id}
+                            onClick={() => reservar(c)}
+                          >
+                            {trabajando === c.id ? t.cargando : t.reservarPrueba}
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
 
                   {confirmando === c.id && (
                     <div className={styles.aviso} role="alert">
                       <p style={{ margin: "0 0 10px" }}>
-                        {c.tarde
-                          ? t.confirmaPierde.replace("{h}", String(horas))
-                          : t.confirmaDevuelve}
+                        {esInvitado
+                          ? c.tarde
+                            ? t.confirmaPierdePrueba.replace("{h}", String(datos?.horas ?? 2))
+                            : t.confirmaConservaPrueba
+                          : c.tarde
+                            ? t.confirmaPierde.replace("{h}", String(datos?.horas ?? 2))
+                            : t.confirmaDevuelve}
                       </p>
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button
-                          className={styles.boton}
-                          style={{ minHeight: 44 }}
-                          onClick={() => cancelar(c)}
-                        >
+                        <button className={styles.boton} style={boton} onClick={() => cancelar(c)}>
                           {t.confirmar}
                         </button>
                         <button
                           className={`${styles.boton} ${styles.botonSecundario}`}
-                          style={{ minHeight: 44 }}
+                          style={boton}
                           onClick={() => setConfirmando(null)}
                         >
                           {t.noCancelar}
