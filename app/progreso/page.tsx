@@ -11,7 +11,7 @@ export default function MiProgreso() {
   const t = textos[idioma];
   return (
     <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
+      <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <div className={styles.cabecera}>
         <h1>{t.progresoTitulo}</h1>
       </div>

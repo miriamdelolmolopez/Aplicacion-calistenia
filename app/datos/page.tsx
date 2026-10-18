@@ -152,7 +152,7 @@ export default function Datos() {
       }
     }
 
-    router.push("/cuenta");
+    router.push("/inicio");
   }
 
   function campoTexto(

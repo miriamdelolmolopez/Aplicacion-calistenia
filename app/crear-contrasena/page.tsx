@@ -30,7 +30,7 @@ export default function CrearContrasena() {
     setCargando(false);
 
     if (fallo) return setError(t.errorGeneral);
-    router.push("/cuenta");
+    router.push("/inicio");
   }
 
   return (

@@ -97,6 +97,21 @@
 - **Preferencias:** cada alumna puede desactivar desde su cuenta los avisos no esenciales (los esenciales —plaza liberada, clase cancelada, registro y contraseña— se envían siempre).
 - **Después:** notificaciones push y WhatsApp.
 
+## Hoja de ruta tras la primera prueba en el móvil (peticiones de Miriam)
+- **Menú y paneles:** menú hamburguesa con panel lateral (Inicio, Reservar clases, Ajustes, Mis pagos, Reto del día, Perfil, Academia, Tutoriales, Mensajes). La página de Inicio es un escaparate con secciones con foto. Las opciones y secciones cambian según lo que tenga cada persona: clases en grupo, individuales, online o invitada (y administradora).
+- **Reservar clases:** diseño con tira de días, franjas horarias y tarjetas por clase con las fotos de los apuntados (inspirado en Wodbuster, con la marca propia).
+- **Perfil:** foto (con cambio de foto), datos personales y medidas. **Ajustes:** notificaciones y privacidad. **Mis pagos:** historial de pagos.
+- **Reto del día:** biblioteca de retos que carga Miriam, cada uno con 3 niveles (principiante, intermedio, avanzado); la app publica uno cada día según la fecha asignada; cada persona marca el suyo y lleva su progreso.
+- **Cumpleaños:** se avisa por defecto con una notificación; cada persona puede desactivarlo en Ajustes (privacidad).
+- **Muro:** descartado por ahora.
+- **Tareas o deberes:** asignados por Miriam, con fecha límite.
+- **Descuentos:** códigos que aplica Miriam a mano al dar de alta un bono (no hay canje por parte de la alumna de momento).
+- **Herramientas de Miriam:** varias plantillas de horario (editar, duplicar, aplicar a semanas concretas, imprimir en PDF), tipos de tarifa (agrupar entrenamientos y limitar cuántos de cada tipo), formas de pago editables, textos legales editables que hay que aceptar de nuevo, de forma obligatoria, cada vez que cambian. Las tarifas recurrentes llegan con Stripe.
+- **Automatizaciones:** cumpleaños, día antes y día después de la clase de prueba, etc.
+- **Más ideas aprobadas:** lista de personas que llevan semanas sin venir (para avisarles); retos y logros con medallas («primer pino», «10 entrenos», «racha de 4 semanas»); añadir la clase al calendario del móvil (.ics); sección de tutoriales con las dudas frecuentes; sección de mensajes; Academia (cursos con enlace a otra web).
+- **Valoración en Google:** solo para quien viene a clases presenciales en Fuengirola; al terminar una clase se le ofrece un enlace a la ficha de Google de Miriam, sin filtrar solo a quien esté contento (Google lo prohíbe). Para online: testimonio dentro de la app que Miriam puede publicar con permiso.
+- **Feedback y vídeos del alumno online:** aconsejado: mensajes dentro de la app ligados a un ejercicio o entreno, con vídeo como enlace (Loom, YouTube no listado, Drive) mientras no haya almacenamiento de vídeo propio; WhatsApp sigue como complemento con un botón en la app. Mensajes entre alumnas: más adelante, con permiso de cada persona, opción de bloquear y denunciar.
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.

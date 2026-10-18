@@ -35,7 +35,7 @@ function Formulario() {
     setCargando(false);
 
     if (fallo) return setError(t.errorCredenciales);
-    router.push("/cuenta");
+    router.push("/inicio");
   }
 
   return (

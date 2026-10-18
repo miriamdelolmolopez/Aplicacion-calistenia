@@ -154,7 +154,7 @@ export default function Clases() {
 
   return (
     <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: "/cuenta", texto: "volver" }} />
+      <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <div className={styles.cabecera}>
         <h1>{t.horarioTitulo}</h1>
         <p>{t.horarioIntro}</p>

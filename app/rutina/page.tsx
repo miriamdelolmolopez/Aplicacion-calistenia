@@ -292,7 +292,7 @@ export default function MiRutina() {
 
   return (
     <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: "/cuenta", texto: "volver" }} />
+      <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <div className={styles.cabecera}>
         <h1>{t.rutinaTitulo}</h1>
       </div>

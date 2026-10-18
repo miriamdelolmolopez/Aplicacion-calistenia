@@ -41,8 +41,8 @@ export default async function Administracion() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Administración</h1>
-        <Link href="/cuenta" className={styles.enlaceBarra}>
-          Mi cuenta
+        <Link href="/inicio" className={styles.enlaceBarra}>
+          Inicio
         </Link>
       </header>
 

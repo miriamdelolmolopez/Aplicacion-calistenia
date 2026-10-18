@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import styles from "./formularios.module.css";
+import MenuLateral from "./MenuLateral";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
 
@@ -24,7 +25,10 @@ export default function BarraSuperior({
 
   return (
     <header className={styles.barra}>
-      {enlace}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <MenuLateral />
+        {enlace}
+      </div>
       <label className={styles.idioma}>
         <span className={styles.oculto}>{t.idioma}</span>
         <select

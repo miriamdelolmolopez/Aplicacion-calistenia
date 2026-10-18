@@ -16,7 +16,7 @@ export async function requireAdmin() {
     .select("rol")
     .eq("id", user.id)
     .maybeSingle();
-  if (perfil?.rol !== "admin") redirect("/cuenta");
+  if (perfil?.rol !== "admin") redirect("/inicio");
 
   return { supabase, user };
 }

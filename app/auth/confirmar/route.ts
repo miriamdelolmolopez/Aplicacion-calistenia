@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 // Páginas a las que puede llevar un enlace de correo (lista cerrada, por seguridad).
-const PERMITIDAS = new Set(["/datos", "/crear-contrasena", "/cuenta"]);
+const PERMITIDAS = new Set(["/datos", "/crear-contrasena", "/inicio", "/cuenta"]);
 
 // Destino según el tipo de enlace, cuando el correo no indica otro.
 const POR_TIPO: Record<string, string> = {
@@ -11,7 +11,7 @@ const POR_TIPO: Record<string, string> = {
   email: "/datos",
   invite: "/crear-contrasena",
   recovery: "/crear-contrasena",
-  magiclink: "/cuenta",
+  magiclink: "/inicio",
 };
 
 export async function GET(request: NextRequest) {
