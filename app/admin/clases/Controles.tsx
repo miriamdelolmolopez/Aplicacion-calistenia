@@ -308,10 +308,10 @@ export function FilaClase({
             >
               Cancelar clase y devolver las clases
             </button>
-            <Mensajes estado={estadoCancelar} />
           </form>
         </>
       )}
+      <Mensajes estado={estadoCancelar} />
     </details>
   );
 }
