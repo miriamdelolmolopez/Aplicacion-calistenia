@@ -23,6 +23,7 @@ type Ejercicio = {
   descripcion: string | null;
   descripcion_en: string | null;
   video_url: string | null;
+  foto_url: string | null;
   tipo: string;
   ejercicio_musculos: { musculo: string; rol: string }[];
   ejercicio_materiales: { materiales: { nombre: string; nombre_en: string | null } | null }[];
@@ -52,6 +53,7 @@ type Rutina = {
   nota: string | null;
   estado: string;
   entrenos_semana: number | null;
+  foto_url: string | null;
   publicada_en: string | null;
   rutina_sesiones: Sesion[];
 };
@@ -74,7 +76,7 @@ async function obtenerDatos(): Promise<Datos> {
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "id, nombre, nota, estado, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, nota, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo, ejercicios(id, nombre, nombre_en, descripcion, descripcion_en, video_url, tipo, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
+      "id, nombre, nota, estado, entrenos_semana, foto_url, publicada_en, rutina_sesiones(id, nombre, nota, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo, ejercicios(id, nombre, nombre_en, descripcion, descripcion_en, video_url, foto_url, tipo, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
     )
     .order("publicada_en", { ascending: false });
 
@@ -266,10 +268,13 @@ export default function MiRutina() {
                   const secundarios = e.ejercicio_musculos.filter((m) => m.rol === "secundario");
                   return (
                     <li key={it.id} className={`${styles.ejercicioAlumno} ${it.grupo !== null ? styles.enSuperserie : ""}`}>
-                      <strong>
-                        {etiqueta && <span className={styles.etiquetaSuper}>{etiqueta}</span>}
-                        {nombreEj(e)}
-                      </strong>
+                      <div className={estilosRutina.ejCabecera}>
+                        {e.foto_url && <span className={estilosRutina.ejFoto} style={{ backgroundImage: `url("${e.foto_url}")` }} />}
+                        <strong>
+                          {etiqueta && <span className={styles.etiquetaSuper}>{etiqueta}</span>}
+                          {nombreEj(e)}
+                        </strong>
+                      </div>
                       <div>{objetivo(it)}</div>
                       {(it.grupo === null || ultimoDelGrupo) && (
                         <div className={styles.ayuda}>
@@ -319,7 +324,7 @@ export default function MiRutina() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <CabeceraFoto foto="online" titulo={t.rutinaTitulo} />
+      <CabeceraFoto foto="online" titulo={t.rutinaTitulo} propia={actual?.foto_url} />
 
       {datos === null && <p className={styles.aviso}>{t.cargando}</p>}
       {datos && !datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}

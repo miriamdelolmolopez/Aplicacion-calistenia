@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Avatar from "../../Avatar";
 import { claveDia, dentroDeHoras, haceHoras, textoDia, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
+import BotonFoto from "../fotos/BotonFoto";
 import { FilaClase, FormularioAjustes, FormularioTipo, GenerarClases, NuevoTipo } from "./Controles";
 
 export const metadata = { title: "Clases · Administración" };
@@ -17,6 +18,7 @@ type Tipo = {
   duracion_min: number;
   activo: boolean;
   servicio: string;
+  foto_url: string | null;
 };
 type Persona = { nombre: string | null; apellidos: string | null; email: string | null; foto_path?: string | null };
 type Reserva = {
@@ -49,7 +51,7 @@ export default async function AdminClases() {
 
   const { data: tiposDatos } = await supabase
     .from("tipos_clase")
-    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio")
+    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, foto_url")
     .order("nombre");
   const tipos = (tiposDatos ?? []) as Tipo[];
 
@@ -124,7 +126,10 @@ export default async function AdminClases() {
           <Link href="/admin/horarios">Horarios</Link>.
         </p>
         {tipos.map((t) => (
-          <FormularioTipo key={t.id} tipo={t} />
+          <div key={t.id} className={styles.bloqueTipo}>
+            <BotonFoto destino="tipo_clase" id={t.id} actual={t.foto_url} />
+            <FormularioTipo tipo={t} />
+          </div>
         ))}
         <NuevoTipo />
       </section>

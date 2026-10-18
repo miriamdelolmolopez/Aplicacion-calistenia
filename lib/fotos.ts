@@ -16,9 +16,10 @@ const DEGRADADOS: Record<FotoNombre, string> = {
 // Capa oscura suave para que el texto blanco se lea sobre cualquier foto.
 const VELO = "linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.08) 65%)";
 
-export function fondoFoto(nombre: FotoNombre, conVelo = true): string {
-  const capas = [`url(/fotos/${nombre}.jpg)`, DEGRADADOS[nombre]];
-  return conVelo ? [VELO, ...capas].join(", ") : capas.join(", ");
+// `propia` es la foto que Miriam ha subido; si no hay, se usa la de ejemplo.
+export function fondoFoto(nombre: FotoNombre, propia?: string | null): string {
+  const capas = [propia ? `url("${propia}")` : null, `url(/fotos/${nombre}.jpg)`, DEGRADADOS[nombre]];
+  return [VELO, ...capas.filter(Boolean)].join(", ");
 }
 
 // Qué foto lleva cada tipo de clase, según su nombre.

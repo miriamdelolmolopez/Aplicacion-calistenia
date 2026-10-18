@@ -35,3 +35,19 @@
   cursor: pointer;
   white-space: nowrap;
 }
+
+.ejCabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ejFoto {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  background-color: var(--relleno);
+  background-size: cover;
+  background-position: center;
+  border-radius: 14px;
+}

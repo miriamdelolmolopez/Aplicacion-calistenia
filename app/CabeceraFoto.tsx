@@ -6,13 +6,15 @@ export default function CabeceraFoto({
   foto,
   titulo,
   subtitulo,
+  propia,
 }: {
   foto: FotoNombre;
   titulo: string;
   subtitulo?: string;
+  propia?: string | null;
 }) {
   return (
-    <section className={styles.cabecera} style={{ backgroundImage: fondoFoto(foto) }}>
+    <section className={styles.cabecera} style={{ backgroundImage: fondoFoto(foto, propia) }}>
       <h1>{titulo}</h1>
       {subtitulo && <p>{subtitulo}</p>}
     </section>

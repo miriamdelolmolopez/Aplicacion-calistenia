@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { obtenerFotosApp } from "./fotos/acciones";
 import styles from "./page.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
@@ -10,9 +12,14 @@ import { fondoFoto } from "@/lib/fotos";
 export default function Inicio() {
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
+  const [propia, setPropia] = useState<string | null>(null);
+
+  useEffect(() => {
+    obtenerFotosApp().then((f) => setPropia(f.portada));
+  }, []);
 
   return (
-    <main className={styles.portada} style={{ backgroundImage: fondoFoto("portada") }}>
+    <main className={styles.portada} style={{ backgroundImage: fondoFoto("portada", propia) }}>
       <header className={styles.arriba}>
         <Link href="/entrar" className={styles.entrar}>
           {t.entrar}

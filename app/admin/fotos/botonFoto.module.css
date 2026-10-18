@@ -1,0 +1,55 @@
+.caja {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 96px;
+  height: 64px;
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--secundario);
+  background-color: var(--relleno);
+  background-size: cover;
+  background-position: center;
+  border-radius: 14px;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  background: transparent;
+  border: 1px solid var(--oliva-oscuro);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.error {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #9b2c2c;
+}

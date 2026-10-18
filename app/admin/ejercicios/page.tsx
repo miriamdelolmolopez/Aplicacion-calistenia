@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { CATEGORIAS, nombreCategoria, nombreMusculo, nombreTipo } from "@/lib/ejercicios";
 import VideoEjercicio from "../../VideoEjercicio";
+import BotonFoto from "../fotos/BotonFoto";
 import styles from "../admin.module.css";
 import {
   FormularioEjercicio,
@@ -15,6 +16,7 @@ export const metadata = { title: "Ejercicios · Administración" };
 type Fila = Omit<EjercicioForm, "musculos" | "materiales"> & {
   ejercicio_musculos: { musculo: string; rol: string }[];
   ejercicio_materiales: { material_id: string }[];
+  foto_url: string | null;
 };
 
 export default async function Ejercicios({
@@ -29,9 +31,10 @@ export default async function Ejercicios({
   const { data } = await supabase
     .from("ejercicios")
     .select(
-      "id, nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, activo, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)",
+      "id, nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, foto_url, activo, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)",
     )
     .order("nombre");
+  const fotos = new Map(((data ?? []) as unknown as Fila[]).map((e) => [e.id, e.foto_url]));
   const todos: EjercicioForm[] = ((data ?? []) as unknown as Fila[]).map((e) => ({
     id: e.id,
     nombre: e.nombre,
@@ -156,6 +159,7 @@ export default async function Ejercicios({
                 </div>
                 <details className={styles.detalles}>
                   <summary>Editar</summary>
+                  <BotonFoto destino="ejercicio" id={e.id} actual={fotos.get(e.id) ?? null} />
                   <VideoEjercicio url={e.video_url} titulo={e.nombre} />
                   <FormularioEjercicio ejercicio={e} materiales={materiales} />
                 </details>

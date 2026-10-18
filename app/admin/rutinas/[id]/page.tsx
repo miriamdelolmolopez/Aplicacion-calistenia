@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
+import BotonFoto from "../../fotos/BotonFoto";
 import styles from "../../admin.module.css";
 import {
   Constructor,
@@ -21,6 +22,7 @@ type FilaRutina = {
   nota: string | null;
   estado: string;
   entrenos_semana: number | null;
+  foto_url: string | null;
   user_id: string | null;
   profiles: Persona | null;
   rutina_sesiones: (Omit<SesionRutina, "items"> & { rutina_items: SesionRutina["items"] })[];
@@ -49,7 +51,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "id, nombre, nota, estado, entrenos_semana, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, orden, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
+      "id, nombre, nota, estado, entrenos_semana, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, orden, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -114,6 +116,11 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
           ← Rutinas
         </Link>
       </header>
+      <section className={styles.tarjeta}>
+        <h2>Foto de la rutina</h2>
+        <p className={styles.ayuda}>La ve la alumna arriba de Mi rutina.</p>
+        <BotonFoto destino="rutina" id={r.id} actual={r.foto_url} />
+      </section>
       <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} />
     </main>
   );

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Avatar from "../Avatar";
 import { marcarBorradoAtendido } from "./acciones";
 import EditorPersona from "./EditorPersona";
+import BotonFoto from "./fotos/BotonFoto";
 import FormularioAlta from "./FormularioAlta";
 import styles from "./admin.module.css";
 
@@ -63,6 +64,9 @@ export default async function Administracion() {
     profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null;
   }[];
 
+  const { data: fotosApp } = await supabase.from("fotos_app").select("clave, url");
+  const fotoApp = (clave: string) => fotosApp?.find((f) => f.clave === clave)?.url ?? null;
+
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
@@ -98,6 +102,15 @@ export default async function Administracion() {
           Rutinas de alumnos online
         </Link>
       </nav>
+
+      <section className={styles.tarjeta}>
+        <h2>Fotos de la app</h2>
+        <p className={styles.ayuda}>Las fotos de cada clase, rutina y ejercicio se cambian en su pantalla.</p>
+        <strong>Portada</strong>
+        <BotonFoto destino="portada" actual={fotoApp("portada")} />
+        <strong>Saludo de Inicio</strong>
+        <BotonFoto destino="inicio" actual={fotoApp("inicio")} />
+      </section>
 
       {cumples.length > 0 && (
         <section className={styles.tarjeta}>

@@ -10,6 +10,7 @@ import { obtenerFotos, obtenerProfe } from "../perfil/acciones";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
+import { obtenerFotosApp } from "../fotos/acciones";
 import { descargarIcs } from "@/lib/calendario";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase } from "@/lib/fotos";
@@ -130,6 +131,7 @@ export default function Clases() {
   const [semana, setSemana] = useState<number | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
+  const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const [verNombres, setVerNombres] = useState<string | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
 
@@ -145,6 +147,7 @@ export default function Clases() {
       setFotos(await fotosDe(d));
     });
     obtenerProfe().then(setProfe);
+    obtenerFotosApp().then((f) => setFotosTipos(f.tipos));
   }, []);
 
   const esAlumno = datos?.rol === "alumno";
@@ -345,7 +348,7 @@ export default function Clases() {
 
             return (
               <section key={c.id} id={`clase-${c.id}`} className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""}`}>
-                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo)) }}>
+                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo]) }}>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                 </div>

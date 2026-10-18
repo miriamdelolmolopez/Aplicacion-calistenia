@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
+import { obtenerFotosApp } from "../fotos/acciones";
 import { obtenerFotos } from "../perfil/acciones";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
@@ -83,6 +84,7 @@ export default function Inicio() {
   const router = useRouter();
   const perfil = useMiPerfil();
   const [extra, setExtra] = useState<Extra | null>(null);
+  const [fotoInicio, setFotoInicio] = useState<string | null>(null);
   const id = perfil && perfil !== "anonimo" ? perfil.id : null;
 
   useEffect(() => {
@@ -92,6 +94,10 @@ export default function Inicio() {
   useEffect(() => {
     if (id) cargarExtra(id).then(setExtra);
   }, [id]);
+
+  useEffect(() => {
+    obtenerFotosApp().then((f) => setFotoInicio(f.inicio));
+  }, []);
 
   // Hasta tener los datos y las aceptaciones no se puede avanzar.
   useEffect(() => {
@@ -117,7 +123,7 @@ export default function Inicio() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior />
-      <section className={estilos.hero} style={{ backgroundImage: fondoFoto("inicio") }}>
+      <section className={estilos.hero} style={{ backgroundImage: fondoFoto("inicio", fotoInicio) }}>
         <h1>
           {t.hola}, {perfil.nombre}
         </h1>
