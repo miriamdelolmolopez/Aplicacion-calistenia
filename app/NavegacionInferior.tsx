@@ -60,7 +60,13 @@ export default function NavegacionInferior() {
     <>
       <nav className={estilos.barra} aria-label={t.barraNavegacion}>
         {pestanas.map((p) => {
-          const activa = p.href === "/admin" ? ruta === "/admin" : ruta === p.href || ruta.startsWith(p.href + "/");
+          const activa =
+            p.href === "/admin"
+              ? ruta === "/admin"
+              : ruta === p.href ||
+                ruta.startsWith(p.href + "/") ||
+                // El progreso y el entreno cuelgan de «Entrenamiento» para quien tiene online.
+                (p.href === "/rutina" && (ruta.startsWith("/progreso") || ruta.startsWith("/entreno")));
           return (
             <Link key={p.href} href={p.href} className={`${estilos.pestana} ${activa ? estilos.activa : ""}`}>
               <span className={estilos.icono}>

@@ -213,3 +213,29 @@
   background: #70754b;
   border-radius: 6px 6px 0 0;
 }
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.chip {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2b2b2a;
+  background: #fff;
+  border: 1px solid #e3dccd;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chipActivo {
+  color: #fff;
+  background: #5a5e3b;
+  border-color: #5a5e3b;
+}

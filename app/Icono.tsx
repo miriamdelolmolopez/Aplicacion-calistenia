@@ -60,6 +60,13 @@ const DIBUJOS = {
       <path d="M4 21V5M9 8h6" />
     </>
   ),
+  historial: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  metricas: <path d="M5 21V11M12 21V4M19 21v-7" />,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   cerrar: <path d="M6 6l12 12M18 6 6 18" />,
 } as const;

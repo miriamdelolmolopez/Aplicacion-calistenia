@@ -6,7 +6,7 @@ import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import PlantaAvatar from "./PlantaAvatar";
 import estilos from "./progreso.module.css";
-import { TIPOS } from "@/lib/ejercicios";
+import { CATEGORIAS, TIPOS } from "@/lib/ejercicios";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
 
@@ -64,7 +64,13 @@ type Objetivo = {
 
 type EjercicioLista = { id: string; nombre: string; tipo: string };
 
-type Datos = { prog: Prog | null; entrenos: EntrenoP[]; objetivos: Objetivo[]; ejercicios: EjercicioLista[] };
+type Datos = {
+  prog: Prog | null;
+  entrenos: EntrenoP[];
+  objetivos: Objetivo[];
+  ejercicios: EjercicioLista[];
+  categorias: Record<string, string>; // id del ejercicio → categoría (pino, core…)
+};
 
 const LIMITE_ENTRENOS = 300;
 const CAMPOS_SERIE: Campo[] = ["reps", "segundos", "peso_kg", "distancia_m"];
@@ -100,13 +106,14 @@ async function cargar(userId: string | undefined, admin: boolean): Promise<Datos
     consultaObjetivos = consultaObjetivos.eq("user_id", userId);
   }
 
-  const [{ data: prog }, { data: entrenos }, { data: objetivos }, lista] = await Promise.all([
+  const [{ data: prog }, { data: entrenos }, { data: objetivos }, lista, { data: cats }] = await Promise.all([
     rpc,
     consultaEntrenos,
     consultaObjetivos,
     admin
       ? supabase.from("ejercicios").select("id, nombre, tipo").order("nombre")
       : Promise.resolve({ data: [] as EjercicioLista[] }),
+    supabase.from("ejercicios").select("id, categoria"),
   ]);
 
   return {
@@ -119,6 +126,7 @@ async function cargar(userId: string | undefined, admin: boolean): Promise<Datos
     })),
     objetivos: ((objetivos ?? []) as unknown as Objetivo[]).map((o) => ({ ...o, meta: Number(o.meta) })),
     ejercicios: (lista.data ?? []) as EjercicioLista[],
+    categorias: Object.fromEntries(((cats ?? []) as { id: string; categoria: string }[]).map((c) => [c.id, c.categoria])),
   };
 }
 
@@ -151,11 +159,14 @@ export default function Progreso({
   admin = false,
   online = true,
   presencial = false,
+  vista = "todo",
 }: {
   userId?: string;
   admin?: boolean;
   online?: boolean;
   presencial?: boolean;
+  // Qué parte se enseña: Evolución (gráficas), Estadísticas, Historial (entrenos) o todo junto.
+  vista?: "todo" | "evolucion" | "estadisticas" | "historial";
 }) {
   const [idioma] = useIdioma();
   const base = textos[idioma];
@@ -163,6 +174,7 @@ export default function Progreso({
   const [datos, setDatos] = useState<Datos | null>(null);
   const [ejercicioSel, setEjercicioSel] = useState<string>("");
   const [campoSel, setCampoSel] = useState<Campo | "">("");
+  const [categoria, setCategoria] = useState<string>("todas");
 
   useEffect(() => {
     cargar(userId, admin).then(setDatos);
@@ -176,6 +188,7 @@ export default function Progreso({
   const { prog, entrenos, objetivos } = datos;
   const verOnline = online;
   const verClases = presencial || !online;
+  const verEstadisticas = vista === "todo" || vista === "estadisticas";
 
   // Ejercicios con datos (series hechas) y mejor valor de cada uno.
   const ejerciciosConDatos = new Map<string, { nombre: string; tipo: string }>();
@@ -280,6 +293,8 @@ export default function Progreso({
 
   return (
     <div className={estilos.contenedor}>
+      {verEstadisticas && (
+        <>
       <section className={estilos.tarjeta}>
         <div className={estilos.planta}>
           <PlantaAvatar
@@ -354,8 +369,12 @@ export default function Progreso({
         </section>
       )}
 
+        </>
+      )}
+
       {verOnline && (
         <>
+      {verEstadisticas && (
       <section className={estilos.tarjeta}>
         <h2 style={{ margin: 0 }}>{t.objetivosTitulo}</h2>
         {objetivos.length === 0 && <p className={estilos.ayuda}>{t.sinObjetivos}</p>}
@@ -412,7 +431,11 @@ export default function Progreso({
           </form>
         )}
       </section>
+      )}
 
+      {vista === "evolucion" && <Evolucion datos={datos} categoria={categoria} cambiarCategoria={setCategoria} t={t} idioma={idioma} unidad={unidad} campoDeEjercicio={campoPorDefecto} />}
+
+      {vista === "todo" && (
       <section className={estilos.tarjeta}>
         <h2 style={{ margin: 0 }}>{t.graficasTitulo}</h2>
         {listaEj.length === 0 ? (
@@ -452,7 +475,9 @@ export default function Progreso({
           </>
         )}
       </section>
+      )}
 
+      {(vista === "todo" || vista === "historial") && (
       <section className={estilos.tarjeta}>
         <h2 style={{ margin: 0 }}>{t.misEntrenos}</h2>
         {entrenos.length === 0 && <p className={estilos.ayuda}>{t.sinEntrenos}</p>}
@@ -486,6 +511,7 @@ export default function Progreso({
         })}
         {entrenos.length >= LIMITE_ENTRENOS && <p className={estilos.ayuda}>{t.masAntiguos}</p>}
       </section>
+      )}
         </>
       )}
     </div>
@@ -550,5 +576,108 @@ function Grafica({
         </text>
       )}
     </svg>
+  );
+}
+
+// Evolución: una gráfica pequeña por ejercicio, con filtros por categoría (Todas, Pino…).
+function Evolucion({
+  datos,
+  categoria,
+  cambiarCategoria,
+  t,
+  idioma,
+  unidad,
+  campoDeEjercicio,
+}: {
+  datos: Datos;
+  categoria: string;
+  cambiarCategoria: (c: string) => void;
+  t: (typeof textos)["es"];
+  idioma: "es" | "en";
+  unidad: (c: Campo) => string;
+  campoDeEjercicio: (tipo: string) => Campo;
+}) {
+  const { entrenos, categorias } = datos;
+
+  const ejercicios = new Map<string, { nombre: string; tipo: string }>();
+  for (const e of entrenos) {
+    for (const s of e.entreno_series) {
+      if (s.completada && s.ejercicio_id && !ejercicios.has(s.ejercicio_id)) {
+        ejercicios.set(s.ejercicio_id, { nombre: s.nombre_ejercicio, tipo: s.tipo });
+      }
+    }
+  }
+
+  const puntosDe = (id: string, campo: Campo) => {
+    const puntos: { fecha: string; valor: number }[] = [];
+    for (const e of [...entrenos].reverse()) {
+      const vals = e.entreno_series
+        .filter((s) => s.completada && s.ejercicio_id === id)
+        .map((s) => s[campo])
+        .filter((v): v is number => v !== null && v !== undefined)
+        .map(Number);
+      if (vals.length > 0) puntos.push({ fecha: e.terminado_en, valor: Math.max(...vals) });
+    }
+    return puntos;
+  };
+
+  const todos = [...ejercicios.entries()]
+    .map(([id, e]) => {
+      const preferido = campoDeEjercicio(e.tipo);
+      const campo = CAMPOS_SERIE.includes(preferido) && puntosDe(id, preferido).length > 0
+        ? preferido
+        : (CAMPOS_SERIE.find((c) => puntosDe(id, c).length > 0) ?? preferido);
+      return { id, nombre: e.nombre, campo, puntos: puntosDe(id, campo), categoria: categorias[id] ?? "otros" };
+    })
+    .filter((e) => e.puntos.length > 0)
+    .sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+  const presentes = CATEGORIAS.filter((c) => todos.some((e) => e.categoria === c.valor));
+  const visibles = categoria === "todas" ? todos : todos.filter((e) => e.categoria === categoria);
+
+  return (
+    <>
+      <div className={estilos.chips} role="tablist">
+        {[{ valor: "todas", es: t.filtroTodas, en: t.filtroTodas }, ...presentes].map((c) => (
+          <button
+            key={c.valor}
+            type="button"
+            role="tab"
+            aria-selected={categoria === c.valor}
+            className={`${estilos.chip} ${categoria === c.valor ? estilos.chipActivo : ""}`}
+            onClick={() => cambiarCategoria(c.valor)}
+          >
+            {idioma === "en" ? c.en : c.es}
+          </button>
+        ))}
+      </div>
+
+      {todos.length === 0 && <p className={estilos.aviso}>{t.sinDatosGrafica}</p>}
+
+      {visibles.map((e) => {
+        const primero = e.puntos[0];
+        const ultimo = e.puntos[e.puntos.length - 1];
+        const semanas = Math.max(
+          1,
+          Math.round((new Date(ultimo.fecha).getTime() - new Date(primero.fecha).getTime()) / (7 * 86400000)),
+        );
+        const mejora = e.puntos.length >= 2 && ultimo.valor > primero.valor;
+        return (
+          <section key={e.id} className={estilos.tarjeta}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: "1.1rem" }}>{e.nombre}</h2>
+              <span className={estilos.ayuda}>
+                {mejora
+                  ? semanas === 1
+                    ? t.unaSemana
+                    : t.mejoraEnSemanas.replace("{n}", String(semanas))
+                  : t.sinMejoraAun}
+              </span>
+            </div>
+            <Grafica puntos={e.puntos} idioma={idioma} unidad={unidad(e.campo)} />
+          </section>
+        );
+      })}
+    </>
   );
 }

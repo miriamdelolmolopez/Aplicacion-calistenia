@@ -61,7 +61,8 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
   const lista: Seccion[] = ["inicio"];
   if (p.rol === "admin" || !soloOnline) lista.push("reservar");
   if (online && p.rol !== "admin") lista.push("rutina");
-  if (p.rol !== "admin") lista.push("progreso");
+  // Con entrenamiento online el progreso está dentro de «Entrenamiento»; sin él, tiene su propio botón.
+  if (p.rol !== "admin" && !online) lista.push("progreso");
   if (p.rol !== "admin") lista.push("pagos");
   lista.push("perfil", "ajustes");
   if (p.rol === "admin") lista.push("admin");
