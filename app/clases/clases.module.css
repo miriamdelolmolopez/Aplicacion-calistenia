@@ -271,3 +271,35 @@
 .menu button:hover {
   background: var(--relleno);
 }
+
+.filtros {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 0.7fr;
+  gap: 6px;
+  margin: 16px 0 0;
+}
+
+.filtro {
+  min-height: 44px;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  text-align: center;
+  font-weight: 600;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filtroActivo {
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+  border-color: var(--oliva-oscuro);
+}
+
+.noIncluida {
+  opacity: 0.6;
+}

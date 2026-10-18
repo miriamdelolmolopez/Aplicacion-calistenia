@@ -30,6 +30,23 @@ export function crearIcs(c: { id: string; titulo: string; inicioIso: string; dur
   ].join("\r\n");
 }
 
+// Fecha en el formato de Google Calendar: AAAAMMDDTHHMMSSZ.
+const fechaGoogle = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+// Enlace que abre Google Calendar con la clase ya rellenada.
+export function enlaceGoogleCalendar(c: Parameters<typeof crearIcs>[0]): string {
+  const inicio = new Date(c.inicioIso);
+  const fin = new Date(inicio.getTime() + c.duracionMin * 60000);
+  const q = new URLSearchParams({
+    action: "TEMPLATE",
+    text: c.titulo,
+    dates: `${fechaGoogle(inicio)}/${fechaGoogle(fin)}`,
+    details: c.descripcion ?? "",
+    location: LUGAR_CLASES,
+  });
+  return `https://calendar.google.com/calendar/render?${q.toString()}`;
+}
+
 // Descarga el archivo en el móvil o el ordenador.
 export function descargarIcs(c: Parameters<typeof crearIcs>[0]) {
   const blob = new Blob([crearIcs(c)], { type: "text/calendar;charset=utf-8" });

@@ -11,6 +11,7 @@ import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
 import { obtenerFotosApp } from "../fotos/acciones";
+import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import { descargarIcs } from "@/lib/calendario";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase } from "@/lib/fotos";
@@ -40,6 +41,8 @@ type Clase = {
   prioridad: boolean;
   duracion_min: number;
   tarde: boolean; // quedan menos horas que el límite de cancelación
+  servicio: string;
+  incluido: boolean; // puede reservarla según lo que tiene contratado
 };
 
 type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto; clase?: Clase };
@@ -133,6 +136,8 @@ export default function Clases() {
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const [verNombres, setVerNombres] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<"todo" | "grupal" | "individual">("todo");
+  const [confirmada, setConfirmada] = useState<ClaseConfirmada | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
@@ -165,11 +170,15 @@ export default function Clases() {
     setTrabajando(c.id);
     const r = await accion();
     setTrabajando(null);
-    setAviso(
-      r.ok
-        ? { tipo: "ok", clave: claveOk(r.devuelta), clase: conCalendario ? c : undefined }
-        : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto },
-    );
+    if (r.ok && conCalendario) {
+      setConfirmada({ id: c.id, tipo: c.tipo, empieza_en: c.empieza_en, duracion_min: c.duracion_min });
+    } else {
+      setAviso(
+        r.ok
+          ? { tipo: "ok", clave: claveOk(r.devuelta) }
+          : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto },
+      );
+    }
     await cargar();
   }
 
@@ -218,7 +227,9 @@ export default function Clases() {
     semana ?? (datos ? Math.floor((new Date(`${diaElegido}T12:00:00Z`).getTime() - new Date(`${primerLunes}T12:00:00Z`).getTime()) / (7 * 86400000)) : 0);
   const diasSemana = datos ? Array.from({ length: 7 }, (_, i) => sumarDias(primerLunes, semanaActual * 7 + i)) : [];
 
-  const clasesDelDia = (datos?.lista ?? []).filter((c) => claveDia(c.empieza_en) === diaElegido);
+  const clasesDelDia = (datos?.lista ?? []).filter(
+    (c) => claveDia(c.empieza_en) === diaElegido && (filtro === "todo" || c.servicio === filtro),
+  );
   const etiquetaDia = (() => {
     if (!datos) return "";
     const texto = textoDia(`${diaElegido}T12:00:00Z`, idioma);
@@ -261,13 +272,6 @@ export default function Clases() {
       {aviso && (
         <div className={aviso.tipo === "error" ? styles.error : styles.aviso} role={aviso.tipo === "error" ? "alert" : "status"}>
           {t[aviso.clave]}
-          {aviso.clase && (
-            <div style={{ marginTop: 8 }}>
-              <button className={`${styles.boton} ${styles.botonSecundario}`} style={boton} onClick={() => alCalendario(aviso.clase!)}>
-                {t.alCalendario}
-              </button>
-            </div>
-          )}
         </div>
       )}
 
@@ -275,6 +279,27 @@ export default function Clases() {
 
       {datos && (
         <>
+          <div className={estilos.filtros} role="tablist" aria-label={t.filtroTodo}>
+            {(
+              [
+                ["grupal", t.filtroGrupales],
+                ["individual", t.filtroPersonal],
+                ["todo", t.filtroTodo],
+              ] as const
+            ).map(([valor, texto]) => (
+              <button
+                key={valor}
+                type="button"
+                role="tab"
+                aria-selected={filtro === valor}
+                className={`${estilos.filtro} ${filtro === valor ? estilos.filtroActivo : ""}`}
+                onClick={() => setFiltro(valor)}
+              >
+                {texto}
+              </button>
+            ))}
+          </div>
+
           <div className={estilos.cabeceraDia}>
             <span className={estilos.etiquetaDia}>{t.diaLabel}</span>
             <strong>{etiquetaDia}</strong>
@@ -336,7 +361,7 @@ export default function Clases() {
             </div>
           )}
 
-          {clasesDelDia.length === 0 && <p className={styles.aviso}>{t.sinClasesDia}</p>}
+          {clasesDelDia.length === 0 && <p className={styles.aviso}>{filtro === "todo" ? t.sinClasesDia : t.sinClasesFiltro}</p>}
 
           {clasesDelDia.map((c) => {
             const cancelada = c.estado === "cancelada";
@@ -345,9 +370,16 @@ export default function Clases() {
             const pruebaLibres = Math.max(Math.min(c.plazas_prueba, c.plazas) - c.ocupadas_prueba, 0);
             const puedeProbar = !!datos && esInvitado && datos.datosCompletos && !datos.pruebaGastada;
             const cuadrados = Array.from({ length: c.plazas }, (_, i) => i);
+            const personal = c.servicio === "individual";
+            // Se ve, pero solo se reserva lo contratado (la administradora no reserva).
+            const noIncluida = !c.incluido && datos.rol !== "admin";
 
             return (
-              <section key={c.id} id={`clase-${c.id}`} className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""}`}>
+              <section
+                key={c.id}
+                id={`clase-${c.id}`}
+                className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
+              >
                 <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo]) }}>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
@@ -358,7 +390,11 @@ export default function Clases() {
                   {cancelada && <strong className={estilos.etiquetaCancelada}>{t.cancelada}</strong>}
                 </div>
 
-                {!cancelada && (
+                {!cancelada && personal && (
+                  <p className={estilos.plazas}>{completa ? t.huecoOcupado : t.huecoLibre}</p>
+                )}
+
+                {!cancelada && !personal && (
                   <>
                     <button
                       type="button"
@@ -439,8 +475,11 @@ export default function Clases() {
                         </>
                       )}
 
+                      {/* Lo que no tiene contratado se ve, pero no se puede reservar */}
+                      {!c.mi_reserva && noIncluida && <span className={styles.ayuda}>{t.noIncluido}</span>}
+
                       {/* Alumno sin reserva */}
-                      {!c.mi_reserva && esAlumno && (
+                      {!c.mi_reserva && esAlumno && c.incluido && (
                         <>
                           {completa && !c.en_espera && (
                             <button className={styles.boton} style={boton} disabled={trabajando === c.id} onClick={() => unirse(c)}>
@@ -479,7 +518,7 @@ export default function Clases() {
                       )}
 
                       {/* Invitado sin reserva */}
-                      {!c.mi_reserva && puedeProbar && (
+                      {!c.mi_reserva && puedeProbar && c.incluido && (
                         <>
                           {completa ? (
                             <span className={styles.ayuda}>{t.completa}</span>
@@ -523,6 +562,21 @@ export default function Clases() {
             );
           })}
         </>
+      )}
+
+      {confirmada && (
+        <ReservaConfirmada
+          clase={confirmada}
+          idioma={idioma}
+          alVer={() => {
+            // Vuelve a Reservas con la clase reservada a la vista.
+            setDia(claveDia(confirmada.empieza_en));
+            setFiltro("todo");
+            const id = confirmada.id;
+            setConfirmada(null);
+            setTimeout(() => document.getElementById(`clase-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+          }}
+        />
       )}
     </main>
   );
