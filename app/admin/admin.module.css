@@ -497,8 +497,19 @@
 }
 
 /* Formularios de tipo de clase: dos columnas; el título, la casilla, el botón y los mensajes ocupan todo el ancho. */
+.filaTipo.tipoClase {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
 .filaTipo.tipoClase > * {
   grid-column: auto;
+  min-width: 0;
+}
+
+.filaTipo.tipoClase input:not([type="checkbox"]) {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .filaTipo.tipoClase > strong,

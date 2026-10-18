@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
+import { obtenerFotos } from "../perfil/acciones";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
 import Icono from "../Icono";
@@ -15,7 +17,15 @@ import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
 
 type Proxima = { empieza_en: string; nombre: string };
-type Extra = { proxima: Proxima | null; bonos: MiBono[]; entrenoId: string | null; completo: boolean };
+type Cumple = { id: string; nombre: string };
+type Extra = {
+  proxima: Proxima | null;
+  bonos: MiBono[];
+  entrenoId: string | null;
+  completo: boolean;
+  cumples: Cumple[];
+  fotos: Record<string, string>;
+};
 
 async function cargarExtra(userId: string): Promise<Extra> {
   const supabase = createClient();
@@ -38,11 +48,18 @@ async function cargarExtra(userId: string): Promise<Extra> {
 
   const { data: curso } = await supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle();
 
+  // Quién cumple años hoy (solo salen las personas que lo tienen activado en Ajustes).
+  const { data: cumplesDatos } = await supabase.rpc("cumpleanos_hoy");
+  const cumples = (cumplesDatos ?? []) as Cumple[];
+  const fotos = cumples.length ? await obtenerFotos(cumples.map((c) => c.id)) : {};
+
   return {
     proxima: primera ?? null,
     bonos: await obtenerMisBonos(),
     entrenoId: curso?.id ?? null,
     completo: tipos.has("privacidad") && tipos.has("terminos"),
+    cumples,
+    fotos,
   };
 }
 
@@ -103,6 +120,20 @@ export default function Inicio() {
       </div>
 
       <div className={estilos.contenido}>
+        {extra.cumples.length > 0 && (
+          <section className={estilos.cumple}>
+            <strong>🎂 {t.cumpleHoy}</strong>
+            <div className={estilos.cumpleLista}>
+              {extra.cumples.map((c) => (
+                <span key={c.id} className={estilos.cumpleItem}>
+                  <Avatar nombre={c.nombre} url={extra.fotos[c.id]} tamano={32} />
+                  {c.nombre}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
         {extra.entrenoId && (
           <Link href={`/entreno/${extra.entrenoId}`} className={`${estilos.destacada} ${estilos.alerta}`}>
             <strong>{t.entrenoPendiente}</strong>

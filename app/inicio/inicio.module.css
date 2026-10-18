@@ -50,6 +50,29 @@
   background: var(--oliva-oscuro);
 }
 
+.cumple {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #fbf3d9;
+  border: 1px solid #ecdba0;
+  border-radius: var(--radio);
+}
+
+.cumpleLista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.cumpleItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
 .atajos {
   margin: 10px 0 0;
   font-size: 1.1rem;

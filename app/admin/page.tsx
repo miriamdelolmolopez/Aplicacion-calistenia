@@ -48,6 +48,10 @@ export default async function Administracion() {
     : { data: [] };
   const fotoDe = (p: Fila) => firmadas?.find((f) => f.path === p.foto_path)?.signedUrl ?? null;
 
+  // Cumpleaños de hoy (solo las personas que lo tienen activado en Ajustes).
+  const { data: cumplesDatos } = await supabase.rpc("cumpleanos_hoy");
+  const cumples = (cumplesDatos ?? []) as { id: string; nombre: string }[];
+
   const { data: peticiones } = await supabase
     .from("solicitudes_borrado")
     .select("id, creada_en, profiles(nombre, apellidos, email)")
@@ -88,6 +92,13 @@ export default async function Administracion() {
           Rutinas de alumnos online
         </Link>
       </nav>
+
+      {cumples.length > 0 && (
+        <section className={styles.tarjeta}>
+          <h2>🎂 Hoy cumplen años</h2>
+          <p style={{ margin: 0 }}>{cumples.map((c) => c.nombre).join(" · ")}</p>
+        </section>
+      )}
 
       {pendientesBorrado.length > 0 && (
         <section className={styles.tarjeta}>

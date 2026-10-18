@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
+import Avatar from "../../Avatar";
 import { claveDia, dentroDeHoras, haceHoras, textoDia, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
 import { FilaClase, FormularioAjustes, FormularioTipo, GenerarClases, NuevoTipo } from "./Controles";
@@ -15,7 +17,7 @@ type Tipo = {
   duracion_min: number;
   activo: boolean;
 };
-type Persona = { nombre: string | null; apellidos: string | null; email: string | null };
+type Persona = { nombre: string | null; apellidos: string | null; email: string | null; foto_path?: string | null };
 type Reserva = {
   id: string;
   estado: string;
@@ -68,12 +70,26 @@ export default async function AdminClases() {
   const { data: clasesDatos } = await supabase
     .from("sesiones_clase")
     .select(
-      "id, empieza_en, plazas, plazas_prueba, estado, motivo_cancelacion, tipos_clase(nombre, minimo_alumnos), reservas(id, estado, user_id, es_prueba, profiles(nombre, apellidos, email)), lista_espera(id, creado_en, profiles(nombre, apellidos, email))",
+      "id, empieza_en, plazas, plazas_prueba, estado, motivo_cancelacion, tipos_clase(nombre, minimo_alumnos), reservas(id, estado, user_id, es_prueba, profiles(nombre, apellidos, email, foto_path)), lista_espera(id, creado_en, profiles(nombre, apellidos, email))",
     )
     .gte("empieza_en", desde)
     .order("empieza_en")
     .limit(200);
   const clases = (clasesDatos ?? []) as unknown as Clase[];
+
+  // Fotos de las personas apuntadas (privadas: enlaces temporales solo para esta pantalla).
+  const rutasFotos = [
+    ...new Set(
+      clases.flatMap((c) =>
+        c.reservas.filter((r) => r.estado === "reservada").map((r) => r.profiles?.foto_path ?? null),
+      ),
+    ),
+  ].filter((r): r is string => !!r);
+  const { data: firmadas } = rutasFotos.length
+    ? await createAdminClient().storage.from("avatares").createSignedUrls(rutasFotos, 3600)
+    : { data: [] };
+  const fotoDe = (ruta: string | null | undefined) =>
+    ruta ? (firmadas?.find((f) => f.path === ruta)?.signedUrl ?? null) : null;
 
   const porDia = new Map<string, Clase[]>();
   for (const c of clases) {
@@ -132,6 +148,7 @@ export default async function AdminClases() {
                     userId: r.user_id,
                     nombre: nombreDe(r.profiles),
                     prueba: r.es_prueba,
+                    foto: fotoDe(r.profiles?.foto_path),
                   }));
                 const espera = [...c.lista_espera]
                   .sort((a, b) => a.creado_en.localeCompare(b.creado_en))
@@ -154,6 +171,19 @@ export default async function AdminClases() {
                               .map((a) => a.nombre + (a.prueba ? " (prueba)" : ""))
                               .join(", ")}`}
                         </div>
+                        {apuntados.length > 0 && (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, margin: "8px 0" }}>
+                            {apuntados.map((a) => (
+                              <div key={a.reservaId} style={{ width: 60, textAlign: "center" }} title={a.nombre}>
+                                <Avatar nombre={a.nombre} url={a.foto} tamano={48} />
+                                <div style={{ fontSize: "0.72rem", lineHeight: 1.2, marginTop: 2 }}>
+                                  {a.nombre.split(" ")[0]}
+                                  {a.prueba && " (prueba)"}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         {espera.length > 0 && (
                           <div className={styles.ayuda}>
                             Lista de espera: {espera.map((e) => e.nombre).join(", ")}
