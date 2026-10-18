@@ -123,9 +123,22 @@ function duracion(seg: number): string {
   return h > 0 ? `${h} h ${m} min` : `${Math.max(m, seg > 0 ? 1 : 0)} min`;
 }
 
+// Cuando lo mira Miriam (en la ficha de una alumna) los textos hablan de ella en tercera persona.
+const TERCERA_PERSONA = {
+  faltanEntrenos: "Le faltan {n} entrenos para el siguiente nivel.",
+  plantaMarchita1: "Su planta tiene sed: lleva {n} días sin entrenar.",
+  plantaMarchita2: "Su planta está muy mustia: lleva más de 14 días sin entrenar.",
+  plantaBrillante: "Racha en marcha: su planta luce hojas brillantes.",
+  rachaExplica: "Cuenta las semanas seguidas en las que ha hecho todos sus entrenos.",
+  sinRutinaRacha: "La racha empezará cuando tenga una rutina publicada.",
+  sinObjetivos: "Todavía no le has puesto objetivos.",
+  planNoActivoProgreso: "Su plan online no está activo.",
+};
+
 export default function Progreso({ userId, admin = false }: { userId?: string; admin?: boolean }) {
   const [idioma] = useIdioma();
-  const t = textos[idioma];
+  const base = textos[idioma];
+  const t = (admin ? { ...base, ...TERCERA_PERSONA } : base) as typeof base;
   const [datos, setDatos] = useState<Datos | null>(null);
   const [ejercicioSel, setEjercicioSel] = useState<string>("");
   const [campoSel, setCampoSel] = useState<Campo | "">("");

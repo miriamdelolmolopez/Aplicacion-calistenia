@@ -1,0 +1,189 @@
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro {
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filtroActivo {
+  color: #fff;
+  background: var(--oliva);
+  border-color: var(--oliva);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: inherit;
+  text-decoration: none;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+}
+
+.datos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.alerta {
+  color: #8a4b2a;
+  font-weight: 600;
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  text-align: center;
+  background: var(--crema);
+  border-radius: 12px;
+}
+
+.cifra strong {
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.barras {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 90px;
+}
+
+.barraMes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+  font-size: 0.72rem;
+}
+
+.barraRelleno {
+  width: 100%;
+  min-height: 2px;
+  background: var(--oliva);
+  border-radius: 4px 4px 0 0;
+}
+
+.datosLista {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.datosLista div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.datosLista dt {
+  color: var(--secundario);
+}
+
+.datosLista dd {
+  margin: 0;
+  text-align: right;
+  word-break: break-word;
+}
+
+.sube {
+  color: #3f6a2b;
+  font-weight: 600;
+}
+
+.baja {
+  color: #8a4b2a;
+  font-weight: 600;
+}
+
+.igual {
+  color: var(--secundario);
+}
+
+.sesionChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.entreno {
+  padding: 12px;
+  background: var(--crema);
+  border-radius: 12px;
+}
+
+.entreno h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+}
+
+.ejercicio {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 0.88rem;
+}
+
+.nota textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 10px;
+  font: inherit;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  box-sizing: border-box;
+}

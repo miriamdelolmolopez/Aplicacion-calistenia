@@ -73,6 +73,9 @@ export default async function Administracion() {
       </header>
 
       <nav className={styles.tarjeta}>
+        <Link href="/admin/usuarios" className={styles.boton}>
+          Usuarios
+        </Link>
         <Link href="/admin/clases" className={styles.boton}>
           Clases y horario
         </Link>
@@ -153,8 +156,8 @@ export default async function Administracion() {
                   </div>
                 )}
                 {p.rol !== "admin" && (
-                  <Link href={`/admin/alumnos/${p.id}`} className={styles.enlaceBarra}>
-                    Ver progreso y objetivos
+                  <Link href={`/admin/usuarios/${p.id}`} className={styles.enlaceBarra}>
+                    Ver ficha completa
                   </Link>
                 )}
                 {p.rol !== "admin" && (
