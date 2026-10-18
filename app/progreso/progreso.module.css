@@ -1,0 +1,184 @@
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--font-montserrat), Montserrat, sans-serif;
+  color: #2b2b2a;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e3dccd;
+}
+
+.aviso {
+  padding: 14px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e3dccd;
+}
+
+.ayuda {
+  font-size: 0.85rem;
+  color: #5a5e3b;
+}
+
+.alerta {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: #8a4b2a;
+  font-weight: 600;
+}
+
+.planta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.numeros {
+  display: flex;
+  gap: 12px;
+}
+
+.numero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 10px;
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e3dccd;
+}
+
+.numero strong {
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.objetivo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #f4efe6;
+  border-radius: 10px;
+}
+
+.objetivoCab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.etiquetaOk {
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  color: #fff;
+  background: #70754b;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.barra {
+  height: 10px;
+  background: #e3dccd;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barraRelleno {
+  height: 100%;
+  background: #70754b;
+  border-radius: 999px;
+}
+
+.botonMini {
+  border: 0;
+  background: transparent;
+  color: #8a4b2a;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.formObjetivo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.formObjetivo select,
+.formObjetivo input,
+.selectores select {
+  padding: 10px;
+  font: inherit;
+  border: 1px solid #cfc7b5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.formObjetivo select,
+.formObjetivo input {
+  flex: 1 1 140px;
+}
+
+.boton {
+  padding: 10px 16px;
+  font: inherit;
+  color: #fff;
+  background: #70754b;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.selectores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.selectores label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  flex: 1 1 150px;
+}
+
+.grafica {
+  width: 100%;
+  height: auto;
+}
+
+.desplegable {
+  border-top: 1px solid #e3dccd;
+  padding-top: 8px;
+}
+
+.desplegable summary {
+  cursor: pointer;
+}
+
+.detalleEntreno {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0 0 4px;
+  font-size: 0.9rem;
+}
+
+.detalleEntreno ul {
+  margin: 2px 0 0;
+  padding-left: 18px;
+}

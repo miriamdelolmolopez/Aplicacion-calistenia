@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
 import MapaCorporal from "../../MapaCorporal";
+import PlantaAvatar from "../../progreso/PlantaAvatar";
+import { createClient } from "@/lib/supabase/client";
 import styles from "../../formularios.module.css";
 import { textos } from "../../textos";
 import { useIdioma } from "../../useIdioma";
@@ -14,6 +17,9 @@ export type DatosResumen = {
   ejercicios: number;
   intensidades: Record<string, number>;
 };
+
+// Con estos totales de entrenos la planta sube de nivel.
+const NIVELES_NUEVOS = [5, 15, 30, 60, 100];
 
 const ANCHO = 1080;
 const ALTO = 1350;
@@ -119,6 +125,15 @@ export default function Resumen({
   const [vista, setVista] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const mapa = useRef<HTMLDivElement>(null);
+  const [planta, setPlanta] = useState<{ total: number; nivel: number; racha_semanas: number } | null>(null);
+
+  useEffect(() => {
+    createClient()
+      .rpc("mi_progreso")
+      .then(({ data }) => {
+        if (data) setPlanta(data as { total: number; nivel: number; racha_semanas: number });
+      });
+  }, []);
 
   const tiempo = `${t.duracionTotal}: ${duracionTexto(duracionSeg)}`;
   const series = `${resumen?.series_hechas ?? 0} ${t.seriesLabel} · ${resumen?.ejercicios ?? 0} ${t.ejerciciosHechos}`;
@@ -219,6 +234,30 @@ export default function Resumen({
           />
         </div>
       </section>
+
+      {planta && (
+        <section className={styles.tarjeta} style={{ marginBottom: 16, alignItems: "center", textAlign: "center" }}>
+          <PlantaAvatar
+            nivel={planta.nivel}
+            brillante={planta.racha_semanas >= 2}
+            tamano={150}
+            titulo={t[`planta${planta.nivel}` as keyof typeof t] as string}
+          />
+          <strong>
+            {t.nivelLabel} {planta.nivel} · {t[`planta${planta.nivel}` as keyof typeof t] as string}
+          </strong>
+          {NIVELES_NUEVOS.includes(planta.total) && (
+            <p className={styles.aviso}>
+              {t.subisteNivel
+                .replace("{n}", String(planta.nivel))
+                .replace("{nombre}", t[`planta${planta.nivel}` as keyof typeof t] as string)}
+            </p>
+          )}
+          <Link href="/progreso" className={styles.botonSecundario}>
+            {t.miProgreso}
+          </Link>
+        </section>
+      )}
 
       <section className={styles.tarjeta} style={{ marginBottom: 16 }}>
         <div className={estilos.pie}>

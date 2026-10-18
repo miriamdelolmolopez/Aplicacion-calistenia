@@ -90,6 +90,11 @@ export default async function Administracion() {
                   </div>
                 )}
                 {p.rol !== "admin" && (
+                  <Link href={`/admin/alumnos/${p.id}`} className={styles.enlaceBarra}>
+                    Ver progreso y objetivos
+                  </Link>
+                )}
+                {p.rol !== "admin" && (
                   <EditorPersona
                     persona={{
                       id: p.id,

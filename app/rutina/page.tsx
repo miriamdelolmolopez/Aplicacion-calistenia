@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { descartarEntreno, iniciarEntreno } from "../entreno/acciones";
@@ -301,6 +302,9 @@ export default function MiRutina() {
 
       {datos?.planActivo && (
         <>
+          <Link href="/progreso" className={styles.botonSecundario} style={{ display: "inline-block", marginBottom: 16 }}>
+            🌱 {t.miProgreso}
+          </Link>
           <section className={styles.tarjeta} style={{ marginBottom: 16 }}>
             <h2 style={{ margin: 0 }}>{t.rutinaActual}</h2>
             {datos.enCurso && (
