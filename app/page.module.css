@@ -1,0 +1,100 @@
+.pagina {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+}
+
+.entrar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--oliva-oscuro);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.idioma select {
+  min-height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.centro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.centro h1 {
+  margin: 0;
+  font-size: 2.4rem;
+}
+
+.lema {
+  margin: 0 0 32px;
+  color: var(--secundario);
+  font-size: 0.95rem;
+}
+
+.intro {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.botones {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 20px;
+  background: var(--oliva-oscuro);
+  color: var(--blanco);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radio);
+}
+
+.boton:hover {
+  background: var(--oliva);
+}
