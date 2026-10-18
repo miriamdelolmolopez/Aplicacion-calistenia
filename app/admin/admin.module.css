@@ -11,27 +11,42 @@
 .barra {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  min-height: 56px;
+  align-items: flex-end;
+  gap: 12px;
+  min-height: 120px;
+  padding: 16px 20px;
+  color: var(--blanco);
+  background-color: #3b3d28;
+  background-image: linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.15) 70%),
+    url(/fotos/personal.jpg), linear-gradient(160deg, #6f7351, #3b3d28);
+  background-size: cover;
+  background-position: center 30%;
+  border-radius: 28px;
+  box-shadow: var(--sombra);
 }
 
 .barra h1 {
   margin: 0;
   font-size: 2rem;
+  line-height: 1.1;
+  color: var(--blanco);
 }
 
 .enlaceBarra {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--oliva-oscuro);
+  color: var(--blanco);
   font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .tarjeta {
   background: var(--blanco);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 24px;
+  box-shadow: var(--sombra);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -169,7 +184,7 @@
 
 .persona {
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 14px;
   display: flex;
   flex-direction: column;
