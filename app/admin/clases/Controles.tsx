@@ -4,10 +4,13 @@ import { useActionState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import {
+  apuntarAlumno,
+  cambiarAjustes,
   cambiarPlazas,
   cambiarTipo,
   cancelarClase,
   generarClases,
+  quitarApuntado,
   reactivarClase,
 } from "./acciones";
 
@@ -55,6 +58,46 @@ export function GenerarClases() {
   );
 }
 
+export function FormularioAjustes({
+  horas,
+  dias,
+  ver,
+}: {
+  horas: number;
+  dias: number;
+  ver: boolean;
+}) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarAjustes, {});
+  return (
+    <form action={accion} className={styles.tarjeta}>
+      <h2>Ajustes de reservas</h2>
+      <div className={styles.campo}>
+        <label htmlFor="aj-horas">Horas antes de la clase para cancelar sin perderla</label>
+        <input
+          id="aj-horas"
+          name="horas"
+          type="number"
+          min={0}
+          max={72}
+          defaultValue={horas}
+        />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="aj-dias">Días de antelación máxima para reservar</label>
+        <input id="aj-dias" name="dias" type="number" min={1} max={60} defaultValue={dias} />
+      </div>
+      <label className={styles.casilla}>
+        <input type="checkbox" name="ver" defaultChecked={ver} />
+        Los alumnos ven quién está apuntado (nombre e inicial del apellido)
+      </label>
+      <button className={styles.boton} type="submit" disabled={pendiente}>
+        Guardar ajustes
+      </button>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
+
 export function FormularioTipo({
   tipo,
 }: {
@@ -95,10 +138,82 @@ export function FormularioTipo({
   );
 }
 
+type Apuntado = { reservaId: string; userId: string; nombre: string };
+
+function FilaApuntado({ apuntado }: { apuntado: Apuntado }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(quitarApuntado, {});
+  return (
+    <form action={accion} className={styles.apuntadoFila}>
+      <input type="hidden" name="reservaId" value={apuntado.reservaId} />
+      <span>{apuntado.nombre}</span>
+      <span className={styles.apuntadoBotones}>
+        <button
+          className={`${styles.boton} ${styles.botonSecundario}`}
+          type="submit"
+          name="devolver"
+          value="si"
+          disabled={pendiente}
+        >
+          Quitar y devolver clase
+        </button>
+        <button
+          className={`${styles.boton} ${styles.botonSecundario}`}
+          type="submit"
+          name="devolver"
+          value="no"
+          disabled={pendiente}
+        >
+          Quitar sin devolver
+        </button>
+      </span>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
+
+function FormularioApuntar({
+  sesionId,
+  alumnos,
+}: {
+  sesionId: string;
+  alumnos: { id: string; texto: string }[];
+}) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(apuntarAlumno, {});
+  return (
+    <form action={accion} className={styles.formularioInterno}>
+      <input type="hidden" name="sesionId" value={sesionId} />
+      <div className={styles.campo}>
+        <label htmlFor={`ap-${sesionId}`}>Apuntar a un alumno</label>
+        <select id={`ap-${sesionId}`} name="persona" defaultValue="">
+          <option value="" disabled>
+            Elige una persona…
+          </option>
+          {alumnos.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.texto}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button className={styles.boton} type="submit" disabled={pendiente}>
+        Apuntar (descuenta una clase de su bono)
+      </button>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
+
 export function FilaClase({
   clase,
 }: {
-  clase: { id: string; plazas: number; cancelada: boolean; motivo: string | null };
+  clase: {
+    id: string;
+    plazas: number;
+    cancelada: boolean;
+    motivo: string | null;
+    apuntados: Apuntado[];
+    alumnos: { id: string; texto: string }[];
+  };
 }) {
   const [estadoPlazas, accionPlazas, pendientePlazas] = useActionState<Estado, FormData>(
     cambiarPlazas,
@@ -111,6 +226,10 @@ export function FilaClase({
   const [estadoReactivar, accionReactivar, pendienteReactivar] = useActionState<Estado, FormData>(
     reactivarClase,
     {},
+  );
+
+  const posibles = clase.alumnos.filter(
+    (a) => !clase.apuntados.some((p) => p.userId === a.id),
   );
 
   return (
@@ -128,6 +247,16 @@ export function FilaClase({
         </form>
       ) : (
         <>
+          <div className={styles.formularioInterno}>
+            <strong>Apuntados ({clase.apuntados.length})</strong>
+            {clase.apuntados.length === 0 && <p className={styles.ayuda}>Nadie todavía.</p>}
+            {clase.apuntados.map((a) => (
+              <FilaApuntado key={a.reservaId} apuntado={a} />
+            ))}
+          </div>
+
+          <FormularioApuntar sesionId={clase.id} alumnos={posibles} />
+
           <form action={accionPlazas} className={styles.formularioInterno}>
             <input type="hidden" name="sesionId" value={clase.id} />
             <div className={styles.campo}>
@@ -146,8 +275,28 @@ export function FilaClase({
             </button>
             <Mensajes estado={estadoPlazas} />
           </form>
+
           <form action={accionCancelar} className={styles.formularioInterno}>
             <input type="hidden" name="sesionId" value={clase.id} />
+            <strong>Cancelar esta clase</strong>
+            <p className={styles.ayuda}>
+              Se devolverá su clase a las {clase.apuntados.length} personas apuntadas. Aún no
+              se envían avisos: lo verán en la app (los avisos llegan en la Fase 6).
+            </p>
+            <div className={styles.campo}>
+              <label htmlFor={`dias-${clase.id}`}>¿Cuántos días amplías su bono?</label>
+              <input
+                id={`dias-${clase.id}`}
+                name="dias"
+                type="number"
+                min={0}
+                max={60}
+                defaultValue={0}
+              />
+              <span className={styles.ayuda}>
+                Pon 0 si no quieres ampliar. Por lluvia, tu política es 7 días.
+              </span>
+            </div>
             <div className={styles.campo}>
               <label htmlFor={`motivo-${clase.id}`}>Motivo (opcional)</label>
               <input id={`motivo-${clase.id}`} name="motivo" maxLength={200} />
@@ -157,7 +306,7 @@ export function FilaClase({
               type="submit"
               disabled={pendienteCancelar}
             >
-              Cancelar esta clase
+              Cancelar clase y devolver las clases
             </button>
             <Mensajes estado={estadoCancelar} />
           </form>

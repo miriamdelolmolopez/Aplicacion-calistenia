@@ -50,6 +50,11 @@
 - **Bonos (Parte B):** clase suelta 15 € y 30 días; mensuales (4/8/12 clases) 30 días; bono de 10 clases 90 días.
 - **Bonos seguidos del mismo servicio:** el nuevo empieza a contar cuando se agota el anterior o cuando caduca (lo que ocurra antes). Solo hay un bono activo por persona y servicio; los demás esperan en cola.
 - **Reservar con pago pendiente:** permitido en servicios presenciales; el bono se usa desde el principio y el pago pendiente se avisa a Miriam y al alumno. (Para servicios online, más adelante, el bono solo se activará una vez pagado.)
+- **Reservas (Parte C):** la clase tiene que caer dentro de la validez del bono activo; si no, la app lo explica. Una reserva por persona y clase.
+- **Mínimo de alumnos por clase:** 1 por defecto (solo aviso para Miriam; alerta en las clases de las próximas 24 h que no lleguen).
+- **Apuntados visibles para los alumnos:** sí, como nombre e inicial del apellido ("Marta G."). Miriam los ve completos. Hay un interruptor en el panel (ajuste "ver_apuntados") para activarlo o desactivarlo.
+- **Ajustes editables en el panel:** horas de cancelación (2), días máximos de antelación (14) y ver apuntados.
+- **Cancelar una clase:** un botón que pregunta cuántos días se amplía el bono (0 permitido), cancela la clase y devuelve su clase a todos los apuntados (adelantado desde la Parte D).
 - **Avisos:** hasta la Fase 6 el aviso de plaza liberada se ve dentro de la app y el de mínimo no alcanzado como alerta en el panel.
 - **Horario inicial (lunes y miércoles):** 17:30 pino intermedio (6 plazas) · 18:35 pino principiantes (6) · 19:40 calistenia (10).
 

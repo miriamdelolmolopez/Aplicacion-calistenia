@@ -225,6 +225,30 @@
   gap: 4px;
 }
 
+.apuntadoFila {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--linea);
+}
+
+.apuntadoBotones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.alerta {
+  background: #f6e3d6;
+  color: #7a3a14;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 10px;
+  margin: 0;
+}
+
 .dia {
   margin: 8px 0;
   font-size: 1.25rem;

@@ -6,6 +6,12 @@ export function haceHoras(horas: number): string {
   return new Date(Date.now() - horas * 3600 * 1000).toISOString();
 }
 
+// ¿Empieza dentro de las próximas X horas (y todavía no ha empezado)?
+export function dentroDeHoras(iso: string, horas: number): boolean {
+  const falta = new Date(iso).getTime() - Date.now();
+  return falta > 0 && falta <= horas * 3600 * 1000;
+}
+
 export function claveDia(iso: string): string {
   // Devuelve AAAA-MM-DD en hora de Madrid (sirve para agrupar clases por día).
   return new Intl.DateTimeFormat("en-CA", {
