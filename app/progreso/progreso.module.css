@@ -188,3 +188,28 @@
   padding-left: 18px;
 }
 
+
+.barras {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 130px;
+}
+
+.barraMes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+  font-size: 0.78rem;
+}
+
+.barraMesRelleno {
+  width: 100%;
+  min-height: 2px;
+  background: #70754b;
+  border-radius: 6px 6px 0 0;
+}

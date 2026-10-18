@@ -47,6 +47,11 @@ type Prog = {
   entrenos_esta_semana: number;
   mes_entrenos: number;
   mes_segundos: number;
+  entrenos_total: number;
+  clases_total: number;
+  objetivo_de_rutina: boolean;
+  mes_clases: number;
+  clases_por_mes: { mes: string; clases: number }[];
 };
 
 type Objetivo = {
@@ -117,6 +122,11 @@ async function cargar(userId: string | undefined, admin: boolean): Promise<Datos
   };
 }
 
+function nombreMes(mes: string, idioma: "es" | "en"): string {
+  const [anio, m] = mes.split("-").map(Number);
+  return new Date(anio, m - 1, 1).toLocaleDateString(idioma === "en" ? "en-GB" : "es-ES", { month: "short" });
+}
+
 function duracion(seg: number): string {
   const h = Math.floor(seg / 3600);
   const m = Math.floor((seg % 3600) / 60);
@@ -125,17 +135,28 @@ function duracion(seg: number): string {
 
 // Cuando lo mira Miriam (en la ficha de una alumna) los textos hablan de ella en tercera persona.
 const TERCERA_PERSONA = {
-  faltanEntrenos: "Le faltan {n} entrenos para el siguiente nivel.",
-  plantaMarchita1: "Su planta tiene sed: lleva {n} días sin entrenar.",
-  plantaMarchita2: "Su planta está muy mustia: lleva más de 14 días sin entrenar.",
+  faltanEntrenos: "Le faltan {n} clases o entrenos para el siguiente nivel.",
+  plantaMarchita1: "Su planta tiene sed: lleva {n} días sin clase ni entreno.",
+  plantaMarchita2: "Su planta está muy mustia: lleva más de 14 días sin clase ni entreno.",
   plantaBrillante: "Racha en marcha: su planta luce hojas brillantes.",
-  rachaExplica: "Cuenta las semanas seguidas en las que ha hecho todos sus entrenos.",
+  rachaExplica: "Cuenta las semanas seguidas en las que ha cumplido su objetivo (clases y entrenos).",
   sinRutinaRacha: "La racha empezará cuando tenga una rutina publicada.",
   sinObjetivos: "Todavía no le has puesto objetivos.",
   planNoActivoProgreso: "Su plan online no está activo.",
 };
 
-export default function Progreso({ userId, admin = false }: { userId?: string; admin?: boolean }) {
+// online y presencial dicen qué partes se enseñan (según los servicios de la persona).
+export default function Progreso({
+  userId,
+  admin = false,
+  online = true,
+  presencial = false,
+}: {
+  userId?: string;
+  admin?: boolean;
+  online?: boolean;
+  presencial?: boolean;
+}) {
   const [idioma] = useIdioma();
   const base = textos[idioma];
   const t = (admin ? { ...base, ...TERCERA_PERSONA } : base) as typeof base;
@@ -153,6 +174,8 @@ export default function Progreso({ userId, admin = false }: { userId?: string; a
   if (datos.prog === null) return <p className={estilos.aviso}>{t.planNoActivoProgreso}</p>;
 
   const { prog, entrenos, objetivos } = datos;
+  const verOnline = online;
+  const verClases = presencial || !online;
 
   // Ejercicios con datos (series hechas) y mejor valor de cada uno.
   const ejerciciosConDatos = new Map<string, { nombre: string; tipo: string }>();
@@ -284,27 +307,55 @@ export default function Progreso({ userId, admin = false }: { userId?: string; a
       <section className={estilos.numeros}>
         <div className={estilos.numero}>
           <span className={estilos.ayuda}>{t.rachaTitulo}</span>
-          <strong>
-            {prog.objetivo_semana ? racha : "—"}
-          </strong>
+          <strong>{racha}</strong>
           <span className={estilos.ayuda}>{racha === 1 ? t.rachaSemana : t.rachaSemanas}</span>
-          {prog.objetivo_semana ? (
-            <span className={estilos.ayuda}>
-              {t.estaSemanaLabel}: {prog.entrenos_esta_semana} {t.deLabel} {prog.objetivo_semana}
-            </span>
-          ) : (
-            <span className={estilos.ayuda}>{t.sinRutinaRacha}</span>
-          )}
+          <span className={estilos.ayuda}>
+            {t.estaSemanaLabel}: {prog.entrenos_esta_semana} {t.deLabel} {prog.objetivo_semana}
+          </span>
+          {!prog.objetivo_de_rutina && <span className={estilos.ayuda}>{t.objetivoSinRutina}</span>}
         </div>
         <div className={estilos.numero}>
           <span className={estilos.ayuda}>{t.esteMes}</span>
-          <strong>{prog.mes_entrenos}</strong>
-          <span className={estilos.ayuda}>{t.entrenosLabel}</span>
-          <span className={estilos.ayuda}>{duracion(Number(prog.mes_segundos))}</span>
+          <strong>{(verClases ? prog.mes_clases : 0) + (verOnline ? prog.mes_entrenos : 0)}</strong>
+          {verClases && (
+            <span className={estilos.ayuda}>
+              {prog.mes_clases} {t.clasesMesLabel}
+            </span>
+          )}
+          {verOnline && (
+            <span className={estilos.ayuda}>
+              {prog.mes_entrenos} {t.entrenosLabel}
+              {prog.mes_segundos > 0 ? ` · ${duracion(Number(prog.mes_segundos))}` : ""}
+            </span>
+          )}
         </div>
       </section>
       <p className={estilos.ayuda}>{t.rachaExplica}</p>
 
+      {verClases && (
+        <section className={estilos.tarjeta}>
+          <h2 style={{ margin: 0 }}>{t.clasesPorMes}</h2>
+          {prog.clases_total === 0 ? (
+            <p className={estilos.ayuda}>{t.sinClasesAun}</p>
+          ) : (
+            <div className={estilos.barras}>
+              {prog.clases_por_mes.map((m) => {
+                const maximo = Math.max(...prog.clases_por_mes.map((x) => x.clases), 1);
+                return (
+                  <div key={m.mes} className={estilos.barraMes}>
+                    <span>{m.clases}</span>
+                    <div className={estilos.barraMesRelleno} style={{ height: `${(m.clases / maximo) * 100}%` }} />
+                    <span className={estilos.ayuda}>{nombreMes(m.mes, idioma)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
+      {verOnline && (
+        <>
       <section className={estilos.tarjeta}>
         <h2 style={{ margin: 0 }}>{t.objetivosTitulo}</h2>
         {objetivos.length === 0 && <p className={estilos.ayuda}>{t.sinObjetivos}</p>}
@@ -435,6 +486,8 @@ export default function Progreso({ userId, admin = false }: { userId?: string; a
         })}
         {entrenos.length >= LIMITE_ENTRENOS && <p className={estilos.ayuda}>{t.masAntiguos}</p>}
       </section>
+        </>
+      )}
     </div>
   );
 }
