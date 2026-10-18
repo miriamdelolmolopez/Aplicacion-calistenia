@@ -88,6 +88,15 @@
 - **Objetivos:** los pone solo Miriam desde la ficha de la alumna (ejercicio + dato + meta, p. ej. "pino libre 10 s"). Se consideran logrados cuando la mejor serie hecha de ese ejercicio alcanza la meta. La alumna ve una barra de avance.
 - **Avatar "Planta":** crece por niveles según los entrenos terminados (descartados no cuentan): 1 semilla (0) · 2 brote (5) · 3 plantita (15) · 4 arbusto (30) · 5 árbol joven (60) · 6 árbol grande con flores (100). Nunca baja de nivel. Con racha de 2 semanas o más luce hojas brillantes. **Si lleva más de 5 días sin terminar un entreno, la planta empieza a marchitarse** (más de 14 días, muy marchita); con el siguiente entreno se recupera al momento. Una alumna que aún no ha entrenado nunca no se marchita. Sale en Mi progreso, en la ficha para Miriam y en el resumen al terminar un entreno (con aviso al subir de nivel). Dibujo vectorial propio en los colores de la marca.
 
+## Fase 6 · Avisos por email (decisiones)
+- **Alcance:** por ahora solo avisos por email. **Stripe se aplaza** (Miriam ya tiene cuenta, pero seguirá dando de alta a mano a las alumnas y cobrando en efectivo, Bizum o transferencia). **Textos legales:** los consulta Miriam con su asesoría.
+- **Servicio:** Resend (plan gratuito, 3.000 correos/mes) con el dominio **miriamdelolmo.com** (registrado en IONOS; los registros DNS se añaden en el panel de IONOS). Envío desde `avisos@miriamdelolmo.com`; las respuestas van al Gmail de Miriam. La clave de Resend va solo en `.env.local`.
+- **Correos de la app:** confirmación de reserva, plaza liberada en lista de espera, clase cancelada (con días de ampliación del bono), bono o plan a punto de caducar (unos 3 días antes) y aviso a Miriam cuando una clase no llega al mínimo. Español o inglés según el idioma de cada persona, con la marca.
+- **Correos de Supabase:** registro y recuperar contraseña pasan a salir por Resend (SMTP propio) para usar el dominio y quitar el límite del correo por defecto.
+- **Cuándo se envían:** confirmación de reserva (al reservar o al apuntarla Miriam), plaza liberada (a toda la lista de espera de esa clase cuando alguien cancela o Miriam quita a alguien; la prioridad de las primeras horas sigue como estaba), clase cancelada (a las apuntadas y a la lista de espera, con motivo, devolución y días de ampliación). Bono a punto de caducar (3 días antes) y clase que no llega al mínimo (en las próximas 24 h, aviso a Miriam) los lanza un proceso diario (`/api/cron/avisos`, 7:00-8:00 hora de Madrid en Vercel, protegido con `CRON_SECRET`); cada aviso se registra para no repetirse. Las cuentas @example.com (de prueba) nunca reciben correos.
+- **Preferencias:** cada alumna puede desactivar desde su cuenta los avisos no esenciales (los esenciales —plaza liberada, clase cancelada, registro y contraseña— se envían siempre).
+- **Después:** notificaciones push y WhatsApp.
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.

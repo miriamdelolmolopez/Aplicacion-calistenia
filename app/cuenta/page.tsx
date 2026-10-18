@@ -9,9 +9,9 @@ import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
-import { obtenerMisBonos, type MiBono } from "./acciones";
+import { cambiarAvisosEmail, obtenerMisBonos, type MiBono } from "./acciones";
 
-type Cuenta = { nombre: string; rol: string; servicios: string[]; bonos: MiBono[] };
+type Cuenta = { nombre: string; rol: string; servicios: string[]; bonos: MiBono[]; avisos: boolean };
 
 export default function MiCuenta() {
   const [idioma] = useIdioma();
@@ -27,7 +27,7 @@ export default function MiCuenta() {
 
       const { data: perfil } = await supabase
         .from("profiles")
-        .select("nombre, rol, datos_completos")
+        .select("nombre, rol, datos_completos, avisos_email")
         .eq("id", sesion.user.id)
         .maybeSingle();
 
@@ -59,10 +59,17 @@ export default function MiCuenta() {
         rol: perfil.rol,
         servicios: (servicios ?? []).map((s) => s.servicio),
         bonos,
+        avisos: perfil.avisos_email !== false,
       });
     }
     cargar();
   }, [router]);
+
+  async function cambiarAvisos(activar: boolean) {
+    setCuenta((c) => (c ? { ...c, avisos: activar } : c));
+    const ok = await cambiarAvisosEmail(activar);
+    if (!ok) setCuenta((c) => (c ? { ...c, avisos: !activar } : c));
+  }
 
   async function salir() {
     await createClient().auth.signOut();
@@ -143,6 +150,20 @@ export default function MiCuenta() {
                 {t.miRutina}
               </Link>
             )}
+            <label style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <input
+                type="checkbox"
+                checked={cuenta.avisos}
+                onChange={(e) => cambiarAvisos(e.target.checked)}
+                style={{ marginTop: 4 }}
+              />
+              <span>
+                {t.avisosEmail}
+                <span className={styles.ayuda} style={{ display: "block" }}>
+                  {t.avisosEsenciales}
+                </span>
+              </span>
+            </label>
             <p className={styles.ayuda}>{t.proximamente}</p>
             {cuenta.rol === "admin" && (
               <Link href="/admin" className={styles.boton}>

@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { requireAdmin } from "@/lib/admin";
+import { avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Estado } from "../acciones";
 
@@ -76,6 +78,7 @@ export async function cancelarClase(_previo: Estado, formData: FormData): Promis
   const dias = entero(formData.get("dias"));
   if (!(dias >= 0 && dias <= 60)) return { error: "Los días de ampliación van de 0 a 60." };
 
+  const enEspera = await personasEnEspera(id); // la cancelación vacía la lista
   const { data, error } = await createAdminClient().rpc("cancelar_clase", {
     p_sesion: id,
     p_motivo: motivo,
@@ -83,6 +86,7 @@ export async function cancelarClase(_previo: Estado, formData: FormData): Promis
     p_admin: user.id,
   });
   if (error) return { error: error.message };
+  after(() => avisarClaseCancelada(id, dias, enEspera));
 
   revalidatePath("/admin/clases");
   const personas = Number(data ?? 0);
@@ -117,12 +121,14 @@ export async function apuntarAlumno(_previo: Estado, formData: FormData): Promis
   const persona = String(formData.get("persona") ?? "");
   if (!persona) return { error: "Elige una persona." };
 
+  const sesionId = String(formData.get("sesionId") ?? "");
   const { error } = await createAdminClient().rpc("reservar_clase", {
     p_user: persona,
-    p_sesion: String(formData.get("sesionId") ?? ""),
+    p_sesion: sesionId,
     p_admin: user.id,
   });
   if (error) return { error: error.message };
+  after(() => avisarReserva(persona, sesionId));
 
   revalidatePath("/admin/clases");
   return { mensaje: "Alumno apuntado. Se ha descontado una clase de su bono." };
@@ -133,13 +139,17 @@ export async function quitarApuntado(_previo: Estado, formData: FormData): Promi
   const { user } = await requireAdmin();
 
   const devolver = formData.get("devolver") === "si";
-  const { data, error } = await createAdminClient().rpc("cancelar_reserva", {
+  const reservaId = String(formData.get("reservaId") ?? "");
+  const admin = createAdminClient();
+  const { data: reserva } = await admin.from("reservas").select("sesion_id").eq("id", reservaId).maybeSingle();
+  const { data, error } = await admin.rpc("cancelar_reserva", {
     p_user: user.id,
-    p_reserva: String(formData.get("reservaId") ?? ""),
+    p_reserva: reservaId,
     p_admin: user.id,
     p_devolver: devolver,
   });
   if (error) return { error: error.message };
+  if (reserva) after(() => avisarPlazaLiberada(reserva.sesion_id));
 
   revalidatePath("/admin/clases");
   return {

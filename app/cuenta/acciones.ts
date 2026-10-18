@@ -3,6 +3,21 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
+// Activa o desactiva los avisos por email no esenciales de la persona que llama.
+export async function cambiarAvisosEmail(activar: boolean): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { error } = await createAdminClient()
+    .from("profiles")
+    .update({ avisos_email: !!activar })
+    .eq("id", user.id);
+  return !error;
+}
+
 export type MiBono = {
   id: string;
   servicio: string;

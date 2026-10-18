@@ -1,5 +1,7 @@
 "use server";
 
+import { after } from "next/server";
+import { avisarPlazaLiberada, avisarReserva } from "@/lib/avisos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -52,6 +54,7 @@ export async function reservarClase(sesionId: string): Promise<Resultado> {
     p_sesion: sesionId,
   });
   if (error) return { ok: false, codigo: codigoDe(error.message) };
+  after(() => avisarReserva(user.id, sesionId));
   return { ok: true };
 }
 
@@ -83,10 +86,19 @@ export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
 
-  const { data, error } = await createAdminClient().rpc("cancelar_reserva", {
+  const admin = createAdminClient();
+  const { data: reserva } = await admin
+    .from("reservas")
+    .select("sesion_id")
+    .eq("id", reservaId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const { data, error } = await admin.rpc("cancelar_reserva", {
     p_user: user.id,
     p_reserva: reservaId,
   });
   if (error) return { ok: false, codigo: codigoDe(error.message) };
+  if (reserva) after(() => avisarPlazaLiberada(reserva.sesion_id));
   return { ok: true, devuelta: data === "devuelta" };
 }
