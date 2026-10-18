@@ -91,6 +91,9 @@ export default function MiCuenta() {
                 <p className={styles.ayuda}>{t.sinServicios}</p>
               )}
             </div>
+            <Link href="/clases" className={styles.boton}>
+              {t.verHorario}
+            </Link>
             <p className={styles.ayuda}>{t.proximamente}</p>
             {cuenta.rol === "admin" && (
               <Link href="/admin" className={styles.boton}>

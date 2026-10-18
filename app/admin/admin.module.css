@@ -217,6 +217,29 @@
   font-weight: 600;
 }
 
+.dia {
+  margin: 8px 0;
+  font-size: 1.25rem;
+}
+
+.filaTipo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.nombreTipo {
+  grid-column: 1 / -1;
+}
+
+.filaTipo > :nth-child(n + 5) {
+  grid-column: 1 / -1;
+}
+
 .formularioInterno {
   display: flex;
   flex-direction: column;

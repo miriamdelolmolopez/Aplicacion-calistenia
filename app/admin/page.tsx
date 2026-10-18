@@ -46,6 +46,12 @@ export default async function Administracion() {
         </Link>
       </header>
 
+      <nav className={styles.tarjeta}>
+        <Link href="/admin/clases" className={styles.boton}>
+          Clases y horario
+        </Link>
+      </nav>
+
       <FormularioAlta />
 
       <section className={styles.tarjeta}>

@@ -40,6 +40,16 @@
 - **Correo propio pendiente:** el correo de serie de Supabase solo sirve para pruebas (no permite editar plantillas en el plan gratuito y solo envía a miembros del equipo). Antes de abrir a alumnos: configurar Resend con el dominio de miriamdelolmo.com y volver a probar registro y recuperación de contraseña; las plantillas están preparadas en supabase/plantillas-correo.md.
 - **Panel de administración solo en español.**
 
+## Fase 4 · Reservas y bonos (decisiones)
+- **Orden:** A clases y horario · B bonos y pagos a mano · C reservar y cancelar · D lista de espera y clase de prueba.
+- **Individuales:** se dejan para después de las grupales.
+- **Bono mensual:** dura 30 días desde que se activa; las clases que sobran se pierden. (El bono de 10 clases dura 3 meses.)
+- **Descuento de clase:** se descuenta al reservar y se devuelve si cancela a tiempo (hasta 2 h antes, editable). No hace falta marcar asistencia.
+- **Reserva:** hasta el momento de empezar la clase si quedan plazas; como máximo con 2 semanas de antelación.
+- **Cancelar por lluvia:** un solo botón; la app pregunta cuántos días se amplía el bono a todos los apuntados, cancela la clase y les devuelve su clase.
+- **Avisos:** hasta la Fase 6 el aviso de plaza liberada se ve dentro de la app y el de mínimo no alcanzado como alerta en el panel.
+- **Horario inicial (lunes y miércoles):** 17:30 pino intermedio (6 plazas) · 18:35 pino principiantes (6) · 19:40 calistenia (10).
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.
