@@ -30,6 +30,7 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
   const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
   if (!persona || !tipo) return { error: "Elige la persona y el bono." };
   if (!METODOS.includes(metodo)) return { error: "Elige cómo paga." };
+  const descuento = String(formData.get("descuento") ?? "");
 
   const { error: fallo } = await createAdminClient().rpc("crear_bono", {
     p_user: persona,
@@ -38,6 +39,7 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
     p_pagado: pagado,
     p_nota: nota,
     p_admin: user.id,
+    p_descuento: descuento || null,
   });
   if (fallo) return error(fallo.message);
 

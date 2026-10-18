@@ -12,6 +12,8 @@ import { createClient } from "@/lib/supabase/client";
 type Pago = {
   id: string;
   importe_centimos: number;
+  importe_original_centimos: number | null;
+  descuento_centimos: number;
   metodo: string;
   estado: string;
   creado_en: string;
@@ -27,7 +29,9 @@ export default function MisPagos() {
   useEffect(() => {
     createClient()
       .from("pagos")
-      .select("id, importe_centimos, metodo, estado, creado_en, pagado_en, bonos(tipos_bono(nombre))")
+      .select(
+        "id, importe_centimos, importe_original_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, bonos(tipos_bono(nombre))",
+      )
       .order("creado_en", { ascending: false })
       .then(({ data }) => setPagos((data ?? []) as unknown as Pago[]));
   }, []);
@@ -53,6 +57,12 @@ export default function MisPagos() {
               <small>
                 {fechaCorta(p.pagado_en ?? p.creado_en, idioma)} · {t[`metodo_${p.metodo}` as ClaveTexto]}
               </small>
+              {p.descuento_centimos > 0 && p.importe_original_centimos !== null && (
+                <small>
+                  {t.precioLabel} {euros(p.importe_original_centimos)} − {t.descuentoLabel}{" "}
+                  {euros(p.descuento_centimos)}
+                </small>
+              )}
             </div>
             <div className={estilos.pagoDerecha}>
               <strong>{euros(p.importe_centimos)}</strong>

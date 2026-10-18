@@ -78,6 +78,9 @@ export default async function Administracion() {
         <Link href="/admin/bonos" className={styles.boton}>
           Bonos y pagos
         </Link>
+        <Link href="/admin/descuentos" className={styles.boton}>
+          Descuentos
+        </Link>
         <Link href="/admin/ejercicios" className={styles.boton}>
           Biblioteca de ejercicios
         </Link>

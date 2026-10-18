@@ -24,7 +24,23 @@ const METODOS: Record<string, string> = {
 };
 
 type Tipo = { id: string; nombre: string; precio_centimos: number; activo: boolean };
-type Pago = { id: string; estado: string; metodo: string; importe_centimos: number };
+type Pago = {
+  id: string;
+  estado: string;
+  metodo: string;
+  importe_centimos: number;
+  descuento_centimos: number;
+  descuentos: { nombre: string } | null;
+};
+type DescuentoLista = {
+  id: string;
+  nombre: string;
+  tipo: string;
+  valor: number;
+  caduca_en: string | null;
+  usos_max: number | null;
+  pagos: { estado: string }[];
+};
 type Bono = {
   id: string;
   servicio: string;
@@ -46,6 +62,7 @@ type Alumno = {
 type PagoPendiente = {
   id: string;
   importe_centimos: number;
+  descuento_centimos: number;
   metodo: string;
   creado_en: string;
   profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null;
@@ -71,16 +88,36 @@ export default async function AdminBonos() {
   const { data: pendientesDatos } = await supabase
     .from("pagos")
     .select(
-      "id, importe_centimos, metodo, creado_en, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))",
+      "id, importe_centimos, descuento_centimos, metodo, creado_en, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))",
     )
     .eq("estado", "pendiente")
     .order("creado_en");
   const pendientes = (pendientesDatos ?? []) as unknown as PagoPendiente[];
 
+  // Descuentos que se pueden elegir ahora: activos, sin caducar y con usos libres.
+  const { data: descuentosDatos } = await supabase
+    .from("descuentos")
+    .select("id, nombre, tipo, valor, caduca_en, usos_max, pagos(estado)")
+    .eq("activo", true)
+    .order("nombre");
+  const hoy = new Date().toISOString().slice(0, 10);
+  const descuentos = ((descuentosDatos ?? []) as unknown as DescuentoLista[])
+    .filter(
+      (d) =>
+        (d.caduca_en === null || d.caduca_en >= hoy) &&
+        (d.usos_max === null || d.pagos.filter((p) => p.estado !== "anulado").length < d.usos_max),
+    )
+    .map((d) => ({
+      id: d.id,
+      tipo: d.tipo,
+      valor: d.valor,
+      texto: `${d.nombre} · ${d.tipo === "porcentaje" ? `${d.valor} %` : euros(d.valor)}`,
+    }));
+
   const { data: alumnosDatos } = await supabase
     .from("profiles")
     .select(
-      "id, nombre, apellidos, email, bonos(id, servicio, estado, clases_total, clases_restantes, caduca_en, creado_en, tipos_bono(nombre), pagos(id, estado, metodo, importe_centimos))",
+      "id, nombre, apellidos, email, bonos(id, servicio, estado, clases_total, clases_restantes, caduca_en, creado_en, tipos_bono(nombre), pagos(id, estado, metodo, importe_centimos, descuento_centimos, descuentos(nombre)))",
     )
     .eq("rol", "alumno")
     .order("nombre");
@@ -109,7 +146,10 @@ export default async function AdminBonos() {
                     {fechaCorta(p.creado_en)}
                   </div>
                 </div>
-                <span className={styles.etiqueta}>{euros(p.importe_centimos)}</span>
+                <span className={styles.etiqueta}>
+                  {euros(p.importe_centimos)}
+                  {p.descuento_centimos > 0 && ` (descuento −${euros(p.descuento_centimos)})`}
+                </span>
               </div>
               <BotonPagado pagoId={p.id} />
             </li>
@@ -124,7 +164,8 @@ export default async function AdminBonos() {
         }))}
         tipos={tipos
           .filter((t) => t.activo)
-          .map((t) => ({ id: t.id, texto: `${t.nombre} · ${euros(t.precio_centimos)}` }))}
+          .map((t) => ({ id: t.id, texto: `${t.nombre} · ${euros(t.precio_centimos)}`, precio: t.precio_centimos }))}
+        descuentos={descuentos}
       />
 
       <section className={styles.tarjeta}>
@@ -152,7 +193,10 @@ export default async function AdminBonos() {
                           </div>
                           {pago && (
                             <div className={styles.ayuda}>
-                              {euros(pago.importe_centimos)} · {METODOS[pago.metodo] ?? pago.metodo} ·{" "}
+                              {euros(pago.importe_centimos)}
+                              {pago.descuento_centimos > 0 &&
+                                ` (descuento «${pago.descuentos?.nombre ?? "borrado"}» −${euros(pago.descuento_centimos)})`}{" "}
+                              · {METODOS[pago.metodo] ?? pago.metodo} ·{" "}
                               {pago.estado === "pagado"
                                 ? "cobrado"
                                 : pago.estado === "pendiente"

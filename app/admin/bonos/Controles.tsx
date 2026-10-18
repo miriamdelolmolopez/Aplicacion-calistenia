@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { euros } from "@/lib/formato";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import {
@@ -31,11 +32,25 @@ function Mensajes({ estado }: { estado: Estado }) {
 export function FormularioRegistrar({
   alumnos,
   tipos,
+  descuentos,
 }: {
   alumnos: { id: string; texto: string }[];
-  tipos: { id: string; texto: string }[];
+  tipos: { id: string; texto: string; precio: number }[];
+  descuentos: { id: string; texto: string; tipo: string; valor: number }[];
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(registrarBono, {});
+  const [tipoElegido, setTipoElegido] = useState("");
+  const [descuentoElegido, setDescuentoElegido] = useState("");
+
+  // Total que pagará (el mismo cálculo que hace la base de datos).
+  const precio = tipos.find((t) => t.id === tipoElegido)?.precio ?? null;
+  const d = descuentos.find((x) => x.id === descuentoElegido);
+  const rebaja =
+    precio !== null && d
+      ? d.tipo === "porcentaje"
+        ? Math.round((precio * d.valor) / 100)
+        : Math.min(d.valor, precio)
+      : 0;
   return (
     <form action={accion} className={styles.tarjeta}>
       <h2>Registrar un bono</h2>
@@ -61,7 +76,7 @@ export function FormularioRegistrar({
           </div>
           <div className={styles.campo}>
             <label htmlFor="tipo">Bono</label>
-            <select id="tipo" name="tipo" required defaultValue="">
+            <select id="tipo" name="tipo" required value={tipoElegido} onChange={(e) => setTipoElegido(e.target.value)}>
               <option value="" disabled>
                 Elige un bono…
               </option>
@@ -72,6 +87,29 @@ export function FormularioRegistrar({
               ))}
             </select>
           </div>
+          {descuentos.length > 0 && (
+            <div className={styles.campo}>
+              <label htmlFor="descuento">Descuento (opcional)</label>
+              <select
+                id="descuento"
+                name="descuento"
+                value={descuentoElegido}
+                onChange={(e) => setDescuentoElegido(e.target.value)}
+              >
+                <option value="">Sin descuento</option>
+                {descuentos.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.texto}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {precio !== null && rebaja > 0 && (
+            <p className={styles.aviso}>
+              Precio {euros(precio)} − descuento {euros(rebaja)} = <strong>Total {euros(precio - rebaja)}</strong>
+            </p>
+          )}
           <div className={styles.campo}>
             <label htmlFor="metodo">¿Cómo paga?</label>
             <select id="metodo" name="metodo" defaultValue="efectivo">
