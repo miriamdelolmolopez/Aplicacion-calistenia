@@ -51,7 +51,7 @@ export function useMiPerfil(recargarCon?: string): Estado {
 }
 
 // Qué secciones ve cada persona según lo que tiene contratado.
-export type Seccion = "inicio" | "reservar" | "rutina" | "progreso" | "pagos" | "perfil" | "ajustes" | "admin";
+export type Seccion = "inicio" | "reservar" | "reservas" | "rutina" | "progreso" | "pagos" | "perfil" | "ajustes" | "admin";
 
 export function seccionesDe(p: MiPerfil): Seccion[] {
   const online = p.servicios.includes("online") || p.planOnline;
@@ -60,6 +60,7 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
 
   const lista: Seccion[] = ["inicio"];
   if (p.rol === "admin" || !soloOnline) lista.push("reservar");
+  if (p.rol !== "admin" && !soloOnline) lista.push("reservas");
   if (online && p.rol !== "admin") lista.push("rutina");
   // Con entrenamiento online el progreso está dentro de «Entrenamiento»; sin él, tiene su propio botón.
   if (p.rol !== "admin" && !online) lista.push("progreso");
@@ -72,6 +73,7 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
 export const RUTAS: Record<Seccion, string> = {
   inicio: "/inicio",
   reservar: "/clases",
+  reservas: "/clases/mis-reservas",
   rutina: "/rutina",
   progreso: "/progreso",
   pagos: "/pagos",

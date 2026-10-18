@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
@@ -125,6 +126,7 @@ const LETRAS = {
 export default function Clases() {
   const [idioma] = useIdioma();
   const t = textos[idioma];
+  const router = useRouter();
 
   const [datos, setDatos] = useState<Datos | null>(null);
   const [aviso, setAviso] = useState<Aviso | null>(null);
@@ -279,6 +281,10 @@ export default function Clases() {
 
       {datos && (
         <>
+          <Link href="/clases/mis-reservas" className={estilos.misReservas}>
+            {t.verMisReservasBoton} →
+          </Link>
+
           <div className={estilos.filtros} role="tablist" aria-label={t.filtroTodo}>
             {(
               [
@@ -568,14 +574,7 @@ export default function Clases() {
         <ReservaConfirmada
           clase={confirmada}
           idioma={idioma}
-          alVer={() => {
-            // Vuelve a Reservas con la clase reservada a la vista.
-            setDia(claveDia(confirmada.empieza_en));
-            setFiltro("todo");
-            const id = confirmada.id;
-            setConfirmada(null);
-            setTimeout(() => document.getElementById(`clase-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
-          }}
+          alVer={() => router.push("/clases/mis-reservas")}
         />
       )}
     </main>

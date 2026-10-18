@@ -12,6 +12,12 @@ const DIBUJOS = {
       <path d="M3 10h18M8 3v4M16 3v4" />
     </>
   ),
+  reservas: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4M9 16l2 2 4-4" />
+    </>
+  ),
   rutina: <path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12" />,
   progreso: (
     <>

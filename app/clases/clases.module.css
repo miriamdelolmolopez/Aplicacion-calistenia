@@ -303,3 +303,14 @@
 .noIncluida {
   opacity: 0.6;
 }
+
+.misReservas {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  min-height: 44px;
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  text-decoration: none;
+}

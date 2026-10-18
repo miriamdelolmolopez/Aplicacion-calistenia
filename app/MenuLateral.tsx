@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   inicio: "navInicio",
   reservar: "navReservar",
+  reservas: "misReservasTitulo",
   rutina: "entrenamientoTitulo",
   progreso: "miProgreso",
   pagos: "navPagos",
