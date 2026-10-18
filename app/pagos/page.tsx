@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BarraSuperior from "../BarraSuperior";
+import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
 import estilos from "../perfil/perfil.module.css";
 import { textos, type ClaveTexto } from "../textos";
@@ -42,9 +43,7 @@ export default function MisPagos() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior />
-      <div className={styles.cabecera}>
-        <h1>{t.navPagos}</h1>
-      </div>
+      <CabeceraFoto foto="portada" titulo={t.navPagos} />
 
       {pagos === null && <p className={styles.aviso}>{t.cargando}</p>}
       {pagos?.length === 0 && <p className={styles.aviso}>{t.sinPagos}</p>}

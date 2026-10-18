@@ -215,7 +215,7 @@
 
 .sesionAlumno {
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 14px;
   background: var(--crema);
   display: flex;
@@ -271,3 +271,4 @@
   gap: 12px;
   padding: 4px 0 8px;
 }
+

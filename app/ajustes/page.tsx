@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BarraSuperior from "../BarraSuperior";
+import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
 import { pedirBorradoCuenta } from "../perfil/acciones";
 import estilos from "../perfil/perfil.module.css";
@@ -80,9 +81,7 @@ export default function Ajustes() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior />
-      <div className={styles.cabecera}>
-        <h1>{t.ajustesTitulo}</h1>
-      </div>
+      <CabeceraFoto foto="pino" titulo={t.ajustesTitulo} />
 
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>
         <h2>{t.idioma}</h2>

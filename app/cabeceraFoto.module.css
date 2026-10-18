@@ -1,0 +1,29 @@
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 140px;
+  margin: 12px 0 16px;
+  padding: 18px 20px;
+  color: var(--blanco);
+  background-size: cover;
+  background-position: center;
+  border-radius: 28px;
+  box-shadow: var(--sombra);
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--blanco);
+}
+
+.cabecera p {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.92;
+}

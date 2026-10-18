@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { descartarEntreno, iniciarEntreno } from "../entreno/acciones";
 import BarraSuperior from "../BarraSuperior";
+import CabeceraFoto from "../CabeceraFoto";
 import MapaCorporal from "../MapaCorporal";
 import styles from "../formularios.module.css";
 import estilosRutina from "./rutina.module.css";
@@ -318,9 +319,7 @@ export default function MiRutina() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <div className={styles.cabecera}>
-        <h1>{t.rutinaTitulo}</h1>
-      </div>
+      <CabeceraFoto foto="online" titulo={t.rutinaTitulo} />
 
       {datos === null && <p className={styles.aviso}>{t.cargando}</p>}
       {datos && !datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}

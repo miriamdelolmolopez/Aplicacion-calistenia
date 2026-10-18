@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
+import CabeceraFoto from "../CabeceraFoto";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
 import { textos, type ClaveTexto } from "../textos";
@@ -193,9 +194,7 @@ export default function Perfil() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior />
-      <div className={styles.cabecera}>
-        <h1>{t.perfilTitulo}</h1>
-      </div>
+      <CabeceraFoto foto="inicio" titulo={t.perfilTitulo} />
 
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>
         <div className={estilos.cabeceraPerfil}>

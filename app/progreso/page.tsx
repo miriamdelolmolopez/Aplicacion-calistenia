@@ -1,6 +1,7 @@
 "use client";
 
 import BarraSuperior from "../BarraSuperior";
+import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
@@ -12,9 +13,7 @@ export default function MiProgreso() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <div className={styles.cabecera}>
-        <h1>{t.progresoTitulo}</h1>
-      </div>
+      <CabeceraFoto foto="progreso" titulo={t.progresoTitulo} />
       <Progreso />
     </main>
   );
