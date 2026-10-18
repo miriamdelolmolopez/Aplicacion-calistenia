@@ -593,6 +593,9 @@ export default function PantallaEntreno() {
                 reiniciar: t.cronometroReiniciar,
                 sonido: t.sonidoSegundero,
                 sinSonido: t.sinSonidoSegundero,
+                cancelar: t.cronometroCancelar,
+                retardo: t.cronometroRetardo,
+                prepararse: t.cronometroPrepararse,
               }}
               alParar={(seg) => cambiarSerie(actual.id, { segundos: seg })}
             />

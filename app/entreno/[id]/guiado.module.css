@@ -347,3 +347,54 @@
 .siguiente strong {
   font-size: 1.3rem;
 }
+
+.retardo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.retardo span {
+  flex-basis: 100%;
+  text-align: center;
+}
+
+.retardo button {
+  min-width: 56px;
+  min-height: 40px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.retardo button.retardoActivo {
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+  border-color: var(--oliva-oscuro);
+}
+
+.preparate {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.cuenta {
+  font-size: 5rem;
+  line-height: 1;
+  font-weight: 600;
+  color: #8a4b2a;
+  font-variant-numeric: tabular-nums;
+}

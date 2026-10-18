@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { CATEGORIAS, nombreCategoria, nombreMusculo, nombreTipo } from "@/lib/ejercicios";
 import VideoEjercicio from "../../VideoEjercicio";
 import BotonFoto from "../fotos/BotonFoto";
+import VideoRapido from "./VideoRapido";
 import styles from "../admin.module.css";
 import {
   FormularioEjercicio,
@@ -157,6 +158,7 @@ export default async function Ejercicios({
                     )}
                   </div>
                 </div>
+                <VideoRapido id={e.id} nombre={e.nombre} actual={e.video_url} />
                 <details className={styles.detalles}>
                   <summary>Editar</summary>
                   <BotonFoto destino="ejercicio" id={e.id} actual={fotos.get(e.id) ?? null} />

@@ -162,3 +162,27 @@ export async function crearMaterial(_previo: Estado, formData: FormData): Promis
   revalidatePath("/admin/ejercicios");
   return { mensaje: "Material añadido." };
 }
+
+// Guarda solo el enlace del vídeo de un ejercicio (YouTube o Google Drive). Vacío = quitar el vídeo.
+export async function guardarVideoEjercicio(
+  id: string,
+  enlace: string,
+): Promise<{ ok: boolean; error?: string; enlace?: string | null }> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { ok: false, error: "Ejercicio no válido." };
+
+  const limpio = enlace.trim();
+  let guardar: string | null = null;
+  if (limpio) {
+    const analizado = analizarVideo(limpio);
+    if (!analizado) return { ok: false, error: "Pega un enlace de YouTube o de Google Drive." };
+    guardar = analizado.enlace;
+  }
+
+  const { error } = await createAdminClient().from("ejercicios").update({ video_url: guardar }).eq("id", id);
+  if (error) return { ok: false, error: "No se ha podido guardar el vídeo." };
+
+  revalidatePath("/admin/ejercicios");
+  revalidatePath("/rutina");
+  return { ok: true, enlace: guardar };
+}
