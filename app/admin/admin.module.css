@@ -235,6 +235,32 @@
   resize: vertical;
 }
 
+.musculos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.musculoFila {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.musculoFila label {
+  font-size: 0.85rem;
+}
+
+.musculoFila select {
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;

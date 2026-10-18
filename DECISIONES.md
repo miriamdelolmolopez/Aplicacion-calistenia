@@ -70,6 +70,16 @@
 - **Fichas de Drive:** no se importan en esta versión.
 - **Fuera de esta fase:** vídeos de corrección subidos por el alumno y chat (se siguen haciendo con Loom y WhatsApp).
 - La biblioteca es solo de Miriam; el alumno ve cada ejercicio dentro de su rutina publicada.
+- **Acceso e historial:** con el plan online activo, el alumno ve su rutina actual y puede abrir el Historial con las anteriores. Si el plan termina o se da de baja, no ve nada (ni siquiera la rutina de ese mes); si renueva, lo ve todo otra vez.
+- **Tipos de ejercicio (7):** duración · repeticiones (peso corporal) · peso corporal con peso añadido · repeticiones con peso · peso corporal asistido · distancia y duración · peso y distancia. Cada tipo decide qué anota el alumno en cada serie y qué objetivos pone Miriam. Sustituyen al campo "medida".
+- **Músculos:** 18 grupos (cuello, trapecio, hombro delantero, hombro trasero, pecho, bíceps, tríceps, antebrazo, espalda alta, espalda baja, abdominales, oblicuos, glúteos, cuádriceps, isquiotibiales, aductores, abductores, gemelos). Cada ejercicio tiene músculos principales y secundarios. Mapa del cuerpo en blanco y negro (frente y espalda) con los músculos trabajados en verde oliva; principal = más intenso, secundario = más suave; en una sesión o rutina la intensidad se suma según las series. Librería de dibujo: react-body-highlighter (MIT).
+- **Material:** catálogo ampliable (barra de dominadas, paralelas, anillas, banda elástica, lastre, paralettes, banco o cajón, esterilla, pared). Cada ejercicio indica su material y la rutina muestra un resumen de "Material necesario" (por sesión y total).
+- **Superseries:** ejercicios consecutivos agrupados (A1, A2…); el descanso va al terminar cada vuelta del grupo.
+- **Ordenar en el constructor:** arrastrar y flechas ↑ ↓ (las dos).
+- **Una sola rutina publicada por alumno a la vez:** al publicar una nueva, la anterior pasa al historial.
+- **Planes online en el catálogo de bonos:** mensual (actuales) 79 €, mensual (nuevos) 97 €, bimestral 190 €, trimestral 280 €, semestral 540 €; solo se activan una vez pagados.
+- **Entrenar (Parte C):** Miriam monta la rutina con toda la información. El alumno pulsa Iniciar (corre un contador de tiempo) y Finalizar. Durante el entreno ve lo pautado (tiempos y repeticiones) y anota lo que hace en cada serie: repeticiones, segundos, peso añadido, banda usada… Al finalizar puede hacer una foto y compartir una imagen con el resumen (tiempo total y músculos trabajados).
+- **Progreso (Parte D):** resumen y gráficas a partir de lo que anota cada alumno, objetivos y **racha sin fallar** (la regla exacta de "fallar" se decide en esa parte; propuesta: semanas seguidas cumpliendo los entrenos por semana que fije Miriam en la rutina).
 
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
