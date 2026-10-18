@@ -117,7 +117,29 @@
   color: var(--oliva);
 }
 
-.salir {
+.pie {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--linea);
-  border-radius: 0 0 12px 12px;
+}
+
+.salir {
+  flex: 1;
+}
+
+.engranaje {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  color: var(--oliva-oscuro);
+  border-radius: 12px;
+}
+
+.engranaje:hover {
+  background: var(--relleno);
 }

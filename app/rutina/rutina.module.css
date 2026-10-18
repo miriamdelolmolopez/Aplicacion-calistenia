@@ -1,0 +1,37 @@
+/* Las sesiones de la rutina van una al lado de otra: se pasan deslizando hacia los lados. */
+.carrusel {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.carrusel > section {
+  flex: 0 0 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.chips button {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}

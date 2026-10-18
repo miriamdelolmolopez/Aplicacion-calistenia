@@ -67,7 +67,9 @@ export default function MenuLateral() {
             </div>
 
             <ul className={estilos.lista}>
-              {seccionesDe(perfil).map((s) => (
+              {seccionesDe(perfil)
+                .filter((s) => s !== "ajustes")
+                .map((s) => (
                 <li key={s}>
                   <Link href={RUTAS[s]} className={estilos.enlace} onClick={() => setAbierto(false)}>
                     <Icono nombre={s} />
@@ -77,10 +79,21 @@ export default function MenuLateral() {
               ))}
             </ul>
 
-            <button type="button" className={`${estilos.enlace} ${estilos.salir}`} onClick={salir}>
-              <Icono nombre="salir" />
-              {t.salir}
-            </button>
+            <div className={estilos.pie}>
+              <button type="button" className={`${estilos.enlace} ${estilos.salir}`} onClick={salir}>
+                <Icono nombre="salir" />
+                {t.salir}
+              </button>
+              <Link
+                href={RUTAS.ajustes}
+                className={estilos.engranaje}
+                aria-label={t.navAjustes}
+                title={t.navAjustes}
+                onClick={() => setAbierto(false)}
+              >
+                <Icono nombre="ajustes" tamano={26} />
+              </Link>
+            </div>
           </nav>
         </div>
       )}

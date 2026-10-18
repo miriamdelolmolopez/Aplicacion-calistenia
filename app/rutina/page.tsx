@@ -7,6 +7,7 @@ import { descartarEntreno, iniciarEntreno } from "../entreno/acciones";
 import BarraSuperior from "../BarraSuperior";
 import MapaCorporal from "../MapaCorporal";
 import styles from "../formularios.module.css";
+import estilosRutina from "./rutina.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import VideoEjercicio from "../VideoEjercicio";
@@ -207,11 +208,34 @@ export default function MiRutina() {
         </details>
 
         <h3 style={{ margin: "8px 0 0" }}>{t.sesionesDeRutina}</h3>
+        {r.rutina_sesiones.length > 1 && (
+          <>
+            <div className={estilosRutina.chips}>
+              {r.rutina_sesiones.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() =>
+                    document
+                      .getElementById(`sesion-${s.id}`)
+                      ?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" })
+                  }
+                >
+                  {s.nombre}
+                </button>
+              ))}
+            </div>
+            <p className={styles.ayuda} style={{ margin: 0 }}>
+              {t.deslizaSesiones}
+            </p>
+          </>
+        )}
+        <div className={estilosRutina.carrusel}>
         {r.rutina_sesiones.map((s) => {
           const letras = new Map<number, string>();
           const dentro = new Map<number, number>();
           return (
-            <section key={s.id} className={styles.sesionAlumno}>
+            <section key={s.id} id={`sesion-${s.id}`} className={styles.sesionAlumno}>
               <h3 style={{ margin: 0 }}>{s.nombre}</h3>
               {s.nota && <p className={styles.ayuda}>{s.nota}</p>}
               {s.rutina_items.length === 0 && <p className={styles.ayuda}>{t.sesionSinEjercicios}</p>}
@@ -283,6 +307,7 @@ export default function MiRutina() {
             </section>
           );
         })}
+        </div>
       </div>
     );
   }
