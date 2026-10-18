@@ -261,6 +261,168 @@
   border-radius: 12px;
 }
 
+.estadoChip {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.estadoPublicada {
+  background: var(--oliva-oscuro);
+  color: var(--blanco);
+}
+
+.estadoBorrador {
+  background: var(--relleno);
+  color: var(--carbon);
+}
+
+.estadoHistorial {
+  background: transparent;
+  color: var(--secundario);
+  border: 1px solid var(--linea);
+}
+
+.listaItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sesionCaja {
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--crema);
+}
+
+.sesionTitulo {
+  flex: 1;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.itemCaja {
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--blanco);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.itemSuper {
+  border-left: 5px solid var(--oliva);
+}
+
+.etiquetaSuper {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  background: var(--oliva-oscuro);
+  color: var(--blanco);
+  font-size: 0.75rem;
+}
+
+.itemCabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemTitulo {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.asa {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--secundario);
+  background: var(--relleno);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.flechas {
+  flex: none;
+  display: flex;
+  gap: 6px;
+}
+
+.flechas button {
+  width: 44px;
+  height: 44px;
+  font-size: 1.2rem;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.flechas button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.camposItem {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.accionesItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.accionesItem .boton {
+  min-height: 44px;
+  font-size: 0.9rem;
+}
+
+.añadirItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.añadirItem select,
+.añadirItem input {
+  flex: 1;
+  min-width: 180px;
+  min-height: 48px;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;

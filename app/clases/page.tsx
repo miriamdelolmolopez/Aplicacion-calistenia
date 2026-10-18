@@ -73,7 +73,8 @@ async function obtenerDatos(): Promise<Datos> {
 
   const { data: gastada } = await supabase.rpc("mi_prueba_gastada");
   const bonos = await obtenerMisBonos();
-  const activo = bonos.find((b) => b.estado === "activo");
+  // Solo cuenta el bono de clases grupales (el plan online no tiene clases).
+  const activo = bonos.find((b) => b.estado === "activo" && b.servicio === "grupal");
 
   return {
     horas,

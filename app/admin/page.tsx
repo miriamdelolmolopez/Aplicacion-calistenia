@@ -56,6 +56,9 @@ export default async function Administracion() {
         <Link href="/admin/ejercicios" className={styles.boton}>
           Biblioteca de ejercicios
         </Link>
+        <Link href="/admin/rutinas" className={styles.boton}>
+          Rutinas de alumnos online
+        </Link>
       </nav>
 
       <FormularioAlta />

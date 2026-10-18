@@ -27,6 +27,7 @@ type Tipo = { id: string; nombre: string; precio_centimos: number; activo: boole
 type Pago = { id: string; estado: string; metodo: string; importe_centimos: number };
 type Bono = {
   id: string;
+  servicio: string;
   estado: string;
   clases_total: number;
   clases_restantes: number;
@@ -79,7 +80,7 @@ export default async function AdminBonos() {
   const { data: alumnosDatos } = await supabase
     .from("profiles")
     .select(
-      "id, nombre, apellidos, email, bonos(id, estado, clases_total, clases_restantes, caduca_en, creado_en, tipos_bono(nombre), pagos(id, estado, metodo, importe_centimos))",
+      "id, nombre, apellidos, email, bonos(id, servicio, estado, clases_total, clases_restantes, caduca_en, creado_en, tipos_bono(nombre), pagos(id, estado, metodo, importe_centimos))",
     )
     .eq("rol", "alumno")
     .order("nombre");
@@ -144,7 +145,9 @@ export default async function AdminBonos() {
                         <div>
                           <strong>{b.tipos_bono?.nombre}</strong>
                           <div className={styles.ayuda}>
-                            {b.clases_restantes} de {b.clases_total} clases
+                            {b.servicio === "online"
+                              ? "Plan online"
+                              : `${b.clases_restantes} de ${b.clases_total} clases`}
                             {b.caduca_en && ` · caduca ${fechaCorta(b.caduca_en)}`}
                           </div>
                           {pago && (

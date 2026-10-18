@@ -205,3 +205,68 @@
   margin: 0;
   padding-left: 20px;
 }
+
+.rutinaCaja {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sesionAlumno {
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--crema);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.listaEjercicios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ejercicioAlumno {
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.enSuperserie {
+  border-left: 5px solid var(--oliva);
+}
+
+.etiquetaSuper {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  background: var(--oliva-oscuro);
+  color: var(--blanco);
+  font-size: 0.75rem;
+}
+
+.desplegable summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--oliva-oscuro);
+  font-weight: 600;
+}
+
+.cuerpoResumen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0 8px;
+}

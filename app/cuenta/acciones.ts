@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type MiBono = {
   id: string;
+  servicio: string;
   estado: string;
   nombre: string;
   clasesRestantes: number;
@@ -15,6 +16,7 @@ export type MiBono = {
 
 type Fila = {
   id: string;
+  servicio: string;
   estado: string;
   clases_total: number;
   clases_restantes: number;
@@ -37,7 +39,7 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
   const { data } = await supabase
     .from("bonos")
     .select(
-      "id, estado, clases_total, clases_restantes, caduca_en, tipos_bono(nombre), pagos(estado)",
+      "id, servicio, estado, clases_total, clases_restantes, caduca_en, tipos_bono(nombre), pagos(estado)",
     )
     .in("estado", ["activo", "en_cola"])
     .order("creado_en");
@@ -50,6 +52,7 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
 
   return ordenados.map((b) => ({
     id: b.id,
+    servicio: b.servicio,
     estado: b.estado,
     nombre: b.tipos_bono?.nombre ?? "",
     clasesRestantes: b.clases_restantes,

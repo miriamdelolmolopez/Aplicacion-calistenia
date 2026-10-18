@@ -108,7 +108,18 @@ export default function MiCuenta() {
                         {b.nombre}
                       </strong>
                     </div>
-                    {b.estado === "activo" ? (
+                    {b.servicio === "online" ? (
+                      b.estado === "activo" ? (
+                        <div>
+                          {t.planOnline}
+                          {b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
+                        </div>
+                      ) : (
+                        <div>
+                          {t.planOnline} · {t.enEspera}
+                        </div>
+                      )
+                    ) : b.estado === "activo" ? (
                       <div>
                         {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
                         {b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
@@ -127,6 +138,11 @@ export default function MiCuenta() {
             <Link href="/clases" className={styles.boton}>
               {t.verHorario}
             </Link>
+            {cuenta.bonos.some((b) => b.servicio === "online") && (
+              <Link href="/rutina" className={styles.boton}>
+                {t.miRutina}
+              </Link>
+            )}
             <p className={styles.ayuda}>{t.proximamente}</p>
             {cuenta.rol === "admin" && (
               <Link href="/admin" className={styles.boton}>
