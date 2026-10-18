@@ -1,6 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { descartarEntreno, iniciarEntreno } from "../entreno/acciones";
 import BarraSuperior from "../BarraSuperior";
 import MapaCorporal from "../MapaCorporal";
 import styles from "../formularios.module.css";
@@ -51,12 +53,20 @@ type Rutina = {
   rutina_sesiones: Sesion[];
 };
 
-type Datos = { planActivo: boolean; rutinas: Rutina[] };
+type EnCurso = { id: string; nombre_sesion: string };
+
+type Datos = { planActivo: boolean; rutinas: Rutina[]; enCurso: EnCurso | null };
 
 async function obtenerDatos(): Promise<Datos> {
   const supabase = createClient();
   const { data: plan } = await supabase.rpc("mi_plan_online");
-  if (plan !== true) return { planActivo: false, rutinas: [] };
+  if (plan !== true) return { planActivo: false, rutinas: [], enCurso: null };
+
+  const { data: curso } = await supabase
+    .from("entrenos")
+    .select("id, nombre_sesion")
+    .eq("estado", "en_curso")
+    .maybeSingle();
 
   const { data } = await supabase
     .from("rutinas")
@@ -74,17 +84,49 @@ async function obtenerDatos(): Promise<Datos> {
         rutina_items: [...s.rutina_items].sort((a, b) => a.orden - b.orden),
       })),
   }));
-  return { planActivo: true, rutinas };
+  return { planActivo: true, rutinas, enCurso: (curso as EnCurso | null) ?? null };
 }
 
 export default function MiRutina() {
   const [idioma] = useIdioma();
   const t = textos[idioma];
+  const router = useRouter();
   const [datos, setDatos] = useState<Datos | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [iniciando, setIniciando] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
     obtenerDatos().then(setDatos);
   }, []);
+
+  const mensajeError = (codigo?: string) => {
+    const clave = `err_${codigo}` as keyof typeof t;
+    return (t[clave] as string | undefined) ?? t.errorGeneral;
+  };
+
+  async function iniciar(sesionId: string) {
+    setError(null);
+    setIniciando(true);
+    const r = await iniciarEntreno(sesionId);
+    if (r.ok && r.id) {
+      router.push(`/entreno/${r.id}`);
+      return;
+    }
+    setIniciando(false);
+    setError(mensajeError(r.codigo));
+  }
+
+  async function descartar() {
+    if (!datos?.enCurso) return;
+    const r = await descartarEntreno(datos.enCurso.id);
+    setConfirmando(false);
+    if (!r.ok) {
+      setError(mensajeError(r.codigo));
+      return;
+    }
+    setDatos(await obtenerDatos());
+  }
 
   const nombreEj = (e: Ejercicio) => (idioma === "en" && e.nombre_en) || e.nombre;
   const descEj = (e: Ejercicio) => (idioma === "en" && e.descripcion_en) || e.descripcion;
@@ -141,7 +183,7 @@ export default function MiRutina() {
     );
   }
 
-  function vistaRutina(r: Rutina) {
+  function vistaRutina(r: Rutina, entrenable = false) {
     const todos = r.rutina_sesiones.flatMap((s) => s.rutina_items);
     return (
       <div className={styles.rutinaCaja}>
@@ -172,6 +214,16 @@ export default function MiRutina() {
               <h3 style={{ margin: 0 }}>{s.nombre}</h3>
               {s.nota && <p className={styles.ayuda}>{s.nota}</p>}
               {s.rutina_items.length === 0 && <p className={styles.ayuda}>{t.sesionSinEjercicios}</p>}
+              {entrenable && s.rutina_items.length > 0 && !datos?.enCurso && (
+                <button
+                  type="button"
+                  className={styles.boton}
+                  disabled={iniciando}
+                  onClick={() => iniciar(s.id)}
+                >
+                  {t.iniciarEntreno}
+                </button>
+              )}
               <ul className={styles.listaEjercicios}>
                 {s.rutina_items.map((it, pos) => {
                   let etiqueta: string | null = null;
@@ -251,8 +303,39 @@ export default function MiRutina() {
         <>
           <section className={styles.tarjeta} style={{ marginBottom: 16 }}>
             <h2 style={{ margin: 0 }}>{t.rutinaActual}</h2>
-            {actual ? vistaRutina(actual) : <p className={styles.aviso}>{t.preparandoRutina}</p>}
-            {actual && <p className={styles.ayuda}>{t.entrenarPronto}</p>}
+            {datos.enCurso && (
+              <div className={styles.aviso}>
+                <strong>{t.entrenoEnCurso}</strong>
+                <div>{datos.enCurso.nombre_sesion}</div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className={styles.boton}
+                    onClick={() => router.push(`/entreno/${datos.enCurso!.id}`)}
+                  >
+                    {t.continuarEntreno}
+                  </button>
+                  {!confirmando ? (
+                    <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(true)}>
+                      {t.descartarEntreno}
+                    </button>
+                  ) : (
+                    <>
+                      <span className={styles.ayuda}>{t.confirmaDescartar}</span>
+                      <button type="button" className={styles.botonSecundario} onClick={descartar}>
+                        {t.siDescartar}
+                      </button>
+                      <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(false)}>
+                        {t.noDescartar}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+            {error && <p className={styles.error}>{error}</p>}
+            {actual ? vistaRutina(actual, true) : <p className={styles.aviso}>{t.preparandoRutina}</p>}
+            {actual && !datos.enCurso && <p className={styles.ayuda}>{t.entrenarPronto}</p>}
           </section>
 
           <section className={styles.tarjeta}>
