@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import BarraSuperior from "../../BarraSuperior";
 import styles from "../../formularios.module.css";
 import { textos } from "../../textos";
 import { useIdioma } from "../../useIdioma";
+import VideoEjercicio from "../../VideoEjercicio";
 import { agregarSerie, finalizarEntreno, guardarSerie, quitarSerie } from "../acciones";
-import estilos from "./entreno.module.css";
+import Cronometro from "./Cronometro";
+import estilos from "./guiado.module.css";
 import Resumen, { type DatosResumen } from "./Resumen";
 import { TIPOS, type Campo } from "@/lib/ejercicios";
 import { createClient } from "@/lib/supabase/client";
@@ -57,11 +59,14 @@ type Anterior = {
   detalle: string | null;
 };
 
-type Datos = { entreno: Entreno; series: Serie[]; anteriores: Anterior[] };
+type Datos = {
+  entreno: Entreno;
+  series: Serie[];
+  anteriores: Anterior[];
+  ejercicios: Record<string, { video_url: string | null; nombre_en: string | null }>;
+};
 
 const CUATRO_HORAS = 4 * 3600;
-
-const ahoraMs = () => Date.now();
 
 async function cargar(id: string): Promise<Datos | null> {
   const supabase = createClient();
@@ -82,11 +87,19 @@ async function cargar(id: string): Promise<Datos | null> {
   const lista = (series ?? []) as Serie[];
   const ids = [...new Set(lista.map((s) => s.ejercicio_id).filter((x): x is string => !!x))];
   let anteriores: Anterior[] = [];
+  let ejercicios: Datos["ejercicios"] = {};
   if (ids.length > 0 && entreno.estado === "en_curso") {
     const { data } = await supabase.rpc("ultima_vez", { p_ejercicios: ids });
     anteriores = (data ?? []) as Anterior[];
+    const { data: ejs } = await supabase.from("ejercicios").select("id, video_url, nombre_en").in("id", ids);
+    ejercicios = Object.fromEntries(
+      ((ejs ?? []) as { id: string; video_url: string | null; nombre_en: string | null }[]).map((e) => [
+        e.id,
+        { video_url: e.video_url, nombre_en: e.nombre_en },
+      ]),
+    );
   }
-  return { entreno: entreno as Entreno, series: lista, anteriores };
+  return { entreno: entreno as Entreno, series: lista, anteriores, ejercicios };
 }
 
 function mmss(segundos: number): string {
@@ -128,6 +141,39 @@ function pitido() {
   }
 }
 
+// Orden en que se hacen las series: un ejercicio detrás de otro y, en las superseries,
+// una vuelta de cada ejercicio (A1, A2, A1, A2…).
+function construirSecuencia(series: Serie[]): string[] {
+  const ordenes = [...new Set(series.map((s) => s.orden_ejercicio))].sort((a, b) => a - b);
+  const secuencia: string[] = [];
+  const vistos = new Set<number>();
+  for (const o of ordenes) {
+    if (vistos.has(o)) continue;
+    const grupo = series.find((s) => s.orden_ejercicio === o)?.grupo ?? null;
+    if (grupo === null) {
+      vistos.add(o);
+      series
+        .filter((s) => s.orden_ejercicio === o)
+        .sort((a, b) => a.numero - b.numero)
+        .forEach((s) => secuencia.push(s.id));
+      continue;
+    }
+    const delGrupo = series.filter((s) => s.grupo === grupo);
+    const ords = [...new Set(delGrupo.map((s) => s.orden_ejercicio))].sort((a, b) => a - b);
+    ords.forEach((x) => vistos.add(x));
+    const rondas = Math.max(...delGrupo.map((s) => s.numero));
+    for (let n = 1; n <= rondas; n++) {
+      for (const x of ords) {
+        const s = delGrupo.find((y) => y.orden_ejercicio === x && y.numero === n);
+        if (s) secuencia.push(s.id);
+      }
+    }
+  }
+  return secuencia;
+}
+
+type Descanso = { fin: number; total: number; siguiente: string | null };
+
 export default function PantallaEntreno() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -137,17 +183,31 @@ export default function PantallaEntreno() {
   const [datos, setDatos] = useState<Datos | null>(null);
   const [noExiste, setNoExiste] = useState(false);
   const [ahora, setAhora] = useState(0);
-  const [descanso, setDescanso] = useState<{ fin: number; total: number } | null>(null);
+  const [descanso, setDescanso] = useState<Descanso | null>(null);
+  const [actualId, setActualId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [terminando, setTerminando] = useState(false);
   const [confirmar, setConfirmar] = useState(false);
   const [minutos, setMinutos] = useState("");
-  const avisado = useRef(false);
+  // Se recuerda si el segundero suena (por defecto, sí).
+  const [sonido, setSonido] = useState(() => {
+    try {
+      return localStorage.getItem("sonidoSegundero") !== "no";
+    } catch {
+      return true;
+    }
+  });
+  const descansoRef = useRef<Descanso | null>(null);
 
   const mensajeError = useCallback(
     (codigo?: string) => ((t[`err_${codigo}` as keyof typeof t] as string | undefined) ?? t.errorGeneral),
     [t],
   );
+
+  const fijarDescanso = useCallback((d: Descanso | null) => {
+    descansoRef.current = d;
+    setDescanso(d);
+  }, []);
 
   useEffect(() => {
     cargar(id).then((d) => {
@@ -156,11 +216,32 @@ export default function PantallaEntreno() {
     });
   }, [id]);
 
-  // Reloj: se actualiza cada medio segundo mientras el entreno está en curso.
+  function cambiarSonido() {
+    const nuevo = !sonido;
+    setSonido(nuevo);
+    try {
+      localStorage.setItem("sonidoSegundero", nuevo ? "si" : "no");
+    } catch {
+      // No pasa nada.
+    }
+  }
+
+  // Reloj: se actualiza cada medio segundo; al acabar el descanso avisa y pasa a lo siguiente.
   const enCurso = datos?.entreno.estado === "en_curso";
   useEffect(() => {
     if (!enCurso) return;
-    const tic = () => setAhora(Date.now());
+    const tic = () => {
+      const ahoraMs = Date.now();
+      setAhora(ahoraMs);
+      const d = descansoRef.current;
+      if (d && ahoraMs >= d.fin) {
+        pitido();
+        navigator.vibrate?.([300, 150, 300]);
+        descansoRef.current = null;
+        setDescanso(null);
+        if (d.siguiente) setActualId(d.siguiente);
+      }
+    };
     tic();
     const intervalo = setInterval(tic, 500);
     return () => clearInterval(intervalo);
@@ -187,14 +268,6 @@ export default function PantallaEntreno() {
       candado?.release().catch(() => {});
     };
   }, [enCurso]);
-
-  // Aviso al acabar el descanso.
-  useEffect(() => {
-    if (!descanso || ahora < descanso.fin || avisado.current) return;
-    avisado.current = true;
-    pitido();
-    navigator.vibrate?.([300, 150, 300]);
-  }, [ahora, descanso]);
 
   function cambiarSerie(serieId: string, cambios: Partial<Serie>) {
     setDatos((d) =>
@@ -226,33 +299,6 @@ export default function PantallaEntreno() {
     return s.orden_ejercicio === Math.max(...delGrupo.map((x) => x.orden_ejercicio));
   }
 
-  async function marcarHecha(s: Serie, todas: Serie[]) {
-    // Lo que no se haya escrito se toma del objetivo de Miriam.
-    const cambios: Partial<Serie> = {
-      completada: true,
-      reps: s.reps ?? s.obj_reps_min,
-      segundos: s.segundos ?? s.obj_segundos_min,
-      peso_kg: s.peso_kg ?? s.obj_peso_kg,
-      distancia_m: s.distancia_m ?? s.obj_distancia_m,
-    };
-    cambiarSerie(s.id, cambios);
-    const ok = await guardar(s, cambios);
-    if (!ok) {
-      cambiarSerie(s.id, { completada: false });
-      return;
-    }
-    if (esFinDeVuelta(s, todas) && s.descanso_seg > 0) {
-      avisado.current = false;
-      setDescanso({ fin: ahoraMs() + s.descanso_seg * 1000, total: s.descanso_seg });
-    }
-  }
-
-  async function deshacer(s: Serie) {
-    cambiarSerie(s.id, { completada: false });
-    const ok = await guardar(s, { completada: false });
-    if (!ok) cambiarSerie(s.id, { completada: true });
-  }
-
   async function masSerie(orden: number) {
     const r = await agregarSerie(id, orden);
     if (!r.ok) return setError(mensajeError(r.codigo));
@@ -264,7 +310,11 @@ export default function PantallaEntreno() {
     const r = await quitarSerie(s.id);
     if (!r.ok) return setError(mensajeError(r.codigo));
     const nuevo = await cargar(id);
-    if (nuevo) setDatos(nuevo);
+    if (nuevo) {
+      setDatos(nuevo);
+      // Si la serie quitada era la de la pantalla, se vuelve a la primera pendiente.
+      setActualId(null);
+    }
   }
 
   async function terminar() {
@@ -286,7 +336,7 @@ export default function PantallaEntreno() {
       setTerminando(false);
       return setError(mensajeError(r.codigo));
     }
-    setDescanso(null);
+    fijarDescanso(null);
     const nuevo = await cargar(id);
     if (nuevo) setDatos(nuevo);
     setTerminando(false);
@@ -295,7 +345,9 @@ export default function PantallaEntreno() {
   if (noExiste) {
     return (
       <main className={styles.pagina}>
-        <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
+        <Link href="/rutina" className={estilos.volver}>
+          ← {t.volver}
+        </Link>
         <p className={styles.aviso}>{t.entrenoNoEncontrado}</p>
       </main>
     );
@@ -308,7 +360,7 @@ export default function PantallaEntreno() {
     );
   }
 
-  const { entreno, series, anteriores } = datos;
+  const { entreno, series, anteriores, ejercicios } = datos;
 
   if (entreno.estado === "terminado") {
     return (
@@ -324,7 +376,9 @@ export default function PantallaEntreno() {
   if (entreno.estado === "descartado") {
     return (
       <main className={styles.pagina}>
-        <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
+        <Link href="/rutina" className={estilos.volver}>
+          ← {t.volver}
+        </Link>
         <p className={styles.aviso}>{t.entrenoNoEncontrado}</p>
       </main>
     );
@@ -332,21 +386,66 @@ export default function PantallaEntreno() {
 
   const transcurrido = ahora > 0 ? (ahora - new Date(entreno.empezado_en).getTime()) / 1000 : 0;
   const muyLargo = transcurrido > CUATRO_HORAS;
-  const sinMarcar = series.filter((s) => !s.completada).length;
+  const hechas = series.filter((s) => s.completada).length;
+  const sinMarcar = series.length - hechas;
 
-  // Ejercicios en orden, agrupando las superseries.
-  const ordenes = [...new Set(series.map((s) => s.orden_ejercicio))].sort((a, b) => a - b);
-  const letras = new Map<number, string>();
-  const etiquetaDe = (orden: number): string | null => {
-    const g = series.find((s) => s.orden_ejercicio === orden)?.grupo ?? null;
-    if (g === null) return null;
-    const delGrupo = [...new Set(series.filter((s) => s.grupo === g).map((s) => s.orden_ejercicio))].sort((a, b) => a - b);
-    return `${letras.get(g) ?? ""}${delGrupo.indexOf(orden) + 1}`;
+  // ---- Qué serie toca ahora ----
+  const secuencia = construirSecuencia(series);
+  const porId = new Map(series.map((s) => [s.id, s]));
+  const primeraPendiente = secuencia.find((sid) => !porId.get(sid)?.completada) ?? null;
+  const idActual = actualId && porId.has(actualId) ? actualId : (primeraPendiente ?? secuencia[secuencia.length - 1] ?? null);
+  const actual = idActual ? (porId.get(idActual) ?? null) : null;
+  const posicion = idActual ? secuencia.indexOf(idActual) : -1;
+  const todoHecho = sinMarcar === 0;
+
+  const siguienteDespuesDe = (sid: string): string | null => {
+    const i = secuencia.indexOf(sid);
+    return (
+      secuencia.slice(i + 1).find((x) => !porId.get(x)?.completada) ??
+      secuencia.find((x) => x !== sid && !porId.get(x)?.completada) ??
+      null
+    );
   };
-  for (const o of ordenes) {
-    const g = series.find((s) => s.orden_ejercicio === o)?.grupo ?? null;
-    if (g !== null && !letras.has(g)) letras.set(g, String.fromCharCode(65 + letras.size));
+
+  async function marcarHecha(s: Serie) {
+    // Lo que no se haya escrito se toma del objetivo de Miriam.
+    const cambios: Partial<Serie> = {
+      completada: true,
+      reps: s.reps ?? s.obj_reps_min,
+      segundos: s.segundos ?? s.obj_segundos_min,
+      peso_kg: s.peso_kg ?? s.obj_peso_kg,
+      distancia_m: s.distancia_m ?? s.obj_distancia_m,
+    };
+    cambiarSerie(s.id, cambios);
+    const ok = await guardar(s, cambios);
+    if (!ok) {
+      cambiarSerie(s.id, { completada: false });
+      return;
+    }
+    const siguiente = siguienteDespuesDe(s.id);
+    if (siguiente && esFinDeVuelta(s, series) && s.descanso_seg > 0) {
+      fijarDescanso({ fin: Date.now() + s.descanso_seg * 1000, total: s.descanso_seg, siguiente });
+    } else if (siguiente) {
+      setActualId(siguiente);
+    }
   }
+
+  async function deshacer(s: Serie) {
+    cambiarSerie(s.id, { completada: false });
+    const ok = await guardar(s, { completada: false });
+    if (!ok) cambiarSerie(s.id, { completada: true });
+  }
+
+  const irA = (delta: number) => {
+    const sid = secuencia[posicion + delta];
+    if (sid) setActualId(sid);
+  };
+
+  const omitirEjercicio = (s: Serie) => {
+    const i = secuencia.indexOf(s.id);
+    const otro = secuencia.slice(i + 1).find((x) => porId.get(x)?.orden_ejercicio !== s.orden_ejercicio);
+    if (otro) setActualId(otro);
+  };
 
   const etiquetaCampo = (campo: Campo, tipo: string): string => {
     if (campo === "reps") return t.repsLabel;
@@ -396,27 +495,39 @@ export default function PantallaEntreno() {
   };
 
   const restante = descanso ? Math.max(0, Math.ceil((descanso.fin - ahora) / 1000)) : 0;
+  const siguienteSerie = descanso?.siguiente ? porId.get(descanso.siguiente) : null;
+  const porcentaje = series.length > 0 ? Math.round((hechas / series.length) * 100) : 0;
+
+  const delEjercicio = actual ? series.filter((s) => s.orden_ejercicio === actual.orden_ejercicio) : [];
+  const info = actual?.ejercicio_id ? ejercicios[actual.ejercicio_id] : undefined;
+  const nombreActual = actual ? (idioma === "en" && info?.nombre_en) || actual.nombre_ejercicio : "";
+  const tipo = actual ? TIPOS.find((x) => x.valor === actual.tipo) : undefined;
+  const campos: readonly Campo[] = tipo?.campos ?? ["reps"];
+  const conTiempo = campos.includes("segundos");
 
   return (
-    <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
-
-      <div className={estilos.barra}>
-        <div>
-          <div style={{ fontSize: "0.8rem", opacity: 0.8 }}>{entreno.nombre_sesion}</div>
-          <div className={estilos.tiempo} aria-label={t.tiempoLabel}>
-            {mmss(transcurrido)}
-          </div>
+    <main className={`${styles.pagina} ${estilos.pagina}`}>
+      <div className={estilos.cabecera}>
+        <Link href="/rutina" className={estilos.volver} aria-label={t.volver}>
+          ←
+        </Link>
+        <div className={estilos.tiempoTotal}>
+          <span>{entreno.nombre_sesion}</span>
+          <strong aria-label={t.tiempoLabel}>{mmss(transcurrido)}</strong>
         </div>
-        <button type="button" className={styles.boton} onClick={() => setConfirmar(true)}>
+        <button type="button" className={estilos.finalizar} onClick={() => setConfirmar(true)}>
           {t.finalizarEntreno}
         </button>
+      </div>
+
+      <div className={estilos.progreso} role="progressbar" aria-valuenow={porcentaje} aria-valuemin={0} aria-valuemax={100}>
+        <div style={{ width: `${porcentaje}%` }} />
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
 
       {confirmar && (
-        <section className={styles.tarjeta} style={{ marginBottom: 12 }}>
+        <section className={`${styles.tarjeta} ${estilos.confirmar}`}>
           <h2 style={{ margin: 0 }}>{t.confirmaFinalizar}</h2>
           {sinMarcar > 0 && <p className={styles.ayuda}>{t.seriesSinMarcar.replace("{n}", String(sinMarcar))}</p>}
           {muyLargo && (
@@ -431,7 +542,7 @@ export default function PantallaEntreno() {
               />
             </div>
           )}
-          <div className={estilos.pie}>
+          <div className={estilos.fila}>
             <button type="button" className={styles.boton} disabled={terminando} onClick={terminar}>
               {terminando ? t.guardandoLabel : t.finalizarEntreno}
             </button>
@@ -442,133 +553,153 @@ export default function PantallaEntreno() {
         </section>
       )}
 
-      {ordenes.map((orden) => {
-        const delEjercicio = series.filter((s) => s.orden_ejercicio === orden);
-        const primera = delEjercicio[0];
-        const etiqueta = etiquetaDe(orden);
-        const tipo = TIPOS.find((x) => x.valor === primera.tipo);
-        const campos: readonly Campo[] = tipo?.campos ?? ["reps"];
-        const ultimoDelGrupo = primera.grupo !== null && esFinDeVuelta(primera, series);
-        return (
-          <section
-            key={orden}
-            className={`${estilos.bloque} ${primera.grupo !== null ? estilos.bloqueSuper : ""}`}
-          >
-            <div>
-              <strong>
-                {etiqueta && <span className={styles.etiquetaSuper}>{etiqueta}</span>}
-                {primera.nombre_ejercicio}
-              </strong>
-              {primera.nota_objetivo && <div className={styles.ayuda}>{primera.nota_objetivo}</div>}
-              {primera.grupo !== null && ultimoDelGrupo && <div className={styles.ayuda}>{t.alternaSuper}</div>}
-            </div>
+      {actual && !todoHecho && (
+        <section className={estilos.ejercicio}>
+          <div className={estilos.navegar}>
+            <button type="button" aria-label="‹" disabled={posicion <= 0} onClick={() => irA(-1)}>
+              ‹
+            </button>
+            <span>
+              {t.serieN} {actual.numero} {t.semanasTotal} {delEjercicio.length}
+            </span>
+            <button type="button" aria-label="›" disabled={posicion >= secuencia.length - 1} onClick={() => irA(1)}>
+              ›
+            </button>
+          </div>
 
-            {delEjercicio.map((s) => {
-              const previo = anteriorTexto(s);
+          <VideoEjercicio url={info?.video_url ?? null} titulo={nombreActual} />
+
+          <h1 className={estilos.nombre}>{nombreActual}</h1>
+          {actual.nota_objetivo && <p className={styles.ayuda}>{actual.nota_objetivo}</p>}
+
+          <div className={estilos.objetivo}>
+            <span>{t.objetivoLabel}</span>
+            <strong>{objetivoTexto(actual) || "—"}</strong>
+          </div>
+          {anteriorTexto(actual) && (
+            <p className={styles.ayuda} style={{ margin: 0, textAlign: "center" }}>
+              {t.ultimaVez}: {anteriorTexto(actual)}
+            </p>
+          )}
+
+          {conTiempo && !actual.completada && (
+            <Cronometro
+              key={actual.id}
+              sonido={sonido}
+              alCambiarSonido={cambiarSonido}
+              textos={{
+                iniciar: t.cronometroIniciar,
+                parar: t.cronometroParar,
+                reiniciar: t.cronometroReiniciar,
+                sonido: t.sonidoSegundero,
+                sinSonido: t.sinSonidoSegundero,
+              }}
+              alParar={(seg) => cambiarSerie(actual.id, { segundos: seg })}
+            />
+          )}
+
+          <div className={estilos.campos}>
+            {campos.map((c) => {
+              const clave = campoDe[c];
+              const objetivo = actual[objetivoDe[c]] as number | null;
               return (
-                <div key={s.id} className={`${estilos.serie} ${s.completada ? estilos.serieHecha : ""}`}>
-                  <div className={estilos.serieCabecera}>
-                    <strong>
-                      {t.serieN} {s.numero}
-                    </strong>
-                    <span className={styles.ayuda}>
-                      {t.objetivoLabel}: {objetivoTexto(s) || "—"}
-                    </span>
-                  </div>
-                  {previo && (
-                    <div className={styles.ayuda}>
-                      {t.ultimaVez}: {previo}
-                    </div>
-                  )}
-                  <div className={estilos.campos}>
-                    {campos.map((c) => {
-                      const clave = campoDe[c];
-                      const objetivo = s[objetivoDe[c]] as number | null;
-                      return (
-                        <label key={c}>
-                          {etiquetaCampo(c, s.tipo)}
-                          <input
-                            inputMode="decimal"
-                            value={valor(s[clave] as number | null)}
-                            placeholder={objetivo === null ? "" : String(objetivo)}
-                            disabled={s.completada}
-                            onChange={(e) => cambiarSerie(s.id, { [clave]: aNumero(e.target.value) } as Partial<Serie>)}
-                            onBlur={() => guardar(s)}
-                          />
-                        </label>
-                      );
-                    })}
-                  </div>
+                <label key={c}>
+                  {etiquetaCampo(c, actual.tipo)}
                   <input
-                    className={estilos.detalle}
-                    maxLength={60}
-                    placeholder={t.detalleBanda}
-                    value={s.detalle ?? ""}
-                    disabled={s.completada}
-                    onChange={(e) => cambiarSerie(s.id, { detalle: e.target.value })}
-                    onBlur={() => guardar(s)}
+                    inputMode="decimal"
+                    value={valor(actual[clave] as number | null)}
+                    placeholder={objetivo === null ? "" : String(objetivo)}
+                    disabled={actual.completada}
+                    onChange={(e) => cambiarSerie(actual.id, { [clave]: aNumero(e.target.value) } as Partial<Serie>)}
+                    onBlur={() => guardar(actual)}
                   />
-                  <div className={estilos.pie}>
-                    {s.completada ? (
-                      <button type="button" className={styles.botonSecundario} onClick={() => deshacer(s)}>
-                        ✓ {t.hechaLabel} · {t.deshacer}
-                      </button>
-                    ) : (
-                      <>
-                        <button type="button" className={styles.boton} onClick={() => marcarHecha(s, series)}>
-                          {t.hechaLabel}
-                        </button>
-                        {delEjercicio.length > 1 && (
-                          <button type="button" className={styles.botonSecundario} onClick={() => menosSerie(s)}>
-                            {t.quitarSerie}
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
+                </label>
               );
             })}
+          </div>
+          <input
+            className={estilos.detalle}
+            maxLength={60}
+            placeholder={t.detalleBanda}
+            value={actual.detalle ?? ""}
+            disabled={actual.completada}
+            onChange={(e) => cambiarSerie(actual.id, { detalle: e.target.value })}
+            onBlur={() => guardar(actual)}
+          />
 
-            <div>
-              <button type="button" className={styles.botonSecundario} onClick={() => masSerie(orden)}>
-                {t.masSerie}
+          {actual.completada ? (
+            <button type="button" className={styles.botonSecundario} onClick={() => deshacer(actual)}>
+              ✓ {t.hechaLabel} · {t.deshacer}
+            </button>
+          ) : (
+            <button type="button" className={`${styles.boton} ${estilos.grande}`} onClick={() => marcarHecha(actual)}>
+              {t.serieHecha}
+            </button>
+          )}
+
+          <div className={estilos.extras}>
+            <button type="button" onClick={() => masSerie(actual.orden_ejercicio)}>
+              {t.masSerie}
+            </button>
+            {delEjercicio.length > 1 && !actual.completada && (
+              <button type="button" onClick={() => menosSerie(actual)}>
+                − {t.quitarSerie}
               </button>
-            </div>
-          </section>
-        );
-      })}
+            )}
+            <button type="button" onClick={() => omitirEjercicio(actual)}>
+              {t.omitirEjercicio}
+            </button>
+          </div>
+        </section>
+      )}
 
-      <div className={estilos.relleno} />
+      {todoHecho && (
+        <section className={`${styles.tarjeta} ${estilos.completo}`}>
+          <h1 style={{ margin: 0 }}>{t.entrenoCompleto}</h1>
+          <p style={{ margin: 0 }}>{t.todoHechoAyuda}</p>
+          <button type="button" className={`${styles.boton} ${estilos.grande}`} onClick={() => setConfirmar(true)}>
+            {t.finalizarEntreno}
+          </button>
+        </section>
+      )}
 
       {descanso && (
         <div className={estilos.descanso} role="timer">
-          <div>
-            <div style={{ fontSize: "0.8rem" }}>{t.descansando}</div>
-            <div className={estilos.cuentaAtras}>{mmss(restante)}</div>
+          <div className={estilos.descansoCuerpo}>
+            <span className={estilos.descansoTitulo}>{t.descansando}</span>
+            <strong className={estilos.cuentaAtras}>{mmss(restante)}</strong>
+            <div className={estilos.descansoBotones}>
+              <button
+                type="button"
+                onClick={() => fijarDescanso({ ...descanso, fin: Math.max(Date.now() + 1000, descanso.fin - 15000) })}
+              >
+                −15
+              </button>
+              <button type="button" onClick={() => fijarDescanso({ ...descanso, fin: descanso.fin + 15000 })}>
+                +15
+              </button>
+              <button
+                type="button"
+                className={estilos.saltar}
+                onClick={() => {
+                  const sig = descanso.siguiente;
+                  fijarDescanso(null);
+                  if (sig) setActualId(sig);
+                }}
+              >
+                {t.saltar}
+              </button>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button
-              type="button"
-              className={estilos.mini}
-              onClick={() => setDescanso((d) => (d ? { ...d, fin: Math.max(Date.now(), d.fin - 15000) } : d))}
-            >
-              −15
-            </button>
-            <button
-              type="button"
-              className={estilos.mini}
-              onClick={() => {
-                avisado.current = false;
-                setDescanso((d) => (d ? { ...d, fin: d.fin + 15000 } : d));
-              }}
-            >
-              +15
-            </button>
-            <button type="button" className={estilos.mini} onClick={() => setDescanso(null)}>
-              {t.saltar}
-            </button>
-          </div>
+          {siguienteSerie && (
+            <div className={estilos.siguiente}>
+              <span>
+                {t.siguienteEs} · {t.serieN} {siguienteSerie.numero}
+              </span>
+              <strong>{siguienteSerie.nombre_ejercicio}</strong>
+              <span>{objetivoTexto(siguienteSerie)}</span>
+            </div>
+          )}
         </div>
       )}
     </main>

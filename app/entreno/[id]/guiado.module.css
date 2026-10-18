@@ -1,0 +1,349 @@
+.pagina {
+  padding-bottom: 40px;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 10px;
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.2rem;
+  color: var(--oliva-oscuro);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid var(--linea);
+  border-radius: 50%;
+}
+
+.tiempoTotal {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.tiempoTotal span {
+  overflow: hidden;
+  font-size: 0.8rem;
+  color: var(--secundario);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tiempoTotal strong {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.finalizar {
+  min-height: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  background: transparent;
+  border: 1.5px solid var(--oliva-oscuro);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.progreso {
+  height: 8px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: var(--relleno);
+  border-radius: 999px;
+}
+
+.progreso > div {
+  height: 100%;
+  background: var(--oliva-oscuro);
+  border-radius: 999px;
+  transition: width 0.3s;
+}
+
+.confirmar {
+  margin-bottom: 14px;
+}
+
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ejercicio {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 28px;
+  box-shadow: var(--sombra);
+}
+
+.navegar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--secundario);
+}
+
+.navegar button {
+  width: 44px;
+  height: 44px;
+  font-size: 1.4rem;
+  color: var(--oliva-oscuro);
+  background: var(--relleno);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.navegar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.nombre {
+  margin: 0;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.objetivo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px;
+  background: var(--crema);
+  border-radius: 18px;
+}
+
+.objetivo span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.objetivo strong {
+  font-size: 1.5rem;
+  color: var(--oliva-oscuro);
+}
+
+.cronometro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: #eef0e0;
+  border-radius: 22px;
+}
+
+.cronoTiempo {
+  font-size: 3.2rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--oliva-oscuro);
+}
+
+.cronoBotones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cronoBotones button {
+  min-height: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.cronoBotones button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cronoBotones .cronoIniciar,
+.cronoBotones .cronoParar {
+  min-width: 110px;
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+  border-color: var(--oliva-oscuro);
+}
+
+.cronoBotones .cronoParar {
+  background: #8a4b2a;
+  border-color: #8a4b2a;
+}
+
+.campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.campos label {
+  display: flex;
+  flex: 1 1 100px;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.campos input,
+.detalle {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  font-size: 1.1rem;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+.detalle {
+  font-size: 0.9rem;
+}
+
+.grande {
+  min-height: 58px;
+  font-size: 1.05rem;
+}
+
+.extras {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+}
+
+.extras button {
+  min-height: 40px;
+  padding: 0 4px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.completo {
+  align-items: center;
+  text-align: center;
+}
+
+/* Descanso: pantalla verde que tapa el ejercicio hasta que acaba el tiempo. */
+.descanso {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background: #9bae6b;
+  color: var(--blanco);
+  animation: aparecer 0.2s ease-out;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.descansoCuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+}
+
+.descansoTitulo {
+  font-size: 1.3rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cuentaAtras {
+  font-size: 5.5rem;
+  line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.descansoBotones {
+  display: flex;
+  gap: 10px;
+}
+
+.descansoBotones button {
+  min-width: 80px;
+  min-height: 48px;
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--blanco);
+  background: rgba(0, 0, 0, 0.18);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.descansoBotones .saltar {
+  color: var(--carbon);
+  background: var(--blanco);
+}
+
+.siguiente {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 20px 24px 36px;
+  color: var(--carbon);
+  background: var(--blanco);
+  border-radius: 28px 28px 0 0;
+}
+
+.siguiente span {
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.siguiente strong {
+  font-size: 1.3rem;
+}
