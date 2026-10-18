@@ -36,6 +36,9 @@
 - **Una misma persona puede tener varios servicios a la vez** (grupal, individual, online).
 - **Primer acceso:** obligatorio rellenar datos y aceptar privacidad y términos.
 - "Continuar con Google": se deja para el final de la fase o para más adelante.
+- **Alta de alumnos:** desde /admin (solo administradora). La app genera un enlace personal que Miriam envía por WhatsApp; el alumno elige contraseña y rellena sus datos. Los enlaces caducan (por defecto 1 hora): se puede generar uno nuevo.
+- **Correo propio pendiente:** el correo de serie de Supabase solo sirve para pruebas (no permite editar plantillas en el plan gratuito y solo envía a miembros del equipo). Antes de abrir a alumnos: configurar Resend con el dominio de miriamdelolmo.com y volver a probar registro y recuperación de contraseña; las plantillas están preparadas en supabase/plantillas-correo.md.
+- **Panel de administración solo en español.**
 
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
