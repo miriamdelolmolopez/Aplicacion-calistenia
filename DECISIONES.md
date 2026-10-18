@@ -61,6 +61,16 @@
 - **Avisos:** hasta la Fase 6 el aviso de plaza liberada se ve dentro de la app y el de mínimo no alcanzado como alerta en el panel.
 - **Horario inicial (lunes y miércoles):** 17:30 pino intermedio (6 plazas) · 18:35 pino principiantes (6) · 19:40 calistenia (10).
 
+## Fase 5 · Entrenamiento online (decisiones)
+- **Orden:** A biblioteca de ejercicios · B constructor de rutinas, plantillas y planes online · C entrenar (series, temporizador) · D progreso (mes, racha, gráficas, objetivos).
+- **Vídeos:** la app acepta enlaces de **YouTube** (no listado) y de **Google Drive** (compartido con "cualquiera con el enlace"). Más adelante se puede pasar a Bunny Stream (~1-2 $/mes) si hace falta privacidad real. Quien tenga el enlace puede ver el vídeo.
+- **Textos de los ejercicios:** español obligatorio, inglés opcional (si falta, se muestra el español).
+- **Rutinas:** sesiones con nombre libre (no atadas a días fijos); cada ejercicio con series, repeticiones o segundos, descanso y nota. El alumno elige qué sesión hace cada día. Se pueden guardar como plantilla y copiar a otro alumno.
+- **Acceso:** solo alumnos con plan online activo y pagado (los planes online se añaden al catálogo de bonos: 79 €/97 €/mes, 190 € bimestral, 280 € trimestral, 540 € semestral).
+- **Fichas de Drive:** no se importan en esta versión.
+- **Fuera de esta fase:** vídeos de corrección subidos por el alumno y chat (se siguen haciendo con Loom y WhatsApp).
+- La biblioteca es solo de Miriam; el alumno ve cada ejercicio dentro de su rutina publicada.
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.

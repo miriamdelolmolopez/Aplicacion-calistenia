@@ -225,6 +225,42 @@
   gap: 4px;
 }
 
+.campo textarea {
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  resize: vertical;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--linea);
+  border-radius: 99px;
+  color: var(--carbon);
+  text-decoration: none;
+  font-size: 0.9rem;
+  background: var(--blanco);
+}
+
+.chipActivo {
+  background: var(--oliva-oscuro);
+  border-color: var(--oliva-oscuro);
+  color: var(--blanco);
+  font-weight: 600;
+}
+
 .apuntadoFila {
   display: flex;
   flex-direction: column;
