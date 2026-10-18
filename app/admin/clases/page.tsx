@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { claveDia, dentroDeHoras, haceHoras, textoDia, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
-import { FilaClase, FormularioAjustes, FormularioTipo, GenerarClases } from "./Controles";
+import { FilaClase, FormularioAjustes, FormularioTipo, GenerarClases, NuevoTipo } from "./Controles";
 
 export const metadata = { title: "Clases · Administración" };
 
@@ -12,6 +12,8 @@ type Tipo = {
   plazas_max: number;
   minimo_alumnos: number;
   plazas_prueba: number;
+  duracion_min: number;
+  activo: boolean;
 };
 type Persona = { nombre: string | null; apellidos: string | null; email: string | null };
 type Reserva = {
@@ -44,7 +46,7 @@ export default async function AdminClases() {
 
   const { data: tiposDatos } = await supabase
     .from("tipos_clase")
-    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba")
+    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo")
     .order("nombre");
   const tipos = (tiposDatos ?? []) as Tipo[];
 
@@ -97,14 +99,17 @@ export default async function AdminClases() {
       />
 
       <section className={styles.tarjeta}>
-        <h2>Plazas y mínimo por tipo de clase</h2>
+        <h2>Tipos de clase</h2>
         <p className={styles.ayuda}>
-          El mínimo es solo un aviso para ti (0 = sin aviso). Los cambios afectan a las
-          clases que crees a partir de ahora.
+          Aquí cambias el nombre, las plazas, el mínimo y la duración de cada tipo, o lo desactivas. El
+          mínimo es solo un aviso para ti (0 = sin aviso). Los cambios afectan a las clases que crees a
+          partir de ahora. Los horarios (plantillas) están en{" "}
+          <Link href="/admin/horarios">Horarios</Link>.
         </p>
         {tipos.map((t) => (
           <FormularioTipo key={t.id} tipo={t} />
         ))}
+        <NuevoTipo />
       </section>
 
       <section className={styles.tarjeta}>

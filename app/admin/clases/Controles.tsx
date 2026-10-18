@@ -9,6 +9,7 @@ import {
   cambiarPlazas,
   cambiarTipo,
   cancelarClase,
+  crearTipo,
   generarClases,
   quitarApuntado,
   quitarDeLista,
@@ -108,13 +109,33 @@ export function FormularioTipo({
     plazas_max: number;
     minimo_alumnos: number;
     plazas_prueba: number;
+    duracion_min: number;
+    activo: boolean;
   };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
   return (
-    <form action={accion} className={styles.filaTipo}>
+    <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
       <input type="hidden" name="tipoId" value={tipo.id} />
-      <strong className={styles.nombreTipo}>{tipo.nombre}</strong>
+      <div className={styles.campo}>
+        <label htmlFor={`no-${tipo.id}`}>Nombre</label>
+        <input id={`no-${tipo.id}`} name="nombre" maxLength={60} defaultValue={tipo.nombre} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`du-${tipo.id}`}>Duración (minutos)</label>
+        <input
+          id={`du-${tipo.id}`}
+          name="duracion_min"
+          type="number"
+          min={10}
+          max={240}
+          defaultValue={tipo.duracion_min}
+        />
+      </div>
+      <label className={styles.casilla}>
+        <input type="checkbox" name="activo" defaultChecked={tipo.activo} />
+        <span>Activo (si lo desactivas no se crean clases nuevas de este tipo)</span>
+      </label>
       <div className={styles.campo}>
         <label htmlFor={`pl-${tipo.id}`}>Plazas</label>
         <input
@@ -150,6 +171,39 @@ export function FormularioTipo({
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         Guardar
+      </button>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
+
+export function NuevoTipo() {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(crearTipo, {});
+  return (
+    <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
+      <strong>Nuevo tipo de clase</strong>
+      <div className={styles.campo}>
+        <label htmlFor="nt-nombre">Nombre</label>
+        <input id="nt-nombre" name="nombre" maxLength={60} required />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="nt-plazas">Plazas</label>
+        <input id="nt-plazas" name="plazas_max" type="number" min={1} max={100} defaultValue={8} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="nt-min">Mínimo</label>
+        <input id="nt-min" name="minimo_alumnos" type="number" min={0} max={100} defaultValue={0} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="nt-prueba">Plazas para invitados (prueba)</label>
+        <input id="nt-prueba" name="plazas_prueba" type="number" min={0} max={100} defaultValue={2} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="nt-dur">Duración (minutos)</label>
+        <input id="nt-dur" name="duracion_min" type="number" min={10} max={240} defaultValue={60} />
+      </div>
+      <button className={styles.boton} type="submit" disabled={pendiente}>
+        Crear tipo
       </button>
       <Mensajes estado={estado} />
     </form>

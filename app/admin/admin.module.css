@@ -496,6 +496,18 @@
   grid-column: 1 / -1;
 }
 
+/* Formularios de tipo de clase: dos columnas; el título, la casilla, el botón y los mensajes ocupan todo el ancho. */
+.filaTipo.tipoClase > * {
+  grid-column: auto;
+}
+
+.filaTipo.tipoClase > strong,
+.filaTipo.tipoClase > label,
+.filaTipo.tipoClase > button,
+.filaTipo.tipoClase > p {
+  grid-column: 1 / -1;
+}
+
 .formularioInterno {
   display: flex;
   flex-direction: column;

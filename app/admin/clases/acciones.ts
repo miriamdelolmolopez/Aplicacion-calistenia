@@ -186,9 +186,13 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   await requireAdmin();
 
   const id = String(formData.get("tipoId") ?? "");
+  const nombre = String(formData.get("nombre") ?? "").trim();
   const plazas = entero(formData.get("plazas_max"));
   const minimo = entero(formData.get("minimo_alumnos"));
   const prueba = entero(formData.get("plazas_prueba"));
+  const duracion = entero(formData.get("duracion_min"));
+  const activo = formData.get("activo") === "on";
+  if (nombre.length < 1 || nombre.length > 60) return { error: "El nombre tiene que tener entre 1 y 60 letras." };
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
   if (!(minimo >= 0 && minimo <= plazas)) {
     return { error: "El mínimo no puede ser mayor que las plazas." };
@@ -196,13 +200,50 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   if (!(prueba >= 0 && prueba <= plazas)) {
     return { error: "Las plazas de prueba no pueden ser más que las plazas de la clase." };
   }
+  if (!(duracion >= 10 && duracion <= 240)) return { error: "La duración va de 10 a 240 minutos." };
 
   const { error } = await createAdminClient()
     .from("tipos_clase")
-    .update({ plazas_max: plazas, minimo_alumnos: minimo, plazas_prueba: prueba })
+    .update({ nombre, plazas_max: plazas, minimo_alumnos: minimo, plazas_prueba: prueba, duracion_min: duracion, activo })
     .eq("id", id);
-  if (error) return { error: "No se ha podido guardar." };
+  if (error) {
+    return { error: error.code === "23505" ? "Ya existe un tipo de clase con ese nombre." : "No se ha podido guardar." };
+  }
 
   revalidatePath("/admin/clases");
-  return { mensaje: "Guardado. Las clases nuevas usarán estas plazas y este mínimo." };
+  revalidatePath("/admin/horarios");
+  return { mensaje: "Guardado. Las clases nuevas usarán estos datos; las que ya existen no cambian." };
+}
+
+// Crea un tipo de clase nuevo (por ejemplo «Movilidad»).
+export async function crearTipo(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+
+  const nombre = String(formData.get("nombre") ?? "").trim();
+  const plazas = entero(formData.get("plazas_max"));
+  const minimo = entero(formData.get("minimo_alumnos"));
+  const prueba = entero(formData.get("plazas_prueba"));
+  const duracion = entero(formData.get("duracion_min"));
+  if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
+  if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
+  if (!(minimo >= 0 && minimo <= plazas)) return { error: "El mínimo no puede ser mayor que las plazas." };
+  if (!(prueba >= 0 && prueba <= plazas)) {
+    return { error: "Las plazas de prueba no pueden ser más que las plazas de la clase." };
+  }
+  if (!(duracion >= 10 && duracion <= 240)) return { error: "La duración va de 10 a 240 minutos." };
+
+  const { error } = await createAdminClient().from("tipos_clase").insert({
+    nombre,
+    plazas_max: plazas,
+    minimo_alumnos: minimo,
+    plazas_prueba: prueba,
+    duracion_min: duracion,
+  });
+  if (error) {
+    return { error: error.code === "23505" ? "Ya existe un tipo de clase con ese nombre." : "No se ha podido crear." };
+  }
+
+  revalidatePath("/admin/clases");
+  revalidatePath("/admin/horarios");
+  return { mensaje: "Tipo de clase creado. Ya puedes añadirlo a una plantilla de horario." };
 }

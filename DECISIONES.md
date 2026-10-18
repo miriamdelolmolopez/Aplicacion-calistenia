@@ -127,6 +127,14 @@
 - **Privacidad:** las **invitadas nunca ven quién está apuntado** (se corrige en la base de datos): solo ven las plazas libres y las libres para invitadas. Las alumnas ven a los apuntados (si el ajuste «ver apuntados» está activo) con su foto si la tienen visible, o sus iniciales; al tocar se ven nombre y inicial del apellido («Ana G.»). Miriam siempre los ve.
 - **Calendario:** botón «Añadir al calendario» (archivo .ics) tras reservar y en el menú de cada clase, con la dirección **Paseo Marítimo Rey de España 71, Fuengirola, Málaga**, la hora y la duración del tipo de clase.
 
+## Bloque 4 · Herramientas de Miriam (decisiones)
+- **Orden:** 4A plantillas de horario y tipos de clase · 4B descuentos · 4C textos legales con aceptación obligatoria.
+- **Fuera de alcance por ahora:** tipos de tarifa con límites por tipo de clase (los bonos siguen con un contador general de clases) y formas de pago editables (de momento Efectivo, Bizum, Transferencia y Tarjeta fijas; no se muestran datos de pago a las alumnas). Se pueden añadir más adelante.
+- **Plantillas de horario:** varias plantillas con nombre (p. ej. «Horario normal», «Verano»); se pueden crear, editar (día, hora, tipo y plazas), duplicar, borrar (menos la principal), aplicar a una o varias semanas concretas (de lunes a domingo; solo añade las clases que faltan, nunca toca las existentes ni sus reservas, ni crea clases en el pasado) e imprimir o guardar en PDF. Una plantilla es la **principal** y es la que usa el botón «Crear clases». El horario que había pasa a ser «Horario normal».
+- **Tipos de clase:** se pueden crear, renombrar, cambiar duración y desactivar (no se borran).
+- **Descuentos (4B):** en % o en euros, con caducidad y máximo de usos opcionales; los aplica Miriam al dar de alta un bono; el pago guarda precio original, descuento y total.
+- **Textos legales (4C):** privacidad y términos editables en español e inglés, con versiones y fecha; quien no haya aceptado la versión vigente no puede usar la app hasta aceptar; se guarda quién aceptó qué versión y cuándo. Los definitivos los da la asesoría de Miriam; se empieza con los borradores actuales.
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.
