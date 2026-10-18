@@ -219,7 +219,8 @@ export default function Progreso({ userId, admin = false }: { userId?: string; a
 
   async function nuevoObjetivo(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
+    const formulario = e.currentTarget;
+    const f = new FormData(formulario);
     const meta = Number(String(f.get("meta")).replace(",", "."));
     const r = await crearObjetivo({
       userId: userId!,
@@ -231,7 +232,7 @@ export default function Progreso({ userId, admin = false }: { userId?: string; a
       alert(r.mensaje);
       return;
     }
-    e.currentTarget.reset();
+    formulario.reset();
     setDatos(await cargar(userId, admin));
   }
 

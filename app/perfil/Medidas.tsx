@@ -81,7 +81,8 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
   async function guardar(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMensaje(null);
-    const f = new FormData(e.currentTarget);
+    const formulario = e.currentTarget;
+    const f = new FormData(formulario);
     const valores: Record<string, number | string | null> = { fecha: String(f.get("fecha") || hoyIso()) };
     let alguno = false;
     for (const { campo } of CAMPOS) {
@@ -107,7 +108,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
     setGuardando(false);
     if (error) return setMensaje({ ok: false, texto: t.errorMedidas });
     setMensaje({ ok: true, texto: t.medidasGuardadas });
-    e.currentTarget.reset();
+    formulario.reset();
     setDatos(await cargar(userId));
   }
 

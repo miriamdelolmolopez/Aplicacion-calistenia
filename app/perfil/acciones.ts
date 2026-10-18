@@ -90,6 +90,27 @@ export async function obtenerFotos(ids: string[]): Promise<Record<string, string
   return resultado;
 }
 
+// La profe (Miriam) con su foto, para las tarjetas de clase. La ve cualquier persona con sesión.
+export async function obtenerProfe(): Promise<{ nombre: string; foto: string | null } | null> {
+  if (!(await persona())) return null;
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("profiles")
+    .select("foto_path")
+    .eq("rol", "admin")
+    .order("creado_en")
+    .limit(1)
+    .maybeSingle();
+  if (!data) return null;
+
+  let foto: string | null = null;
+  if (data.foto_path) {
+    const { data: firmada } = await admin.storage.from("avatares").createSignedUrl(data.foto_path, 3600);
+    foto = firmada?.signedUrl ?? null;
+  }
+  return { nombre: "Miriam", foto };
+}
+
 // La persona pide que se borre su cuenta; Miriam recibe un aviso y lo gestiona.
 export async function pedirBorradoCuenta(): Promise<Resultado> {
   const user = await persona();

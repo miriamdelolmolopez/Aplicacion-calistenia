@@ -122,6 +122,11 @@
 - **Mis pagos:** lista de pagos con fecha, bono, importe, método y estado.
 - **Menú:** «Mi cuenta» pasa a «Perfil»; se añaden «Ajustes» y «Mis pagos».
 
+## Bloque 3 · Reservar clases rediseñado (decisiones)
+- **Diseño:** cabecera con el día elegido y tira de días (L M X J V S D con número, flechas para pasar de semana, solo los días que permite el ajuste de antelación), botones con las horas del día para saltar a cada clase, y tarjetas por clase con nombre y hora grandes, foto de Miriam como profe, fila de cuadrados con la foto de cada persona apuntada y cuadrados grises para las plazas libres. Sin filtro por tipo de clase.
+- **Privacidad:** las **invitadas nunca ven quién está apuntado** (se corrige en la base de datos): solo ven las plazas libres y las libres para invitadas. Las alumnas ven a los apuntados (si el ajuste «ver apuntados» está activo) con su foto si la tienen visible, o sus iniciales; al tocar se ven nombre y inicial del apellido («Ana G.»). Miriam siempre los ve.
+- **Calendario:** botón «Añadir al calendario» (archivo .ics) tras reservar y en el menú de cada clase, con la dirección **Paseo Marítimo Rey de España 71, Fuengirola, Málaga**, la hora y la duración del tipo de clase.
+
 ## Pendiente de decidir
 - Cuenta de Supabase y Vercel (las crea Miriam con su correo).
 - Nombre definitivo y logo definitivo.

@@ -1,0 +1,265 @@
+.cabeceraDia {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 8px;
+}
+
+.etiquetaDia {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.tira {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  flex: 1;
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--relleno);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.dia span {
+  font-size: 0.7rem;
+  color: var(--secundario);
+}
+
+.dia:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.diaElegido {
+  color: #fff;
+  background: var(--oliva);
+}
+
+.diaElegido span {
+  color: #fff;
+}
+
+.flecha {
+  width: 24px;
+  height: 40px;
+  font-size: 1.3rem;
+  color: var(--oliva-oscuro);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.flecha:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.horas {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.horas button {
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-top: 5px solid var(--carbon);
+  border-radius: var(--radio);
+  scroll-margin-top: 12px;
+}
+
+.cancelada {
+  opacity: 0.6;
+}
+
+.cancelada h2 {
+  text-decoration: line-through;
+}
+
+.titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.titulo h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.hora {
+  font-family: var(--font-titulos), serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.profe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.etiquetaCancelada {
+  margin-left: auto;
+  color: #8a4b2a;
+}
+
+.cuadrados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--linea);
+  border-bottom: 1px solid var(--linea);
+  cursor: default;
+}
+
+.cuadrado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.cuadrado img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.iniciales {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 600;
+  color: #fff;
+  background: var(--oliva);
+}
+
+.libre {
+  background: var(--relleno);
+}
+
+.ocupado {
+  background: #cfc7b3;
+}
+
+.nombres {
+  margin: -4px 0 0;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.plazas {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+
+.menuCaja {
+  position: relative;
+}
+
+.puntos {
+  width: 40px;
+  height: 44px;
+  font-size: 1.4rem;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  bottom: 48px;
+  left: 0;
+  z-index: 5;
+  min-width: 200px;
+  padding: 6px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--carbon);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background: var(--relleno);
+}

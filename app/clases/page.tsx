@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
 import { obtenerMisBonos } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
+import { obtenerFotos, obtenerProfe } from "../perfil/acciones";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
+import estilos from "./clases.module.css";
+import { descargarIcs } from "@/lib/calendario";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -25,19 +29,23 @@ type Clase = {
   ocupadas: number;
   mi_reserva: string | null;
   apuntados: string[];
+  apuntados_ids: string[];
   plazas_prueba: number;
   ocupadas_prueba: number;
   en_espera: boolean;
   posicion: number;
   hay_espera: number;
   prioridad: boolean;
+  duracion_min: number;
   tarde: boolean; // quedan menos horas que el límite de cancelación
 };
 
-type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto };
+type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto; clase?: Clase };
 
 type Datos = {
   horas: number;
+  dias: number;
+  hoy: string;
   rol: string;
   datosCompletos: boolean;
   pruebaGastada: boolean;
@@ -78,6 +86,8 @@ async function obtenerDatos(): Promise<Datos> {
 
   return {
     horas,
+    dias,
+    hoy: claveDia(new Date(ahora).toISOString()),
     rol: perfil?.rol ?? "",
     datosCompletos: !!perfil?.datos_completos,
     pruebaGastada: gastada === true,
@@ -85,6 +95,27 @@ async function obtenerDatos(): Promise<Datos> {
     lista,
   };
 }
+
+// Enlaces temporales a las fotos de quienes están apuntados (solo las ven las alumnas).
+async function fotosDe(d: Datos): Promise<Record<string, string>> {
+  const ids = [...new Set(d.lista.flatMap((c) => c.apuntados_ids))];
+  return ids.length ? obtenerFotos(ids) : {};
+}
+
+// Suma días a una fecha AAAA-MM-DD (sin zonas horarias de por medio).
+function sumarDias(clave: string, dias: number): string {
+  const d = new Date(`${clave}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+// 0 = lunes … 6 = domingo
+const diaSemana = (clave: string) => (new Date(`${clave}T12:00:00Z`).getUTCDay() + 6) % 7;
+
+const LETRAS = {
+  es: ["L", "M", "X", "J", "V", "S", "D"],
+  en: ["M", "T", "W", "T", "F", "S", "S"],
+};
 
 export default function Clases() {
   const [idioma] = useIdioma();
@@ -94,20 +125,36 @@ export default function Clases() {
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [trabajando, setTrabajando] = useState<string | null>(null);
+  const [dia, setDia] = useState<string | null>(null);
+  const [semana, setSemana] = useState<number | null>(null);
+  const [fotos, setFotos] = useState<Record<string, string>>({});
+  const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
+  const [verNombres, setVerNombres] = useState<string | null>(null);
+  const [menu, setMenu] = useState<string | null>(null);
 
-  const cargar = useCallback(async () => setDatos(await obtenerDatos()), []);
+  const cargar = useCallback(async () => {
+    const d = await obtenerDatos();
+    setDatos(d);
+    setFotos(await fotosDe(d));
+  }, []);
 
   useEffect(() => {
-    obtenerDatos().then(setDatos);
+    obtenerDatos().then(async (d) => {
+      setDatos(d);
+      setFotos(await fotosDe(d));
+    });
+    obtenerProfe().then(setProfe);
   }, []);
 
   const esAlumno = datos?.rol === "alumno";
   const esInvitado = datos?.rol === "invitado";
+  const veApuntados = datos?.rol === "alumno" || datos?.rol === "admin";
 
   async function ejecutar(
     c: Clase,
     accion: () => Promise<{ ok: boolean; codigo?: string; devuelta?: boolean }>,
     claveOk: (devuelta?: boolean) => ClaveTexto,
+    conCalendario = false,
   ) {
     setAviso(null);
     setConfirmando(null);
@@ -116,14 +163,14 @@ export default function Clases() {
     setTrabajando(null);
     setAviso(
       r.ok
-        ? { tipo: "ok", clave: claveOk(r.devuelta) }
+        ? { tipo: "ok", clave: claveOk(r.devuelta), clase: conCalendario ? c : undefined }
         : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto },
     );
     await cargar();
   }
 
   const reservar = (c: Clase) =>
-    ejecutar(c, () => reservarClase(c.id), () => (esInvitado ? "okReservadaPrueba" : "okReservada"));
+    ejecutar(c, () => reservarClase(c.id), () => (esInvitado ? "okReservadaPrueba" : "okReservada"), true);
 
   const cancelar = (c: Clase) =>
     c.mi_reserva
@@ -144,30 +191,47 @@ export default function Clases() {
   const unirse = (c: Clase) => ejecutar(c, () => unirseListaEspera(c.id), () => "okEsperaUnido");
   const salir = (c: Clase) => ejecutar(c, () => salirListaEspera(c.id), () => "okEsperaSalido");
 
-  const porDia = new Map<string, Clase[]>();
-  for (const c of datos?.lista ?? []) {
-    const dia = claveDia(c.empieza_en);
-    porDia.set(dia, [...(porDia.get(dia) ?? []), c]);
-  }
+  const alCalendario = (c: Clase) => {
+    setMenu(null);
+    descargarIcs({
+      id: c.id,
+      titulo: `${c.tipo} · Miriam del Olmo`,
+      inicioIso: c.empieza_en,
+      duracionMin: c.duracion_min || 60,
+    });
+  };
+
+  // ---- Tira de días: semanas de lunes a domingo; solo se pueden elegir los días con plazo de reserva ----
+  const hoy = datos?.hoy ?? "";
+  const ultimo = datos ? sumarDias(datos.hoy, datos.dias) : "";
+  const primerLunes = datos ? sumarDias(datos.hoy, -diaSemana(datos.hoy)) : "";
+  const numSemanas = datos ? Math.floor((diaSemana(datos.hoy) + datos.dias) / 7) + 1 : 1;
+  const diaElegido = dia ?? hoy;
+  const semanaActual =
+    semana ?? (datos ? Math.floor((new Date(`${diaElegido}T12:00:00Z`).getTime() - new Date(`${primerLunes}T12:00:00Z`).getTime()) / (7 * 86400000)) : 0);
+  const diasSemana = datos ? Array.from({ length: 7 }, (_, i) => sumarDias(primerLunes, semanaActual * 7 + i)) : [];
+
+  const clasesDelDia = (datos?.lista ?? []).filter((c) => claveDia(c.empieza_en) === diaElegido);
+  const etiquetaDia = (() => {
+    if (!datos) return "";
+    const texto = textoDia(`${diaElegido}T12:00:00Z`, idioma);
+    if (diaElegido === hoy) return `${t.hoy} · ${texto}`;
+    if (diaElegido === sumarDias(hoy, 1)) return `${t.manana} · ${texto}`;
+    return texto;
+  })();
 
   const boton = { minHeight: 44 } as const;
 
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <div className={styles.cabecera}>
-        <h1>{t.horarioTitulo}</h1>
-        <p>{t.horarioIntro}</p>
-      </div>
 
       {datos && esAlumno && datos.restantes !== null && (
         <p className={styles.aviso}>
           {t.tienesClases}: <strong>{datos.restantes}</strong>
         </p>
       )}
-      {datos && esAlumno && datos.restantes === null && (
-        <p className={styles.aviso}>{t.sinBono}</p>
-      )}
+      {datos && esAlumno && datos.restantes === null && <p className={styles.aviso}>{t.sinBono}</p>}
       {datos && esInvitado && (
         <p className={styles.aviso}>
           {datos.pruebaGastada ? (
@@ -184,199 +248,275 @@ export default function Clases() {
           )}
         </p>
       )}
-      {datos && !esAlumno && !esInvitado && <p className={styles.aviso}>{t.soloAlumnosInfo}</p>}
+      {datos && !esAlumno && !esInvitado && datos.rol !== "admin" && (
+        <p className={styles.aviso}>{t.soloAlumnosInfo}</p>
+      )}
       {aviso && (
-        <p
-          className={aviso.tipo === "error" ? styles.error : styles.aviso}
-          role={aviso.tipo === "error" ? "alert" : "status"}
-        >
+        <div className={aviso.tipo === "error" ? styles.error : styles.aviso} role={aviso.tipo === "error" ? "alert" : "status"}>
           {t[aviso.clave]}
-        </p>
+          {aviso.clase && (
+            <div style={{ marginTop: 8 }}>
+              <button className={`${styles.boton} ${styles.botonSecundario}`} style={boton} onClick={() => alCalendario(aviso.clase!)}>
+                {t.alCalendario}
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {datos === null && <p className={styles.aviso}>{t.cargando}</p>}
-      {datos?.lista.length === 0 && <p className={styles.aviso}>{t.sinClases}</p>}
 
-      {[...porDia.entries()].map(([dia, lista]) => (
-        <section key={dia} className={styles.tarjeta} style={{ marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: "1.3rem" }}>
-            {textoDia(lista[0].empieza_en, idioma)}
-          </h2>
-          <ul
-            className={styles.lista}
-            style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 18 }}
-          >
-            {lista.map((c) => {
-              const cancelada = c.estado === "cancelada";
-              const completa = c.ocupadas >= c.plazas;
-              const libres = Math.max(c.plazas - c.ocupadas, 0);
-              const pruebaLibres = Math.max(
-                Math.min(c.plazas_prueba, c.plazas) - c.ocupadas_prueba,
-                0,
-              );
-              const puedeProbar = !!datos && esInvitado && datos.datosCompletos && !datos.pruebaGastada;
+      {datos && (
+        <>
+          <div className={estilos.cabeceraDia}>
+            <span className={estilos.etiquetaDia}>{t.diaLabel}</span>
+            <strong>{etiquetaDia}</strong>
+          </div>
 
-              return (
-                <li key={c.id} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      alignItems: "center",
-                      opacity: cancelada ? 0.55 : 1,
+          <div className={estilos.tira}>
+            <button
+              type="button"
+              className={estilos.flecha}
+              aria-label={t.semanaAnterior}
+              disabled={semanaActual <= 0}
+              onClick={() => setSemana(semanaActual - 1)}
+            >
+              ‹
+            </button>
+            <div className={estilos.dias}>
+              {diasSemana.map((d, i) => {
+                const fuera = d < hoy || d > ultimo;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    disabled={fuera}
+                    className={`${estilos.dia} ${d === diaElegido ? estilos.diaElegido : ""}`}
+                    onClick={() => {
+                      setDia(d);
+                      setConfirmando(null);
+                      setVerNombres(null);
                     }}
                   >
-                    <div>
-                      <strong style={{ textDecoration: cancelada ? "line-through" : "none" }}>
-                        {textoHora(c.empieza_en)} · {c.tipo}
-                      </strong>
-                      <div className={styles.ayuda}>
-                        {cancelada
-                          ? t.cancelada
-                          : `${libres} ${libres === 1 ? t.libre : t.libres} · ${c.ocupadas}/${c.plazas} ${t.plazasTotales}`}
-                      </div>
-                      {!cancelada && esInvitado && !completa && (
-                        <div className={styles.ayuda}>
-                          {pruebaLibres} {pruebaLibres === 1 ? t.pruebaLibre : t.pruebaLibres}
-                        </div>
-                      )}
-                      {!cancelada && c.apuntados.length > 0 && (
-                        <div className={styles.ayuda}>
-                          {t.apuntadosLabel}: {c.apuntados.join(", ")}
-                        </div>
-                      )}
-                      {!cancelada && c.hay_espera > 0 && (
-                        <div className={styles.ayuda}>
-                          {t.listaEspera}: {c.hay_espera}
-                        </div>
-                      )}
-                    </div>
+                    <span>{LETRAS[idioma][i]}</span>
+                    <strong>{Number(d.slice(8))}</strong>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              className={estilos.flecha}
+              aria-label={t.semanaSiguiente}
+              disabled={semanaActual >= numSemanas - 1}
+              onClick={() => setSemana(semanaActual + 1)}
+            >
+              ›
+            </button>
+          </div>
 
-                    {/* Ya tiene reserva */}
-                    {!cancelada && c.mi_reserva && confirmando !== c.id && (
-                      <div style={{ textAlign: "right" }}>
-                        <div className={styles.ayuda}>✓ {t.reservada}</div>
-                        <button
-                          className={`${styles.boton} ${styles.botonSecundario}`}
-                          style={boton}
-                          disabled={trabajando === c.id}
-                          onClick={() => setConfirmando(c.id)}
-                        >
-                          {t.cancelarReserva}
-                        </button>
-                      </div>
-                    )}
+          {clasesDelDia.length > 1 && (
+            <div className={estilos.horas}>
+              {clasesDelDia.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => document.getElementById(`clase-${c.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                >
+                  {textoHora(c.empieza_en)}
+                </button>
+              ))}
+            </div>
+          )}
 
-                    {/* Alumno sin reserva */}
-                    {!cancelada && !c.mi_reserva && esAlumno && (
-                      <>
-                        {completa && !c.en_espera && (
-                          <button
-                            className={styles.boton}
-                            style={boton}
-                            disabled={trabajando === c.id}
-                            onClick={() => unirse(c)}
-                          >
-                            {trabajando === c.id ? t.cargando : t.unirseEspera}
-                          </button>
-                        )}
-                        {completa && c.en_espera && (
-                          <div style={{ textAlign: "right" }}>
-                            <div className={styles.ayuda}>
-                              {t.enListaEspera} · {t.posicion} {c.posicion}
-                            </div>
-                            <button
-                              className={`${styles.boton} ${styles.botonSecundario}`}
-                              style={boton}
-                              disabled={trabajando === c.id}
-                              onClick={() => salir(c)}
-                            >
-                              {t.salirEspera}
-                            </button>
-                          </div>
-                        )}
-                        {!completa && c.prioridad && !c.en_espera && (
-                          <span className={styles.ayuda}>{t.plazaParaEspera}</span>
-                        )}
-                        {!completa && (!c.prioridad || c.en_espera) && (
-                          <div style={{ textAlign: "right" }}>
-                            {c.prioridad && c.en_espera && (
-                              <div className={styles.ayuda}>
-                                <strong>{t.hayPlaza}</strong>
-                              </div>
-                            )}
-                            <button
-                              className={styles.boton}
-                              style={boton}
-                              disabled={trabajando === c.id}
-                              onClick={() => reservar(c)}
-                            >
-                              {trabajando === c.id
-                                ? t.cargando
-                                : c.prioridad && c.en_espera
-                                  ? t.confirmarPlaza
-                                  : t.reservar}
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    )}
+          {clasesDelDia.length === 0 && <p className={styles.aviso}>{t.sinClasesDia}</p>}
 
-                    {/* Invitado sin reserva */}
-                    {!cancelada && !c.mi_reserva && puedeProbar && (
-                      <>
-                        {completa ? (
-                          <span className={styles.ayuda}>{t.completa}</span>
-                        ) : pruebaLibres === 0 ? (
-                          <span className={styles.ayuda}>{t.sinPlazasPrueba}</span>
-                        ) : c.prioridad ? (
-                          <span className={styles.ayuda}>{t.plazaParaEspera}</span>
-                        ) : (
-                          <button
-                            className={styles.boton}
-                            style={boton}
-                            disabled={trabajando === c.id}
-                            onClick={() => reservar(c)}
-                          >
-                            {trabajando === c.id ? t.cargando : t.reservarPrueba}
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
+          {clasesDelDia.map((c) => {
+            const cancelada = c.estado === "cancelada";
+            const completa = c.ocupadas >= c.plazas;
+            const libres = Math.max(c.plazas - c.ocupadas, 0);
+            const pruebaLibres = Math.max(Math.min(c.plazas_prueba, c.plazas) - c.ocupadas_prueba, 0);
+            const puedeProbar = !!datos && esInvitado && datos.datosCompletos && !datos.pruebaGastada;
+            const cuadrados = Array.from({ length: c.plazas }, (_, i) => i);
 
-                  {confirmando === c.id && (
-                    <div className={styles.aviso} role="alert">
-                      <p style={{ margin: "0 0 10px" }}>
-                        {esInvitado
-                          ? c.tarde
-                            ? t.confirmaPierdePrueba.replace("{h}", String(datos?.horas ?? 2))
-                            : t.confirmaConservaPrueba
-                          : c.tarde
-                            ? t.confirmaPierde.replace("{h}", String(datos?.horas ?? 2))
-                            : t.confirmaDevuelve}
+            return (
+              <section key={c.id} id={`clase-${c.id}`} className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""}`}>
+                <div className={estilos.titulo}>
+                  <h2>{c.tipo}</h2>
+                  <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
+                </div>
+                <div className={estilos.profe}>
+                  <Avatar nombre={profe?.nombre ?? "Miriam"} url={profe?.foto} tamano={28} />
+                  <span>{profe?.nombre ?? "Miriam"}</span>
+                  {cancelada && <strong className={estilos.etiquetaCancelada}>{t.cancelada}</strong>}
+                </div>
+
+                {!cancelada && (
+                  <>
+                    <button
+                      type="button"
+                      className={estilos.cuadrados}
+                      onClick={() => veApuntados && c.apuntados.length > 0 && setVerNombres(verNombres === c.id ? null : c.id)}
+                      aria-label={t.apuntadosLabel}
+                    >
+                      {cuadrados.map((i) => {
+                        if (veApuntados && c.apuntados_ids[i]) {
+                          const id = c.apuntados_ids[i];
+                          return (
+                            <span key={i} className={estilos.cuadrado} title={c.apuntados[i]}>
+                              {fotos[id] ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={fotos[id]} alt={c.apuntados[i]} />
+                              ) : (
+                                <span className={estilos.iniciales}>{(c.apuntados[i] ?? "?").slice(0, 1)}</span>
+                              )}
+                            </span>
+                          );
+                        }
+                        return (
+                          <span
+                            key={i}
+                            className={`${estilos.cuadrado} ${i < c.ocupadas ? estilos.ocupado : estilos.libre}`}
+                          />
+                        );
+                      })}
+                    </button>
+
+                    {verNombres === c.id && veApuntados && (
+                      <p className={estilos.nombres}>
+                        {t.apuntadosLabel}: {c.apuntados.join(", ")}
                       </p>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button className={styles.boton} style={boton} onClick={() => cancelar(c)}>
-                          {t.confirmar}
-                        </button>
-                        <button
-                          className={`${styles.boton} ${styles.botonSecundario}`}
-                          style={boton}
-                          onClick={() => setConfirmando(null)}
-                        >
-                          {t.noCancelar}
-                        </button>
-                      </div>
+                    )}
+
+                    <p className={estilos.plazas}>
+                      {libres} {libres === 1 ? t.libre : t.libres} · {c.ocupadas}/{c.plazas} {t.plazasTotales}
+                      {esInvitado && !completa && ` · ${pruebaLibres} ${pruebaLibres === 1 ? t.pruebaLibre : t.pruebaLibres}`}
+                      {c.hay_espera > 0 && ` · ${t.listaEspera}: ${c.hay_espera}`}
+                    </p>
+                  </>
+                )}
+
+                {!cancelada && (
+                  <div className={estilos.pie}>
+                    <div className={estilos.menuCaja}>
+                      <button
+                        type="button"
+                        className={estilos.puntos}
+                        aria-label={t.masOpciones}
+                        onClick={() => setMenu(menu === c.id ? null : c.id)}
+                      >
+                        ⋮
+                      </button>
+                      {menu === c.id && (
+                        <div className={estilos.menu}>
+                          <button type="button" onClick={() => alCalendario(c)}>
+                            {t.alCalendario}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
+
+                    <div className={estilos.acciones}>
+                      {/* Ya tiene reserva */}
+                      {c.mi_reserva && confirmando !== c.id && (
+                        <>
+                          <span className={styles.ayuda}>✓ {t.reservada}</span>
+                          <button
+                            className={`${styles.boton} ${styles.botonSecundario}`}
+                            style={boton}
+                            disabled={trabajando === c.id}
+                            onClick={() => setConfirmando(c.id)}
+                          >
+                            {t.cancelarReserva}
+                          </button>
+                        </>
+                      )}
+
+                      {/* Alumno sin reserva */}
+                      {!c.mi_reserva && esAlumno && (
+                        <>
+                          {completa && !c.en_espera && (
+                            <button className={styles.boton} style={boton} disabled={trabajando === c.id} onClick={() => unirse(c)}>
+                              {trabajando === c.id ? t.cargando : t.unirseEspera}
+                            </button>
+                          )}
+                          {completa && c.en_espera && (
+                            <>
+                              <span className={styles.ayuda}>
+                                {t.enListaEspera} · {t.posicion} {c.posicion}
+                              </span>
+                              <button
+                                className={`${styles.boton} ${styles.botonSecundario}`}
+                                style={boton}
+                                disabled={trabajando === c.id}
+                                onClick={() => salir(c)}
+                              >
+                                {t.salirEspera}
+                              </button>
+                            </>
+                          )}
+                          {!completa && c.prioridad && !c.en_espera && <span className={styles.ayuda}>{t.plazaParaEspera}</span>}
+                          {!completa && (!c.prioridad || c.en_espera) && (
+                            <>
+                              {c.prioridad && c.en_espera && (
+                                <span className={styles.ayuda}>
+                                  <strong>{t.hayPlaza}</strong>
+                                </span>
+                              )}
+                              <button className={styles.boton} style={boton} disabled={trabajando === c.id} onClick={() => reservar(c)}>
+                                {trabajando === c.id ? t.cargando : c.prioridad && c.en_espera ? t.confirmarPlaza : t.reservar}
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+
+                      {/* Invitado sin reserva */}
+                      {!c.mi_reserva && puedeProbar && (
+                        <>
+                          {completa ? (
+                            <span className={styles.ayuda}>{t.completa}</span>
+                          ) : pruebaLibres === 0 ? (
+                            <span className={styles.ayuda}>{t.sinPlazasPrueba}</span>
+                          ) : c.prioridad ? (
+                            <span className={styles.ayuda}>{t.plazaParaEspera}</span>
+                          ) : (
+                            <button className={styles.boton} style={boton} disabled={trabajando === c.id} onClick={() => reservar(c)}>
+                              {trabajando === c.id ? t.cargando : t.reservarPrueba}
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {confirmando === c.id && (
+                  <div className={styles.aviso} role="alert">
+                    <p style={{ margin: "0 0 10px" }}>
+                      {esInvitado
+                        ? c.tarde
+                          ? t.confirmaPierdePrueba.replace("{h}", String(datos.horas))
+                          : t.confirmaConservaPrueba
+                        : c.tarde
+                          ? t.confirmaPierde.replace("{h}", String(datos.horas))
+                          : t.confirmaDevuelve}
+                    </p>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button className={styles.boton} style={boton} onClick={() => cancelar(c)}>
+                        {t.confirmar}
+                      </button>
+                      <button className={`${styles.boton} ${styles.botonSecundario}`} style={boton} onClick={() => setConfirmando(null)}>
+                        {t.noCancelar}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </>
+      )}
     </main>
   );
 }
