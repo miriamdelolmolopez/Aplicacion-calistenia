@@ -217,6 +217,14 @@
   font-weight: 600;
 }
 
+.bonoFila {
+  border-top: 1px solid var(--linea);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .dia {
   margin: 8px 0;
   font-size: 1.25rem;

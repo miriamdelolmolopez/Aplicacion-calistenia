@@ -26,6 +26,16 @@ export function textoDia(iso: string, idioma: "es" | "en" = "es"): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+// Fecha corta, por ejemplo "19 oct 2026".
+export function fechaCorta(iso: string, idioma: "es" | "en" = "es"): string {
+  return new Intl.DateTimeFormat(idioma === "es" ? "es-ES" : "en-GB", {
+    timeZone: ZONA,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(iso));
+}
+
 export function textoHora(iso: string): string {
   return new Intl.DateTimeFormat("es-ES", {
     timeZone: ZONA,

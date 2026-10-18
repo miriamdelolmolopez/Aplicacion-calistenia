@@ -47,6 +47,9 @@
 - **Descuento de clase:** se descuenta al reservar y se devuelve si cancela a tiempo (hasta 2 h antes, editable). No hace falta marcar asistencia.
 - **Reserva:** hasta el momento de empezar la clase si quedan plazas; como máximo con 2 semanas de antelación.
 - **Cancelar por lluvia:** un solo botón; la app pregunta cuántos días se amplía el bono a todos los apuntados, cancela la clase y les devuelve su clase.
+- **Bonos (Parte B):** clase suelta 15 € y 30 días; mensuales (4/8/12 clases) 30 días; bono de 10 clases 90 días.
+- **Bonos seguidos del mismo servicio:** el nuevo empieza a contar cuando se agota el anterior o cuando caduca (lo que ocurra antes). Solo hay un bono activo por persona y servicio; los demás esperan en cola.
+- **Reservar con pago pendiente:** permitido en servicios presenciales; el bono se usa desde el principio y el pago pendiente se avisa a Miriam y al alumno. (Para servicios online, más adelante, el bono solo se activará una vez pagado.)
 - **Avisos:** hasta la Fase 6 el aviso de plaza liberada se ve dentro de la app y el de mínimo no alcanzado como alerta en el panel.
 - **Horario inicial (lunes y miércoles):** 17:30 pino intermedio (6 plazas) · 18:35 pino principiantes (6) · 19:40 calistenia (10).
 

@@ -50,6 +50,9 @@ export default async function Administracion() {
         <Link href="/admin/clases" className={styles.boton}>
           Clases y horario
         </Link>
+        <Link href="/admin/bonos" className={styles.boton}>
+          Bonos y pagos
+        </Link>
       </nav>
 
       <FormularioAlta />
