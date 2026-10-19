@@ -452,3 +452,9 @@
   font-weight: 700;
   font-family: var(--font-titulos), Georgia, serif;
 }
+
+.barraMini {
+  height: 6px;
+  width: 80%;
+  margin: 4px auto 2px;
+}

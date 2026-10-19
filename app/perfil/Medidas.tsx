@@ -24,6 +24,9 @@ const CAMPOS: { campo: Campo; etiqueta: ClaveTexto; unidad: string }[] = [
   { campo: "muslo_cm", etiqueta: "musloCm", unidad: "cm" },
 ];
 
+// Las alumnas solo apuntan el peso; la administradora ve también lo que ya hubiera guardado de otras medidas.
+const CAMPOS_FORM = CAMPOS.filter((c) => c.campo === "peso_kg");
+
 type Datos = { filas: Fila[]; nacimiento: string | null };
 
 async function cargar(userId?: string): Promise<Datos> {
@@ -73,6 +76,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
   const imc = peso !== null && altura !== null ? calcularImc(peso, altura) : null;
   const esMenor = nacimiento ? edadDe(nacimiento) < 18 : false;
 
+  const visibles = soloLectura ? CAMPOS : CAMPOS_FORM;
   const puntos = filas
     .filter((f) => f[campoGrafica] !== null)
     .map((f) => ({ fecha: f.fecha, valor: f[campoGrafica] as number }));
@@ -144,7 +148,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
             <input id="fecha-medida" name="fecha" type="date" defaultValue={hoyIso()} max={hoyIso()} />
           </div>
           <div className={estilos.rejillaMedidas}>
-            {CAMPOS.map(({ campo, etiqueta }) => (
+            {CAMPOS_FORM.map(({ campo, etiqueta }) => (
               <div key={campo} className={styles.campo}>
                 <label htmlFor={campo}>{t[etiqueta]}</label>
                 <input id={campo} name={campo} inputMode="decimal" />
@@ -166,18 +170,20 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
         <p className={styles.ayuda}>{t.sinMedidas}</p>
       ) : (
         <>
-          <div className={estilos.selectorMedida}>
-            <label>
-              {t.medidaLabel}
-              <select value={campoGrafica} onChange={(e) => setCampoGrafica(e.target.value as Campo)}>
-                {CAMPOS.filter((c) => filas.some((f) => f[c.campo] !== null)).map((c) => (
-                  <option key={c.campo} value={c.campo}>
-                    {t[c.etiqueta]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          {visibles.length > 1 && (
+            <div className={estilos.selectorMedida}>
+              <label>
+                {t.medidaLabel}
+                <select value={campoGrafica} onChange={(e) => setCampoGrafica(e.target.value as Campo)}>
+                  {visibles.filter((c) => filas.some((f) => f[c.campo] !== null)).map((c) => (
+                    <option key={c.campo} value={c.campo}>
+                      {t[c.etiqueta]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
           <GraficaLinea puntos={puntos} unidad={unidad} idioma={idioma} />
 
           <details className={estilos.historial}>
@@ -187,7 +193,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
                 <li key={f.id}>
                   <span>
                     <strong>{fechaCorta(f.fecha, idioma)}</strong>{" "}
-                    {CAMPOS.filter((c) => f[c.campo] !== null)
+                    {visibles.filter((c) => f[c.campo] !== null)
                       .map((c) => `${f[c.campo]} ${c.unidad}`)
                       .join(" · ")}
                   </span>

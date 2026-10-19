@@ -164,9 +164,27 @@ export default function Perfil() {
     );
   }
 
-  const segundo = online && !presencial
-    ? { valor: r ? `${r.sesiones_semana}/${r.objetivo_semana}` : "—", etiqueta: `${t.sesiones} ${t.sesionesAyuda}` }
-    : { valor: r ? String(r.reservas_tarifa) : "—", etiqueta: t.reservas };
+  // Números de la cabecera: con presencial y online salen los dos, cada uno con su barra (2/8, 1/3…).
+  type Numero = { valor: string; etiqueta: string; fraccion?: number };
+  const numeros: Numero[] = [{ valor: r ? String(r.dias_activo) : "—", etiqueta: t.diasActivo }];
+  if (presencial || !online) {
+    const totalClases = datos.bonos
+      .filter((b) => b.estado === "activo" && b.servicio !== "online")
+      .reduce((suma, b) => suma + b.clasesTotal, 0);
+    numeros.push({
+      valor: r ? (totalClases > 0 ? `${r.reservas_tarifa}/${totalClases}` : String(r.reservas_tarifa)) : "—",
+      etiqueta: t.reservas,
+      fraccion: r && totalClases > 0 ? Math.min(1, r.reservas_tarifa / totalClases) : undefined,
+    });
+  }
+  if (online) {
+    numeros.push({
+      valor: r ? `${r.sesiones_semana}/${r.objetivo_semana}` : "—",
+      etiqueta: `${t.sesiones} ${t.sesionesAyuda}`,
+      fraccion: r ? Math.min(1, r.sesiones_semana / r.objetivo_semana) : undefined,
+    });
+  }
+  numeros.push({ valor: "0", etiqueta: t.cursos });
 
   const opcionesLista: { href: string; texto: string; icono: string }[] = [
     { href: "/perfil/datos", texto: t.misDatos, icono: "👤" },
@@ -213,19 +231,18 @@ export default function Perfil() {
       </section>
 
       {!esAdmin && (
-        <section className={estilos.numeros}>
-          <div>
-            <strong>{r ? r.dias_activo : "—"}</strong>
-            <span>{t.diasActivo}</span>
-          </div>
-          <div>
-            <strong>{segundo.valor}</strong>
-            <span>{segundo.etiqueta}</span>
-          </div>
-          <div>
-            <strong>0</strong>
-            <span>{t.cursos}</span>
-          </div>
+        <section className={estilos.numeros} style={{ gridTemplateColumns: `repeat(${numeros.length}, 1fr)` }}>
+          {numeros.map((n) => (
+            <div key={n.etiqueta}>
+              <strong>{n.valor}</strong>
+              {n.fraccion !== undefined && (
+                <div className={`${estilos.barraFondo} ${estilos.barraMini}`} aria-hidden="true">
+                  <div className={estilos.barraRelleno} style={{ width: `${Math.round(n.fraccion * 100)}%` }} />
+                </div>
+              )}
+              <span>{n.etiqueta}</span>
+            </div>
+          ))}
         </section>
       )}
 
