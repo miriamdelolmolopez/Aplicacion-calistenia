@@ -10,6 +10,7 @@ import Icono, { type NombreIcono } from "../Icono";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import estilos from "./entrenamiento.module.css";
+import CalendarioEntreno from "./CalendarioEntreno";
 import PestanasEntreno from "./PestanasEntreno";
 import { claveDia } from "@/lib/fechas";
 import { fondoFoto } from "@/lib/fotos";
@@ -174,6 +175,10 @@ export default function Entrenamiento() {
               </li>
             ))}
           </ul>
+
+          <div style={{ marginTop: 14 }}>
+            <CalendarioEntreno />
+          </div>
         </>
       )}
     </main>

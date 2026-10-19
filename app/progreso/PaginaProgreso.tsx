@@ -15,8 +15,8 @@ import Progreso from "./Progreso";
 
 // Pantalla de progreso.
 //  · Con entrenamiento online: cuelga de Entrenamiento (pestaña Progreso) y tiene dos
-//    sub-pestañas: Evolución (gráficas) y Estadísticas.
-//  · Solo con clases: una sola pantalla con sus estadísticas.
+//    sub-pestañas: Evolución (planta, números y objetivos) y Estadísticas (gráficas de ejercicios).
+//  · Solo con clases: una sola pantalla con su progreso.
 export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadisticas" }) {
   const [idioma] = useIdioma();
   const t = textos[idioma];
@@ -26,11 +26,11 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
   const online = cargado && (perfil.servicios.includes("online") || perfil.planOnline);
   const presencial = cargado && (perfil.servicios.includes("grupal") || perfil.servicios.includes("individual"));
 
-  // Sin online no hay pestaña de evolución: todo está en Estadísticas.
-  const sinEvolucion = cargado && !online && vista === "evolucion";
+  // Sin online no hay gráficas de ejercicios: todo lo suyo está en la primera pantalla.
+  const sinGraficas = cargado && !online && vista === "estadisticas";
   useEffect(() => {
-    if (sinEvolucion) router.replace("/progreso/estadisticas");
-  }, [sinEvolucion, router]);
+    if (sinGraficas) router.replace("/progreso");
+  }, [sinGraficas, router]);
 
   return (
     <main className={styles.pagina}>
@@ -53,7 +53,7 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
         <CabeceraFoto foto="progreso" titulo={t.progresoTitulo} />
       )}
 
-      {!cargado || sinEvolucion ? (
+      {!cargado || sinGraficas ? (
         <p className={styles.aviso}>{t.cargando}</p>
       ) : (
         <Progreso online={online} presencial={presencial} vista={vista} />

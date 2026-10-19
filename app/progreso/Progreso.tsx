@@ -174,7 +174,6 @@ export default function Progreso({
   const [datos, setDatos] = useState<Datos | null>(null);
   const [ejercicioSel, setEjercicioSel] = useState<string>("");
   const [campoSel, setCampoSel] = useState<Campo | "">("");
-  const [categoria, setCategoria] = useState<string>("todas");
 
   useEffect(() => {
     cargar(userId, admin).then(setDatos);
@@ -188,7 +187,8 @@ export default function Progreso({
   const { prog, entrenos, objetivos } = datos;
   const verOnline = online;
   const verClases = presencial || !online;
-  const verEstadisticas = vista === "todo" || vista === "estadisticas";
+  // La planta, los números y los objetivos van en «Evolución»; las gráficas de ejercicios, en «Estadísticas».
+  const verEstadisticas = vista === "todo" || vista === "evolucion";
 
   // Ejercicios con datos (series hechas) y mejor valor de cada uno.
   const ejerciciosConDatos = new Map<string, { nombre: string; tipo: string }>();
@@ -433,7 +433,7 @@ export default function Progreso({
       </section>
       )}
 
-      {vista === "evolucion" && <Evolucion datos={datos} categoria={categoria} cambiarCategoria={setCategoria} t={t} idioma={idioma} unidad={unidad} campoDeEjercicio={campoPorDefecto} />}
+      {vista === "estadisticas" && <Evolucion datos={datos} t={t} idioma={idioma} unidad={unidad} campoDeEjercicio={campoPorDefecto} />}
 
       {vista === "todo" && (
       <section className={estilos.tarjeta}>
@@ -579,25 +579,41 @@ function Grafica({
   );
 }
 
-// Evolución: una gráfica pequeña por ejercicio, con filtros por categoría (Todas, Pino…).
+const TEXTO_ELEGIR = {
+  es: { elegir: "Elegir ejercicios", todos: "Todos", ninguno: "Ninguno", vacio: "Marca algún ejercicio para ver su gráfica." },
+  en: { elegir: "Choose exercises", todos: "All", ninguno: "None", vacio: "Tick an exercise to see its chart." },
+};
+const CLAVE_ELEGIDOS = "evolucionEjercicios";
+
+function leerElegidos(): string[] | null {
+  try {
+    const guardado = localStorage.getItem(CLAVE_ELEGIDOS);
+    const lista = guardado ? JSON.parse(guardado) : null;
+    return Array.isArray(lista) ? lista.filter((x): x is string => typeof x === "string") : null;
+  } catch {
+    return null;
+  }
+}
+
+// Una gráfica pequeña por ejercicio. Los ejercicios se eligen en un desplegable con casillas.
 function Evolucion({
   datos,
-  categoria,
-  cambiarCategoria,
   t,
   idioma,
   unidad,
   campoDeEjercicio,
 }: {
   datos: Datos;
-  categoria: string;
-  cambiarCategoria: (c: string) => void;
   t: (typeof textos)["es"];
   idioma: "es" | "en";
   unidad: (c: Campo) => string;
   campoDeEjercicio: (tipo: string) => Campo;
 }) {
   const { entrenos, categorias } = datos;
+  const tx = TEXTO_ELEGIR[idioma];
+  // null = todavía no ha elegido: salen los 3 ejercicios con más datos.
+  const [elegidos, setElegidos] = useState<string[] | null>(leerElegidos);
+  const [abierto, setAbierto] = useState(false);
 
   const ejercicios = new Map<string, { nombre: string; tipo: string }>();
   for (const e of entrenos) {
@@ -632,27 +648,58 @@ function Evolucion({
     .filter((e) => e.puntos.length > 0)
     .sort((a, b) => a.nombre.localeCompare(b.nombre));
 
+  const porDefecto = [...todos].sort((a, b) => b.puntos.length - a.puntos.length).slice(0, 3).map((e) => e.id);
+  const marcados = new Set(elegidos ?? porDefecto);
+  const visibles = todos.filter((e) => marcados.has(e.id));
   const presentes = CATEGORIAS.filter((c) => todos.some((e) => e.categoria === c.valor));
-  const visibles = categoria === "todas" ? todos : todos.filter((e) => e.categoria === categoria);
+
+  function cambiar(ids: string[]) {
+    setElegidos(ids);
+    try {
+      localStorage.setItem(CLAVE_ELEGIDOS, JSON.stringify(ids));
+    } catch {
+      // sin almacenamiento: la elección vale mientras la pantalla esté abierta
+    }
+  }
+  const alternar = (id: string) => cambiar(marcados.has(id) ? [...marcados].filter((x) => x !== id) : [...marcados, id]);
 
   return (
     <>
-      <div className={estilos.chips} role="tablist">
-        {[{ valor: "todas", es: t.filtroTodas, en: t.filtroTodas }, ...presentes].map((c) => (
-          <button
-            key={c.valor}
-            type="button"
-            role="tab"
-            aria-selected={categoria === c.valor}
-            className={`${estilos.chip} ${categoria === c.valor ? estilos.chipActivo : ""}`}
-            onClick={() => cambiarCategoria(c.valor)}
-          >
-            {idioma === "en" ? c.en : c.es}
+      {todos.length > 0 && (
+        <div className={estilos.selectorEj}>
+          <button type="button" className={estilos.selectorBoton} aria-expanded={abierto} onClick={() => setAbierto(!abierto)}>
+            {tx.elegir} ({visibles.length})<span aria-hidden="true">{abierto ? "▴" : "▾"}</span>
           </button>
-        ))}
-      </div>
+          {abierto && (
+            <div className={estilos.selectorPanel}>
+              <div className={estilos.selectorAcciones}>
+                <button type="button" onClick={() => cambiar(todos.map((e) => e.id))}>
+                  {tx.todos}
+                </button>
+                <button type="button" onClick={() => cambiar([])}>
+                  {tx.ninguno}
+                </button>
+              </div>
+              {presentes.map((c) => (
+                <fieldset key={c.valor}>
+                  <legend>{idioma === "en" ? c.en : c.es}</legend>
+                  {todos
+                    .filter((e) => e.categoria === c.valor)
+                    .map((e) => (
+                      <label key={e.id}>
+                        <input type="checkbox" checked={marcados.has(e.id)} onChange={() => alternar(e.id)} />
+                        {e.nombre}
+                      </label>
+                    ))}
+                </fieldset>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {todos.length === 0 && <p className={estilos.aviso}>{t.sinDatosGrafica}</p>}
+      {todos.length > 0 && visibles.length === 0 && <p className={estilos.aviso}>{tx.vacio}</p>}
 
       {visibles.map((e) => {
         const primero = e.puntos[0];
