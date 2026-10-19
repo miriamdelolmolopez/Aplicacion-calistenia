@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 import styles from "./formularios.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
@@ -13,9 +14,18 @@ export default function BarraSuperior({
 }) {
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
+  // Si se llegó desde el Perfil (?desde=perfil), «volver» lleva de nuevo al Perfil.
+  const desde = useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(window.location.search).get("desde"),
+    () => null,
+  );
 
   const enlace = izquierda ? (
-    <Link href={izquierda.href} className={styles.enlaceBarra}>
+    <Link
+      href={desde === "perfil" && izquierda.texto === "volver" ? "/perfil" : izquierda.href}
+      className={styles.enlaceBarra}
+    >
       {izquierda.texto === "volver" ? "← " + t.volver : t.entrar}
     </Link>
   ) : (

@@ -164,8 +164,8 @@ export default function Perfil() {
     );
   }
 
-  // Números de la cabecera: con presencial y online salen los dos, cada uno con su barra (2/8, 1/3…).
-  type Numero = { valor: string; etiqueta: string; fraccion?: number };
+  // Números de la cabecera: con presencial y online salen los dos (2/8, 1/3…).
+  type Numero = { valor: string; etiqueta: string };
   const numeros: Numero[] = [{ valor: r ? String(r.dias_activo) : "—", etiqueta: t.diasActivo }];
   if (presencial || !online) {
     const totalClases = datos.bonos
@@ -174,14 +174,12 @@ export default function Perfil() {
     numeros.push({
       valor: r ? (totalClases > 0 ? `${r.reservas_tarifa}/${totalClases}` : String(r.reservas_tarifa)) : "—",
       etiqueta: t.reservas,
-      fraccion: r && totalClases > 0 ? Math.min(1, r.reservas_tarifa / totalClases) : undefined,
     });
   }
   if (online) {
     numeros.push({
       valor: r ? `${r.sesiones_semana}/${r.objetivo_semana}` : "—",
       etiqueta: `${t.sesiones} ${t.sesionesAyuda}`,
-      fraccion: r ? Math.min(1, r.sesiones_semana / r.objetivo_semana) : undefined,
     });
   }
   numeros.push({ valor: "0", etiqueta: t.cursos });
@@ -189,8 +187,8 @@ export default function Perfil() {
   const opcionesLista: { href: string; texto: string; icono: string }[] = [
     { href: "/perfil/datos", texto: t.misDatos, icono: "👤" },
   ];
-  if (!esAdmin && presencial) opcionesLista.push({ href: "/clases/mis-reservas", texto: t.historialClases, icono: "📅" });
-  if (!esAdmin && online) opcionesLista.push({ href: "/rutina", texto: t.entrenamientos, icono: "🏋️" });
+  if (!esAdmin && presencial) opcionesLista.push({ href: "/clases/mis-reservas?desde=perfil", texto: t.historialClases, icono: "📅" });
+  if (!esAdmin && online) opcionesLista.push({ href: "/rutina?desde=perfil", texto: t.entrenamientos, icono: "🏋️" });
   opcionesLista.push({ href: "/perfil/calculadoras", texto: t.calculadoras, icono: "🧮" });
   opcionesLista.push({ href: "/perfil/contrasena", texto: t.cambiarContrasena, icono: "🔒" });
 
@@ -235,11 +233,6 @@ export default function Perfil() {
           {numeros.map((n) => (
             <div key={n.etiqueta}>
               <strong>{n.valor}</strong>
-              {n.fraccion !== undefined && (
-                <div className={`${estilos.barraFondo} ${estilos.barraMini}`} aria-hidden="true">
-                  <div className={estilos.barraRelleno} style={{ width: `${Math.round(n.fraccion * 100)}%` }} />
-                </div>
-              )}
               <span>{n.etiqueta}</span>
             </div>
           ))}
@@ -251,7 +244,7 @@ export default function Perfil() {
           <h2>{t.contratado}</h2>
           {datos.bonos.length === 0 && <p className={estilos.ayudaPerfil}>{t.sinBonos}</p>}
           {datos.bonos.map(barra)}
-          <Link href="/pagos" className={estilos.enlaceSuave}>
+          <Link href="/pagos?desde=perfil" className={estilos.enlaceSuave}>
             {t.verPagos} →
           </Link>
         </section>

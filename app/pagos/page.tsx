@@ -42,7 +42,7 @@ export default function MisPagos() {
 
   return (
     <main className={styles.pagina}>
-      <BarraSuperior />
+      <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto foto="portada" titulo={t.navPagos} />
 
       {pagos === null && <p className={styles.aviso}>{t.cargando}</p>}

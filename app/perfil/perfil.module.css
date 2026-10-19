@@ -453,8 +453,12 @@
   font-family: var(--font-titulos), Georgia, serif;
 }
 
-.barraMini {
-  height: 6px;
-  width: 80%;
-  margin: 4px auto 2px;
+.rejillaCalc > * {
+  min-width: 0;
+}
+
+.campoCalc input,
+.campoCalc select {
+  width: 100%;
+  box-sizing: border-box;
 }
