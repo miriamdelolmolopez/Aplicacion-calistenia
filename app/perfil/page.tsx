@@ -1,35 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
-import CabeceraFoto from "../CabeceraFoto";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
-import styles from "../formularios.module.css";
-import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
-import Medidas from "./Medidas";
+import { useMiPerfil } from "../useMiPerfil";
 import estilos from "./perfil.module.css";
 import { obtenerFotos, quitarFoto, subirFoto } from "./acciones";
+import { textosPerfil } from "./textosPerfil";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
-import { fechaNacimientoValida, telefonoValido } from "@/lib/validaciones";
+
+type Resumen = { dias_activo: number; reservas_tarifa: number; sesiones_semana: number; objetivo_semana: number };
 
 type Datos = {
-  id: string;
-  email: string;
-  rol: string;
   nombre: string;
-  apellidos: string;
-  telefono: string;
-  dni: string;
-  fecha: string;
-  sexo: string;
-  emNombre: string;
-  emTelefono: string;
+  email: string;
   foto: string | null;
   bonos: MiBono[];
+  resumen: Resumen | null;
 };
 
 async function cargar(): Promise<Datos | null> {
@@ -38,27 +29,21 @@ async function cargar(): Promise<Datos | null> {
   if (!sesion.user) return null;
   const { data: p } = await supabase
     .from("profiles")
-    .select(
-      "id, email, rol, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono",
-    )
+    .select("id, email, nombre, apellidos")
     .eq("id", sesion.user.id)
     .maybeSingle();
   if (!p) return null;
-  const fotos = await obtenerFotos([p.id]);
+  const [fotos, bonos, resumen] = await Promise.all([
+    obtenerFotos([p.id]),
+    obtenerMisBonos(),
+    supabase.rpc("resumen_perfil"),
+  ]);
   return {
-    id: p.id,
+    nombre: [p.nombre, p.apellidos].filter(Boolean).join(" "),
     email: p.email ?? "",
-    rol: p.rol,
-    nombre: p.nombre ?? "",
-    apellidos: p.apellidos ?? "",
-    telefono: p.telefono ?? "",
-    dni: p.dni ?? "",
-    fecha: p.fecha_nacimiento ?? "",
-    sexo: p.sexo ?? "",
-    emNombre: p.contacto_emergencia_nombre ?? "",
-    emTelefono: p.contacto_emergencia_telefono ?? "",
     foto: fotos[p.id] ?? null,
-    bonos: await obtenerMisBonos(),
+    bonos,
+    resumen: resumen.error ? null : (resumen.data as Resumen | null),
   };
 }
 
@@ -77,44 +62,35 @@ async function prepararFoto(archivo: File): Promise<Blob> {
   );
 }
 
+const DIA = 24 * 60 * 60 * 1000;
+
 export default function Perfil() {
   const [idioma] = useIdioma();
-  const t = textos[idioma];
+  const t = textosPerfil[idioma];
+  const mi = useMiPerfil();
   const [datos, setDatos] = useState<Datos | null>(null);
-  const [valores, setValores] = useState({ nombre: "", apellidos: "", telefono: "", fecha: "", sexo: "", emNombre: "", emTelefono: "" });
-  const [mensaje, setMensaje] = useState<{ ok: boolean; clave: ClaveTexto } | null>(null);
+  const [opciones, setOpciones] = useState(false);
   const [foto, setFoto] = useState<"quieta" | "subiendo">("quieta");
   const [errorFoto, setErrorFoto] = useState(false);
-  const [clave, setClave] = useState("");
-  const [mensajeClave, setMensajeClave] = useState<{ ok: boolean; clave: ClaveTexto } | null>(null);
+  const [ahora] = useState(() => Date.now());
 
   useEffect(() => {
-    cargar().then((d) => {
-      setDatos(d);
-      if (d) {
-        setValores({
-          nombre: d.nombre,
-          apellidos: d.apellidos,
-          telefono: d.telefono,
-          fecha: d.fecha,
-          sexo: d.sexo,
-          emNombre: d.emNombre,
-          emTelefono: d.emTelefono,
-        });
-      }
-    });
+    cargar().then(setDatos);
   }, []);
 
-  if (!datos) {
+  if (!datos || typeof mi !== "object" || mi === null) {
     return (
-      <main className={styles.pagina}>
+      <main className={estilos.perfilPagina}>
         <BarraSuperior />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <p className={estilos.ayudaPerfil}>{t.cargando}</p>
       </main>
     );
   }
 
-  const nombreCompleto = [datos.nombre, datos.apellidos].filter(Boolean).join(" ");
+  const esAdmin = mi.rol === "admin";
+  const online = mi.servicios.includes("online") || mi.planOnline;
+  const presencial = mi.servicios.includes("grupal") || mi.servicios.includes("individual");
+  const r = datos.resumen;
 
   async function elegirFoto(e: React.ChangeEvent<HTMLInputElement>) {
     const archivo = e.target.files?.[0];
@@ -125,198 +101,154 @@ export default function Perfil() {
     try {
       const f = new FormData();
       f.append("foto", new File([await prepararFoto(archivo)], "foto.jpg", { type: "image/jpeg" }));
-      const r = await subirFoto(f);
-      if (!r.ok) setErrorFoto(true);
+      const res = await subirFoto(f);
+      if (!res.ok) setErrorFoto(true);
     } catch {
       setErrorFoto(true);
     }
     setDatos(await cargar());
     setFoto("quieta");
+    setOpciones(false);
   }
 
   async function sinFoto() {
     await quitarFoto();
     setDatos(await cargar());
+    setOpciones(false);
   }
 
-  async function guardarDatos(e: FormEvent) {
-    e.preventDefault();
-    setMensaje(null);
-    if (
-      !valores.nombre.trim() ||
-      !valores.apellidos.trim() ||
-      !valores.emNombre.trim() ||
-      !telefonoValido(valores.telefono) ||
-      !telefonoValido(valores.emTelefono) ||
-      !fechaNacimientoValida(valores.fecha)
-    ) {
-      return setMensaje({ ok: false, clave: "errorCampo" });
+  const nombreServicio = (s: string) =>
+    s === "online" ? t.servicioOnline : s === "individual" ? t.servicioIndividual : t.servicioGrupal;
+
+  function barra(b: MiBono) {
+    const activo = b.estado === "activo";
+    let hecho = 0;
+    let total = 1;
+    let texto = "";
+    if (b.servicio === "online") {
+      const desde = b.activoDesde ? new Date(b.activoDesde).getTime() : null;
+      const hasta = b.caducaEn ? new Date(b.caducaEn).getTime() : null;
+      if (activo && desde !== null && hasta !== null) {
+        total = Math.max(1, Math.round((hasta - desde) / DIA));
+        hecho = Math.min(total, Math.max(0, Math.round((ahora - desde) / DIA)));
+      }
+      texto = `${hecho}/${total} ${t.diasDeTotal}`;
+    } else {
+      total = b.clasesTotal;
+      hecho = total - b.clasesRestantes;
+      texto = `${hecho}/${total} ${t.sesionesDeTotal}`;
     }
-    const { error } = await createClient()
-      .from("profiles")
-      .update({
-        nombre: valores.nombre.trim(),
-        apellidos: valores.apellidos.trim(),
-        telefono: valores.telefono.trim(),
-        fecha_nacimiento: valores.fecha,
-        sexo: valores.sexo === "" ? null : valores.sexo,
-        contacto_emergencia_nombre: valores.emNombre.trim(),
-        contacto_emergencia_telefono: valores.emTelefono.trim(),
-      })
-      .eq("id", datos!.id);
-    if (error) return setMensaje({ ok: false, clave: "errorGeneral" });
-    setMensaje({ ok: true, clave: "cambiosGuardados" });
-    setDatos(await cargar());
+    return (
+      <div key={b.id} className={estilos.bonoTarjeta}>
+        <div className={estilos.bonoCabecera}>
+          <strong>
+            {!activo && `${t.siguiente}: `}
+            {b.nombre || nombreServicio(b.servicio)}
+          </strong>
+          <span>{texto}</span>
+        </div>
+        <div
+          className={estilos.barraFondo}
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={hecho}
+        >
+          <div className={estilos.barraRelleno} style={{ width: `${Math.round((hecho / total) * 100)}%` }} />
+        </div>
+        <small>
+          {nombreServicio(b.servicio)}
+          {activo ? (b.caducaEn ? ` · ${t.caduca} ${fechaCorta(b.caducaEn, idioma)}` : "") : ` · ${t.enEspera}`}
+        </small>
+      </div>
+    );
   }
 
-  async function cambiarClave(e: FormEvent) {
-    e.preventDefault();
-    setMensajeClave(null);
-    if (clave.length < 8) return setMensajeClave({ ok: false, clave: "errorContrasenaCorta" });
-    const { error } = await createClient().auth.updateUser({ password: clave });
-    if (error) return setMensajeClave({ ok: false, clave: "errorGeneral" });
-    setClave("");
-    setMensajeClave({ ok: true, clave: "contrasenaCambiada" });
-  }
+  const segundo = online && !presencial
+    ? { valor: r ? `${r.sesiones_semana}/${r.objetivo_semana}` : "—", etiqueta: `${t.sesiones} ${t.sesionesAyuda}` }
+    : { valor: r ? String(r.reservas_tarifa) : "—", etiqueta: t.reservas };
 
-  const campo = (id: keyof typeof valores, etiqueta: ClaveTexto, tipo = "text") => (
-    <div className={styles.campo}>
-      <label htmlFor={id}>{t[etiqueta]}</label>
-      <input
-        id={id}
-        type={tipo}
-        value={valores[id]}
-        onChange={(e) => setValores((v) => ({ ...v, [id]: e.target.value }))}
-      />
-    </div>
-  );
+  const opcionesLista: { href: string; texto: string; icono: string }[] = [
+    { href: "/perfil/datos", texto: t.misDatos, icono: "👤" },
+  ];
+  if (!esAdmin && presencial) opcionesLista.push({ href: "/clases/mis-reservas", texto: t.historialClases, icono: "📅" });
+  if (!esAdmin && online) opcionesLista.push({ href: "/rutina", texto: t.entrenamientos, icono: "🏋️" });
+  opcionesLista.push({ href: "/perfil/calculadoras", texto: t.calculadoras, icono: "🧮" });
+  opcionesLista.push({ href: "/perfil/contrasena", texto: t.cambiarContrasena, icono: "🔒" });
 
   return (
-    <main className={styles.pagina}>
+    <main className={estilos.perfilPagina}>
       <BarraSuperior />
-      <CabeceraFoto foto="inicio" titulo={t.perfilTitulo} />
+      <h1 className={estilos.perfilTitulo}>{t.titulo}</h1>
 
-      <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-        <div className={estilos.cabeceraPerfil}>
-          <Avatar nombre={nombreCompleto} url={datos.foto} tamano={88} />
-          <div>
-            <strong>{nombreCompleto || datos.email}</strong>
-            <div className={styles.ayuda}>{datos.email}</div>
-            <div className={estilos.accionesFoto}>
-              <label className={styles.botonSecundario}>
-                {foto === "subiendo" ? t.subiendoFoto : datos.foto ? t.cambiarFoto : t.ponerFoto}
-                <input type="file" accept="image/*" hidden disabled={foto === "subiendo"} onChange={elegirFoto} />
-              </label>
-              {datos.foto && (
-                <button type="button" className={styles.botonSecundario} onClick={sinFoto}>
-                  {t.quitarFoto}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-        {errorFoto && <p className={styles.error}>{t.errorFoto}</p>}
-      </section>
-
-      <form className={`${styles.tarjeta} ${estilos.seccion}`} onSubmit={guardarDatos} noValidate>
-        <h2>{t.misDatos}</h2>
-        {campo("nombre", "nombre")}
-        {campo("apellidos", "apellidos")}
-        {campo("telefono", "telefono", "tel")}
-        {campo("fecha", "fechaNacimiento", "date")}
-        <div className={styles.campo}>
-          <label htmlFor="sexo">{t.sexoLabel}</label>
-          <select
-            id="sexo"
-            value={valores.sexo}
-            onChange={(e) => setValores((v) => ({ ...v, sexo: e.target.value }))}
-          >
-            <option value="">{t.sexoNoIndicar}</option>
-            <option value="mujer">{t.sexoMujer}</option>
-            <option value="hombre">{t.sexoHombre}</option>
-            <option value="otro">{t.sexoOtro}</option>
-          </select>
-        </div>
-        <div className={styles.campo}>
-          <label htmlFor="dni">{t.dni}</label>
-          <input id="dni" value={datos.dni} disabled readOnly />
-          <p className={styles.ayuda}>{t.dniSoloMiriam}</p>
-        </div>
-        <fieldset className={styles.grupo}>
-          <legend>{t.emergenciaTitulo}</legend>
-          {campo("emNombre", "emergenciaNombre")}
-          {campo("emTelefono", "emergenciaTelefono", "tel")}
-        </fieldset>
-        {mensaje && (
-          <p className={mensaje.ok ? styles.aviso : styles.error} role="alert">
-            {t[mensaje.clave]}
-          </p>
-        )}
-        <button type="submit" className={styles.boton}>
-          {t.guardarCambios}
+      <section className={estilos.cabecera}>
+        <button
+          type="button"
+          className={estilos.fotoBoton}
+          onClick={() => setOpciones((o) => !o)}
+          aria-expanded={opciones}
+          aria-label={t.fotoOpciones}
+        >
+          <Avatar nombre={datos.nombre} url={datos.foto} tamano={116} />
         </button>
-      </form>
-
-      <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-        <h2>{t.medidasTitulo}</h2>
-        <Medidas />
+        {opciones && (
+          <div className={estilos.fotoOpciones} role="group" aria-label={t.fotoOpciones}>
+            <label className={estilos.opcionFoto}>
+              {foto === "subiendo" ? t.fotoSubiendo : datos.foto ? t.fotoCambiar : t.fotoPoner}
+              <input type="file" accept="image/*" hidden disabled={foto === "subiendo"} onChange={elegirFoto} />
+            </label>
+            {datos.foto && (
+              <button type="button" className={estilos.opcionFoto} onClick={sinFoto}>
+                {t.fotoEliminar}
+              </button>
+            )}
+            <button type="button" className={estilos.opcionFoto} onClick={() => setOpciones(false)}>
+              {t.fotoCancelar}
+            </button>
+          </div>
+        )}
+        {errorFoto && <p className={estilos.errorPerfil}>{t.fotoError}</p>}
+        <h2 className={estilos.nombre}>{datos.nombre || datos.email}</h2>
+        <p className={estilos.correo}>{datos.email}</p>
       </section>
 
-      {(datos.rol === "alumno" || datos.bonos.length > 0) && (
-        <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-          <h2>{t.miBono}</h2>
-          {datos.bonos.length === 0 && <p className={styles.ayuda}>{t.sinBono}</p>}
-          {datos.bonos.map((b) => (
-            <div key={b.id} className={styles.aviso}>
-              <strong>
-                {b.estado === "en_cola" ? `${t.siguienteBono}: ` : ""}
-                {b.nombre}
-              </strong>
-              {b.servicio === "online" ? (
-                <div>
-                  {t.planOnline}
-                  {b.estado === "activo"
-                    ? b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`
-                    : ` · ${t.enEspera}`}
-                </div>
-              ) : (
-                <div>
-                  {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
-                  {b.estado === "activo"
-                    ? b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`
-                    : ` · ${t.enEspera}`}
-                </div>
-              )}
-              {b.pagoPendiente && <div>{t.pagoPendiente}</div>}
-            </div>
-          ))}
-          <Link href="/pagos" className={styles.botonSecundario}>
-            {t.navPagos}
+      {!esAdmin && (
+        <section className={estilos.numeros}>
+          <div>
+            <strong>{r ? r.dias_activo : "—"}</strong>
+            <span>{t.diasActivo}</span>
+          </div>
+          <div>
+            <strong>{segundo.valor}</strong>
+            <span>{segundo.etiqueta}</span>
+          </div>
+          <div>
+            <strong>0</strong>
+            <span>{t.cursos}</span>
+          </div>
+        </section>
+      )}
+
+      {!esAdmin && (
+        <section className={estilos.bonos}>
+          <h2>{t.contratado}</h2>
+          {datos.bonos.length === 0 && <p className={estilos.ayudaPerfil}>{t.sinBonos}</p>}
+          {datos.bonos.map(barra)}
+          <Link href="/pagos" className={estilos.enlaceSuave}>
+            {t.verPagos} →
           </Link>
         </section>
       )}
 
-      <form className={`${styles.tarjeta} ${estilos.seccion}`} onSubmit={cambiarClave} noValidate>
-        <h2>{t.cambiarContrasena}</h2>
-        <div className={styles.campo}>
-          <label htmlFor="clave-nueva">{t.contrasenaNueva}</label>
-          <input
-            id="clave-nueva"
-            type="password"
-            autoComplete="new-password"
-            value={clave}
-            onChange={(e) => setClave(e.target.value)}
-          />
-        </div>
-        {mensajeClave && (
-          <p className={mensajeClave.ok ? styles.aviso : styles.error} role="alert">
-            {t[mensajeClave.clave]}
-          </p>
-        )}
-        <button type="submit" className={styles.botonSecundario}>
-          {t.cambiarContrasena}
-        </button>
-      </form>
+      <nav className={estilos.lista} aria-label={t.titulo}>
+        {opcionesLista.map((o) => (
+          <Link key={o.href} href={o.href} className={estilos.fila}>
+            <span aria-hidden="true">{o.icono}</span>
+            <span className={estilos.filaTexto}>{o.texto}</span>
+            <span aria-hidden="true">›</span>
+          </Link>
+        ))}
+      </nav>
     </main>
   );
 }

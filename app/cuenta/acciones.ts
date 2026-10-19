@@ -25,6 +25,7 @@ export type MiBono = {
   nombre: string;
   clasesRestantes: number;
   clasesTotal: number;
+  activoDesde: string | null;
   caducaEn: string | null;
   pagoPendiente: boolean;
 };
@@ -35,6 +36,7 @@ type Fila = {
   estado: string;
   clases_total: number;
   clases_restantes: number;
+  activo_desde: string | null;
   caduca_en: string | null;
   tipos_bono: { nombre: string } | null;
   pagos: { estado: string }[];
@@ -54,7 +56,7 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
   const { data } = await supabase
     .from("bonos")
     .select(
-      "id, servicio, estado, clases_total, clases_restantes, caduca_en, tipos_bono(nombre), pagos(estado)",
+      "id, servicio, estado, clases_total, clases_restantes, activo_desde, caduca_en, tipos_bono(nombre), pagos(estado)",
     )
     .in("estado", ["activo", "en_cola"])
     .order("creado_en");
@@ -72,6 +74,7 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
     nombre: b.tipos_bono?.nombre ?? "",
     clasesRestantes: b.clases_restantes,
     clasesTotal: b.clases_total,
+    activoDesde: b.activo_desde,
     caducaEn: b.caduca_en,
     pagoPendiente: b.pagos.some((p) => p.estado === "pendiente"),
   }));

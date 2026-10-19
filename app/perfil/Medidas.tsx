@@ -120,7 +120,8 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
 
   return (
     <div className={estilos.bloque}>
-      <div className={estilos.imc}>
+      {/* La calculadora de IMC ahora está en Perfil > Calculadoras; aquí solo la ve la administradora. */}
+      {soloLectura && <div className={estilos.imc}>
         <strong>{t.imcTitulo}</strong>
         {imc === null ? (
           <p className={styles.ayuda}>{t.imcFalta}</p>
@@ -133,7 +134,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
             <p className={styles.ayuda}>{t.imcNota}</p>
           </>
         )}
-      </div>
+      </div>}
 
       {!soloLectura && (
         <form onSubmit={guardar} className={estilos.formMedidas}>
