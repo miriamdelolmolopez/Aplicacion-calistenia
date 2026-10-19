@@ -26,6 +26,7 @@
   font: inherit;
   font-size: 0.68rem;
   font-weight: 600;
+  white-space: nowrap;
   color: var(--secundario);
   text-decoration: none;
   background: transparent;

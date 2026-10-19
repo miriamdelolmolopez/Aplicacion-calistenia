@@ -13,10 +13,12 @@ export default function ReservaConfirmada({
   clase,
   idioma,
   alVer,
+  alVolver,
 }: {
   clase: ClaseConfirmada;
   idioma: "es" | "en";
   alVer: () => void;
+  alVolver: () => void;
 }) {
   const t = textos[idioma];
   const [eligiendo, setEligiendo] = useState(false);
@@ -33,6 +35,9 @@ export default function ReservaConfirmada({
 
   return (
     <div className={estilos.pantalla} role="dialog" aria-modal="true" aria-label={t.reservaConfirmada}>
+      <button type="button" className={estilos.volver} onClick={alVolver}>
+        ← {t.volver}
+      </button>
       <div className={estilos.contenido}>
         <div className={estilos.check} aria-hidden="true">
           <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

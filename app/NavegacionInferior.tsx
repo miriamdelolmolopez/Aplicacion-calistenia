@@ -30,7 +30,7 @@ function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"]): Pestana[] {
   const lista: Pestana[] = [{ href: RUTAS.inicio, icono: "inicio", texto: t.navInicio }];
   if (ver.includes("reservar")) lista.push({ href: RUTAS.reservar, icono: "reservar", texto: t.tabReservas });
   if (ver.includes("rutina")) lista.push({ href: RUTAS.rutina, icono: "rutina", texto: t.tabEntreno });
-  if (ver.includes("progreso")) lista.push({ href: RUTAS.progreso, icono: "progreso", texto: t.miProgreso });
+  if (ver.includes("progreso")) lista.push({ href: RUTAS.progreso, icono: "progreso", texto: t.progresoCorto });
   lista.push({ href: RUTAS.perfil, icono: "perfil", texto: t.perfilTitulo });
   return lista;
 }

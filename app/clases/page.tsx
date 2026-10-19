@@ -400,7 +400,23 @@ export default function Clases() {
                   <p className={estilos.plazas}>{completa ? t.huecoOcupado : t.huecoLibre}</p>
                 )}
 
-                {!cancelada && !personal && (
+                {/* Quien está de prueba solo ve cuántas plazas de prueba quedan, no las plazas de la clase. */}
+                {!cancelada && !personal && esInvitado && (
+                  <>
+                    <div className={estilos.cuadrados} aria-hidden="true">
+                      {Array.from({ length: completa ? 0 : pruebaLibres }, (_, i) => (
+                        <span key={i} className={`${estilos.cuadrado} ${estilos.libre}`} />
+                      ))}
+                    </div>
+                    <p className={estilos.plazas}>
+                      {completa || pruebaLibres === 0
+                        ? t.sinPlazasPrueba
+                        : `${pruebaLibres} ${pruebaLibres === 1 ? t.pruebaLibre : t.pruebaLibres}`}
+                    </p>
+                  </>
+                )}
+
+                {!cancelada && !personal && !esInvitado && (
                   <>
                     <button
                       type="button"
@@ -439,7 +455,6 @@ export default function Clases() {
 
                     <p className={estilos.plazas}>
                       {libres} {libres === 1 ? t.libre : t.libres} · {c.ocupadas}/{c.plazas} {t.plazasTotales}
-                      {esInvitado && !completa && ` · ${pruebaLibres} ${pruebaLibres === 1 ? t.pruebaLibre : t.pruebaLibres}`}
                       {c.hay_espera > 0 && ` · ${t.listaEspera}: ${c.hay_espera}`}
                     </p>
                   </>
@@ -575,6 +590,7 @@ export default function Clases() {
           clase={confirmada}
           idioma={idioma}
           alVer={() => router.push("/clases/mis-reservas")}
+          alVolver={() => setConfirmada(null)}
         />
       )}
     </main>
