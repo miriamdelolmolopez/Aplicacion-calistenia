@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import { colorDeTipo, PALETA_CLASES } from "@/lib/colores";
 import {
   apuntarAlumno,
   cambiarAjustes,
@@ -112,9 +113,11 @@ export function FormularioTipo({
     duracion_min: number;
     activo: boolean;
     servicio: string;
+    color: string | null;
   };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
+  const colorActual = colorDeTipo(tipo.color, tipo.nombre);
   return (
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
       <input type="hidden" name="tipoId" value={tipo.id} />
@@ -173,6 +176,18 @@ export function FormularioTipo({
           defaultValue={tipo.plazas_prueba}
         />
       </div>
+      <fieldset className={styles.grupo}>
+        <legend>Color en el calendario de Mis reservas</legend>
+        <div className={styles.muestras}>
+          {PALETA_CLASES.map((p) => (
+            <label key={p.color} className={styles.muestra} title={p.nombre}>
+              <input type="radio" name="color" value={p.color} defaultChecked={p.color.toLowerCase() === colorActual.toLowerCase()} />
+              <span style={{ background: p.color }} />
+              <span className={styles.oculto}>{p.nombre}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         Guardar
       </button>

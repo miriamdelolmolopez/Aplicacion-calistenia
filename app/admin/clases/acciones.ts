@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
+import { colorLibre, colorValido } from "@/lib/colores";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Estado } from "../acciones";
 
@@ -192,6 +193,8 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   const prueba = entero(formData.get("plazas_prueba"));
   const duracion = entero(formData.get("duracion_min"));
   const activo = formData.get("activo") === "on";
+  const color = String(formData.get("color") ?? "");
+  if (color && !colorValido(color)) return { error: "Color no válido." };
   if (nombre.length < 1 || nombre.length > 60) return { error: "El nombre tiene que tener entre 1 y 60 letras." };
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
   if (!(minimo >= 0 && minimo <= plazas)) {
@@ -204,7 +207,15 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
 
   const { error } = await createAdminClient()
     .from("tipos_clase")
-    .update({ nombre, plazas_max: plazas, minimo_alumnos: minimo, plazas_prueba: prueba, duracion_min: duracion, activo })
+    .update({
+      nombre,
+      plazas_max: plazas,
+      minimo_alumnos: minimo,
+      plazas_prueba: prueba,
+      duracion_min: duracion,
+      activo,
+      ...(color ? { color } : {}),
+    })
     .eq("id", id);
   if (error) {
     return { error: error.code === "23505" ? "Ya existe un tipo de clase con ese nombre." : "No se ha podido guardar." };
@@ -234,7 +245,13 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
   }
   if (!(duracion >= 10 && duracion <= 240)) return { error: "La duración va de 10 a 240 minutos." };
 
-  const { error } = await createAdminClient().from("tipos_clase").insert({
+  // Color automático: el primero de la paleta que no usa otro tipo (después se puede cambiar).
+  const admin = createAdminClient();
+  const { data: existentes } = await admin.from("tipos_clase").select("color");
+  const color = servicio === "individual" ? "#2B2B2A" : colorLibre((existentes ?? []).map((e) => e.color));
+
+  const { error } = await admin.from("tipos_clase").insert({
+    color,
     nombre,
     plazas_max: plazas,
     minimo_alumnos: minimo,

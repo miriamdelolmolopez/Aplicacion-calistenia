@@ -19,6 +19,7 @@ type Tipo = {
   activo: boolean;
   servicio: string;
   foto_url: string | null;
+  color: string | null;
 };
 type Persona = { nombre: string | null; apellidos: string | null; email: string | null; foto_path?: string | null };
 type Reserva = {
@@ -51,7 +52,7 @@ export default async function AdminClases() {
 
   const { data: tiposDatos } = await supabase
     .from("tipos_clase")
-    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, foto_url")
+    .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, foto_url, color")
     .order("nombre");
   const tipos = (tiposDatos ?? []) as Tipo[];
 
