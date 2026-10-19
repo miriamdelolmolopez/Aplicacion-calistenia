@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
+import { useEnvio } from "../useEnvio";
 import { ESTADOS_CURSO, NIVELES, type Curso } from "@/lib/cursos";
 import { borrarCurso, guardarCurso } from "./acciones";
 
@@ -29,6 +30,7 @@ function Mensajes({ estado }: { estado: Estado }) {
 export function FormularioCurso({ curso, categorias }: { curso?: Curso; categorias: string[] }) {
   const router = useRouter();
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarCurso, {});
+  const { ref, alEnviar } = useEnvio(accion, estado, !curso);
   const [borrando, setBorrando] = useState(false);
   const [errorBorrar, setErrorBorrar] = useState<string | null>(null);
   const p = curso?.id ?? "nuevo";
@@ -43,7 +45,7 @@ export function FormularioCurso({ curso, categorias }: { curso?: Curso; categori
   }
 
   return (
-    <form action={accion} className={curso ? styles.formularioInterno : styles.tarjeta}>
+    <form ref={ref} onSubmit={alEnviar} className={curso ? styles.formularioInterno : styles.tarjeta}>
       {curso ? <input type="hidden" name="id" value={curso.id} /> : <h2>Nuevo curso</h2>}
 
       <div className={styles.campo}>
