@@ -1,0 +1,209 @@
+.banner {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 200px;
+  margin: 8px 0 16px;
+  padding: 22px;
+  color: var(--blanco);
+  background-color: #3b3d28;
+  background-size: cover;
+  background-position: center;
+  border-radius: 28px;
+  box-shadow: var(--sombra);
+}
+
+.banner h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--blanco);
+}
+
+.banner p {
+  margin: 0;
+  max-width: 28ch;
+  line-height: 1.4;
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 84px;
+  padding: 16px 18px;
+  color: var(--carbon);
+  text-decoration: none;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 22px;
+  box-shadow: var(--sombra);
+}
+
+.opcion strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.opcion .ayuda {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.opcion .flecha {
+  margin-left: auto;
+  color: var(--secundario);
+}
+
+.titulo {
+  margin: 12px 0 14px;
+  font-size: 2rem;
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 20px;
+}
+
+.filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.filtros select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--carbon);
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}
+
+.filtros .ancha {
+  grid-column: 1 / -1;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px;
+  font: inherit;
+  text-align: left;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 20px;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+}
+
+.foto {
+  flex: none;
+  width: 96px;
+  height: 96px;
+  background-color: #6a6e47;
+  background-size: cover;
+  background-position: center;
+  border-radius: 14px;
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cuerpo strong {
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.cuerpo span {
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.cuerpo .precio {
+  font-weight: 700;
+  color: var(--oliva-oscuro);
+}
+
+.flecha {
+  flex: none;
+  color: var(--secundario);
+}
+
+.detalleFoto {
+  height: 170px;
+  margin: -6px 0 14px;
+  background-color: #6a6e47;
+  background-size: cover;
+  background-position: center;
+  border-radius: 18px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.meta span {
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+  background: #e4e7d2;
+  border-radius: 99px;
+}
+
+.enlaceCurso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 6px;
+  font-weight: 600;
+  color: var(--blanco);
+  text-decoration: none;
+  background: var(--oliva-oscuro);
+  border-radius: var(--radio);
+}

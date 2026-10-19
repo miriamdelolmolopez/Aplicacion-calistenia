@@ -6,15 +6,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export type ResultadoFoto = { ok: boolean; url?: string | null; error?: string };
 
-export type Destino = "tipo_clase" | "rutina" | "ejercicio" | "portada" | "inicio";
+export type Destino = "tipo_clase" | "rutina" | "ejercicio" | "curso" | "portada" | "inicio";
 
 const TIPOS: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX = 1024 * 1024; // 1 MB (el navegador ya la reduce a unos 150 KB)
-const TABLAS = { tipo_clase: "tipos_clase", rutina: "rutinas", ejercicio: "ejercicios" } as const;
+const TABLAS = { tipo_clase: "tipos_clase", rutina: "rutinas", ejercicio: "ejercicios", curso: "cursos" } as const;
 const MARCA = "/object/public/fotos/";
 
 function esDestino(valor: string): valor is Destino {
-  return ["tipo_clase", "rutina", "ejercicio", "portada", "inicio"].includes(valor);
+  return ["tipo_clase", "rutina", "ejercicio", "curso", "portada", "inicio"].includes(valor);
 }
 
 async function urlActual(destino: Destino, id: string): Promise<string | null> {
@@ -43,7 +43,7 @@ async function borrarArchivo(url: string | null) {
 }
 
 function repasar() {
-  for (const ruta of ["/", "/inicio", "/clases", "/rutina", "/admin", "/admin/contenido", "/admin/clases", "/admin/rutinas", "/admin/ejercicios"]) {
+  for (const ruta of ["/", "/inicio", "/clases", "/rutina", "/admin", "/admin/contenido", "/admin/clases", "/admin/rutinas", "/admin/ejercicios", "/admin/academia", "/academia"]) {
     revalidatePath(ruta);
   }
 }

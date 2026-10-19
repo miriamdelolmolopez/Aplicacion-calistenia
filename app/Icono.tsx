@@ -72,6 +72,12 @@ const DIBUJOS = {
       <path d="M4 21V5M9 8h6M9 12h6" />
     </>
   ),
+  academia: (
+    <>
+      <path d="m2 9 10-5 10 5-10 5Z" />
+      <path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5M22 9v6" />
+    </>
+  ),
   lupa: (
     <>
       <circle cx="11" cy="11" r="7" />

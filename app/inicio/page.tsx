@@ -161,6 +161,7 @@ export default function Inicio() {
   if (secciones.includes("reservar")) accesos.push({ href: RUTAS.reservar, icono: "reservar", texto: "botonReservarClase" });
   if (secciones.includes("rutina")) accesos.push({ href: RUTAS.rutina, icono: "rutina", texto: "botonEntrenoOnline" });
   if (secciones.includes("progreso")) accesos.push({ href: RUTAS.progreso, icono: "progreso", texto: "miProgreso" });
+  accesos.push({ href: RUTAS.academia, icono: "academia", texto: "navAcademia" });
   accesos.push({ href: "/aprende", icono: "saber", texto: "botonSaberMas", extra: "botonGlosario" });
 
   return (
