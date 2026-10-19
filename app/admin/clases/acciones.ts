@@ -195,6 +195,9 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   const activo = formData.get("activo") === "on";
   const color = String(formData.get("color") ?? "");
   if (color && !colorValido(color)) return { error: "Color no válido." };
+  const descripcion = String(formData.get("descripcion") ?? "").trim();
+  const descripcionEn = String(formData.get("descripcion_en") ?? "").trim();
+  if (descripcion.length > 1500 || descripcionEn.length > 1500) return { error: "Las descripciones pueden tener hasta 1500 letras." };
   if (nombre.length < 1 || nombre.length > 60) return { error: "El nombre tiene que tener entre 1 y 60 letras." };
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
   if (!(minimo >= 0 && minimo <= plazas)) {
@@ -214,6 +217,8 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
       plazas_prueba: prueba,
       duracion_min: duracion,
       activo,
+      descripcion: descripcion || null,
+      descripcion_en: descripcionEn || null,
       ...(color ? { color } : {}),
     })
     .eq("id", id);

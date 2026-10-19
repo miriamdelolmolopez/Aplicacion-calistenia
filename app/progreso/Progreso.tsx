@@ -736,14 +736,15 @@ function Evolucion({
                 </button>
                 {presentes.map((c) => {
                   const ids = todos.filter((e) => e.categoria === c.valor).map((e) => e.id);
-                  const activa = ids.length === marcados.size && ids.every((id) => marcados.has(id));
+                  // Interruptor: si todos los de la categoría están marcados se quitan; si no, se suman.
+                  const activa = ids.every((id) => marcados.has(id));
                   return (
                     <button
                       key={c.valor}
                       type="button"
                       aria-pressed={activa}
                       className={activa ? estilos.selectorActivo : ""}
-                      onClick={() => cambiar(ids)}
+                      onClick={() => cambiar(activa ? [...marcados].filter((x) => !ids.includes(x)) : [...new Set([...marcados, ...ids])])}
                     >
                       {idioma === "en" ? c.en : c.es}
                     </button>

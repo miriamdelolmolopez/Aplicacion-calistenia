@@ -314,3 +314,24 @@
   color: var(--oliva-oscuro);
   text-decoration: none;
 }
+
+.titulo {
+  position: relative;
+}
+
+.saberMas {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  min-height: 44px;
+  padding: 0 4px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--blanco);
+  text-decoration: underline;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}

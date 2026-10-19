@@ -13,6 +13,7 @@ import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
 import { obtenerFotosApp } from "../fotos/acciones";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
+import SaberMas from "./SaberMas";
 import { descargarIcs } from "@/lib/calendario";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase } from "@/lib/fotos";
@@ -138,6 +139,8 @@ export default function Clases() {
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const [verNombres, setVerNombres] = useState<string | null>(null);
+  const [descripciones, setDescripciones] = useState<Record<string, { es: string | null; en: string | null }>>({});
+  const [saberMas, setSaberMas] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<"todo" | "grupal" | "individual">("todo");
   const [confirmada, setConfirmada] = useState<ClaseConfirmada | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
@@ -155,6 +158,19 @@ export default function Clases() {
     });
     obtenerProfe().then(setProfe);
     obtenerFotosApp().then((f) => setFotosTipos(f.tipos));
+    createClient()
+      .from("tipos_clase")
+      .select("nombre, descripcion, descripcion_en")
+      .then(({ data }) =>
+        setDescripciones(
+          Object.fromEntries(
+            ((data ?? []) as { nombre: string; descripcion: string | null; descripcion_en: string | null }[]).map((d) => [
+              d.nombre,
+              { es: d.descripcion, en: d.descripcion_en },
+            ]),
+          ),
+        ),
+      );
   }, []);
 
   const esAlumno = datos?.rol === "alumno";
@@ -387,6 +403,9 @@ export default function Clases() {
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
                 <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo]) }}>
+                  <button type="button" className={estilos.saberMas} onClick={() => setSaberMas(c.tipo)}>
+                    {t.saberMasLink}
+                  </button>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                 </div>
@@ -583,6 +602,15 @@ export default function Clases() {
             );
           })}
         </>
+      )}
+
+      {saberMas && (
+        <SaberMas
+          titulo={saberMas}
+          descripcion={(idioma === "en" ? descripciones[saberMas]?.en : null) || descripciones[saberMas]?.es || null}
+          idioma={idioma}
+          alCerrar={() => setSaberMas(null)}
+        />
       )}
 
       {confirmada && (

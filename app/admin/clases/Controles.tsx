@@ -114,6 +114,8 @@ export function FormularioTipo({
     activo: boolean;
     servicio: string;
     color: string | null;
+    descripcion: string | null;
+    descripcion_en: string | null;
   };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
@@ -175,6 +177,14 @@ export function FormularioTipo({
           max={100}
           defaultValue={tipo.plazas_prueba}
         />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`de-${tipo.id}`}>Descripción («Saber más» en Reservas)</label>
+        <textarea id={`de-${tipo.id}`} name="descripcion" rows={5} maxLength={1500} defaultValue={tipo.descripcion ?? ""} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`den-${tipo.id}`}>Descripción en inglés (opcional)</label>
+        <textarea id={`den-${tipo.id}`} name="descripcion_en" rows={5} maxLength={1500} defaultValue={tipo.descripcion_en ?? ""} />
       </div>
       <fieldset className={styles.grupo}>
         <legend>Color en el calendario de Mis reservas</legend>
