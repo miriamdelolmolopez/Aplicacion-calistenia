@@ -1,0 +1,55 @@
+.pagina {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+}
+
+.enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.enlaces a {
+  color: #5a5e3b;
+  text-decoration: underline;
+}
+
+.tarjeta {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 18px;
+  line-height: 1.6;
+}
+
+.tarjeta h1 {
+  font-family: var(--font-titulares, "Cormorant Garamond", serif);
+  font-size: 1.9rem;
+  margin: 0 0 6px;
+}
+
+.tarjeta h2 {
+  font-family: var(--font-titulares, "Cormorant Garamond", serif);
+  font-size: 1.35rem;
+  margin: 26px 0 6px;
+}
+
+.tarjeta p {
+  margin: 0 0 10px;
+}
+
+.tarjeta ul {
+  margin: 0 0 10px;
+  padding-left: 22px;
+}
+
+.tarjeta li {
+  margin-bottom: 4px;
+}
+
+.version {
+  font-size: 0.85rem;
+  color: #5a5e3b;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../BarraSuperior";
 import CabeceraFoto from "../CabeceraFoto";
@@ -129,6 +130,18 @@ export default function Ajustes() {
           </button>
         )}
         {error && <p className={styles.error}>{t.errorGeneral}</p>}
+      </section>
+      <section className={`${styles.tarjeta} ${estilos.seccion}`}>
+        <h2>{idioma === "en" ? "Legal" : "Textos legales"}</h2>
+        <p className={styles.ayuda}>
+          <Link href="/legal/terminos">{idioma === "en" ? "Terms and conditions" : "Términos y condiciones"}</Link>
+          {" · "}
+          <Link href="/legal/privacidad">{idioma === "en" ? "Privacy policy" : "Política de privacidad"}</Link>
+          {" · "}
+          <Link href="/legal/aviso-legal">{idioma === "en" ? "Legal notice" : "Aviso legal"}</Link>
+          {" · "}
+          <Link href="/legal/cookies">Cookies</Link>
+        </p>
       </section>
     </main>
   );

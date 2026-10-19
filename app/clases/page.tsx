@@ -51,6 +51,7 @@ type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto; clase?: Clase };
 
 type Datos = {
   horas: number;
+  horasIndividual: number;
   dias: number;
   hoy: string;
   rol: string;
@@ -68,6 +69,7 @@ async function obtenerDatos(): Promise<Datos> {
   const valor = (clave: string, defecto: number) =>
     Number(ajustes?.find((a) => a.clave === clave)?.valor ?? defecto);
   const horas = valor("cancelacion_horas", 2);
+  const horasIndividual = valor("cancelacion_horas_individual", 12);
   const dias = valor("reserva_dias_max", 14);
 
   const { data: sesion } = await supabase.auth.getUser();
@@ -83,7 +85,7 @@ async function obtenerDatos(): Promise<Datos> {
   const ahora = Date.now();
   const lista = ((data ?? []) as Omit<Clase, "tarde">[]).map((c) => ({
     ...c,
-    tarde: new Date(c.empieza_en).getTime() - horas * 3600 * 1000 < ahora,
+    tarde: new Date(c.empieza_en).getTime() - (c.servicio === "individual" ? horasIndividual : horas) * 3600 * 1000 < ahora,
   }));
 
   const { data: gastada } = await supabase.rpc("mi_prueba_gastada");
@@ -93,6 +95,7 @@ async function obtenerDatos(): Promise<Datos> {
 
   return {
     horas,
+    horasIndividual,
     dias,
     hoy: claveDia(new Date(ahora).toISOString()),
     rol: perfil?.rol ?? "",
@@ -582,10 +585,10 @@ export default function Clases() {
                     <p style={{ margin: "0 0 10px" }}>
                       {esInvitado
                         ? c.tarde
-                          ? t.confirmaPierdePrueba.replace("{h}", String(datos.horas))
+                          ? t.confirmaPierdePrueba.replace("{h}", String(c.servicio === "individual" ? datos.horasIndividual : datos.horas))
                           : t.confirmaConservaPrueba
                         : c.tarde
-                          ? t.confirmaPierde.replace("{h}", String(datos.horas))
+                          ? t.confirmaPierde.replace("{h}", String(c.servicio === "individual" ? datos.horasIndividual : datos.horas))
                           : t.confirmaDevuelve}
                     </p>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

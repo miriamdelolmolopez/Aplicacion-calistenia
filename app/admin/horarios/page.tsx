@@ -48,8 +48,7 @@ export default async function Horarios() {
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>
           Una plantilla es un horario semanal que puedes aplicar a las semanas que quieras. Cambiar una
-          plantilla no modifica las clases que ya se han creado. La plantilla <strong>principal</strong> es la
-          que usa el botón «Crear clases» de la pantalla de Clases.
+          plantilla no modifica las clases que ya se han creado. Las clases no se crean solas: tú eliges desde qué día hasta qué día las publicas.
         </p>
       </section>
 
@@ -89,7 +88,7 @@ export default async function Horarios() {
             </details>
 
             <details className={styles.detalles}>
-              <summary>Aplicar a semanas</summary>
+              <summary>Publicar clases (elegir días)</summary>
               <Aplicar id={p.id} hoy={hoy} />
             </details>
 

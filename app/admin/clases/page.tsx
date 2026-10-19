@@ -5,7 +5,7 @@ import Avatar from "../../Avatar";
 import { claveDia, dentroDeHoras, haceHoras, textoDia, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
-import { FilaClase, FormularioAjustes, FormularioTipo, GenerarClases, NuevoTipo } from "./Controles";
+import { FilaClase, FormularioAjustes, FormularioTipo, NuevoTipo } from "./Controles";
 
 export const metadata = { title: "Clases · Administración" };
 
@@ -112,10 +112,17 @@ export default async function AdminClases() {
         </Link>
       </header>
 
-      <GenerarClases />
+      <section className={styles.tarjeta}>
+        <h2>Publicar clases</h2>
+        <p className={styles.ayuda}>
+          Las clases no se crean solas. Prepara tu horario en <Link href="/admin/horarios">Horarios</Link> y allí
+          eliges desde qué día hasta qué día publicarlas.
+        </p>
+      </section>
 
       <FormularioAjustes
         horas={Number(ajuste("cancelacion_horas") ?? 2)}
+        horasIndividual={Number(ajuste("cancelacion_horas_individual") ?? 12)}
         dias={Number(ajuste("reserva_dias_max") ?? 14)}
         ver={ajuste("ver_apuntados") !== "false"}
       />
@@ -141,7 +148,7 @@ export default async function AdminClases() {
         <h2>Próximas clases ({clases.length})</h2>
         {clases.length === 0 && (
           <p className={styles.ayuda}>
-            Todavía no hay clases. Pulsa «Crear clases» para generarlas.
+            Todavía no hay clases. Publícalas desde Horarios.
           </p>
         )}
         {[...porDia.entries()].map(([dia, lista]) => (

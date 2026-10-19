@@ -13,10 +13,9 @@ import {
   normalizarDni,
   telefonoValido,
 } from "@/lib/validaciones";
+import { aceptadoVigente, VERSION_LEGAL } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
-// Versión de los textos legales que acepta la persona (se cambiará al tener los definitivos).
-const VERSION_LEGAL = "borrador-2026-10";
 
 type Campo =
   | "nombre"
@@ -70,7 +69,7 @@ export default function Datos() {
 
       const { data: consentimientos } = await supabase
         .from("consentimientos")
-        .select("tipo")
+        .select("tipo, version")
         .eq("user_id", sesion.user.id);
 
       if (perfil) {
@@ -84,8 +83,7 @@ export default function Datos() {
           emTelefono: perfil.contacto_emergencia_telefono ?? "",
         });
       }
-      const tipos = new Set((consentimientos ?? []).map((c) => c.tipo));
-      setYaAceptado(tipos.has("privacidad") && tipos.has("terminos"));
+      setYaAceptado(aceptadoVigente(consentimientos));
       setListo(true);
     }
     cargar();
@@ -245,6 +243,15 @@ export default function Datos() {
                 {t[errores.terminos]}
               </p>
             )}
+            <p className={styles.ayuda}>
+              <Link href="/legal/aviso-legal" target="_blank">
+                Aviso legal
+              </Link>
+              {" · "}
+              <Link href="/legal/cookies" target="_blank">
+                Cookies
+              </Link>
+            </p>
           </fieldset>
         )}
 

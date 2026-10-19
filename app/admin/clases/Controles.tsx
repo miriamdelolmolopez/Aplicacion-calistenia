@@ -63,10 +63,12 @@ export function GenerarClases() {
 
 export function FormularioAjustes({
   horas,
+  horasIndividual,
   dias,
   ver,
 }: {
   horas: number;
+  horasIndividual: number;
   dias: number;
   ver: boolean;
 }) {
@@ -75,7 +77,7 @@ export function FormularioAjustes({
     <form action={accion} className={styles.tarjeta}>
       <h2>Ajustes de reservas</h2>
       <div className={styles.campo}>
-        <label htmlFor="aj-horas">Horas antes de la clase para cancelar sin perderla</label>
+        <label htmlFor="aj-horas">Horas antes de una clase grupal para cancelar sin perderla</label>
         <input
           id="aj-horas"
           name="horas"
@@ -84,6 +86,10 @@ export function FormularioAjustes({
           max={72}
           defaultValue={horas}
         />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="aj-horas-ind">Horas antes de una clase individual para cancelar sin perderla</label>
+        <input id="aj-horas-ind" name="horas_individual" type="number" min={0} max={72} defaultValue={horasIndividual} />
       </div>
       <div className={styles.campo}>
         <label htmlFor="aj-dias">Días de antelación máxima para reservar</label>

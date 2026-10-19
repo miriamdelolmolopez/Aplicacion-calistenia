@@ -26,7 +26,7 @@ type Reserva = {
 
 type TipoClase = { nombre: string; color: string };
 
-type Datos = { reservas: Reserva[]; bonos: MiBono[]; horas: number; tipos: TipoClase[] };
+type Datos = { reservas: Reserva[]; bonos: MiBono[]; horas: number; horasIndividual: number; tipos: TipoClase[] };
 
 async function obtenerDatos(): Promise<Datos> {
   const supabase = createClient();
@@ -43,7 +43,7 @@ async function obtenerDatos(): Promise<Datos> {
       .order("sesiones_clase(empieza_en)", { ascending: true })
       .limit(1000),
     obtenerMisBonos(),
-    supabase.from("ajustes").select("clave, valor").eq("clave", "cancelacion_horas"),
+    supabase.from("ajustes").select("clave, valor").in("clave", ["cancelacion_horas", "cancelacion_horas_individual"]),
     supabase.from("tipos_clase").select("nombre, color, activo").eq("activo", true).order("nombre"),
   ]);
 
@@ -65,7 +65,7 @@ async function obtenerDatos(): Promise<Datos> {
     nombre: t.nombre,
     color: colorDeTipo(t.color, t.nombre),
   }));
-  return { reservas, bonos, horas: Number(ajustes?.[0]?.valor ?? 2), tipos };
+  return { reservas, bonos, horas: Number(ajustes?.find((a) => a.clave === "cancelacion_horas")?.valor ?? 2), horasIndividual: Number(ajustes?.find((a) => a.clave === "cancelacion_horas_individual")?.valor ?? 12), tipos };
 }
 
 const LETRAS = {
@@ -244,7 +244,8 @@ export default function MisReservas() {
           <h2>{textoDia(`${dia}T12:00:00Z`, idioma)}</h2>
           {delDia.map((r) => {
             const pasada = r.empieza_en < ahoraIso;
-            const tarde = new Date(r.empieza_en).getTime() - datos.horas * 3600 * 1000 < new Date(ahoraIso).getTime();
+            const horasLimite = r.servicio === "individual" ? datos.horasIndividual : datos.horas;
+            const tarde = new Date(r.empieza_en).getTime() - horasLimite * 3600 * 1000 < new Date(ahoraIso).getTime();
             return (
               <article key={r.id} className={estilos.clase} style={{ borderLeft: `6px solid ${r.color}` }}>
                 <div>
@@ -288,7 +289,7 @@ export default function MisReservas() {
                 {confirmando === r.id && (
                   <div className={styles.aviso} role="alert">
                     <p style={{ margin: "0 0 10px" }}>
-                      {tarde ? t.confirmaPierde.replace("{h}", String(datos.horas)) : t.confirmaDevuelve}
+                      {tarde ? t.confirmaPierde.replace("{h}", String(horasLimite)) : t.confirmaDevuelve}
                     </p>
                     <div className={estilos.acciones}>
                       <button type="button" className={styles.boton} disabled={trabajando} onClick={() => cancelar(r)}>

@@ -1,6 +1,8 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { aceptadoVigente } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 export type MiPerfil = {
@@ -10,6 +12,7 @@ export type MiPerfil = {
   servicios: string[]; // los marcados en su perfil y los de sus bonos
   planOnline: boolean; // tiene un plan online activo ahora mismo
   datosCompletos: boolean;
+  legalAceptado: boolean; // ha aceptado la versión vigente de los textos legales
 };
 
 // null = cargando · "anonimo" = no ha iniciado sesión
@@ -21,11 +24,12 @@ async function cargarPerfil(): Promise<Estado> {
   if (!sesion.user) return "anonimo";
   const id = sesion.user.id;
 
-  const [{ data: perfil }, { data: servicios }, { data: bonos }, { data: plan }] = await Promise.all([
+  const [{ data: perfil }, { data: servicios }, { data: bonos }, { data: plan }, { data: aceptaciones }] = await Promise.all([
     supabase.from("profiles").select("nombre, rol, datos_completos").eq("id", id).maybeSingle(),
     supabase.from("perfil_servicios").select("servicio").eq("user_id", id),
     supabase.from("bonos").select("servicio").in("estado", ["activo", "en_cola"]),
     supabase.rpc("mi_plan_online"),
+    supabase.from("consentimientos").select("tipo, version").eq("user_id", id),
   ]);
   if (!perfil) return "anonimo";
 
@@ -36,16 +40,26 @@ async function cargarPerfil(): Promise<Estado> {
     servicios: [...new Set([...(servicios ?? []).map((s) => s.servicio), ...(bonos ?? []).map((b) => b.servicio)])],
     planOnline: plan === true,
     datosCompletos: !!perfil.datos_completos,
+    legalAceptado: aceptadoVigente(aceptaciones),
   };
 }
 
 // `recargarCon`: si cambia (por ejemplo la ruta), se vuelve a leer el perfil.
 export function useMiPerfil(recargarCon?: string): Estado {
   const [perfil, setPerfil] = useState<Estado>(null);
+  const router = useRouter();
+  const ruta = usePathname();
 
   useEffect(() => {
     cargarPerfil().then(setPerfil);
   }, [recargarCon]);
+
+  // Si los textos legales cambian, hay que aceptarlos de nuevo para seguir usando la app.
+  useEffect(() => {
+    if (perfil && perfil !== "anonimo" && perfil.rol !== "admin" && !perfil.legalAceptado) {
+      if (!ruta.startsWith("/datos") && !ruta.startsWith("/legal")) router.replace("/datos");
+    }
+  }, [perfil, ruta, router]);
 
   return perfil;
 }

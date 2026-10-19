@@ -16,6 +16,7 @@ import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
+import { aceptadoVigente } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 type Reserva = { empieza_en: string; nombre: string };
@@ -36,8 +37,7 @@ type Extra = {
 
 async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> {
   const supabase = createClient();
-  const { data: consentimientos } = await supabase.from("consentimientos").select("tipo").eq("user_id", userId);
-  const tipos = new Set((consentimientos ?? []).map((c) => c.tipo));
+  const { data: consentimientos } = await supabase.from("consentimientos").select("tipo, version").eq("user_id", userId);
 
   const { data: reservas } = await supabase
     .from("reservas")
@@ -86,7 +86,7 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
     sesionesOnline,
     bonos: await obtenerMisBonos(),
     entrenoId: curso?.id ?? null,
-    completo: tipos.has("privacidad") && tipos.has("terminos"),
+    completo: aceptadoVigente(consentimientos),
     cumples,
     fotos,
     frases: (frases ?? []) as Frase[],

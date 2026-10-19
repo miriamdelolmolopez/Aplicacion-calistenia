@@ -171,27 +171,21 @@ export function Aplicar({ id, hoy }: { id: string; hoy: string }) {
   return (
     <form action={accion} className={styles.formularioInterno}>
       <input type="hidden" name="id" value={id} />
-      <strong>Aplicar a semanas concretas</strong>
+      <strong>Publicar las clases de esta plantilla</strong>
       <p className={styles.ayuda}>
-        Elige cualquier día de la primera semana. Se crean las clases que falten de lunes a domingo; las que ya
-        existen y sus reservas no se tocan.
+        Elige desde qué día hasta qué día (los dos incluidos). Solo se crean las clases que falten; las que ya
+        existen y sus reservas no se tocan. Las alumnas verán las clases en cuanto las publiques.
       </p>
       <div className={styles.campo}>
-        <label htmlFor={`ap-f-${id}`}>Primera semana (cualquier día de ella)</label>
-        <input id={`ap-f-${id}`} name="fecha" type="date" defaultValue={hoy} required />
+        <label htmlFor={`ap-d-${id}`}>Desde el día</label>
+        <input id={`ap-d-${id}`} name="desde" type="date" defaultValue={hoy} required />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`ap-s-${id}`}>¿Cuántas semanas?</label>
-        <select id={`ap-s-${id}`} name="semanas" defaultValue="1">
-          {[1, 2, 3, 4, 6, 8, 12].map((n) => (
-            <option key={n} value={n}>
-              {n} {n === 1 ? "semana" : "semanas"}
-            </option>
-          ))}
-        </select>
+        <label htmlFor={`ap-h-${id}`}>Hasta el día</label>
+        <input id={`ap-h-${id}`} name="hasta" type="date" defaultValue={hoy} required />
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
-        {pendiente ? "Creando…" : "Crear las clases"}
+        {pendiente ? "Publicando…" : "Publicar clases"}
       </button>
       <Mensajes estado={estado} />
     </form>

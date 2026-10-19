@@ -163,9 +163,11 @@ export async function cambiarAjustes(_previo: Estado, formData: FormData): Promi
   await requireAdmin();
 
   const horas = entero(formData.get("horas"));
+  const horasInd = entero(formData.get("horas_individual"));
   const dias = entero(formData.get("dias"));
   const ver = formData.get("ver") === "on";
   if (!(horas >= 0 && horas <= 72)) return { error: "Las horas de cancelación van de 0 a 72." };
+  if (!(horasInd >= 0 && horasInd <= 72)) return { error: "Las horas de cancelación van de 0 a 72." };
   if (!(dias >= 1 && dias <= 60)) return { error: "Los días de antelación van de 1 a 60." };
 
   const ahora = new Date().toISOString();
@@ -173,6 +175,7 @@ export async function cambiarAjustes(_previo: Estado, formData: FormData): Promi
     .from("ajustes")
     .upsert([
       { clave: "cancelacion_horas", valor: String(horas), actualizado_en: ahora },
+      { clave: "cancelacion_horas_individual", valor: String(horasInd), actualizado_en: ahora },
       { clave: "reserva_dias_max", valor: String(dias), actualizado_en: ahora },
       { clave: "ver_apuntados", valor: ver ? "true" : "false", actualizado_en: ahora },
     ]);

@@ -86,7 +86,7 @@ export async function marcarPrincipal(_previo: Estado, formData: FormData): Prom
   if (error) return { error: "No se ha podido cambiar." };
   refrescar();
   revalidatePath("/admin/clases");
-  return { mensaje: "Ahora es la principal: el botón «Crear clases» usará esta plantilla." };
+  return { mensaje: "Ahora es la plantilla principal." };
 }
 
 export async function borrarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
@@ -142,20 +142,24 @@ export async function quitarClase(_previo: Estado, formData: FormData): Promise<
   return {};
 }
 
-// Crea las clases que falten en una o varias semanas (de lunes a domingo).
+// Publica (crea) las clases de una plantilla entre dos fechas, ambas incluidas.
 export async function aplicarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
   await requireAdmin();
-  const fecha = String(formData.get("fecha") ?? "");
-  const semanas = Number(formData.get("semanas"));
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { error: "Elige una fecha de la primera semana." };
-  if (!Number.isInteger(semanas) || semanas < 1 || semanas > 12) return { error: "Entre 1 y 12 semanas." };
+  const desde = String(formData.get("desde") ?? "");
+  const hasta = String(formData.get("hasta") ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(desde) || !/^\d{4}-\d{2}-\d{2}$/.test(hasta)) {
+    return { error: "Elige el día de inicio y el día final." };
+  }
+  if (hasta < desde) return { error: "El día final no puede ser anterior al inicial." };
+  const dias = (Date.parse(hasta) - Date.parse(desde)) / 86400000 + 1;
+  if (dias > 120) return { error: "Elige como máximo 120 días seguidos (unos 4 meses)." };
 
-  const { data, error } = await createAdminClient().rpc("aplicar_plantilla", {
+  const { data, error } = await createAdminClient().rpc("crear_clases_rango", {
     p_plantilla: String(formData.get("id") ?? ""),
-    p_fecha: fecha,
-    p_semanas: semanas,
+    p_desde: desde,
+    p_hasta: hasta,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: "No se han podido publicar las clases." };
 
   revalidatePath("/admin/clases");
   const n = Number(data ?? 0);
@@ -163,6 +167,6 @@ export async function aplicarPlantilla(_previo: Estado, formData: FormData): Pro
     mensaje:
       n === 0
         ? "No se ha creado ninguna clase: ya existían todas (o esas fechas ya han pasado)."
-        : `Se han creado ${n} ${n === 1 ? "clase" : "clases"}. Las que ya existían no se han tocado.`,
+        : `Se han publicado ${n} ${n === 1 ? "clase" : "clases"}. Las que ya existían no se han tocado.`,
   };
 }
