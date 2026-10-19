@@ -1,7 +1,7 @@
 // Datos de la titular y versión de los textos legales.
 // Si cambias algún texto legal, cambia VERSION_LEGAL: todas las personas
 // tendrán que volver a aceptarlos para seguir usando la app.
-export const VERSION_LEGAL = "2026-10-v1";
+export const VERSION_LEGAL = "2026-10-v2";
 export const FECHA_LEGAL = "19 de octubre de 2026";
 
 export const TITULAR = {

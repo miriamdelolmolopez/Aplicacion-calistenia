@@ -45,7 +45,10 @@ const URGENCIA: SeccionLegal["bloques"] = [
 
 const IMAGEN_PRESENCIAL: SeccionLegal["bloques"] = [
   {
-    p: "Durante las sesiones podrán realizarse fotografías o vídeos con fines técnicos, educativos o relacionados con la actividad profesional de Miriam: analizar movimientos, realizar correcciones técnicas o generar contenido profesional. El contenido audiovisual podrá utilizarse en redes sociales y otros canales profesionales. Si el Alumno no desea aparecer en contenido audiovisual identificable, deberá comunicarlo expresamente a Miriam antes de comenzar su primer entrenamiento. La negativa al uso promocional de su imagen no afectará a su derecho a recibir el servicio contratado.",
+    p: "Durante las sesiones, Miriam podrá hacer fotografías o vídeos con fines técnicos (analizar movimientos y realizar correcciones). Ese uso es solo para entrenar y no se publica.",
+  },
+  {
+    p: "Para usar imágenes o vídeos en los que aparezca el Alumno en redes sociales y otros canales profesionales, Miriam necesita su autorización previa y expresa. El Alumno la da marcando la casilla opcional «Autorizo el uso de mi imagen» al registrarse (viene sin marcar). Puede retirarla cuando quiera en Ajustes o escribiendo a Miriam, y entonces no se publicarán nuevas imágenes suyas y se retirarán las ya publicadas cuando sea posible. Marcar o no la casilla no afecta a su derecho a recibir el servicio contratado.",
   },
 ];
 
@@ -412,7 +415,10 @@ const secciones: SeccionLegal[] = [
     titulo: "D11. Entrenamiento online · Derechos de imagen",
     bloques: [
       {
-        p: "Durante el servicio, el Alumno puede enviar fotografías o vídeos de sus entrenamientos con fines técnicos, como el análisis de movimientos o las correcciones. Ese contenido podrá usarse además para generar contenido relacionado con la actividad profesional de Miriam y publicarse en redes sociales y otros canales profesionales. Si el Alumno no desea aparecer en contenido audiovisual identificable, deberá comunicarlo expresamente a Miriam antes de comenzar el servicio. La negativa al uso promocional de su imagen no afecta a su derecho a recibir el servicio contratado.",
+        p: "Durante el servicio, el Alumno puede enviar fotografías o vídeos de sus entrenamientos con fines técnicos, como el análisis de movimientos o las correcciones. Ese uso es solo para entrenar y no se publica.",
+      },
+      {
+        p: "Para publicar imágenes o vídeos en los que aparezca el Alumno en redes sociales y otros canales profesionales, Miriam necesita su autorización previa y expresa, que el Alumno da marcando la casilla opcional «Autorizo el uso de mi imagen» al registrarse (viene sin marcar). Puede retirarla cuando quiera en Ajustes o escribiendo a Miriam. Marcar o no la casilla no afecta a su derecho a recibir el servicio contratado.",
       },
     ],
   },
@@ -442,7 +448,7 @@ const secciones: SeccionLegal[] = [
           "Comprende y acepta los riesgos inherentes a la práctica de Calistenia y Pino, especialmente al entrenar sin supervisión presencial.",
           "En el servicio online, ha sido informado de su derecho de desistimiento y acepta que, una vez recibida la rutina o planificación, no podrá solicitar la devolución, y se compromete a usar los contenidos solo de forma personal.",
           "Acepta el tratamiento de sus datos personales en los términos de la política de privacidad, incluido el de sus datos de salud.",
-          "Ha sido informado de las condiciones sobre el uso de imágenes y grabaciones.",
+          "Ha sido informado de que el uso de su imagen en redes solo se hace con su autorización, que es opcional y revocable.",
         ],
       },
       {

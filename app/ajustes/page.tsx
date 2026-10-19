@@ -10,6 +10,7 @@ import estilos from "../perfil/perfil.module.css";
 import { textos } from "../textos";
 import { IDIOMAS, type Idioma } from "../textos";
 import { useIdioma } from "../useIdioma";
+import { VERSION_LEGAL } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 type Preferencias = {
@@ -18,6 +19,7 @@ type Preferencias = {
   avisos_bono: boolean;
   mostrar_foto: boolean;
   avisar_cumple: boolean;
+  imagen: boolean;
   borradoPedido: boolean;
 };
 
@@ -27,15 +29,24 @@ async function cargar(): Promise<Preferencias | null> {
   const supabase = createClient();
   const { data: sesion } = await supabase.auth.getUser();
   if (!sesion.user) return null;
-  const [{ data: p }, { data: s }] = await Promise.all([
+  const [{ data: p }, { data: s }, { data: im }] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, avisos_reserva, avisos_bono, mostrar_foto, avisar_cumple")
       .eq("id", sesion.user.id)
       .maybeSingle(),
     supabase.from("solicitudes_borrado").select("id").eq("atendida", false).limit(1),
+    supabase
+      .from("consentimientos")
+      .select("concedido")
+      .eq("user_id", sesion.user.id)
+      .eq("tipo", "imagen")
+      .order("aceptado_en", { ascending: false })
+      .limit(1),
   ]);
-  return p ? { ...(p as Omit<Preferencias, "borradoPedido">), borradoPedido: (s ?? []).length > 0 } : null;
+  return p
+    ? { ...(p as Omit<Preferencias, "borradoPedido" | "imagen">), imagen: im?.[0]?.concedido === true, borradoPedido: (s ?? []).length > 0 }
+    : null;
 }
 
 export default function Ajustes() {
@@ -62,6 +73,15 @@ export default function Ajustes() {
     setPref((p) => (p ? { ...p, [clave]: valor } : p));
     const { error: fallo } = await createClient().from("profiles").update({ [clave]: valor }).eq("id", pref!.id);
     if (fallo) setPref((p) => (p ? { ...p, [clave]: !valor } : p));
+  }
+
+  // La autorización de imagen se guarda como una fila nueva cada vez (queda el historial); vale la más reciente.
+  async function cambiarImagen(valor: boolean) {
+    setPref((p) => (p ? { ...p, imagen: valor } : p));
+    const { error: fallo } = await createClient()
+      .from("consentimientos")
+      .insert({ user_id: pref!.id, tipo: "imagen", version: VERSION_LEGAL, concedido: valor });
+    if (fallo) setPref((p) => (p ? { ...p, imagen: !valor } : p));
   }
 
   async function pedirBorrado() {
@@ -106,6 +126,14 @@ export default function Ajustes() {
         <h2>{t.privacidadTitulo}</h2>
         {interruptor("mostrar_foto", t.mostrarFoto)}
         {interruptor("avisar_cumple", t.avisarCumple)}
+        <label className={estilos.interruptor}>
+          <input type="checkbox" checked={pref.imagen} onChange={(e) => cambiarImagen(e.target.checked)} />
+          <span>
+            {idioma === "en"
+              ? "I authorise the use of photos and videos in which I appear on social media and professional channels"
+              : "Autorizo el uso de fotos y vídeos en los que aparezca en redes sociales y canales profesionales"}
+          </span>
+        </label>
         <p className={styles.ayuda}>{t.privacidadNota}</p>
       </section>
 

@@ -46,7 +46,7 @@ const secciones: SeccionLegal[] = [
           "Gestionar pagos, facturación y obligaciones fiscales y administrativas. Base: obligación legal (art. 6.1.c).",
           "Adaptar el entrenamiento a tu salud y tu seguridad, y atender emergencias durante las sesiones. Base: tu consentimiento explícito (art. 9.2.a), que das al aceptar esta política y los términos, y la protección de tus intereses vitales en una emergencia (art. 6.1.d).",
           "Enviarte avisos del servicio (por ejemplo, un bono a punto de caducar o una clase cancelada). Base: ejecución del contrato e interés legítimo en que el servicio funcione correctamente (art. 6.1.f).",
-          "Usar imágenes y vídeos en redes sociales y canales profesionales, solo en los términos indicados en los términos y condiciones, y respetando tu derecho a no aparecer de forma identificable. Base: tu consentimiento (art. 6.1.a).",
+          "Usar imágenes y vídeos en los que aparezcas en redes sociales y canales profesionales, solo si marcas la casilla opcional de autorización de imagen, que viene sin marcar. Base: tu consentimiento (art. 6.1.a). Puedes retirarlo en Ajustes o escribiéndonos, sin que afecte a tu acceso al servicio.",
           "Seguridad de la aplicación y prevención de usos indebidos. Base: interés legítimo (art. 6.1.f).",
         ],
       },
@@ -64,7 +64,7 @@ const secciones: SeccionLegal[] = [
       {
         lista: [
           "Supabase: base de datos, autenticación (acceso con correo y contraseña) y almacenamiento de archivos como las fotos de perfil. Aquí se guardan los datos de tu cuenta y de tu servicio.",
-          "Vercel: alojamiento y funcionamiento de la aplicación web. Procesa las conexiones y registros técnicos de acceso.",
+          "Vercel: alojamiento y funcionamiento de la aplicación web. Procesa las conexiones y registros técnicos de acceso (como la dirección IP) y puede hacerlo en servidores de Estados Unidos.",
           "Resend: envío de los correos de la aplicación (confirmación de cuenta, recuperación de contraseña, avisos). Procesa tu correo electrónico y el contenido del mensaje.",
           "Google (Calendar, Meet y Gmail): videollamadas y agenda del servicio online y comunicaciones por correo.",
           "WhatsApp (Meta): comunicaciones y envío de vídeos o consultas. Tally: formularios iniciales o de seguimiento.",
@@ -73,7 +73,7 @@ const secciones: SeccionLegal[] = [
         ],
       },
       {
-        p: "Algunos de estos proveedores pueden tratar datos fuera del Espacio Económico Europeo (por ejemplo, en Estados Unidos). En ese caso, la transferencia se ampara en las garantías previstas por el RGPD, como las cláusulas contractuales tipo de la Comisión Europea o el Marco de Privacidad de Datos UE-EE. UU. Puedes pedirnos más información sobre estas garantías.",
+        p: "La base de datos de la aplicación (Supabase) está en la Unión Europea (Irlanda). Vercel, así como otros proveedores como Google, Meta o Tally, pueden tratar datos fuera del Espacio Económico Europeo, en particular en Estados Unidos. Esas transferencias internacionales se amparan en las garantías previstas por el RGPD: las cláusulas contractuales tipo de la Comisión Europea y, en su caso, el Marco de Privacidad de Datos UE-EE. UU. Puedes pedirnos más información sobre estas garantías.",
       },
     ],
   },
@@ -82,10 +82,11 @@ const secciones: SeccionLegal[] = [
     bloques: [
       {
         lista: [
-          "Los datos de tu cuenta y de tu servicio, mientras mantengas la relación con nosotros.",
-          "Cuando dejes de ser alumna o alumno, o pidas la baja, los bloquearemos y solo se conservarán durante los plazos legales para atender posibles responsabilidades (en general, hasta 6 años para datos mercantiles y fiscales), y después se eliminarán.",
-          "Los datos de pagos y facturación se conservan los plazos que exigen las normas fiscales y mercantiles, aunque se elimine tu cuenta.",
-          "Los datos de salud se conservan mientras sean necesarios para la seguridad de tu entrenamiento y, después, solo bloqueados el tiempo legal que corresponda.",
+          "Datos de tu cuenta y de gestión del servicio (altas, reservas, bonos, rutinas): mientras mantengas la relación con nosotros. Cuando causes baja o pidas borrar tu cuenta, se bloquean durante 5 años para atender posibles reclamaciones y después se eliminan.",
+          "Datos fiscales y de facturación (pagos): 6 años, como exige la normativa mercantil y fiscal, aunque se elimine tu cuenta.",
+          "Datos de salud y condición física: mientras sean necesarios para la seguridad de tu entrenamiento; después, bloqueados el tiempo legal indicado arriba.",
+          "Fotos y vídeos en los que aparezcas, publicados con tu autorización: hasta que retires tu consentimiento o dejen de tener interés para la actividad profesional.",
+          "Fotos y vídeos enviados solo para correcciones técnicas: el tiempo necesario para ese fin.",
         ],
       },
     ],
