@@ -43,7 +43,7 @@ async function borrarArchivo(url: string | null) {
 }
 
 function repasar() {
-  for (const ruta of ["/", "/inicio", "/clases", "/rutina", "/admin", "/admin/clases", "/admin/rutinas", "/admin/ejercicios"]) {
+  for (const ruta of ["/", "/inicio", "/clases", "/rutina", "/admin", "/admin/contenido", "/admin/clases", "/admin/rutinas", "/admin/ejercicios"]) {
     revalidatePath(ruta);
   }
 }

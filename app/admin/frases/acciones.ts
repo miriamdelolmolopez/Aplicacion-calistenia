@@ -12,6 +12,7 @@ function limpiar(valor: FormDataEntryValue | null): string {
 
 function repasar() {
   revalidatePath("/admin");
+  revalidatePath("/admin/contenido");
   revalidatePath("/inicio");
 }
 

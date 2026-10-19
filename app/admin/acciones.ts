@@ -70,6 +70,7 @@ export async function altaAlumno(_previo: Estado, formData: FormData): Promise<E
 
   await guardarServicios(data.user.id, servicios);
   revalidatePath("/admin");
+  revalidatePath("/admin/personas");
 
   const base = await origen();
   return {
@@ -105,6 +106,7 @@ export async function cambiarPersona(_previo: Estado, formData: FormData): Promi
 
   await guardarServicios(userId, servicios);
   revalidatePath("/admin");
+  revalidatePath("/admin/personas");
   return { mensaje: "Cambios guardados." };
 }
 
@@ -116,6 +118,7 @@ export async function marcarBorradoAtendido(formData: FormData): Promise<void> {
     .update({ atendida: true })
     .eq("id", String(formData.get("id") ?? ""));
   revalidatePath("/admin");
+  revalidatePath("/admin/personas");
 }
 
 // Enlace nuevo para que una persona elija contraseña (alta caducada u olvido).
