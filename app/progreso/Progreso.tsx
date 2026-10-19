@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { borrarObjetivo, crearObjetivo } from "../admin/alumnos/acciones";
+import { borrarEntreno } from "../entreno/acciones";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import PlantaAvatar from "./PlantaAvatar";
@@ -174,10 +175,17 @@ export default function Progreso({
   const [datos, setDatos] = useState<Datos | null>(null);
   const [ejercicioSel, setEjercicioSel] = useState<string>("");
   const [campoSel, setCampoSel] = useState<Campo | "">("");
+  const [borrando, setBorrando] = useState<{ id: string; paso: 1 | 2 } | null>(null);
 
   useEffect(() => {
     cargar(userId, admin).then(setDatos);
   }, [userId, admin]);
+
+  async function confirmarBorrado(id: string) {
+    await borrarEntreno(id);
+    setBorrando(null);
+    setDatos(await cargar(userId, admin));
+  }
 
   const nombreNivel = (n: number) => t[`planta${n}` as keyof typeof t] as string;
 
@@ -505,6 +513,31 @@ export default function Progreso({
                     </ul>
                   </div>
                 ))}
+                {!admin && (
+                  <div className={estilos.borrarEntreno}>
+                    {borrando?.id !== e.id ? (
+                      <button type="button" onClick={() => setBorrando({ id: e.id, paso: 1 })}>
+                        {TEXTO_ELEGIR[idioma].borrar}
+                      </button>
+                    ) : (
+                      <>
+                        <p>{borrando.paso === 1 ? TEXTO_ELEGIR[idioma].borrar1 : TEXTO_ELEGIR[idioma].borrar2}</p>
+                        <div>
+                          <button
+                            type="button"
+                            className={estilos.borrarPeligro}
+                            onClick={() => (borrando.paso === 1 ? setBorrando({ id: e.id, paso: 2 }) : confirmarBorrado(e.id))}
+                          >
+                            {borrando.paso === 1 ? TEXTO_ELEGIR[idioma].siBorrar : TEXTO_ELEGIR[idioma].siBorrarDef}
+                          </button>
+                          <button type="button" onClick={() => setBorrando(null)}>
+                            {TEXTO_ELEGIR[idioma].noBorrar}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </details>
           );
@@ -580,8 +613,28 @@ function Grafica({
 }
 
 const TEXTO_ELEGIR = {
-  es: { elegir: "Elegir ejercicios", todos: "Todos", ninguno: "Ninguno", vacio: "Marca algún ejercicio para ver su gráfica." },
-  en: { elegir: "Choose exercises", todos: "All", ninguno: "None", vacio: "Tick an exercise to see its chart." },
+  es: {
+    elegir: "Elegir ejercicios",
+    todos: "Todos",
+    vacio: "Marca algún ejercicio para ver su gráfica.",
+    borrar: "Borrar entreno",
+    borrar1: "¿Borrar este entreno?",
+    borrar2: "Se borrará para siempre y bajará tu progreso. ¿Seguro que quieres borrarlo?",
+    siBorrar: "Sí, borrar",
+    siBorrarDef: "Sí, borrar definitivamente",
+    noBorrar: "No, conservarlo",
+  },
+  en: {
+    elegir: "Choose exercises",
+    todos: "All",
+    vacio: "Tick an exercise to see its chart.",
+    borrar: "Delete workout",
+    borrar1: "Delete this workout?",
+    borrar2: "It will be deleted for good and your progress will go down. Are you sure?",
+    siBorrar: "Yes, delete",
+    siBorrarDef: "Yes, delete for good",
+    noBorrar: "No, keep it",
+  },
 };
 const CLAVE_ELEGIDOS = "evolucionEjercicios";
 
@@ -673,12 +726,29 @@ function Evolucion({
           {abierto && (
             <div className={estilos.selectorPanel}>
               <div className={estilos.selectorAcciones}>
-                <button type="button" onClick={() => cambiar(todos.map((e) => e.id))}>
+                <button
+                  type="button"
+                  aria-pressed={marcados.size === todos.length}
+                  className={marcados.size === todos.length ? estilos.selectorActivo : ""}
+                  onClick={() => cambiar(todos.map((e) => e.id))}
+                >
                   {tx.todos}
                 </button>
-                <button type="button" onClick={() => cambiar([])}>
-                  {tx.ninguno}
-                </button>
+                {presentes.map((c) => {
+                  const ids = todos.filter((e) => e.categoria === c.valor).map((e) => e.id);
+                  const activa = ids.length === marcados.size && ids.every((id) => marcados.has(id));
+                  return (
+                    <button
+                      key={c.valor}
+                      type="button"
+                      aria-pressed={activa}
+                      className={activa ? estilos.selectorActivo : ""}
+                      onClick={() => cambiar(ids)}
+                    >
+                      {idioma === "en" ? c.en : c.es}
+                    </button>
+                  );
+                })}
               </div>
               {presentes.map((c) => (
                 <fieldset key={c.valor}>

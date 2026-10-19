@@ -124,3 +124,18 @@ export async function descartarEntreno(entrenoId: string): Promise<Resultado> {
   if (error) return { ok: false, codigo: codigoDe(error.message) };
   return { ok: true };
 }
+
+// Borra un entreno ya terminado de la persona que llama (y sus series). No se puede deshacer.
+export async function borrarEntreno(entrenoId: string): Promise<Resultado> {
+  const user = await persona();
+  if (!user) return { ok: false, codigo: "sesion" };
+
+  const { error } = await createAdminClient()
+    .from("entrenos")
+    .delete()
+    .eq("id", entrenoId)
+    .eq("user_id", user.id)
+    .eq("estado", "terminado");
+  if (error) return { ok: false, codigo: "general" };
+  return { ok: true };
+}

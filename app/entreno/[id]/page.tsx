@@ -7,7 +7,7 @@ import styles from "../../formularios.module.css";
 import { textos } from "../../textos";
 import { useIdioma } from "../../useIdioma";
 import VideoEjercicio from "../../VideoEjercicio";
-import { agregarSerie, finalizarEntreno, guardarSerie, quitarSerie } from "../acciones";
+import { agregarSerie, descartarEntreno, finalizarEntreno, guardarSerie, quitarSerie } from "../acciones";
 import Cronometro from "./Cronometro";
 import estilos from "./guiado.module.css";
 import Resumen, { type DatosResumen } from "./Resumen";
@@ -188,6 +188,7 @@ export default function PantallaEntreno() {
   const [error, setError] = useState<string | null>(null);
   const [terminando, setTerminando] = useState(false);
   const [confirmar, setConfirmar] = useState(false);
+  const [confirmaDescarte, setConfirmaDescarte] = useState(false);
   const [minutos, setMinutos] = useState("");
   // Se recuerda si el segundero suena (por defecto, sí).
   const [sonido, setSonido] = useState(() => {
@@ -315,6 +316,25 @@ export default function PantallaEntreno() {
       // Si la serie quitada era la de la pantalla, se vuelve a la primera pendiente.
       setActualId(null);
     }
+  }
+
+  // Abre el panel de Finalizar y sube la pantalla para que se vea (si no, queda fuera de la vista).
+  function abrirConfirmar() {
+    setConfirmar(true);
+    setConfirmaDescarte(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function descartar() {
+    setTerminando(true);
+    setError(null);
+    const r = await descartarEntreno(id);
+    if (!r.ok) {
+      setTerminando(false);
+      return setError(mensajeError(r.codigo));
+    }
+    fijarDescanso(null);
+    router.push("/rutina");
   }
 
   async function terminar() {
@@ -515,9 +535,11 @@ export default function PantallaEntreno() {
           <span>{entreno.nombre_sesion}</span>
           <strong aria-label={t.tiempoLabel}>{mmss(transcurrido)}</strong>
         </div>
-        <button type="button" className={estilos.finalizar} onClick={() => setConfirmar(true)}>
-          {t.finalizarEntreno}
-        </button>
+        {!todoHecho && (
+          <button type="button" className={estilos.finalizar} onClick={abrirConfirmar}>
+            {t.finalizarEntreno}
+          </button>
+        )}
       </div>
 
       <div className={estilos.progreso} role="progressbar" aria-valuenow={porcentaje} aria-valuemin={0} aria-valuemax={100}>
@@ -546,10 +568,28 @@ export default function PantallaEntreno() {
             <button type="button" className={styles.boton} disabled={terminando} onClick={terminar}>
               {terminando ? t.guardandoLabel : t.finalizarEntreno}
             </button>
-            <button type="button" className={styles.botonSecundario} onClick={() => setConfirmar(false)}>
+            <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => { setConfirmar(false); setConfirmaDescarte(false); }}>
               {t.noDescartar}
             </button>
+            {!confirmaDescarte && (
+              <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={terminando} onClick={() => setConfirmaDescarte(true)}>
+                {t.descartarEntreno}
+              </button>
+            )}
           </div>
+          {confirmaDescarte && (
+            <div className={styles.aviso} role="alert">
+              <p style={{ margin: "0 0 10px" }}>{t.confirmaDescartar}</p>
+              <div className={estilos.fila}>
+                <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={terminando} onClick={descartar}>
+                  {t.siDescartar}
+                </button>
+                <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmaDescarte(false)}>
+                  {t.noDescartar}
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -660,9 +700,11 @@ export default function PantallaEntreno() {
         <section className={`${styles.tarjeta} ${estilos.completo}`}>
           <h1 style={{ margin: 0 }}>{t.entrenoCompleto}</h1>
           <p style={{ margin: 0 }}>{t.todoHechoAyuda}</p>
-          <button type="button" className={`${styles.boton} ${estilos.grande}`} onClick={() => setConfirmar(true)}>
-            {t.finalizarEntreno}
-          </button>
+          {!confirmar && (
+            <button type="button" className={`${styles.boton} ${estilos.grande}`} onClick={abrirConfirmar}>
+              {t.finalizarEntreno}
+            </button>
+          )}
         </section>
       )}
 

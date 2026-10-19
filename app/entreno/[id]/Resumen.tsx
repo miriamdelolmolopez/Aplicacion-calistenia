@@ -20,6 +20,14 @@ export type DatosResumen = {
 
 // Con estos totales de entrenos la planta sube de nivel.
 const NIVELES_NUEVOS = [5, 15, 30, 60, 100];
+const INICIO_NIVEL = [0, 5, 15, 30, 60, 100]; // total con el que empieza cada nivel (1 a 6)
+
+type Planta = { total: number; nivel: number; racha_semanas: number; siguiente_nivel_en: number | null };
+
+const TEXTO_NIVEL = {
+  es: { faltan: "Entrenos que faltan para subir de nivel", maximo: "¡Has llegado al nivel máximo!" },
+  en: { faltan: "Workouts left to level up", maximo: "You have reached the top level!" },
+};
 
 const ANCHO = 1080;
 const ALTO = 1350;
@@ -125,15 +133,25 @@ export default function Resumen({
   const [vista, setVista] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const mapa = useRef<HTMLDivElement>(null);
-  const [planta, setPlanta] = useState<{ total: number; nivel: number; racha_semanas: number } | null>(null);
+  const [planta, setPlanta] = useState<Planta | null>(null);
+  const [frase, setFrase] = useState<string>("");
 
   useEffect(() => {
-    createClient()
-      .rpc("mi_progreso")
+    const supabase = createClient();
+    supabase.rpc("mi_progreso").then(({ data }) => {
+      if (data) setPlanta(data as Planta);
+    });
+    // Una frase motivadora al azar (las mismas que salen en Inicio).
+    supabase
+      .from("frases_inicio")
+      .select("texto_es, texto_en")
+      .eq("activa", true)
       .then(({ data }) => {
-        if (data) setPlanta(data as { total: number; nivel: number; racha_semanas: number });
+        if (!data || data.length === 0) return;
+        const f = data[Math.floor(Math.random() * data.length)];
+        setFrase((idioma === "en" ? f.texto_en : f.texto_es) || f.texto_es);
       });
-  }, []);
+  }, [idioma]);
 
   const tiempo = `${t.duracionTotal}: ${duracionTexto(duracionSeg)}`;
   const series = `${resumen?.series_hechas ?? 0} ${t.seriesLabel} · ${resumen?.ejercicios ?? 0} ${t.ejerciciosHechos}`;
@@ -237,6 +255,7 @@ export default function Resumen({
 
       {planta && (
         <section className={styles.tarjeta} style={{ marginBottom: 16, alignItems: "center", textAlign: "center" }}>
+          {frase && <p style={{ margin: 0, fontFamily: "var(--font-titulos), Georgia, serif", fontSize: "1.4rem" }}>{frase}</p>}
           <PlantaAvatar
             nivel={planta.nivel}
             brillante={planta.racha_semanas >= 2}
@@ -246,6 +265,11 @@ export default function Resumen({
           <strong>
             {t.nivelLabel} {planta.nivel} · {t[`planta${planta.nivel}` as keyof typeof t] as string}
           </strong>
+          <p style={{ margin: 0 }}>
+            {planta.siguiente_nivel_en === null
+              ? TEXTO_NIVEL[idioma].maximo
+              : `${TEXTO_NIVEL[idioma].faltan}: ${planta.siguiente_nivel_en}/${INICIO_NIVEL[planta.nivel] - INICIO_NIVEL[planta.nivel - 1]}`}
+          </p>
           {NIVELES_NUEVOS.includes(planta.total) && (
             <p className={styles.aviso}>
               {t.subisteNivel
