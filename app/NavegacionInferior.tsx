@@ -23,6 +23,7 @@ function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"]): Pestana[] {
       { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },
       { href: "/admin/clases", icono: "reservar", texto: "Clases" },
       { href: "/admin/bonos", icono: "pagos", texto: "Bonos" },
+      { href: RUTAS.perfil, icono: "perfil", texto: t.perfilTitulo },
     ];
   }
   const ver = seccionesDe(perfil);
@@ -30,6 +31,7 @@ function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"]): Pestana[] {
   if (ver.includes("reservar")) lista.push({ href: RUTAS.reservar, icono: "reservar", texto: t.tabReservas });
   if (ver.includes("rutina")) lista.push({ href: RUTAS.rutina, icono: "rutina", texto: t.tabEntreno });
   if (ver.includes("progreso")) lista.push({ href: RUTAS.progreso, icono: "progreso", texto: t.miProgreso });
+  lista.push({ href: RUTAS.perfil, icono: "perfil", texto: t.perfilTitulo });
   return lista;
 }
 
