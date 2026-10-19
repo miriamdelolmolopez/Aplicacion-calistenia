@@ -66,6 +66,18 @@ const DIBUJOS = {
       <path d="M4 21V5M9 8h6" />
     </>
   ),
+  aprende: (
+    <>
+      <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z" />
+      <path d="M4 21V5M9 8h6M9 12h6" />
+    </>
+  ),
+  lupa: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4-4" />
+    </>
+  ),
   historial: (
     <>
       <circle cx="12" cy="12" r="9" />

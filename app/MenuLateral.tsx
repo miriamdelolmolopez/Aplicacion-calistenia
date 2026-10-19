@@ -18,6 +18,7 @@ const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   rutina: "entrenamientoTitulo",
   progreso: "miProgreso",
   pagos: "navPagos",
+  aprende: "navAprende",
   perfil: "navCuenta",
   ajustes: "navAjustes",
   admin: "panelAdmin",

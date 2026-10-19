@@ -403,9 +403,6 @@ export default function Clases() {
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
                 <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo]) }}>
-                  <button type="button" className={estilos.saberMas} onClick={() => setSaberMas(c.tipo)}>
-                    {t.saberMasLink}
-                  </button>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                 </div>
@@ -413,6 +410,9 @@ export default function Clases() {
                   <Avatar nombre={profe?.nombre ?? "Miriam"} url={profe?.foto} tamano={28} />
                   <span>{profe?.nombre ?? "Miriam"}</span>
                   {cancelada && <strong className={estilos.etiquetaCancelada}>{t.cancelada}</strong>}
+                  <button type="button" className={estilos.saberMas} onClick={() => setSaberMas(c.tipo)}>
+                    {t.saberMasLink}
+                  </button>
                 </div>
 
                 {!cancelada && personal && (
