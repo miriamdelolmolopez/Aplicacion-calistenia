@@ -252,8 +252,8 @@ export default function Datos() {
               <input type="checkbox" checked={imagen} onChange={(e) => setImagen(e.target.checked)} />
               <span>
                 {idioma === "en"
-                  ? "Optional: I authorise the use of photos and videos in which I appear on social media and professional channels. I can withdraw this at any time in Settings, and it does not affect my access to the service."
-                  : "Opcional: autorizo el uso de fotos y vídeos en los que aparezca en redes sociales y canales profesionales. Puedo retirarlo cuando quiera en Ajustes y no afecta a mi acceso al servicio."}
+                  ? "I authorise the use of photos and videos in which I appear on social media and professional channels. I can withdraw this at any time in Settings, and it does not affect my access to the service."
+                  : "Autorizo el uso de fotos y vídeos en los que aparezca en redes sociales y canales profesionales. Puedo retirarlo cuando quiera en Ajustes y no afecta a mi acceso al servicio."}
               </span>
             </label>
             <p className={styles.ayuda}>

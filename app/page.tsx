@@ -45,10 +45,7 @@ export default function Inicio() {
           {t.soyAlumno}
         </Link>
         <Link href="/registro" className={`${styles.boton} ${styles.botonSecundario}`}>
-          <span>
-            {t.crearCuentaPrueba}
-            <small>{t.soloGrupalesFuengirola}</small>
-          </span>
+          {t.crearCuentaPrueba}
         </Link>
       </nav>
     </main>

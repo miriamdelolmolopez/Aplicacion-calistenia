@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import BarraSuperior from "../BarraSuperior";
 import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
@@ -122,6 +123,8 @@ const PREGUNTAS: Record<"es" | "en", Pregunta[]> = {
 export default function Ayuda() {
   const [idioma] = useIdioma();
   const preguntas = PREGUNTAS[idioma];
+  // Solo una pregunta abierta a la vez.
+  const [abierta, setAbierta] = useState<number | null>(null);
 
   return (
     <main className={styles.pagina}>
@@ -131,9 +134,16 @@ export default function Ayuda() {
         {idioma === "en" ? "Frequently asked questions. Tap one to see the answer." : "Preguntas frecuentes. Pulsa una para ver la respuesta."}
       </p>
       <div className={estilos.lista}>
-        {preguntas.map((q) => (
-          <details key={q.p} className={estilos.pregunta}>
-            <summary>{q.p}</summary>
+        {preguntas.map((q, i) => (
+          <details key={q.p} className={estilos.pregunta} open={abierta === i}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setAbierta(abierta === i ? null : i);
+              }}
+            >
+              {q.p}
+            </summary>
             <p>{q.r}</p>
           </details>
         ))}

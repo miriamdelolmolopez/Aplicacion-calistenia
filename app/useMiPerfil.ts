@@ -46,20 +46,25 @@ async function cargarPerfil(): Promise<Estado> {
 
 // `recargarCon`: si cambia (por ejemplo la ruta), se vuelve a leer el perfil.
 export function useMiPerfil(recargarCon?: string): Estado {
-  const [perfil, setPerfil] = useState<Estado>(null);
+  // Se guarda con qué valor de `recargarCon` se leyó, para no actuar con datos de una pantalla anterior.
+  const [leido, setLeido] = useState<{ perfil: Estado; con?: string }>({ perfil: null });
   const router = useRouter();
   const ruta = usePathname();
+  const perfil = leido.perfil;
+  const actualizado = leido.con === recargarCon;
 
   useEffect(() => {
-    cargarPerfil().then(setPerfil);
+    cargarPerfil().then((p) => setLeido({ perfil: p, con: recargarCon }));
   }, [recargarCon]);
 
   // Si los textos legales cambian, hay que aceptarlos de nuevo para seguir usando la app.
+  // Solo se decide con datos recién leídos (si no, tras aceptar volvería a la pantalla de datos).
   useEffect(() => {
+    if (!actualizado) return;
     if (perfil && perfil !== "anonimo" && perfil.rol !== "admin" && !perfil.legalAceptado) {
       if (!ruta.startsWith("/datos") && !ruta.startsWith("/legal")) router.replace("/datos");
     }
-  }, [perfil, ruta, router]);
+  }, [perfil, actualizado, ruta, router]);
 
   return perfil;
 }

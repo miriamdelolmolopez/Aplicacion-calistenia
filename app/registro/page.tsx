@@ -51,7 +51,7 @@ export default function Registro() {
       <BarraSuperior izquierda={{ href: "/", texto: "volver" }} />
       <div className={styles.cabecera}>
         <h1>{enviado ? t.registroEnviado : t.registroTitulo}</h1>
-        <p>{enviado ? t.registroEnviadoTexto : t.registroIntro}</p>
+        {enviado && <p>{t.registroEnviadoTexto}</p>}
       </div>
 
       {!enviado && (
@@ -81,8 +81,8 @@ export default function Registro() {
             <input type="checkbox" checked={imagen} onChange={(e) => setImagen(e.target.checked)} />
             <span>
               {idioma === "en"
-                ? "Optional: I authorise the use of photos and videos in which I appear on social media and professional channels. I can withdraw this at any time."
-                : "Opcional: autorizo el uso de fotos y vídeos en los que aparezca en redes sociales y canales profesionales. Puedo retirarlo cuando quiera."}
+                ? "I authorise the use of photos and videos in which I appear on social media and professional channels. I can withdraw this at any time."
+                : "Autorizo el uso de fotos y vídeos en los que aparezca en redes sociales y canales profesionales. Puedo retirarlo cuando quiera."}
             </span>
           </label>
           <p className={styles.ayuda}>

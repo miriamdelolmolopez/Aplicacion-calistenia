@@ -208,3 +208,40 @@ export async function guardarVideoEjercicio(
   revalidatePath("/rutina");
   return { ok: true, enlace: guardar };
 }
+
+// Cambia el nombre de un material, lo oculta o lo muestra.
+export async function editarMaterial(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+
+  const id = texto(formData, "id");
+  const nombre = texto(formData, "nombre");
+  const nombreEn = texto(formData, "nombre_en");
+  if (!UUID.test(id)) return { error: "Material no válido." };
+  if (nombre.length < 2 || nombre.length > 60) return { error: "El nombre debe tener entre 2 y 60 letras." };
+  if (nombreEn && (nombreEn.length < 2 || nombreEn.length > 60)) {
+    return { error: "El nombre en inglés debe tener entre 2 y 60 letras." };
+  }
+
+  const { error } = await createAdminClient()
+    .from("materiales")
+    .update({ nombre, nombre_en: nombreEn || null, activo: formData.get("activo") === "on" })
+    .eq("id", id);
+  if (error) {
+    return { error: error.code === "23505" ? "Ya existe un material con ese nombre." : "No se ha podido guardar." };
+  }
+
+  revalidatePath("/admin/ejercicios");
+  return { mensaje: "Cambios guardados." };
+}
+
+// Borra un material (se quita también de los ejercicios que lo tenían).
+export async function borrarMaterial(id: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { ok: false, error: "Material no válido." };
+
+  const { error } = await createAdminClient().from("materiales").delete().eq("id", id);
+  if (error) return { ok: false, error: "No se ha podido borrar el material." };
+
+  revalidatePath("/admin/ejercicios");
+  return { ok: true };
+}
