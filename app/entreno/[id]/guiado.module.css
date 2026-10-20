@@ -153,7 +153,7 @@
   align-items: center;
   gap: 10px;
   padding: 14px;
-  background: #eef0e0;
+  background: #fdf0ea;
   border-radius: 22px;
 }
 
@@ -198,8 +198,8 @@
 }
 
 .cronoBotones .cronoParar {
-  background: #8a4b2a;
-  border-color: #8a4b2a;
+  background: #b4501f;
+  border-color: #b4501f;
 }
 
 .campos {
@@ -395,7 +395,7 @@
   font-size: 5rem;
   line-height: 1;
   font-weight: 600;
-  color: #8a4b2a;
+  color: #b4501f;
   font-variant-numeric: tabular-nums;
 }
 
@@ -420,7 +420,7 @@
   font-weight: 600;
   color: var(--carbon);
   background: var(--blanco);
-  border: 1px solid #cfc7b5;
+  border: 1px solid #d3cfc6;
   border-radius: 8px;
 }
 

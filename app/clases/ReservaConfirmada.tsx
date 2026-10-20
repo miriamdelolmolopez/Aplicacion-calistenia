@@ -86,12 +86,12 @@ export default function ReservaConfirmada({
       </div>
 
       <svg className={estilos.hoja} viewBox="0 0 120 180" aria-hidden="true">
-        <g fill="none" stroke="#70754b" strokeWidth="1.4" strokeLinecap="round" opacity="0.55">
+        <g fill="none" stroke="#e8602c" strokeWidth="1.4" strokeLinecap="round" opacity="0.55">
           <path d="M60 178C58 130 62 80 92 20" />
-          <path d="M62 140c-22-4-34-20-36-40 22 2 34 18 36 40Z" fill="#70754b" fillOpacity="0.16" />
-          <path d="M66 110c18-6 28-22 28-42-20 6-30 20-28 42Z" fill="#70754b" fillOpacity="0.16" />
-          <path d="M72 80c-14-8-20-22-18-38 16 8 22 22 18 38Z" fill="#70754b" fillOpacity="0.16" />
-          <path d="M82 52c12-6 18-16 18-30-14 4-20 14-18 30Z" fill="#70754b" fillOpacity="0.16" />
+          <path d="M62 140c-22-4-34-20-36-40 22 2 34 18 36 40Z" fill="#e8602c" fillOpacity="0.16" />
+          <path d="M66 110c18-6 28-22 28-42-20 6-30 20-28 42Z" fill="#e8602c" fillOpacity="0.16" />
+          <path d="M72 80c-14-8-20-22-18-38 16 8 22 22 18 38Z" fill="#e8602c" fillOpacity="0.16" />
+          <path d="M82 52c12-6 18-16 18-30-14 4-20 14-18 30Z" fill="#e8602c" fillOpacity="0.16" />
         </g>
       </svg>
     </div>

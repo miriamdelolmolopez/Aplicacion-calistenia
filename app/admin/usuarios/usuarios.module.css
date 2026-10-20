@@ -58,7 +58,7 @@
 }
 
 .alerta {
-  color: #8a4b2a;
+  color: #b4501f;
   font-weight: 600;
 }
 
@@ -141,12 +141,12 @@
 }
 
 .sube {
-  color: #3f6a2b;
+  color: #2a8a57;
   font-weight: 600;
 }
 
 .baja {
-  color: #8a4b2a;
+  color: #b4501f;
   font-weight: 600;
 }
 
@@ -223,7 +223,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--secundario);
-  background: #f3f0e8;
+  background: #f1f0ec;
   border-bottom: 1px solid var(--linea);
 }
 
@@ -234,7 +234,7 @@
 }
 
 .tabla tr:hover td {
-  background: #faf8f3;
+  background: #f8f7f5;
 }
 
 .celdaPersona {

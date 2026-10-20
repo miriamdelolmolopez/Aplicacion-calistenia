@@ -24,21 +24,21 @@
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #5a5e3b;
+  color: #c9471a;
   cursor: pointer;
   background: #ffffff;
-  border: 1px solid rgba(112, 117, 75, 0.45);
+  border: 1px solid rgba(232, 96, 44, 0.45);
   border-radius: 12px;
 }
 
 .embudo:focus-visible {
-  outline: 3px solid #70754b;
+  outline: 3px solid #e8602c;
   outline-offset: 2px;
 }
 
 .embudoActivo {
-  background: #e4e7d2;
-  border-color: #70754b;
+  background: #fdebe3;
+  border-color: #e8602c;
 }
 
 .insignia {
@@ -50,7 +50,7 @@
   padding: 0 6px;
   font-size: 0.75rem;
   color: #ffffff;
-  background: #70754b;
+  background: #e8602c;
   border-radius: 10px;
 }
 

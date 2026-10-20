@@ -5,7 +5,7 @@ import { MUSCULOS } from "@/lib/ejercicios";
 import styles from "./MapaCorporal.module.css";
 
 // De más suave a más intenso (verde oliva de tu marca).
-const COLORES = ["#dfe3c8", "#bcc48f", "#98a15f", "#70754b", "#3f4326"];
+const COLORES = ["#f9d9cb", "#bcc48f", "#f2a07c", "#e8602c", "#3f4326"];
 
 // Cuerpo humano en blanco y negro, de frente y de espalda, con los músculos
 // trabajados resaltados en color. La intensidad va de 1 (suave) a 5 (fuerte).

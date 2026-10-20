@@ -16,8 +16,8 @@
 
 .periodoActivo {
   color: #fff;
-  background: var(--carbon);
-  border-color: var(--carbon);
+  background: var(--acento);
+  border-color: var(--acento);
 }
 
 .cifras {
@@ -30,15 +30,21 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 12px;
+  padding: 16px 14px;
   text-align: center;
-  background: var(--crema);
-  border-radius: 12px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 24px;
+  box-shadow: var(--sombra);
 }
 
 .cifra strong {
-  font-size: 1.5rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 1.8rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
   line-height: 1.15;
+  color: var(--acento-oscuro);
 }
 
 .cifra small {
@@ -46,12 +52,12 @@
 }
 
 .sube {
-  color: #3f6a2b;
+  color: #2a8a57;
   font-weight: 600;
 }
 
 .baja {
-  color: #8a4b2a;
+  color: #b4501f;
   font-weight: 600;
 }
 
@@ -72,7 +78,7 @@
 }
 
 .pista {
-  height: 10px;
+  height: 8px;
   margin-top: 4px;
   background: var(--relleno);
   border-radius: 999px;
@@ -93,7 +99,7 @@
 .mensuales {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
+  gap: 10px;
   height: 160px;
 }
 
@@ -119,17 +125,19 @@
 }
 
 .barra {
-  width: 45%;
+  width: 10px;
+  max-width: 45%;
   min-height: 2px;
   background: var(--oliva);
-  border-radius: 3px 3px 0 0;
+  border-radius: 999px;
 }
 
 .barraAnterior {
-  width: 45%;
+  width: 10px;
+  max-width: 45%;
   min-height: 2px;
-  background: #cfd3b3;
-  border-radius: 3px 3px 0 0;
+  background: #f5c6b3;
+  border-radius: 999px;
 }
 
 .leyenda {
@@ -181,8 +189,9 @@
   gap: 8px;
   padding: 8px 10px;
   font-size: 0.92rem;
-  background: var(--crema);
+  background: var(--blanco);
   border-radius: 10px;
+  border: 1px solid var(--linea);
 }
 
 .fechas {

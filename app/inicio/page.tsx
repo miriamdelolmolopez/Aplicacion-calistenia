@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Anillo from "../Anillo";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
@@ -179,7 +180,7 @@ export default function Inicio() {
 
       <section
         className={estilos.hero}
-        style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio, !fotosListas) }}
+        style={{ backgroundImage: fondoFoto("handstand", propiaInicio, !fotosListas) }}
       >
         <span className={estilos.vista}>
           {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
@@ -225,15 +226,18 @@ export default function Inicio() {
         )}
 
         {bonosClases.map((b) => (
-          <section key={b.id} className={estilos.tarjeta}>
-            <h2>{t.tuBono}</h2>
-            <p className={estilos.grande}>
-              <strong>{b.nombre}</strong>
-              <span>
-                {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
-                {b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
-              </span>
-            </p>
+          <section key={b.id} className={`${estilos.tarjeta} ${estilos.tarjetaAnillo}`}>
+            <div className={estilos.tarjetaTexto}>
+              <h2>{t.tuBono}</h2>
+              <p className={estilos.grande}>
+                <strong>{b.nombre}</strong>
+                <span>
+                  {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
+                  {b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
+                </span>
+              </p>
+            </div>
+            <Anillo valor={b.clasesRestantes} total={b.clasesTotal} />
           </section>
         ))}
 

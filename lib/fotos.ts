@@ -1,16 +1,18 @@
 // Fotos de la app. Las imágenes van en public/fotos. Si un archivo no existe,
 // se ve el degradado de color de debajo, así que nunca queda un hueco vacío.
 
-export type FotoNombre = "portada" | "inicio" | "calistenia" | "pino" | "personal" | "online" | "progreso";
+export type FotoNombre = "portada" | "inicio" | "calistenia" | "pino" | "personal" | "online" | "progreso" | "handstand";
 
+// Color liso de cada foto: se ve si la foto no carga y, en tarjetas con color, tiñe la foto (efecto duotono).
 const DEGRADADOS: Record<FotoNombre, string> = {
-  portada: "linear-gradient(160deg, #b9ad92, #70754b)",
-  inicio: "linear-gradient(160deg, #8d9265, #5a5e3b)",
-  calistenia: "linear-gradient(160deg, #8d9265, #5a5e3b)",
-  pino: "linear-gradient(160deg, #a39a7f, #6a6e47)",
-  personal: "linear-gradient(160deg, #6f7351, #3b3d28)",
-  online: "linear-gradient(160deg, #565a3d, #2b2b2a)",
-  progreso: "linear-gradient(160deg, #7f8556, #4a4d31)",
+  portada: "linear-gradient(#f0622d, #f0622d)",
+  inicio: "linear-gradient(#f0622d, #f0622d)",
+  calistenia: "linear-gradient(#f0622d, #f0622d)",
+  pino: "linear-gradient(#b8451c, #b8451c)",
+  personal: "linear-gradient(#6b5a50, #6b5a50)",
+  online: "linear-gradient(#e98a5e, #e98a5e)",
+  progreso: "linear-gradient(#f0622d, #f0622d)",
+  handstand: "linear-gradient(#ebe8e3, #ebe8e3)",
 };
 
 // Capa oscura suave para que el texto blanco se lea sobre cualquier foto.
@@ -19,9 +21,11 @@ const VELO = "linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0
 // `propia` es la foto que Miriam ha subido; si no hay, se usa la de ejemplo.
 export function fondoFoto(nombre: FotoNombre, propia?: string | null, esperando = false): string {
   // Con foto propia no se pide también la de ejemplo (el navegador descarga todas las capas).
-  const foto = esperando ? null : propia ? `url("${propia}")` : `url(/fotos/${nombre}-v2.webp)`;
+  const ejemplo = nombre === "handstand" ? "/fotos/handstand-v1.webp" : `/fotos/${nombre}-v2.webp`;
+  const foto = esperando ? null : propia ? `url("${propia}")` : `url(${ejemplo})`;
   const capas = [foto, DEGRADADOS[nombre]];
-  return [VELO, ...capas.filter(Boolean)].join(", ");
+  // La foto de la portada de Inicio es clara: va sin capa oscura.
+  return [nombre === "handstand" ? null : VELO, ...capas].filter(Boolean).join(", ");
 }
 
 // Qué foto lleva cada tipo de clase, según su nombre.

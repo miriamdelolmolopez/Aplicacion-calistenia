@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   font-family: var(--font-montserrat), Montserrat, sans-serif;
-  color: #2b2b2a;
+  color: #17181a;
 }
 
 .tarjeta {
@@ -14,25 +14,25 @@
   background: #fff;
   border-radius: 24px;
   border: 1px solid var(--linea);
-  box-shadow: 0 4px 18px rgba(43, 43, 42, 0.07);
+  box-shadow: 0 4px 18px rgba(23, 24, 26, 0.07);
 }
 
 .aviso {
   padding: 14px;
   background: #fff;
   border-radius: 12px;
-  border: 1px solid #e3dccd;
+  border: 1px solid #e4e1dc;
 }
 
 .ayuda {
   font-size: 0.85rem;
-  color: #5a5e3b;
+  color: #c9471a;
 }
 
 .alerta {
   margin: 8px 0 0;
   font-size: 0.9rem;
-  color: #8a4b2a;
+  color: #b4501f;
   font-weight: 600;
 }
 
@@ -59,7 +59,7 @@
   background: #fff;
   border-radius: 22px;
   border: 1px solid var(--linea);
-  box-shadow: 0 4px 18px rgba(43, 43, 42, 0.07);
+  box-shadow: 0 4px 18px rgba(23, 24, 26, 0.07);
 }
 
 .numero strong {
@@ -72,7 +72,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 10px;
-  background: #f4efe6;
+  background: #f4f3f1;
   border-radius: 10px;
 }
 
@@ -87,28 +87,28 @@
   padding: 2px 8px;
   font-size: 0.78rem;
   color: #fff;
-  background: #70754b;
+  background: #e8602c;
   border-radius: 999px;
   white-space: nowrap;
 }
 
 .barra {
   height: 10px;
-  background: #e3dccd;
+  background: #e4e1dc;
   border-radius: 999px;
   overflow: hidden;
 }
 
 .barraRelleno {
   height: 100%;
-  background: #70754b;
+  background: #e8602c;
   border-radius: 999px;
 }
 
 .botonMini {
   border: 0;
   background: transparent;
-  color: #8a4b2a;
+  color: #b4501f;
   font-size: 1rem;
   cursor: pointer;
 }
@@ -124,7 +124,7 @@
 .selectores select {
   padding: 10px;
   font: inherit;
-  border: 1px solid #cfc7b5;
+  border: 1px solid #d3cfc6;
   border-radius: 8px;
   background: #fff;
 }
@@ -141,7 +141,7 @@
   padding: 10px 16px;
   font: inherit;
   color: #fff;
-  background: #70754b;
+  background: #e8602c;
   border: 0;
   border-radius: 10px;
   cursor: pointer;
@@ -167,7 +167,7 @@
 }
 
 .desplegable {
-  border-top: 1px solid #e3dccd;
+  border-top: 1px solid #e4e1dc;
   padding-top: 8px;
 }
 
@@ -210,7 +210,7 @@
 .barraMesRelleno {
   width: 100%;
   min-height: 2px;
-  background: #70754b;
+  background: #e8602c;
   border-radius: 6px 6px 0 0;
 }
 
@@ -227,17 +227,17 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #2b2b2a;
+  color: #17181a;
   background: #fff;
-  border: 1px solid #e3dccd;
+  border: 1px solid #e4e1dc;
   border-radius: 999px;
   cursor: pointer;
 }
 
 .chipActivo {
   color: #fff;
-  background: #5a5e3b;
-  border-color: #5a5e3b;
+  background: #c9471a;
+  border-color: #c9471a;
 }
 
 .selectorEj {
@@ -253,9 +253,9 @@
   padding: 0 16px;
   font: inherit;
   font-weight: 600;
-  color: #2b2b2a;
+  color: #17181a;
   background: #fff;
-  border: 1px solid #e3dccd;
+  border: 1px solid #e4e1dc;
   border-radius: 14px;
   cursor: pointer;
 }
@@ -269,9 +269,9 @@
   padding: 12px 14px;
   overflow-y: auto;
   background: #fff;
-  border: 1px solid #e3dccd;
+  border: 1px solid #e4e1dc;
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(43, 43, 42, 0.12);
+  box-shadow: 0 8px 24px rgba(23, 24, 26, 0.12);
 }
 
 .selectorAcciones {
@@ -282,7 +282,7 @@
 
 .selectorAcciones .selectorActivo {
   color: #fff;
-  background: #5a5e3b;
+  background: #c9471a;
 }
 
 .selectorAcciones button {
@@ -291,9 +291,9 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #5a5e3b;
+  color: #c9471a;
   background: transparent;
-  border: 1px solid #5a5e3b;
+  border: 1px solid #c9471a;
   border-radius: 999px;
   cursor: pointer;
 }
@@ -323,7 +323,7 @@
 .selectorPanel input[type="checkbox"] {
   width: 22px;
   height: 22px;
-  accent-color: #5a5e3b;
+  accent-color: #c9471a;
 }
 
 .borrarEntreno {
@@ -332,7 +332,7 @@
   gap: 8px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #e3dccd;
+  border-top: 1px solid #e4e1dc;
 }
 
 .borrarEntreno p {
@@ -352,15 +352,15 @@
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #5a5e3b;
+  color: #c9471a;
   background: transparent;
-  border: 1px solid #5a5e3b;
+  border: 1px solid #c9471a;
   border-radius: 999px;
   cursor: pointer;
 }
 
 .borrarEntreno .borrarPeligro {
   color: #fff;
-  background: #9b2c2c;
-  border-color: #9b2c2c;
+  background: #c2362b;
+  border-color: #c2362b;
 }

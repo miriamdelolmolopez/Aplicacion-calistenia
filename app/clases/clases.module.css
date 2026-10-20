@@ -68,9 +68,9 @@
 .diaElegido {
   position: relative;
   color: #fff;
-  background: var(--carbon);
-  border-color: var(--carbon);
-  box-shadow: var(--sombra-alta);
+  background: var(--acento);
+  border-color: var(--acento);
+  box-shadow: var(--sombra-acento);
 }
 
 /* Borde que da la vuelta alrededor del día elegido */
@@ -81,7 +81,7 @@
   padding: 1.5px;
   border-radius: inherit;
   pointer-events: none;
-  background: conic-gradient(from var(--ang), transparent 62%, #70754b 84%, #b4bb88 92%, transparent 100%);
+  background: conic-gradient(from var(--ang), transparent 62%, #ffffff 86%, #ffc7ad 94%, transparent 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -170,6 +170,7 @@
   color: var(--blanco);
   background-size: cover;
   background-position: center;
+  background-blend-mode: normal, multiply, normal;
 }
 
 .titulo h2 {
@@ -196,7 +197,7 @@
 
 .etiquetaCancelada {
   margin-left: auto;
-  color: #8a4b2a;
+  color: #b4501f;
 }
 
 .cuadrados {
@@ -344,8 +345,8 @@
 
 .filtroActivo {
   color: var(--blanco);
-  background: var(--carbon);
-  border-color: var(--carbon);
+  background: var(--acento);
+  border-color: var(--acento);
 }
 
 .noIncluida {

@@ -105,15 +105,15 @@
 
 .campo input:focus {
   border-color: var(--oliva);
-  box-shadow: 0 0 0 4px rgba(112, 117, 75, 0.16);
+  box-shadow: 0 0 0 4px rgba(232, 96, 44, 0.16);
 }
 
 .campo input[aria-invalid="true"] {
-  border-color: #9b2c2c;
+  border-color: #c2362b;
 }
 
 .error {
-  color: #9b2c2c;
+  color: #c2362b;
   font-size: 0.85rem;
   margin: 0;
 }
@@ -167,18 +167,18 @@
   font: inherit;
   font-weight: 600;
   color: var(--blanco);
-  background: var(--oliva-oscuro);
+  background: var(--acento);
   border: 0;
   border-radius: 9999px;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s;
+  transition: background-color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
 }
 
 .boton:hover:not(:disabled) {
-  background: var(--carbon);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 24px -14px rgba(43, 43, 42, 0.5);
+  background: var(--acento-oscuro);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-acento);
 }
 
 .boton:active:not(:disabled) {
@@ -192,13 +192,13 @@
 
 .botonSecundario {
   background: transparent;
-  color: var(--oliva-oscuro);
-  border: 1px solid var(--oliva-oscuro);
+  color: var(--acento-oscuro);
+  border: 1.5px solid var(--acento);
 }
 
 .botonSecundario:hover:not(:disabled) {
-  background: var(--relleno);
-  color: var(--carbon);
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
   box-shadow: none;
 }
 

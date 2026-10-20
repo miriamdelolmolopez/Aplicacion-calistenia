@@ -16,13 +16,14 @@
   min-height: 120px;
   padding: 16px 20px;
   color: var(--blanco);
-  background-color: #3b3d28;
+  background-color: #1f2023;
   background-image: linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.15) 70%),
-    url(/fotos/personal-v2.webp), linear-gradient(160deg, #6f7351, #3b3d28);
+    url(/fotos/personal-v2.webp), linear-gradient(160deg, #d9531f, #1f2023);
   background-size: cover;
   background-position: center 30%;
   border-radius: 28px;
   box-shadow: var(--sombra);
+  background-blend-mode: normal, multiply, normal;
 }
 
 .barra h1 {
@@ -86,7 +87,7 @@
 .campo input:focus,
 .campo select:focus {
   border-color: var(--oliva);
-  box-shadow: 0 0 0 4px rgba(112, 117, 75, 0.16);
+  box-shadow: 0 0 0 4px rgba(232, 96, 44, 0.16);
 }
 
 .grupo {
@@ -120,17 +121,17 @@
   font: inherit;
   font-weight: 600;
   color: var(--blanco);
-  background: var(--oliva-oscuro);
+  background: var(--acento);
   border: 0;
   border-radius: 9999px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s;
+  transition: background-color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
 }
 
 .boton:hover:not(:disabled) {
-  background: var(--carbon);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 24px -14px rgba(43, 43, 42, 0.5);
+  background: var(--acento-oscuro);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-acento);
 }
 
 .boton:disabled {
@@ -140,18 +141,18 @@
 
 .botonSecundario {
   background: transparent;
-  color: var(--oliva-oscuro);
-  border: 1px solid var(--oliva-oscuro);
+  color: var(--acento-oscuro);
+  border: 1.5px solid var(--acento);
 }
 
 .botonSecundario:hover:not(:disabled) {
-  background: var(--relleno);
-  color: var(--carbon);
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
   box-shadow: none;
 }
 
 .error {
-  color: #9b2c2c;
+  color: #c2362b;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -213,7 +214,7 @@
 }
 
 .etiqueta {
-  background: rgba(112, 117, 75, 0.14);
+  background: rgba(232, 96, 44, 0.14);
   color: var(--oliva-oscuro);
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.7rem;
@@ -474,8 +475,8 @@
 }
 
 .chipActivo {
-  background: var(--carbon);
-  border-color: var(--carbon);
+  background: var(--acento);
+  border-color: var(--acento);
   color: var(--blanco);
   font-weight: 600;
 }
@@ -495,7 +496,7 @@
 }
 
 .alerta {
-  background: #f6e3d6;
+  background: #fde4d6;
   color: #7a3a14;
   font-size: 0.85rem;
   font-weight: 600;
@@ -662,12 +663,13 @@
   overflow: hidden;
   color: var(--blanco);
   text-decoration: none;
-  background-color: #3b3d28;
+  background-color: #1f2023;
   background-size: cover;
   background-position: center;
   border-radius: 24px;
   box-shadow: var(--sombra);
   transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
+  background-blend-mode: normal, multiply, normal;
 }
 
 .azulejo:hover {

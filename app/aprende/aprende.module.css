@@ -29,7 +29,7 @@
   width: 48px;
   height: 48px;
   color: var(--oliva-oscuro);
-  background: #e4e7d2;
+  background: #fdebe3;
   border-radius: 14px;
 }
 
@@ -140,7 +140,7 @@
 
 .numeros .elegido {
   color: var(--blanco);
-  background: var(--carbon);
+  background: var(--acento);
 }
 
 .respuestas {
@@ -168,14 +168,14 @@
 
 .respuestas .bien {
   color: var(--blanco);
-  background: #4a7c3a;
-  border-color: #4a7c3a;
+  background: #2f9e63;
+  border-color: #2f9e63;
 }
 
 .respuestas .mal {
   color: var(--blanco);
-  background: #9b2c2c;
-  border-color: #9b2c2c;
+  background: #c2362b;
+  border-color: #c2362b;
 }
 
 .barra {
@@ -215,7 +215,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   margin-bottom: 12px;
-  background-color: #e4e7d2;
+  background-color: #fdebe3;
   background-position: center;
   background-size: cover;
   border-radius: 14px;

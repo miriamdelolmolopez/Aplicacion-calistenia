@@ -120,14 +120,14 @@
 
 .vino {
   color: #fff;
-  background: #3f7a3a;
-  border-color: #3f7a3a;
+  background: #2a8a57;
+  border-color: #2a8a57;
 }
 
 .novino {
   color: #fff;
-  background: #a8412f;
-  border-color: #a8412f;
+  background: #c9471a;
+  border-color: #c9471a;
 }
 
 .panelPersona {
@@ -165,7 +165,7 @@
   padding: 4px 0;
   font-weight: 600;
   color: var(--carbon);
-  background: #ece9e1;
+  background: #eeece8;
   border-radius: 8px;
   text-decoration: none;
 }
@@ -182,7 +182,7 @@
 
 .diaElegido {
   color: #fff;
-  background: var(--carbon);
+  background: var(--acento);
 }
 
 .diaElegido small {
@@ -218,7 +218,7 @@
   height: 64px;
   padding: 0;
   overflow: hidden;
-  background: #ece9e1;
+  background: #eeece8;
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
@@ -231,17 +231,17 @@
 }
 
 .cuadroVino {
-  border-color: #3f7a3a;
+  border-color: #2a8a57;
 }
 
 .cuadroNoVino {
-  border-color: #a8412f;
+  border-color: #c9471a;
 }
 
 .cuadroLibre {
   width: 64px;
   height: 64px;
-  background: #ece9e1;
+  background: #eeece8;
   border-radius: 8px;
   opacity: 0.6;
 }
@@ -254,7 +254,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   color: #fff;
-  background: rgba(43, 43, 42, 0.8);
+  background: rgba(23, 24, 26, 0.8);
   border-radius: 4px;
 }
 
@@ -266,7 +266,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(43, 43, 42, 0.5);
+  background: rgba(23, 24, 26, 0.5);
 }
 
 .hoja {
@@ -302,7 +302,7 @@
 
 .tarjetaElegida {
   border-color: var(--oliva-oscuro);
-  box-shadow: 0 0 0 2px rgba(90, 94, 59, 0.3);
+  box-shadow: 0 0 0 2px rgba(201, 71, 26, 0.3);
 }
 
 .cierra {
@@ -322,7 +322,7 @@
   gap: 14px;
   margin-bottom: 12px;
   padding: 14px;
-  background: #ecefdf;
+  background: #fdf1ec;
   border-radius: 14px;
 }
 

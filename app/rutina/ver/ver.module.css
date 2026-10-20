@@ -99,7 +99,7 @@
 .diaHecho {
   color: var(--blanco);
   font-weight: 700;
-  background: #4f8a3a;
+  background: #2f9e63;
 }
 
 .hoy {
@@ -117,7 +117,7 @@
 }
 
 .sesionHecha {
-  background: #eef4e9;
+  background: #e8f5ee;
 }
 
 .sesionFila {
@@ -141,8 +141,8 @@
 }
 
 .sesionHecha .check {
-  background: #4f8a3a;
-  border-color: #4f8a3a;
+  background: #2f9e63;
+  border-color: #2f9e63;
 }
 
 .sesionTexto {

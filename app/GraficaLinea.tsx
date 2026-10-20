@@ -24,29 +24,47 @@ export default function GraficaLinea({
   const alto = maximo + margen;
   const x = (i: number) => (puntos.length === 1 ? (izq + W - der) / 2 : izq + (i * (W - izq - der)) / (puntos.length - 1));
   const y = (v: number) => arriba + (1 - (v - bajo) / (alto - bajo)) * (H - arriba - abajo);
-  const camino = puntos.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(p.valor).toFixed(1)}`).join(" ");
+  // Línea suave (curvas) y un relleno que se desvanece por debajo
+  const pts = puntos.map((p, i) => [x(i), y(p.valor)] as const);
+  const camino = pts
+    .map(([px, py], i) => {
+      if (i === 0) return `M${px.toFixed(1)} ${py.toFixed(1)}`;
+      const [qx, qy] = pts[i - 1];
+      const cx = ((qx + px) / 2).toFixed(1);
+      return `C${cx} ${qy.toFixed(1)} ${cx} ${py.toFixed(1)} ${px.toFixed(1)} ${py.toFixed(1)}`;
+    })
+    .join(" ");
+  const base = H - abajo;
+  const area = `${camino} L${pts[pts.length - 1][0].toFixed(1)} ${base} L${pts[0][0].toFixed(1)} ${base} Z`;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }} role="img">
+      <defs>
+        <linearGradient id="relleno-linea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e8602c" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#e8602c" stopOpacity="0" />
+        </linearGradient>
+      </defs>
       {[bajo, (bajo + alto) / 2, alto].map((v) => (
         <g key={v}>
-          <line x1={izq} x2={W - der} y1={y(v)} y2={y(v)} stroke="#e3dccd" />
-          <text x={izq - 4} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#5a5e3b">
+          <line x1={izq} x2={W - der} y1={y(v)} y2={y(v)} stroke="#e4e1dc" />
+          <text x={izq - 4} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#6b6e75">
             {Math.round(v * 10) / 10}
           </text>
         </g>
       ))}
-      <path d={camino} fill="none" stroke="#70754b" strokeWidth={2.5} strokeLinejoin="round" />
+      {puntos.length > 1 && <path d={area} fill="url(#relleno-linea)" />}
+      <path d={camino} fill="none" stroke="#e8602c" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
       {puntos.map((p, i) => (
-        <circle key={p.fecha} cx={x(i)} cy={y(p.valor)} r={4} fill="#70754b">
+        <circle key={p.fecha} cx={x(i)} cy={y(p.valor)} r={4} fill="#ffffff" stroke="#e8602c" strokeWidth={2.5}>
           <title>{`${fechaCorta(p.fecha, idioma)}: ${p.valor} ${unidad}`}</title>
         </circle>
       ))}
-      <text x={izq} y={H - 8} fontSize="10" fill="#5a5e3b">
+      <text x={izq} y={H - 8} fontSize="10" fill="#6b6e75">
         {fechaCorta(puntos[0].fecha, idioma)}
       </text>
       {puntos.length > 1 && (
-        <text x={W - der} y={H - 8} fontSize="10" textAnchor="end" fill="#5a5e3b">
+        <text x={W - der} y={H - 8} fontSize="10" textAnchor="end" fill="#6b6e75">
           {fechaCorta(puntos[puntos.length - 1].fecha, idioma)}
         </text>
       )}

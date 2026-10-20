@@ -1,37 +1,42 @@
 .hero {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 2px;
-  min-height: 200px;
-  margin: 12px 0 16px;
-  padding: 20px;
-  color: var(--blanco);
+  justify-content: flex-start;
+  gap: 6px;
+  min-height: 430px;
+  margin: 8px 0 0;
+  padding: 24px 22px 90px;
+  color: var(--carbon);
   background-size: cover;
-  background-position: center;
-  border-radius: 28px;
+  background-position: 70% 40%;
+  border-radius: 36px;
   box-shadow: var(--sombra);
 }
 
 .hero h1 {
   margin: 0;
-  font-size: 2.1rem;
-  line-height: 1.1;
-  color: var(--blanco);
+  font-size: 2.4rem;
+  line-height: 1.05;
+  color: var(--carbon);
 }
 
 .hero p {
   margin: 0;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.9;
+  color: var(--secundario);
+  opacity: 1;
 }
 
 .contenido {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  margin-top: -72px;
+  padding: 0 10px;
 }
 
 .tarjeta {
@@ -41,7 +46,7 @@
   padding: 18px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: var(--radio);
+  border-radius: 28px;
   box-shadow: var(--sombra);
 }
 
@@ -86,8 +91,8 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px 18px;
-  background: #fbf3d9;
-  border: 1px solid #ecdba0;
+  background: #fff1de;
+  border: 1px solid #f7dca0;
   border-radius: var(--radio);
 }
 
@@ -152,20 +157,20 @@
 }
 
 .oliva {
-  background: linear-gradient(160deg, #7f8556, #70754b);
+  background: linear-gradient(160deg, #e8602c, #e8602c);
 }
 
 .olivaOscuro {
-  background: linear-gradient(160deg, #6a6e47, #4a4d31);
+  background: linear-gradient(160deg, #e8602c, #2a2b2f);
 }
 
 .carbon {
-  background: linear-gradient(160deg, #3b3b39, #2b2b2a);
+  background: linear-gradient(160deg, #3b3b39, #17181a);
 }
 
 .arena {
   color: var(--carbon);
-  background: linear-gradient(160deg, #efe6d3, #e3d8bf);
+  background: linear-gradient(160deg, #f0ece6, #e4ddd0);
 }
 
 .hero .frase {
@@ -272,7 +277,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--blanco);
-  background: rgba(43, 43, 42, 0.55);
+  background: rgba(23, 24, 26, 0.55);
   border-radius: 999px;
 }
 
@@ -301,7 +306,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 20px;
+  border-radius: 26px;
   box-shadow: var(--sombra);
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.2s;
@@ -314,7 +319,7 @@
 
 .resumenActiva {
   border-color: var(--oliva-oscuro);
-  background: #f3f4ea;
+  background: #fef6f2;
 }
 
 .resumenTitulo {
@@ -339,11 +344,11 @@
 }
 
 .bien {
-  color: #3f7a3a;
+  color: #2a8a57;
 }
 
 .mal {
-  color: #a8412f;
+  color: #c9471a;
 }
 
 .resumenDetalle {
@@ -408,4 +413,31 @@
   .resumenCuadricula {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+/* Tarjeta de bono con anillo de progreso */
+.tarjetaAnillo {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tarjetaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.resumenCuadricula > .resumenTarjeta:first-child {
+  color: #ffffff;
+  background: var(--acento);
+  border-color: transparent;
+  box-shadow: var(--sombra-acento);
+}
+
+.resumenCuadricula > .resumenTarjeta:first-child .resumenTitulo,
+.resumenCuadricula > .resumenTarjeta:first-child .resumenPie {
+  color: rgba(255, 255, 255, 0.9);
 }

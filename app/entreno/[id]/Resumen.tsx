@@ -63,7 +63,7 @@ async function crearImagen(opciones: {
   lienzo.height = ALTO;
   const c = lienzo.getContext("2d")!;
 
-  c.fillStyle = "#2b2b2a";
+  c.fillStyle = "#17181a";
   c.fillRect(0, 0, ANCHO, ALTO);
 
   if (opciones.foto) {
@@ -77,13 +77,13 @@ async function crearImagen(opciones: {
   // Franja inferior con el resumen.
   const alturaFranja = 520;
   const degradado = c.createLinearGradient(0, ALTO - alturaFranja - 120, 0, ALTO);
-  degradado.addColorStop(0, "rgba(43,43,42,0)");
-  degradado.addColorStop(0.35, "rgba(43,43,42,0.85)");
-  degradado.addColorStop(1, "rgba(43,43,42,0.95)");
+  degradado.addColorStop(0, "rgba(23, 24, 26,0)");
+  degradado.addColorStop(0.35, "rgba(23, 24, 26,0.85)");
+  degradado.addColorStop(1, "rgba(23, 24, 26,0.95)");
   c.fillStyle = degradado;
   c.fillRect(0, ALTO - alturaFranja - 120, ANCHO, alturaFranja + 120);
 
-  c.fillStyle = "#f4efe6";
+  c.fillStyle = "#f4f3f1";
   c.textBaseline = "alphabetic";
   c.font = "600 64px Montserrat, Arial, sans-serif";
   c.fillText(opciones.sesion.slice(0, 26), 60, ALTO - 360);

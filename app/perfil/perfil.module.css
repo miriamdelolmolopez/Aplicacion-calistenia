@@ -106,7 +106,7 @@
 .historial button {
   border: 0;
   background: transparent;
-  color: #8a4b2a;
+  color: #b4501f;
   cursor: pointer;
 }
 
@@ -202,7 +202,7 @@
 }
 
 .errorPerfil {
-  color: #9b2c2c;
+  color: #c2362b;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -309,7 +309,7 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 20px;
+  border-radius: 26px;
   box-shadow: var(--sombra);
 }
 
@@ -329,7 +329,7 @@
 }
 
 .barraFondo {
-  height: 10px;
+  height: 8px;
   overflow: hidden;
   background: var(--relleno);
   border-radius: 99px;

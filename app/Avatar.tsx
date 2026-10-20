@@ -17,6 +17,10 @@ export default function Avatar({
       .map((p) => p[0]?.toUpperCase())
       .join("") || "·";
 
+  // Color según el nombre (siempre el mismo para la misma persona): terracota y neutros cálidos
+  const COLORES = ["#e8602c", "#17181a", "#c9471a", "#8a6f5a", "#f0834f"];
+  const color = COLORES[[...nombre].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORES.length];
+
   const caja: React.CSSProperties = {
     width: tamano,
     height: tamano,
@@ -35,7 +39,7 @@ export default function Avatar({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "var(--oliva)",
+        background: color,
         color: "#fff",
         fontWeight: 600,
         fontSize: tamano * 0.38,
