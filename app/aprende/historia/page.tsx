@@ -8,7 +8,7 @@ import estilos from "../aprende.module.css";
 import { textosAprende } from "../textosAprende";
 import { createClient } from "@/lib/supabase/client";
 
-type Seccion = { id: string; titulo_es: string; titulo_en: string | null; texto_es: string; texto_en: string | null };
+type Seccion = { id: string; titulo_es: string; titulo_en: string | null; texto_es: string; texto_en: string | null; foto_url: string | null };
 
 export default function Historia() {
   const [idioma] = useIdioma();
@@ -18,7 +18,7 @@ export default function Historia() {
   useEffect(() => {
     createClient()
       .from("historia")
-      .select("id, titulo_es, titulo_en, texto_es, texto_en")
+      .select("id, titulo_es, titulo_en, texto_es, texto_en, foto_url")
       .eq("activo", true)
       .order("orden")
       .then(({ data }) => setSecciones((data ?? []) as Seccion[]));
@@ -35,6 +35,7 @@ export default function Historia() {
       <div className={estilos.lista}>
         {(secciones ?? []).map((s) => (
           <section key={s.id} className={estilos.seccion}>
+            {s.foto_url && <div className={estilos.foto} role="img" aria-label={(idioma === "en" && s.titulo_en) || s.titulo_es} style={{ backgroundImage: `url(${s.foto_url})` }} />}
             <h2>{(idioma === "en" && s.titulo_en) || s.titulo_es}</h2>
             {((idioma === "en" && s.texto_en) || s.texto_es)
               .split(/\n+/)

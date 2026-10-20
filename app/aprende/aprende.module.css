@@ -208,3 +208,13 @@
   margin: 4px 0 0;
   font-size: 0.9rem;
 }
+
+.foto {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 12px;
+  background-color: #e4e7d2;
+  background-position: center;
+  background-size: cover;
+  border-radius: 14px;
+}

@@ -9,7 +9,7 @@ import estilos from "../aprende.module.css";
 import { textosAprende } from "../textosAprende";
 import { createClient } from "@/lib/supabase/client";
 
-type Termino = { id: string; termino_es: string; termino_en: string | null; definicion_es: string; definicion_en: string | null };
+type Termino = { id: string; termino_es: string; termino_en: string | null; definicion_es: string; definicion_en: string | null; foto_url: string | null };
 
 // Sin tildes ni mayúsculas, para que «excentrico» también encuentre «Excéntrico».
 const limpiar = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -23,7 +23,7 @@ export default function Glosario() {
   useEffect(() => {
     createClient()
       .from("glosario")
-      .select("id, termino_es, termino_en, definicion_es, definicion_en")
+      .select("id, termino_es, termino_en, definicion_es, definicion_en, foto_url")
       .eq("activo", true)
       .then(({ data }) => setTerminos((data ?? []) as Termino[]));
   }, []);
@@ -59,6 +59,7 @@ export default function Glosario() {
       <div className={estilos.lista}>
         {visibles.map((x) => (
           <article key={x.id} className={estilos.termino}>
+            {x.foto_url && <div className={estilos.foto} role="img" aria-label={nombre(x)} style={{ backgroundImage: `url(${x.foto_url})` }} />}
             <h2>{nombre(x)}</h2>
             {idioma === "es" && x.termino_en && x.termino_en !== x.termino_es && <small>{x.termino_en}</small>}
             {idioma === "en" && x.termino_en && x.termino_es !== x.termino_en && <small>{x.termino_es}</small>}
