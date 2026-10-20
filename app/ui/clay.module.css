@@ -1,0 +1,598 @@
+/* Sistema de diseño "Soft Claymorphism & Apple Warm Minimal" (Calistenia UI)
+   Solo se usa en las pantallas migradas: no afecta a la barra de abajo, al inicio de sesión ni a la portada. */
+
+.fuente,
+.cabecera,
+.saludo,
+.tarjetaProgreso,
+.pastillas,
+.apilada,
+.consejo,
+.metricas,
+.semanal,
+.hoja {
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
+}
+
+/* ── 1. Cabecera: avatar + saludo en dos niveles ── */
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 2px 6px;
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.saludo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.saludoSub {
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ui-body);
+}
+
+.saludoTitulo {
+  margin: 0;
+  overflow: hidden;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.6px;
+  color: var(--ui-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 2. Tarjeta de progreso con tacómetro ── */
+.tarjetaProgreso {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px;
+  background: var(--ui-surface-pure);
+  border-radius: 30px;
+  box-shadow: var(--ui-sombra-card);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tarjetaProgreso:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ui-sombra-card-hover);
+}
+
+.progresoInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.eyebrow {
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui-secundario);
+}
+
+.progresoNombre {
+  margin: 0 0 12px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  color: var(--ui-title);
+}
+
+.metaFila {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metaChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui-secundario);
+}
+
+.gaugeWrap {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: center;
+  width: 120px;
+  height: 80px;
+}
+
+.tacometro {
+  width: 120px;
+  height: 75px;
+  overflow: visible;
+}
+
+.gaugePct {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ui-title);
+}
+
+.aguja {
+  transform-origin: 0 0;
+  animation: girarAguja 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes girarAguja {
+  from {
+    transform: rotate(-70deg);
+  }
+  to {
+    transform: rotate(var(--angulo, 40deg));
+  }
+}
+
+/* ── 3. Pastillas (selector horizontal) ── */
+.pastillas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pastillas::-webkit-scrollbar {
+  display: none;
+}
+
+.pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui-secundario-texto);
+  white-space: nowrap;
+  background: var(--ui-surface-pure);
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pastilla:not(.activa):hover {
+  color: var(--ui-title);
+  background: #f1f1f4;
+}
+
+.pastilla:active {
+  transform: scale(0.96);
+}
+
+.activa {
+  color: #ffffff;
+  background: var(--ui-primary);
+  box-shadow: var(--ui-sombra-boton);
+}
+
+/* ── 4. Banner destacado apilado ── */
+.apilada {
+  position: relative;
+  margin: 10px 0 8px;
+}
+
+.apilada::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 14px;
+  left: 14px;
+  z-index: 1;
+  height: 20px;
+  background: #d9d9de;
+  border-radius: 26px 26px 0 0;
+}
+
+.banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 240px;
+  padding: 24px 22px;
+  overflow: hidden;
+  color: #ffffff;
+  background: linear-gradient(145deg, #e06037 0%, #d4532b 100%);
+  border-radius: 30px;
+  box-shadow: 0 16px 36px -6px rgba(222, 93, 53, 0.45);
+}
+
+.bannerArriba {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bannerTitulo {
+  max-width: 190px;
+  margin: 0;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.4px;
+  color: #ffffff;
+}
+
+.bannerEtiqueta {
+  position: relative;
+  z-index: 4;
+  align-self: flex-start;
+  margin-top: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+}
+
+.circuloAccion {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #ffffff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.circuloAccion:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
+}
+
+.bannerFoto {
+  position: absolute;
+  right: -10px;
+  bottom: -5px;
+  z-index: 3;
+  width: 58%;
+  height: 82%;
+  background-position: center;
+  background-size: cover;
+  border-radius: 26px 0 0 0;
+  box-shadow: -10px 10px 22px rgba(0, 0, 0, 0.18);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 38%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 38%);
+  pointer-events: none;
+}
+
+/* ── 6. Consejo con insignia flotante ── */
+.consejoEnvoltura {
+  position: relative;
+  margin-top: 22px;
+}
+
+.insignia {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: #ffffff;
+  background: var(--ui-badge-dark);
+  border: 3.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  transform: translateX(-50%);
+  animation: ondaToque 2.5s infinite;
+}
+
+@keyframes ondaToque {
+  0% {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(222, 93, 53, 0.4);
+  }
+  70% {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 12px rgba(222, 93, 53, 0);
+  }
+  100% {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(222, 93, 53, 0);
+  }
+}
+
+.consejo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px 20px;
+  text-align: center;
+  color: #ffffff;
+  background: var(--ui-primary);
+  border-radius: 30px;
+  box-shadow: 0 16px 36px -6px rgba(222, 93, 53, 0.45);
+}
+
+.consejoTexto {
+  margin: 0 0 18px;
+  padding: 0 4px;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #ffffff;
+}
+
+.consejoAcciones {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+}
+
+.botonSuave,
+.botonBlanco {
+  flex: 1;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border: 0;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.botonSuave {
+  color: #ffffff;
+  background: var(--ui-primary-soft-btn);
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.botonSuave:hover {
+  background: #de6d49;
+}
+
+.botonBlanco {
+  font-weight: 700;
+  color: var(--ui-title);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.botonBlanco:hover {
+  transform: translateY(-1px);
+}
+
+/* ── 7. Tarjetas de métrica (dos lado a lado) con barras finas y línea suave ── */
+.metricas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.tarjetaMetrica {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--ui-surface-pure);
+  border-radius: 24px;
+  box-shadow: var(--ui-sombra-card);
+}
+
+.metricaCab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.metricaIcono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--ui-primary);
+  background: var(--ui-primary-light);
+  border-radius: 50%;
+}
+
+.metricaEtiqueta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui-secundario);
+}
+
+.metricaValor {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ui-title);
+}
+
+.metricaUnidad {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ui-secundario);
+}
+
+/* ── 8. Tarjeta semanal / mensual con pistas cilíndricas ── */
+.semanal {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  background: var(--ui-surface-pure);
+  border-radius: 30px;
+  box-shadow: var(--ui-sombra-card);
+}
+
+.pistas {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 18px;
+  padding: 0 4px;
+}
+
+.pistaColumna {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pista {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 4px;
+  height: 80px;
+  background: var(--ui-barra-inactiva);
+  border-radius: 9999px;
+}
+
+.cuenta {
+  position: absolute;
+  left: -1px;
+  width: 6px;
+  min-height: 12px;
+  background: #55575e;
+  border-radius: 9999px;
+}
+
+.pistaColumna.destacada .pista {
+  background: rgba(222, 93, 53, 0.2);
+}
+
+.pistaColumna.destacada .cuenta {
+  height: 18px;
+  background: var(--ui-primary);
+  box-shadow: 0 2px 8px rgba(222, 93, 53, 0.5);
+}
+
+.pistaEtiqueta {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ui-secundario-texto);
+}
+
+.pistaColumna.destacada .pistaEtiqueta {
+  font-weight: 700;
+  color: var(--ui-title);
+}
+
+/* ── 5. Hoja flotante (entreno guiado) ── */
+.hoja {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 36px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.hojaFila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hojaTitulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ui-title);
+}
+
+.hojaSub {
+  font-size: 12px;
+  color: var(--ui-secundario-texto);
+}
+
+.hojaTiempo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--ui-title);
+  font-variant-numeric: tabular-nums;
+}
+
+.cristal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  color: #ffffff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cristal:hover {
+  background: rgba(255, 255, 255, 0.36);
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aguja,
+  .insignia {
+    animation: none;
+  }
+}

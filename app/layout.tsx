@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Outfit } from "next/font/google";
+import { JetBrains_Mono, Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import NavegacionInferior from "./NavegacionInferior";
 import SesionRecordada from "./SesionRecordada";
 import "./globals.css";
@@ -7,6 +7,13 @@ import "./globals.css";
 // Una sola familia para títulos y texto (Outfit) y una monoespaciada para cifras y datos.
 const letra = Outfit({
   variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+// Letra del sistema de diseño Calistenia UI (solo la usan las pantallas migradas).
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
@@ -29,7 +36,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${letra.variable} ${mono.variable}`}>
+    <html lang="es" className={`${letra.variable} ${mono.variable} ${jakarta.variable}`}>
       <body>
         {children}
         <NavegacionInferior />

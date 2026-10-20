@@ -220,3 +220,32 @@
   background-size: cover;
   border-radius: 14px;
 }
+
+
+/* Pastillas del sistema de diseño Calistenia UI */
+.numeros button {
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--ui-secundario-texto);
+  background: var(--ui-surface-pure);
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.numeros button:hover {
+  color: var(--ui-title);
+  background: #f1f1f4;
+}
+
+.numeros .elegido, .numeros .elegido:hover {
+  color: #ffffff;
+  background: var(--ui-primary);
+  border-color: var(--ui-primary);
+  box-shadow: var(--ui-sombra-boton);
+}
+
+.numeros button {
+  border-radius: 9999px;
+}

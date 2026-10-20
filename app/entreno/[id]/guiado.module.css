@@ -433,3 +433,74 @@
   background: var(--oliva-oscuro);
   border-color: var(--oliva-oscuro);
 }
+
+/* Sistema de diseño Calistenia UI: cabecera como hoja flotante con el cronómetro */
+.cabecera {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
+  background: #ffffff;
+  border-radius: 36px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.volver {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  color: var(--ui-title);
+  background: var(--ui-surface-subtle);
+  border: 0;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.volver:hover {
+  background: var(--ui-primary-light);
+  color: var(--ui-primary);
+  transform: scale(1.04);
+}
+
+.tiempoTotal span {
+  font-size: 0.78rem;
+  color: var(--ui-secundario-texto);
+}
+
+.tiempoTotal strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--ui-title);
+}
+
+.finalizar {
+  color: var(--ui-primary);
+  border-color: var(--ui-primary);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.finalizar:hover {
+  color: #ffffff;
+  background: var(--ui-primary);
+  box-shadow: var(--ui-sombra-boton);
+}
+
+.progreso {
+  height: 6px;
+  background: var(--ui-barra-inactiva);
+}
+
+.progreso > div {
+  background: var(--ui-primary);
+  box-shadow: 0 0 10px rgba(222, 93, 53, 0.45);
+}
+
+.ejercicio {
+  border: 0;
+  border-radius: 30px;
+  box-shadow: var(--ui-sombra-card);
+}

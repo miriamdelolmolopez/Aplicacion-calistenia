@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Anillo from "../Anillo";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
@@ -14,6 +13,9 @@ import Icono, { type NombreIcono } from "../Icono";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
+import clay from "../ui/clay.module.css";
+import { IconoCorona, IconoFlecha, IconoReloj } from "../ui/Mini";
+import Tacometro from "../ui/Tacometro";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
@@ -178,18 +180,36 @@ export default function Inicio() {
     <main className={styles.pagina}>
       <BarraSuperior />
 
-      <section
-        className={estilos.hero}
-        style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio, !fotosListas) }}
-      >
-        <span className={estilos.vista}>
-          {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
+      <header className={clay.cabecera}>
+        <span className={clay.avatar}>
+          <Avatar nombre={perfil.nombre} tamano={40} />
         </span>
-        <h1>
-          {t.hola}, {perfil.nombre}
-        </h1>
-        {textoFrase && <p className={estilos.frase}>{textoFrase}</p>}
-      </section>
+        <div className={clay.saludo}>
+          <p className={clay.saludoSub}>{t.hola}</p>
+          <h1 className={clay.saludoTitulo}>{perfil.nombre}</h1>
+        </div>
+      </header>
+
+      <div className={clay.apilada}>
+        <section className={clay.banner}>
+          <div className={clay.bannerArriba}>
+            <h2 className={clay.bannerTitulo}>{textoFrase}</h2>
+            {secciones.includes("reservar") && (
+              <Link href={RUTAS.reservar} className={clay.circuloAccion} aria-label={t.botonReservarClase}>
+                <IconoFlecha />
+              </Link>
+            )}
+          </div>
+          <span className={clay.bannerEtiqueta}>
+            {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
+          </span>
+          <div
+            className={clay.bannerFoto}
+            style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio, !fotosListas) }}
+            aria-hidden="true"
+          />
+        </section>
+      </div>
 
       <div className={estilos.contenido}>
         {esAdmin && <ResumenAdminTarjetas />}
@@ -205,17 +225,24 @@ export default function Inicio() {
         </div>
 
         {extra.cumples.length > 0 && (
-          <section className={estilos.cumple}>
-            <strong>🎂 {t.cumpleHoy}</strong>
-            <div className={estilos.cumpleLista}>
-              {extra.cumples.map((c) => (
-                <span key={c.id} className={estilos.cumpleItem}>
-                  <Avatar nombre={c.nombre} url={extra.fotos[c.id]} tamano={32} />
-                  {c.nombre}
-                </span>
-              ))}
-            </div>
-          </section>
+          <div className={clay.consejoEnvoltura}>
+            <span className={clay.insignia} aria-hidden="true">
+              🎂
+            </span>
+            <section className={clay.consejo}>
+              <p className={clay.consejoTexto}>
+                <strong>{t.cumpleHoy}</strong>
+              </p>
+              <div className={estilos.cumpleLista}>
+                {extra.cumples.map((c) => (
+                  <span key={c.id} className={estilos.cumpleItem}>
+                    <Avatar nombre={c.nombre} url={extra.fotos[c.id]} tamano={32} />
+                    {c.nombre}
+                  </span>
+                ))}
+              </div>
+            </section>
+          </div>
         )}
 
         {extra.entrenoId && (
@@ -225,33 +252,48 @@ export default function Inicio() {
           </Link>
         )}
 
-        {bonosClases.map((b) => (
-          <section key={b.id} className={`${estilos.tarjeta} ${estilos.tarjetaAnillo}`}>
-            <div className={estilos.tarjetaTexto}>
-              <h2>{t.tuBono}</h2>
-              <p className={estilos.grande}>
-                <strong>{b.nombre}</strong>
-                <span>
-                  {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
-                  {b.caducaEn && ` · ${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
-                </span>
-              </p>
-            </div>
-            <Anillo valor={b.clasesRestantes} total={b.clasesTotal} />
-          </section>
-        ))}
+        {bonosClases.map((b) => {
+          const pct = b.clasesTotal > 0 ? Math.round((b.clasesRestantes / b.clasesTotal) * 100) : 0;
+          return (
+            <section key={b.id} className={clay.tarjetaProgreso}>
+              <div className={clay.progresoInfo}>
+                <span className={clay.eyebrow}>{t.tuBono}</span>
+                <h3 className={clay.progresoNombre}>{b.nombre}</h3>
+                <div className={clay.metaFila}>
+                  <span className={clay.metaChip}>
+                    <IconoCorona />
+                    {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
+                  </span>
+                  {b.caducaEn && (
+                    <span className={clay.metaChip}>
+                      <IconoReloj />
+                      {t.caducaEl} {fechaCorta(b.caducaEn, idioma)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className={clay.gaugeWrap}>
+                <Tacometro porcentaje={pct} />
+                <span className={clay.gaugePct}>{pct}%</span>
+              </div>
+            </section>
+          );
+        })}
 
         {planOnlineBono && (
-          <section className={estilos.tarjeta}>
-            <h2>{t.tuPlanOnlineTitulo}</h2>
-            <p className={estilos.grande}>
-              <strong>{planOnlineBono.nombre}</strong>
+          <section className={clay.tarjetaProgreso}>
+            <div className={clay.progresoInfo}>
+              <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
+              <h3 className={clay.progresoNombre}>{planOnlineBono.nombre}</h3>
               {planOnlineBono.caducaEn && (
-                <span>
-                  {t.caducaEl} {fechaCorta(planOnlineBono.caducaEn, idioma)}
-                </span>
+                <div className={clay.metaFila}>
+                  <span className={clay.metaChip}>
+                    <IconoReloj />
+                    {t.caducaEl} {fechaCorta(planOnlineBono.caducaEn, idioma)}
+                  </span>
+                </div>
               )}
-            </p>
+            </div>
           </section>
         )}
 

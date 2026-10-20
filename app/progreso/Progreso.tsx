@@ -7,6 +7,7 @@ import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import PlantaAvatar from "./PlantaAvatar";
 import estilos from "./progreso.module.css";
+import clay from "../ui/clay.module.css";
 import { CATEGORIAS, TIPOS } from "@/lib/ejercicios";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
@@ -356,19 +357,22 @@ export default function Progreso({
       <p className={estilos.ayuda}>{t.rachaExplica}</p>
 
       {verClases && (
-        <section className={estilos.tarjeta}>
+        <section className={clay.semanal} style={{ gap: 4 }}>
           <h2 style={{ margin: 0 }}>{t.clasesPorMes}</h2>
           {prog.clases_total === 0 ? (
             <p className={estilos.ayuda}>{t.sinClasesAun}</p>
           ) : (
-            <div className={estilos.barras}>
+            <div className={clay.pistas}>
               {prog.clases_por_mes.map((m) => {
                 const maximo = Math.max(...prog.clases_por_mes.map((x) => x.clases), 1);
+                const nivel = Math.round((m.clases / maximo) * 100);
                 return (
-                  <div key={m.mes} className={estilos.barraMes}>
-                    <span>{m.clases}</span>
-                    <div className={estilos.barraMesRelleno} style={{ height: `${(m.clases / maximo) * 100}%` }} />
-                    <span className={estilos.ayuda}>{nombreMes(m.mes, idioma)}</span>
+                  <div key={m.mes} className={`${clay.pistaColumna} ${m.clases === maximo ? clay.destacada : ""}`}>
+                    <span className={clay.pistaEtiqueta}>{m.clases}</span>
+                    <div className={clay.pista}>
+                      <span className={clay.cuenta} style={{ bottom: `max(0px, calc(${nivel}% - 12px))` }} />
+                    </div>
+                    <span className={clay.pistaEtiqueta}>{nombreMes(m.mes, idioma)}</span>
                   </div>
                 );
               })}

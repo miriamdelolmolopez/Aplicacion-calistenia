@@ -5,6 +5,9 @@ import BarraSuperior from "../../BarraSuperior";
 import { obtenerMisBonos, type MiBono } from "../../cuenta/acciones";
 import styles from "../../formularios.module.css";
 import { textos, type ClaveTexto } from "../../textos";
+import clay from "../../ui/clay.module.css";
+import { IconoCorona, IconoReloj } from "../../ui/Mini";
+import Tacometro from "../../ui/Tacometro";
 import { useIdioma } from "../../useIdioma";
 import { cancelarMiReserva } from "../acciones";
 import estilos from "./mis-reservas.module.css";
@@ -161,24 +164,35 @@ export default function MisReservas() {
       <BarraSuperior izquierda={{ href: "/clases", texto: "volver" }} />
       <h1 className={estilos.titulo}>{t.misReservasTitulo}</h1>
 
-      {bonosClases.map((b) => (
-        <section key={b.id} className={estilos.resumen}>
-          <div>
-            <span className={estilos.etiqueta}>{nombreServicio(b.servicio)}</span>
-            <strong>{b.nombre}</strong>
-            {b.caducaEn && (
-              <span className={estilos.pequeno}>
-                {t.caducaEl} {fechaCorta(b.caducaEn, idioma)}
-              </span>
-            )}
-            <span className={estilos.pequeno}>
-              {t.hasReservado.replace("{a}", String(b.clasesTotal - b.clasesRestantes)).replace("{b}", String(b.clasesTotal))} ·{" "}
-              {b.clasesRestantes === 1 ? t.teQueda : t.teQuedan.replace("{n}", String(b.clasesRestantes))}
-            </span>
-          </div>
-          <strong className={estilos.numeroGrande}>{b.clasesRestantes}</strong>
-        </section>
-      ))}
+      {bonosClases.map((b) => {
+        const usadas = b.clasesTotal - b.clasesRestantes;
+        const pct = b.clasesTotal > 0 ? Math.round((usadas / b.clasesTotal) * 100) : 0;
+        return (
+          <section key={b.id} className={clay.tarjetaProgreso} style={{ marginBottom: 12 }}>
+            <div className={clay.progresoInfo}>
+              <span className={clay.eyebrow}>{nombreServicio(b.servicio)}</span>
+              <h3 className={clay.progresoNombre}>{b.nombre}</h3>
+              <div className={clay.metaFila}>
+                <span className={clay.metaChip}>
+                  <IconoCorona />
+                  {t.hasReservado.replace("{a}", String(usadas)).replace("{b}", String(b.clasesTotal))} ·{" "}
+                  {b.clasesRestantes === 1 ? t.teQueda : t.teQuedan.replace("{n}", String(b.clasesRestantes))}
+                </span>
+                {b.caducaEn && (
+                  <span className={clay.metaChip}>
+                    <IconoReloj />
+                    {t.caducaEl} {fechaCorta(b.caducaEn, idioma)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className={clay.gaugeWrap}>
+              <Tacometro porcentaje={pct} />
+              <span className={clay.gaugePct}>{pct}%</span>
+            </div>
+          </section>
+        );
+      })}
 
       {aviso && (
         <p className={aviso.ok ? styles.aviso : styles.error} role="status">

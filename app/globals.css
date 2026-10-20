@@ -148,3 +148,24 @@ time,
     padding-left: 260px;
   }
 }
+
+/* Sistema de diseño Calistenia UI (solo lo usan las pantallas migradas; ver app/ui/clay.module.css) */
+:root {
+  --ui-primary: #de5d35;
+  --ui-primary-hover: #cf4e27;
+  --ui-primary-active: #b83e1a;
+  --ui-primary-light: #fbefea;
+  --ui-primary-soft-btn: #e57d5c;
+  --ui-surface-pure: #ffffff;
+  --ui-surface-screen: #f8f8fa;
+  --ui-surface-subtle: #f6f6f9;
+  --ui-title: #1c1c1e;
+  --ui-body: #3a3a3c;
+  --ui-secundario: #6e6e73;
+  --ui-secundario-texto: #6e6e73;
+  --ui-badge-dark: #22292d;
+  --ui-barra-inactiva: #ececee;
+  --ui-sombra-card: 0 10px 30px -4px rgba(28, 28, 30, 0.05), 0 4px 12px -2px rgba(28, 28, 30, 0.02);
+  --ui-sombra-card-hover: 0 14px 34px -4px rgba(28, 28, 30, 0.09), 0 6px 16px -2px rgba(28, 28, 30, 0.04);
+  --ui-sombra-boton: 0 8px 22px -3px rgba(222, 93, 53, 0.35);
+}

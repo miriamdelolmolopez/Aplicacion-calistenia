@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import estilos from "./confirmada.module.css";
+import clay from "../ui/clay.module.css";
+import { IconoDedo } from "../ui/Mini";
 import { textos } from "../textos";
 import { descargarIcs, enlaceGoogleCalendar, LUGAR_CLASES } from "@/lib/calendario";
 import { textoDia, textoHora } from "@/lib/fechas";
@@ -54,35 +56,41 @@ export default function ReservaConfirmada({
           <span>{LUGAR_CLASES}</span>
         </div>
 
-        <div className={estilos.botones}>
-          <button type="button" className={estilos.principal} onClick={alVer}>
-            {t.verEnMisReservas}
-          </button>
-          {!eligiendo ? (
-            <button type="button" className={estilos.secundario} onClick={() => setEligiendo(true)}>
-              {t.alCalendario}
-            </button>
-          ) : (
-            <div className={estilos.opciones}>
-              <button type="button" className={estilos.secundario} onClick={() => descargarIcs(evento)}>
-                {t.calendarioMovil}
-              </button>
-              <button
-                type="button"
-                className={estilos.secundario}
-                onClick={() => window.open(enlaceGoogleCalendar(evento), "_blank", "noopener")}
-              >
-                {t.calendarioGoogle}
+        <div className={clay.consejoEnvoltura} style={{ width: "100%" }}>
+          <span className={clay.insignia} aria-hidden="true">
+            <IconoDedo />
+          </span>
+          <section className={clay.consejo}>
+            <p className={clay.consejoTexto}>
+              {t.recuerdaLlegar}
+              <br />
+              {t.traeAgua}
+            </p>
+            <div className={clay.consejoAcciones} style={{ flexWrap: "wrap" }}>
+              {!eligiendo ? (
+                <button type="button" className={clay.botonSuave} onClick={() => setEligiendo(true)}>
+                  {t.alCalendario}
+                </button>
+              ) : (
+                <>
+                  <button type="button" className={clay.botonSuave} onClick={() => descargarIcs(evento)}>
+                    {t.calendarioMovil}
+                  </button>
+                  <button
+                    type="button"
+                    className={clay.botonSuave}
+                    onClick={() => window.open(enlaceGoogleCalendar(evento), "_blank", "noopener")}
+                  >
+                    {t.calendarioGoogle}
+                  </button>
+                </>
+              )}
+              <button type="button" className={clay.botonBlanco} onClick={alVer}>
+                {t.verEnMisReservas}
               </button>
             </div>
-          )}
+          </section>
         </div>
-
-        <p className={estilos.recuerda}>
-          {t.recuerdaLlegar}
-          <br />
-          {t.traeAgua}
-        </p>
       </div>
 
       <svg className={estilos.hoja} viewBox="0 0 120 180" aria-hidden="true">

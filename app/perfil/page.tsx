@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
+import clay from "../ui/clay.module.css";
+import { IconoCorona, IconoReloj } from "../ui/Mini";
+import Tacometro from "../ui/Tacometro";
 import { useIdioma } from "../useIdioma";
 import { useMiPerfil } from "../useMiPerfil";
 import estilos from "./perfil.module.css";
@@ -138,28 +141,33 @@ export default function Perfil() {
       hecho = total - b.clasesRestantes;
       texto = `${hecho}/${total} ${t.sesionesDeTotal}`;
     }
+    const pct = total > 0 ? Math.round((hecho / total) * 100) : 0;
+    const aviso = activo ? (b.caducaEn ? `${t.caduca} ${fechaCorta(b.caducaEn, idioma)}` : "") : t.enEspera;
     return (
-      <div key={b.id} className={estilos.bonoTarjeta}>
-        <div className={estilos.bonoCabecera}>
-          <strong>
+      <div key={b.id} className={clay.tarjetaProgreso}>
+        <div className={clay.progresoInfo}>
+          <span className={clay.eyebrow}>
             {!activo && `${t.siguiente}: `}
-            {b.nombre || nombreServicio(b.servicio)}
-          </strong>
-          <span>{texto}</span>
+            {nombreServicio(b.servicio)}
+          </span>
+          <h3 className={clay.progresoNombre}>{b.nombre || nombreServicio(b.servicio)}</h3>
+          <div className={clay.metaFila}>
+            <span className={clay.metaChip}>
+              <IconoCorona />
+              {texto}
+            </span>
+            {aviso && (
+              <span className={clay.metaChip}>
+                <IconoReloj />
+                {aviso}
+              </span>
+            )}
+          </div>
         </div>
-        <div
-          className={estilos.barraFondo}
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-valuenow={hecho}
-        >
-          <div className={estilos.barraRelleno} style={{ width: `${Math.round((hecho / total) * 100)}%` }} />
+        <div className={clay.gaugeWrap}>
+          <Tacometro porcentaje={pct} />
+          <span className={clay.gaugePct}>{pct}%</span>
         </div>
-        <small>
-          {nombreServicio(b.servicio)}
-          {activo ? (b.caducaEn ? ` · ${t.caduca} ${fechaCorta(b.caducaEn, idioma)}` : "") : ` · ${t.enEspera}`}
-        </small>
       </div>
     );
   }
