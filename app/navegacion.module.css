@@ -9,10 +9,12 @@
   width: min(456px, calc(100vw - 24px));
   padding: 8px 6px;
   transform: translateX(-50%);
-  background: var(--blanco);
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
   border: 1px solid var(--linea);
-  border-radius: 28px;
-  box-shadow: 0 8px 28px rgba(43, 43, 42, 0.14);
+  border-radius: 9999px;
+  box-shadow: var(--sombra-alta);
 }
 
 .pestana {
@@ -41,15 +43,16 @@
   width: 46px;
   height: 34px;
   border-radius: 17px;
-  transition: background 0.15s;
+  transition: background 0.25s, color 0.25s;
 }
 
 .activa {
-  color: var(--oliva-oscuro);
+  color: var(--carbon);
 }
 
 .activa .icono {
-  background: #e4e7d2;
+  background: var(--carbon);
+  color: var(--crema);
 }
 
 @media print {

@@ -40,7 +40,7 @@
   gap: 10px;
   padding: 18px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: var(--radio);
   box-shadow: var(--sombra);
 }
@@ -192,7 +192,7 @@
   text-align: center;
   text-decoration: none;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 22px;
   box-shadow: var(--sombra);
 }
@@ -225,7 +225,7 @@
   color: var(--carbon);
   text-decoration: none;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 20px;
   box-shadow: var(--sombra);
 }
@@ -288,7 +288,7 @@
   font: inherit;
   color: var(--carbon);
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.7);
+  border: 1px solid var(--linea);
   border-radius: 18px;
   box-shadow: var(--sombra);
   cursor: pointer;
@@ -329,7 +329,7 @@
 .resumenDetalle {
   padding: 14px 16px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.7);
+  border: 1px solid var(--linea);
   border-radius: 18px;
   box-shadow: var(--sombra);
 }

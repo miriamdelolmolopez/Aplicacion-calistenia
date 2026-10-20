@@ -11,7 +11,7 @@
   margin-bottom: 12px;
   padding: 16px 18px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 22px;
   box-shadow: var(--sombra);
 }
@@ -51,7 +51,7 @@
   margin: 4px 0 14px;
   padding: 16px 12px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 24px;
   box-shadow: var(--sombra);
 }
@@ -171,7 +171,7 @@
   margin-bottom: 14px;
   padding: 16px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 24px;
   box-shadow: var(--sombra);
 }

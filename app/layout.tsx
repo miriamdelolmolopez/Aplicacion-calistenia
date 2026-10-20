@@ -1,18 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { JetBrains_Mono, Outfit } from "next/font/google";
 import NavegacionInferior from "./NavegacionInferior";
 import SesionRecordada from "./SesionRecordada";
 import "./globals.css";
 
-const titulos = Cormorant_Garamond({
-  variable: "--font-titulos",
+// Una sola familia para títulos y texto (Outfit) y una monoespaciada para cifras y datos.
+const letra = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const cuerpo = Montserrat({
-  variable: "--font-cuerpo",
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +29,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${titulos.variable} ${cuerpo.variable}`}>
+    <html lang="es" className={`${letra.variable} ${mono.variable}`}>
       <body>
         {children}
         <NavegacionInferior />

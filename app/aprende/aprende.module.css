@@ -16,7 +16,7 @@
   color: var(--carbon);
   text-decoration: none;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 22px;
   box-shadow: var(--sombra);
 }
@@ -82,7 +82,7 @@
 .termino {
   padding: 14px 16px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 18px;
 }
 
@@ -103,7 +103,7 @@
 .seccion {
   padding: 18px;
   background: var(--blanco);
-  border: 1px solid rgba(221, 214, 200, 0.6);
+  border: 1px solid var(--linea);
   border-radius: 22px;
   box-shadow: var(--sombra);
 }
