@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import MapaCorporal from "../../MapaCorporal";
+import MultiDesplegable from "../MultiDesplegable";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import {
@@ -60,13 +61,19 @@ export function FormularioEjercicio({
   );
   const p = ejercicio?.id ?? "nuevo";
 
-  // Músculo -> "principal" | "secundario" | "" (se ve el mapa mientras eliges).
-  const [roles, setRoles] = useState<Record<string, string>>(() =>
-    Object.fromEntries((ejercicio?.musculos ?? []).map((m) => [m.musculo, m.rol])),
+  // Músculos elegidos como principales y como secundarios (uno no puede estar en los dos).
+  const [principales, setPrincipales] = useState<string[]>(
+    () => (ejercicio?.musculos ?? []).filter((m) => m.rol === "principal").map((m) => m.musculo),
   );
-  const marcados: MusculoDeEjercicio[] = Object.entries(roles)
-    .filter(([, rol]) => rol === "principal" || rol === "secundario")
-    .map(([musculo, rol]) => ({ musculo, rol }));
+  const [secundarios, setSecundarios] = useState<string[]>(
+    () => (ejercicio?.musculos ?? []).filter((m) => m.rol === "secundario").map((m) => m.musculo),
+  );
+  const [elegidosMaterial, setElegidosMaterial] = useState<string[]>(ejercicio?.materiales ?? []);
+  const marcados: MusculoDeEjercicio[] = [
+    ...principales.map((musculo) => ({ musculo, rol: "principal" })),
+    ...secundarios.map((musculo) => ({ musculo, rol: "secundario" })),
+  ];
+  const opcionesMusculo = MUSCULOS.map((m) => ({ valor: m.valor, etiqueta: m.es }));
 
   return (
     <form action={accion} className={ejercicio ? styles.formularioInterno : styles.tarjeta}>
@@ -123,43 +130,56 @@ export function FormularioEjercicio({
       <fieldset className={styles.grupo}>
         <legend>Músculos que trabaja</legend>
         <p className={styles.ayuda}>
-          Marca al menos uno principal. Los principales se ven con más intensidad que los
-          secundarios.
+          Elige al menos uno principal. Los principales se ven con más intensidad que los secundarios.
         </p>
-        <div className={styles.musculos}>
-          {MUSCULOS.map((m) => (
-            <div key={m.valor} className={styles.musculoFila}>
-              <label htmlFor={`m-${m.valor}-${p}`}>{m.es}</label>
-              <select
-                id={`m-${m.valor}-${p}`}
-                name={`musculo_${m.valor}`}
-                value={roles[m.valor] ?? ""}
-                onChange={(e) => setRoles((r) => ({ ...r, [m.valor]: e.target.value }))}
-              >
-                <option value="">—</option>
-                <option value="principal">Principal</option>
-                <option value="secundario">Secundario</option>
-              </select>
-            </div>
-          ))}
-        </div>
+        <MultiDesplegable
+          titulo="Principales"
+          vacio="Elige uno o varios"
+          opciones={opcionesMusculo}
+          elegidas={principales}
+          alCambiar={(nuevas) => {
+            setPrincipales(nuevas);
+            setSecundarios((sec) => sec.filter((v) => !nuevas.includes(v)));
+          }}
+        />
+        <MultiDesplegable
+          titulo="Secundarios"
+          vacio="Elige uno o varios (opcional)"
+          opciones={opcionesMusculo.filter((o) => !principales.includes(o.valor))}
+          elegidas={secundarios}
+          alCambiar={setSecundarios}
+        />
+        {principales.map((v) => (
+          <input key={`p-${v}`} type="hidden" name={`musculo_${v}`} value="principal" />
+        ))}
+        {secundarios.map((v) => (
+          <input key={`s-${v}`} type="hidden" name={`musculo_${v}`} value="secundario" />
+        ))}
         <MapaCorporal intensidades={intensidadesDeEjercicio(marcados)} />
       </fieldset>
 
       <fieldset className={styles.grupo}>
         <legend>Material</legend>
-        {materiales.length === 0 && <p className={styles.ayuda}>Todavía no hay material.</p>}
-        {materiales.map((mat) => (
-          <label key={mat.id} className={styles.casilla}>
-            <input
-              type="checkbox"
-              name="materiales"
-              value={mat.id}
-              defaultChecked={ejercicio?.materiales.includes(mat.id)}
-            />
-            {mat.nombre}
-          </label>
+        {materiales.length === 0 && <p className={styles.ayuda}>Todavía no hay material: añade uno abajo.</p>}
+        <MultiDesplegable
+          titulo="Material"
+          vacio="Ninguno o elige uno o varios"
+          opciones={materiales.map((mat) => ({ valor: mat.id, etiqueta: mat.nombre }))}
+          elegidas={elegidosMaterial}
+          alCambiar={setElegidosMaterial}
+        />
+        {elegidosMaterial.map((id) => (
+          <input key={id} type="hidden" name="materiales" value={id} />
         ))}
+        <div className={styles.campo}>
+          <label htmlFor={`material-otro-${p}`}>Otro material (opcional)</label>
+          <input
+            id={`material-otro-${p}`}
+            name="material_nuevo"
+            maxLength={60}
+            placeholder="Escribe uno nuevo y se añade a la lista"
+          />
+        </div>
       </fieldset>
 
       <div className={styles.campo}>

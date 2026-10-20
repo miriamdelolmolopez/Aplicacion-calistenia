@@ -17,7 +17,11 @@ type Campos = {
   video_url: string | null;
 };
 
-type Relaciones = { musculos: { musculo: string; rol: string }[]; materiales: string[] };
+type Relaciones = {
+  musculos: { musculo: string; rol: string }[];
+  materiales: string[];
+  materialNuevo: string;
+};
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -65,6 +69,10 @@ function leer(
 
   const materiales = formData.getAll("materiales").map(String);
   if (materiales.some((id) => !UUID.test(id))) return { error: "Material no válido." };
+  const materialNuevo = texto(formData, "material_nuevo");
+  if (materialNuevo && (materialNuevo.length < 2 || materialNuevo.length > 60)) {
+    return { error: "El material nuevo debe tener entre 2 y 60 letras." };
+  }
 
   return {
     campos: {
@@ -76,7 +84,7 @@ function leer(
       descripcion_en: descripcionEn || null,
       video_url: enlace,
     },
-    relaciones: { musculos, materiales },
+    relaciones: { musculos, materiales, materialNuevo },
   };
 }
 
@@ -86,11 +94,25 @@ function errorDeBase(codigo: string | undefined): string {
     : "No se ha podido guardar. Inténtalo de nuevo.";
 }
 
+// Si se escribió un material nuevo, lo crea (o reutiliza el que ya exista con ese nombre) y devuelve su id.
+async function idMaterialNuevo(nombre: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data: existente } = await admin.from("materiales").select("id").ilike("nombre", nombre).maybeSingle();
+  if (existente) return existente.id as string;
+  const { data, error } = await admin.from("materiales").insert({ nombre, orden: 100 }).select("id").single();
+  return error || !data ? null : (data.id as string);
+}
+
 async function guardarRelaciones(id: string, r: Relaciones) {
+  const materiales = [...r.materiales];
+  if (r.materialNuevo) {
+    const nuevo = await idMaterialNuevo(r.materialNuevo);
+    if (nuevo && !materiales.includes(nuevo)) materiales.push(nuevo);
+  }
   return createAdminClient().rpc("guardar_relaciones_ejercicio", {
     p_ejercicio: id,
     p_musculos: r.musculos,
-    p_materiales: r.materiales,
+    p_materiales: materiales,
   });
 }
 

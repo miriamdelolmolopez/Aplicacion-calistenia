@@ -68,6 +68,9 @@ export default function Datos() {
         .eq("id", sesion.user.id)
         .maybeSingle();
 
+      // La casilla de imagen marcada al registrarse llega aquí ya puesta.
+      if (sesion.user.user_metadata?.imagen === true) setImagen(true);
+
       const { data: consentimientos } = await supabase
         .from("consentimientos")
         .select("tipo, version")

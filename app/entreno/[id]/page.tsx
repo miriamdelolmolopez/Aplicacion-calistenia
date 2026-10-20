@@ -35,6 +35,7 @@ export type Serie = {
   peso_kg: number | null;
   distancia_m: number | null;
   detalle: string | null;
+  rpe: number | null;
   completada: boolean;
 };
 
@@ -284,6 +285,7 @@ export default function PantallaEntreno() {
       peso: nueva.peso_kg,
       distancia: nueva.distancia_m,
       detalle: nueva.detalle ?? "",
+      rpe: nueva.rpe ?? null,
       completada: nueva.completada,
     });
     if (!r.ok) {
@@ -669,6 +671,28 @@ export default function PantallaEntreno() {
             onChange={(e) => cambiarSerie(actual.id, { detalle: e.target.value })}
             onBlur={() => guardar(actual)}
           />
+
+          <div className={estilos.rpe} role="group" aria-label={t.rpeEtiqueta}>
+            <span>{t.rpeEtiqueta}</span>
+            <div>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={actual.rpe === n ? estilos.rpeActivo : ""}
+                  aria-pressed={actual.rpe === n}
+                  disabled={actual.completada}
+                  onClick={() => {
+                    const rpe = actual.rpe === n ? null : n;
+                    cambiarSerie(actual.id, { rpe });
+                    guardar(actual, { rpe });
+                  }}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {actual.completada ? (
             <button type="button" className={styles.botonSecundario} onClick={() => deshacer(actual)}>

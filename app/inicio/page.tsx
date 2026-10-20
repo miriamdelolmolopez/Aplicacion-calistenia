@@ -159,6 +159,7 @@ export default function Inicio() {
 
   const accesos: Acceso[] = [];
   if (secciones.includes("reservar")) accesos.push({ href: RUTAS.reservar, icono: "reservar", texto: "botonReservarClase" });
+  if (secciones.includes("reservas")) accesos.push({ href: RUTAS.reservas, icono: "reservas", texto: "misReservasTitulo" });
   if (secciones.includes("rutina")) accesos.push({ href: RUTAS.rutina, icono: "rutina", texto: "botonEntrenoOnline" });
   if (secciones.includes("progreso")) accesos.push({ href: RUTAS.progreso, icono: "progreso", texto: "miProgreso" });
   accesos.push({ href: RUTAS.academia, icono: "academia", texto: "navAcademia" });
@@ -172,6 +173,9 @@ export default function Inicio() {
         className={estilos.hero}
         style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio) }}
       >
+        <span className={estilos.vista}>
+          {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
+        </span>
         <h1>
           {t.hola}, {perfil.nombre}
         </h1>

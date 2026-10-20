@@ -1,0 +1,50 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pregunta {
+  padding: 4px 16px;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 18px;
+}
+
+.pregunta summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pregunta p {
+  margin: 0 0 14px;
+  line-height: 1.55;
+}
+
+.contacto {
+  padding: 18px;
+  text-align: center;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.6);
+  border-radius: 22px;
+}
+
+.contacto h2 {
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+}
+
+.contacto p {
+  margin: 0 0 12px;
+}
+
+.contacto a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}

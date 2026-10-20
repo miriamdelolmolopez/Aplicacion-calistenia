@@ -83,6 +83,7 @@ function Formulario() {
 
       <div className={styles.enlaces}>
         <Link href="/recuperar">{t.olvidaste}</Link>
+        <span aria-hidden="true">{idioma === "en" ? "or" : "o"}</span>
         <Link href="/registro">{t.crearCuenta}</Link>
       </div>
     </>

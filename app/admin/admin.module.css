@@ -671,3 +671,45 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Desplegable de varias opciones (músculos, material, filtros) */
+.multi {
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  background: var(--blanco);
+  margin-bottom: 8px;
+}
+
+.multi summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 48px;
+  padding: 8px 12px;
+  cursor: pointer;
+  justify-content: center;
+}
+
+.multiTitulo {
+  font-weight: 600;
+}
+
+.multiResumen {
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.multiOpciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 2px 12px;
+  padding: 4px 12px 12px;
+  border-top: 1px solid var(--linea);
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  align-items: end;
+}

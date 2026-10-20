@@ -398,3 +398,38 @@
   color: #8a4b2a;
   font-variant-numeric: tabular-nums;
 }
+
+.rpe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.rpe > div {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+
+.rpe button {
+  min-height: 40px;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid #cfc7b5;
+  border-radius: 8px;
+}
+
+.rpe button:disabled {
+  opacity: 0.6;
+}
+
+.rpe .rpeActivo {
+  color: var(--blanco);
+  background: var(--oliva-oscuro);
+  border-color: var(--oliva-oscuro);
+}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { CATEGORIAS, nombreCategoria, nombreMusculo, nombreTipo } from "@/lib/ejercicios";
+import { CATEGORIAS, MUSCULOS, TIPOS, nombreCategoria, nombreMusculo, nombreTipo } from "@/lib/ejercicios";
 import VideoEjercicio from "../../VideoEjercicio";
 import BotonFoto from "../fotos/BotonFoto";
 import VideoRapido from "./VideoRapido";
@@ -23,10 +23,10 @@ type Fila = Omit<EjercicioForm, "musculos" | "materiales"> & {
 export default async function Ejercicios({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string; archivados?: string }>;
+  searchParams: Promise<{ cat?: string; archivados?: string; q?: string; musculo?: string; material?: string; tipo?: string }>;
 }) {
   const { supabase } = await requireAdmin();
-  const { cat, archivados } = await searchParams;
+  const { cat, archivados, q, musculo, material, tipo } = await searchParams;
   const verArchivados = archivados === "1";
 
   const { data } = await supabase
@@ -59,9 +59,20 @@ export default async function Ejercicios({
   const materiales = (materialesDatos ?? []) as Material[];
   const nombreMaterial = (id: string) => materiales.find((m) => m.id === id)?.nombre ?? "";
 
+  const busqueda = (q ?? "").trim().toLowerCase();
+  const sinTildes = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const visibles = todos.filter(
-    (e) => (verArchivados || e.activo) && (!cat || e.categoria === cat),
+    (e) =>
+      (verArchivados || e.activo) &&
+      (!cat || e.categoria === cat) &&
+      (!tipo || e.tipo === tipo) &&
+      (!musculo || e.musculos.some((m) => m.musculo === musculo)) &&
+      (!material || e.materiales.includes(material)) &&
+      (!busqueda ||
+        sinTildes(e.nombre).includes(sinTildes(busqueda)) ||
+        sinTildes(e.nombre_en ?? "").includes(sinTildes(busqueda))),
   );
+  const hayFiltros = !!(busqueda || musculo || material || tipo);
   const cuenta = (valor: string) =>
     todos.filter((e) => e.activo && e.categoria === valor).length;
   const archivadosTotal = todos.filter((e) => !e.activo).length;
@@ -72,6 +83,10 @@ export default async function Ejercicios({
     const q = new URLSearchParams();
     if (nuevaCat) q.set("cat", nuevaCat);
     if (arch) q.set("archivados", "1");
+    if (busqueda) q.set("q", busqueda);
+    if (musculo) q.set("musculo", musculo);
+    if (material) q.set("material", material);
+    if (tipo) q.set("tipo", tipo);
     const texto = q.toString();
     return `/admin/ejercicios${texto ? `?${texto}` : ""}`;
   };
@@ -120,6 +135,55 @@ export default async function Ejercicios({
 
       <section className={styles.tarjeta}>
         <h2>{cat ? nombreCategoria(cat) : "Todos los ejercicios"} ({visibles.length})</h2>
+        <form method="get" className={styles.filtros}>
+          {cat && <input type="hidden" name="cat" value={cat} />}
+          {verArchivados && <input type="hidden" name="archivados" value="1" />}
+          <div className={styles.campo}>
+            <label htmlFor="f-q">Buscar</label>
+            <input id="f-q" name="q" type="search" defaultValue={q ?? ""} placeholder="Nombre del ejercicio" />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="f-musculo">Músculo</label>
+            <select id="f-musculo" name="musculo" defaultValue={musculo ?? ""}>
+              <option value="">Todos</option>
+              {MUSCULOS.map((m) => (
+                <option key={m.valor} value={m.valor}>
+                  {m.es}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="f-material">Material</label>
+            <select id="f-material" name="material" defaultValue={material ?? ""}>
+              <option value="">Todos</option>
+              {materiales.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="f-tipo">Tipo</label>
+            <select id="f-tipo" name="tipo" defaultValue={tipo ?? ""}>
+              <option value="">Todos</option>
+              {TIPOS.map((t) => (
+                <option key={t.valor} value={t.valor}>
+                  {t.es}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button className={styles.boton} type="submit">
+            Filtrar
+          </button>
+          {hayFiltros && (
+            <Link href={cat ? `/admin/ejercicios?cat=${cat}` : "/admin/ejercicios"} className={styles.enlaceBarra}>
+              Quitar filtros
+            </Link>
+          )}
+        </form>
         {visibles.length === 0 && <p className={styles.ayuda}>No hay ejercicios aquí.</p>}
         <ul className={styles.lista}>
           {visibles.map((e) => {

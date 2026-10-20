@@ -251,3 +251,15 @@
   font-size: 0.85rem;
   color: var(--secundario);
 }
+
+.vista {
+  align-self: flex-start;
+  margin-bottom: 6px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blanco);
+  background: rgba(43, 43, 42, 0.55);
+  border-radius: 999px;
+}

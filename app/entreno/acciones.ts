@@ -54,6 +54,7 @@ export type DatosSerie = {
   peso: number | null;
   distancia: number | null;
   detalle: string;
+  rpe: number | null;
   completada: boolean;
 };
 
@@ -70,6 +71,7 @@ export async function guardarSerie(serieId: string, d: DatosSerie): Promise<Resu
     p_distancia: numeroOpc(d.distancia),
     p_detalle: (d.detalle ?? "").slice(0, 60),
     p_completada: !!d.completada,
+    p_rpe: d.rpe !== null && d.rpe >= 1 && d.rpe <= 10 ? Math.round(d.rpe) : null,
   });
   if (error) return { ok: false, codigo: codigoDe(error.message) };
   return { ok: true };
