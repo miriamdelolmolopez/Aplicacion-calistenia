@@ -59,32 +59,51 @@ export default function NavegacionInferior() {
 
   const pestanas = pestanasDe(perfilActual, t);
 
+  // Inicio va en el centro de la barra; el resto se reparte a los lados (con «Más» a la derecha).
+  const inicio = pestanas.find((p) => p.href === RUTAS.inicio);
+  const otras = pestanas.filter((p) => p !== inicio);
+  const mitad = Math.floor((otras.length + 1) / 2);
+  const izquierda = otras.slice(0, mitad);
+  const derecha = otras.slice(mitad);
+
+  const esActiva = (href: string) =>
+    href === "/admin"
+      ? ruta === "/admin"
+      : ruta === href ||
+        ruta.startsWith(href + "/") ||
+        // El progreso y el entreno cuelgan de «Entrenamiento» para quien tiene online.
+        (href === "/rutina" && (ruta.startsWith("/progreso") || ruta.startsWith("/entreno")));
+
+  const pestana = (p: Pestana) => (
+    <Link key={p.href} href={p.href} className={`${estilos.pestana} ${esActiva(p.href) ? estilos.activa : ""}`}>
+      <span className={estilos.icono}>
+        <Icono nombre={p.icono} tamano={22} />
+      </span>
+      {p.texto}
+    </Link>
+  );
+
   return (
     <>
       <nav className={estilos.barra} aria-label={t.barraNavegacion}>
-        {pestanas.map((p) => {
-          const activa =
-            p.href === "/admin"
-              ? ruta === "/admin"
-              : ruta === p.href ||
-                ruta.startsWith(p.href + "/") ||
-                // El progreso y el entreno cuelgan de «Entrenamiento» para quien tiene online.
-                (p.href === "/rutina" && (ruta.startsWith("/progreso") || ruta.startsWith("/entreno")));
-          return (
-            <Link key={p.href} href={p.href} className={`${estilos.pestana} ${activa ? estilos.activa : ""}`}>
-              <span className={estilos.icono}>
-                <Icono nombre={p.icono} tamano={22} />
-              </span>
-              {p.texto}
-            </Link>
-          );
-        })}
-        <button type="button" className={`${estilos.pestana} ${menu ? estilos.activa : ""}`} onClick={() => setMenu(true)}>
-          <span className={estilos.icono}>
-            <Icono nombre="mas" tamano={22} />
-          </span>
-          {t.tabMas}
-        </button>
+        <div className={estilos.lado}>{izquierda.map(pestana)}</div>
+        {inicio && (
+          <Link href={inicio.href} className={`${estilos.centro} ${esActiva(inicio.href) ? estilos.centroActivo : ""}`}>
+            <span className={estilos.centroIcono}>
+              <Icono nombre={inicio.icono} tamano={26} />
+            </span>
+            {inicio.texto}
+          </Link>
+        )}
+        <div className={estilos.lado}>
+          {derecha.map(pestana)}
+          <button type="button" className={`${estilos.pestana} ${menu ? estilos.activa : ""}`} onClick={() => setMenu(true)}>
+            <span className={estilos.icono}>
+              <Icono nombre="mas" tamano={22} />
+            </span>
+            {t.tabMas}
+          </button>
+        </div>
       </nav>
       <MenuLateral perfil={perfilActual} abierto={menu} onCerrar={cerrar} />
       <MenuEscritorio perfil={perfilActual} />

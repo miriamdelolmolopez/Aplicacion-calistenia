@@ -5,9 +5,7 @@
   padding: 16px 20px 32px;
   max-width: 480px;
   margin: 0 auto;
-  color: var(--blanco);
-  background-size: cover;
-  background-position: center;
+  color: var(--carbon);
 }
 
 .arriba {
@@ -22,7 +20,7 @@
   align-items: center;
   min-height: 44px;
   padding: 0 4px;
-  color: var(--blanco);
+  color: var(--carbon);
   font-weight: 600;
   text-decoration: none;
 }
@@ -31,9 +29,9 @@
   min-height: 44px;
   padding: 0 14px;
   font: inherit;
-  color: var(--blanco);
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
   border-radius: 999px;
 }
 
@@ -68,8 +66,7 @@
 .centro h1 {
   margin: 0;
   font-size: 2.6rem;
-  color: var(--blanco);
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.3);
+  color: var(--carbon);
 }
 
 .lema {
@@ -93,31 +90,34 @@
   justify-content: center;
   min-height: 56px;
   padding: 0 20px;
-  background: var(--oliva-oscuro);
+  background: var(--acento);
   color: var(--blanco);
   font-weight: 600;
   text-decoration: none;
   border-radius: 999px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--sombra-acento);
+  transition: background-color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
 }
 
 .boton:hover {
-  background: var(--oliva);
+  background: var(--acento-oscuro);
+  transform: translateY(-2px);
 }
 
 .botonSecundario {
   flex-direction: column;
   padding: 10px 20px;
-  color: var(--blanco);
-  background: rgba(255, 255, 255, 0.16);
-  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  color: var(--acento-oscuro);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1.5px solid var(--acento);
   box-shadow: none;
   text-align: center;
   backdrop-filter: blur(6px);
 }
 
 .botonSecundario:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
 }
 
 .botonSecundario small {
@@ -126,4 +126,18 @@
   font-size: 0.78rem;
   font-weight: 500;
   opacity: 0.9;
+}
+
+/* Foto de fondo al 20 % de opacidad (el gris lo pone el html) */
+.fondo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url(/fotos/handstand-v1.webp) 55% 40% / cover no-repeat;
+  opacity: 0.2;
+}
+
+:global(body):has(.fondo) {
+  background: transparent;
 }

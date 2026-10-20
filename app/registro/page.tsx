@@ -48,6 +48,7 @@ export default function Registro() {
 
   return (
     <main className={styles.pagina}>
+      <div className={styles.fondoEntrar} aria-hidden="true" />
       <BarraSuperior izquierda={{ href: "/", texto: "volver" }} />
       <div className={styles.cabecera}>
         <h1>{enviado ? t.registroEnviado : t.registroTitulo}</h1>

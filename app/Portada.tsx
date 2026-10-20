@@ -5,13 +5,13 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
-import { fondoFoto } from "@/lib/fotos";
 
-export default function Portada({ propia }: { propia: string | null }) {
+export default function Portada() {
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
   return (
-    <main className={styles.portada} style={{ backgroundImage: fondoFoto("portada", propia) }}>
+    <main className={styles.portada}>
+      <div className={styles.fondo} aria-hidden="true" />
       <header className={styles.arriba}>
         <span />
         <label className={styles.idioma}>
@@ -27,7 +27,7 @@ export default function Portada({ propia }: { propia: string | null }) {
       </header>
 
       <section className={styles.centro}>
-        <Image src="/logos/logo_cream.png" alt="" width={240} height={213} priority className={styles.logo} />
+        <Image src="/logos/logo_carbon.png" alt="" width={240} height={213} priority className={styles.logo} />
         <h1>Miriam del Olmo</h1>
         <p className={styles.lema}>{t.lema}</p>
       </section>
