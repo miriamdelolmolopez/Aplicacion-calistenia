@@ -26,10 +26,9 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // Renueva la sesión si hace falta y comprueba quién es.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Renueva la sesión si hace falta y comprueba quién es (verifica la firma del token; no hace falta preguntar a Supabase).
+  const { data: datosSesion } = await supabase.auth.getClaims();
+  const user = datosSesion?.claims ?? null;
 
   const ruta = request.nextUrl.pathname;
   const esPrivada = PRIVADAS.some((p) => ruta === p || ruta.startsWith(p + "/"));

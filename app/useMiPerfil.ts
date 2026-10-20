@@ -20,9 +20,9 @@ export type Estado = MiPerfil | null | "anonimo";
 
 async function cargarPerfil(): Promise<Estado> {
   const supabase = createClient();
-  const { data: sesion } = await supabase.auth.getUser();
-  if (!sesion.user) return "anonimo";
-  const id = sesion.user.id;
+  const { data: sesion } = await supabase.auth.getSession();
+  if (!sesion.session) return "anonimo";
+  const id = sesion.session.user.id;
 
   const [{ data: perfil }, { data: servicios }, { data: bonos }, { data: plan }, { data: aceptaciones }, versiones] = await Promise.all([
     supabase.from("profiles").select("nombre, rol, datos_completos").eq("id", id).maybeSingle(),

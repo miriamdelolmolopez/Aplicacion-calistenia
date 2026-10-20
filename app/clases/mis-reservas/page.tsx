@@ -32,8 +32,8 @@ type Datos = { reservas: Reserva[]; bonos: MiBono[]; horas: number; horasIndivid
 
 async function obtenerDatos(): Promise<Datos> {
   const supabase = createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  const userId = auth.user?.id ?? "";
+  const { data: auth } = await supabase.auth.getSession();
+  const userId = auth.session?.user.id ?? "";
 
   const [{ data }, bonos, { data: ajustes }, { data: tiposData }] = await Promise.all([
     supabase

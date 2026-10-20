@@ -81,7 +81,8 @@ async function obtenerDatos(): Promise<Datos> {
   const horasIndividual = valor("cancelacion_horas_individual", 12);
   const dias = valor("reserva_dias_max", 14);
 
-  const { data: sesion } = await supabase.auth.getUser();
+  const { data: datosSesion } = await supabase.auth.getSession();
+  const sesion = { user: datosSesion.session?.user ?? null };
   const { data: perfil } = sesion.user
     ? await supabase
         .from("profiles")
