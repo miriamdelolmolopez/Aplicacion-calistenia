@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { avisarBonosPorCaducar, avisarMinimos } from "@/lib/avisos";
+import { avisarMinimos } from "@/lib/avisos";
+import { bonoPorCaducar, felicitarCumpleanos, mensajeTrasPrueba, recordatorioPrueba } from "@/lib/automatizaciones";
 
 // Lo llama una vez al día el planificador de Vercel (ver vercel.json), que envía
 // "Authorization: Bearer <CRON_SECRET>". Sin esa clave no hace nada.
@@ -9,6 +10,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const [bonos, minimos] = await Promise.all([avisarBonosPorCaducar(), avisarMinimos()]);
-  return NextResponse.json({ bonosPorCaducar: bonos, minimoNoAlcanzado: minimos });
+  const [minimos, bonos, recordatorios, tras, cumples] = await Promise.all([
+    avisarMinimos(),
+    bonoPorCaducar(),
+    recordatorioPrueba(),
+    mensajeTrasPrueba(),
+    felicitarCumpleanos(),
+  ]);
+  return NextResponse.json({
+    minimoNoAlcanzado: minimos,
+    bonosPorCaducar: bonos,
+    recordatoriosPrueba: recordatorios,
+    mensajesTrasPrueba: tras,
+    cumpleanos: cumples,
+  });
 }

@@ -213,3 +213,23 @@ export function correoInvitacion(p: { para: string; alumno: boolean; ruta: strin
   });
   return { para: p.para, asunto: p.alumno ? "Te damos la bienvenida · Miriam del Olmo" : "Te invito a mi app · Miriam del Olmo", ...m };
 }
+
+// Correo de una automatización: el texto lo escribe Miriam. Se pueden usar {nombre}, {fecha}, {clase},
+// {bono}, {clases} y {regalo}; una línea en blanco separa párrafos.
+export function correoAutomatico(p: {
+  para: string;
+  idioma: Idioma;
+  asunto: string;
+  mensaje: string;
+  valores: Record<string, string>;
+  ruta: string;
+}): Correo {
+  const poner = (t: string) => escapar(t).replace(/\{(\w+)\}/g, (c, k: string) => (k in p.valores ? escapar(p.valores[k]) : c));
+  const titulo = poner(p.asunto);
+  const parrafos = poner(p.mensaje)
+    .split(/\n\s*\n/)
+    .map((x) => x.trim().replace(/\n/g, "<br>"))
+    .filter(Boolean);
+  const m = marco({ idioma: p.idioma, titulo, parrafos, boton: { texto: abrir(p.idioma), ruta: p.ruta } });
+  return { para: p.para, asunto: titulo.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"'), ...m };
+}

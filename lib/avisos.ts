@@ -1,7 +1,6 @@
 import "server-only";
 import { enviarCorreo } from "./email";
 import {
-  correoBonoCaduca,
   correoClaseCancelada,
   correoMinimoNoAlcanzado,
   correoPlazaLiberada,
@@ -17,7 +16,7 @@ import { createAdminClient } from "./supabase/admin";
 // Opcionales (la persona puede desactivarlos en su cuenta): confirmación de reserva
 // y bono a punto de caducar.
 
-type Persona = {
+export type Persona = {
   id: string;
   email: string | null;
   nombre: string | null;
@@ -35,10 +34,10 @@ type Clase = {
 };
 
 // Las cuentas de prueba (example.com) no reciben correos reales.
-const enviable = (email: string | null): email is string =>
+export const enviable = (email: string | null): email is string =>
   !!email && !email.toLowerCase().endsWith("@example.com");
 
-async function personas(ids: string[]): Promise<Persona[]> {
+export async function personas(ids: string[]): Promise<Persona[]> {
   if (ids.length === 0) return [];
   const { data } = await createAdminClient()
     .from("profiles")
@@ -58,7 +57,7 @@ async function clase(sesionId: string): Promise<Clase | null> {
 
 const info = (c: Clase) => ({ nombre: c.tipos_clase?.nombre ?? "Clase", empieza_en: c.empieza_en });
 
-async function protegido(nombre: string, tarea: () => Promise<void>) {
+export async function protegido(nombre: string, tarea: () => Promise<void>) {
   try {
     await tarea();
   } catch (error) {
@@ -147,60 +146,19 @@ export function avisarClaseCancelada(sesionId: string, dias: number, enEspera: s
   });
 }
 
+export type TipoAviso = "bono_caduca" | "minimo_clase" | "prueba_recordatorio" | "prueba_despues" | "cumple";
+
 // Apunta que un aviso automático se va a enviar. Devuelve false si ya se envió antes.
-async function reclamar(tipo: "bono_caduca" | "minimo_clase", refId: string, userId: string): Promise<boolean> {
+export async function reclamar(tipo: TipoAviso, refId: string, userId: string): Promise<boolean> {
   const { error } = await createAdminClient().from("avisos_enviados").insert({ tipo, ref_id: refId, user_id: userId });
   return !error;
 }
 
-async function soltar(tipo: "bono_caduca" | "minimo_clase", refId: string, userId: string) {
+export async function soltar(tipo: TipoAviso, refId: string, userId: string) {
   await createAdminClient().from("avisos_enviados").delete().eq("tipo", tipo).eq("ref_id", refId).eq("user_id", userId);
 }
 
-const HORA = 3600 * 1000;
-
-// Bonos que caducan en los próximos 3 días (opcional). Lo lanza el cron una vez al día.
-export async function avisarBonosPorCaducar(): Promise<number> {
-  let enviados = 0;
-  await protegido("bonos por caducar", async () => {
-    const ahora = Date.now();
-    const { data } = await createAdminClient()
-      .from("bonos")
-      .select("id, user_id, servicio, clases_restantes, caduca_en, tipos_bono(nombre)")
-      .eq("estado", "activo")
-      .gt("caduca_en", new Date(ahora).toISOString())
-      .lte("caduca_en", new Date(ahora + 72 * HORA).toISOString());
-    const bonos = (data ?? []) as unknown as {
-      id: string;
-      user_id: string;
-      servicio: string;
-      clases_restantes: number;
-      caduca_en: string;
-      tipos_bono: { nombre: string } | null;
-    }[];
-    const porId = new Map((await personas(bonos.map((b) => b.user_id))).map((p) => [p.id, p]));
-
-    for (const b of bonos) {
-      const p = porId.get(b.user_id);
-      if (!p || !enviable(p.email) || !p.avisos_bono) continue;
-      if (!(await reclamar("bono_caduca", b.id, p.id))) continue;
-      const ok = await enviarCorreo(
-        correoBonoCaduca({
-          para: p.email,
-          idioma: p.idioma,
-          nombrePersona: p.nombre ?? "",
-          nombreBono: b.tipos_bono?.nombre ?? "bono",
-          caduca: b.caduca_en,
-          clasesRestantes: b.clases_restantes,
-          esOnline: b.servicio === "online",
-        }),
-      );
-      if (ok) enviados++;
-      else await soltar("bono_caduca", b.id, p.id);
-    }
-  });
-  return enviados;
-}
+export const HORA = 3600 * 1000;
 
 // Clases de las próximas 24 h que no llegan al mínimo: aviso a Miriam. Lo lanza el cron.
 export async function avisarMinimos(): Promise<number> {
