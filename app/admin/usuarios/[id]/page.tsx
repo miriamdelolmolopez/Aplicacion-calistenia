@@ -11,6 +11,7 @@ import EditorPersona from "../../EditorPersona";
 import styles from "../../admin.module.css";
 import estilos from "../usuarios.module.css";
 import AvancesSesion from "./AvancesSesion";
+import EliminarUsuario from "./EliminarUsuario";
 import Notas from "./Notas";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
@@ -319,6 +320,13 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
         <h2>Notas privadas</h2>
         <Notas userId={p.id} texto={nota?.texto ?? ""} />
       </section>
+
+      {p.rol !== "admin" && (
+        <section className={styles.tarjeta}>
+          <h2>Eliminar usuario</h2>
+          <EliminarUsuario userId={p.id} nombre={nombre} />
+        </section>
+      )}
     </main>
   );
 }

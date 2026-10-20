@@ -21,6 +21,7 @@ function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"]): Pestana[] {
     return [
       { href: RUTAS.inicio, icono: "inicio", texto: t.navInicio },
       { href: "/admin", icono: "admin", texto: "Panel" },
+      { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },
       { href: "/admin/clases", icono: "reservas", texto: "Reservas" },
       { href: RUTAS.perfil, icono: "perfil", texto: t.perfilTitulo },
     ];

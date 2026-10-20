@@ -105,3 +105,25 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
     enlace: `${protocolo}://${host}${ruta}`,
   };
 }
+
+// Elimina a una persona y todos sus datos (los pagos se conservan: la base de datos les guarda su nombre y DNI).
+export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
+  if (userId === user.id) return { ok: false, error: "No puedes eliminar tu propia cuenta." };
+
+  const admin = createAdminClient();
+  const { data: persona } = await admin.from("profiles").select("rol, foto_path").eq("id", userId).maybeSingle();
+  if (!persona) return { ok: false, error: "No se ha encontrado a esa persona." };
+  if (persona.rol === "admin") return { ok: false, error: "No se puede eliminar a una administradora." };
+
+  if (persona.foto_path) await admin.storage.from("avatares").remove([persona.foto_path as string]);
+
+  const { error } = await admin.auth.admin.deleteUser(userId);
+  if (error) return { ok: false, error: "No se ha podido eliminar. Inténtalo de nuevo." };
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/personas");
+  return { ok: true };
+}
