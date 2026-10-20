@@ -99,6 +99,7 @@ const DIBUJOS = {
   metricas: <path d="M5 21V11M12 21V4M19 21v-7" />,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   cerrar: <path d="M6 6l12 12M18 6 6 18" />,
+  embudo: <path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z" />,
 } as const;
 
 export type NombreIcono = keyof typeof DIBUJOS;

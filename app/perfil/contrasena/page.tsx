@@ -67,7 +67,7 @@ export default function CambiarContrasena() {
     <main className={styles.pagina}>
       <BarraSuperior />
       <Link href="/perfil" className={estilos.volver}>
-        ← {t.titulo}
+        ← {t.volver}
       </Link>
       <form className={`${styles.tarjeta} ${estilos.seccion}`} onSubmit={cambiar} noValidate>
         <h2>{t.cambiarContrasena}</h2>

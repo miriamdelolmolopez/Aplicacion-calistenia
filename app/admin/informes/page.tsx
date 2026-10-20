@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
+import PanelFiltros from "../../PanelFiltros";
 import { nombresFormas } from "@/lib/formasPago";
 import { claveDia, fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
@@ -164,7 +165,7 @@ export default async function Informes({
       <header className={styles.barra}>
         <h1>Informes</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 
@@ -175,6 +176,8 @@ export default async function Informes({
       </div>
 
       <section className={styles.tarjeta}>
+        <p className={styles.ayuda}>Periodo mostrado: {sufijo}</p>
+        <PanelFiltros activos={periodo !== "mes" ? 1 : 0}>
         <div className={estilos.periodos}>
           {PERIODOS.filter((x) => x.id !== "personalizado").map((x) => (
             <Link key={x.id} href={base(`&periodo=${x.id}`)} className={`${estilos.periodo} ${periodo === x.id ? estilos.periodoActivo : ""}`}>
@@ -197,7 +200,7 @@ export default async function Informes({
             Ver ese periodo
           </button>
         </form>
-        <p className={styles.ayuda}>Periodo mostrado: {sufijo}</p>
+        </PanelFiltros>
       </section>
 
       {vista !== "cumpleanos" && (!i || !atletas) && <p className={styles.error}>No se han podido calcular los informes.</p>}

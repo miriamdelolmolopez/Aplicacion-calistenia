@@ -19,7 +19,7 @@ export default async function AdministrarGlosario() {
       <header className={styles.barra}>
         <h1>Glosario</h1>
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
-          ← Aprende
+          ← Volver
         </Link>
       </header>
 

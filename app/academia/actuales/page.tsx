@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
+import PanelFiltros from "../../PanelFiltros";
 import styles from "../../formularios.module.css";
 import { useIdioma } from "../../useIdioma";
 import estilos from "../academia.module.css";
@@ -56,7 +57,11 @@ export default function CursosActuales() {
 
       {cursos !== null && cursos.length > 0 && (
         <>
-          <div className={estilos.filtros}>
+          <PanelFiltros
+            etiqueta={idioma === "en" ? "Filters" : "Filtros"}
+            activos={(categoria ? 1 : 0) + (precio !== "todos" ? 1 : 0) + (nivel ? 1 : 0) + (orden !== "fecha" ? 1 : 0)}
+          >
+          <div className={estilos.filtrosPlano}>
             <label>
               {t.categoria}
               <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
@@ -98,6 +103,7 @@ export default function CursosActuales() {
               </select>
             </label>
           </div>
+          </PanelFiltros>
 
           {visibles.length === 0 && <p className={styles.aviso}>{t.sinResultados}</p>}
           <ul className={estilos.lista}>

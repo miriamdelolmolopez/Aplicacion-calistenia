@@ -16,7 +16,7 @@ export default async function TextosLegales() {
       <header className={styles.barra}>
         <h1>Textos legales</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

@@ -53,7 +53,7 @@ export default async function Tarifas({ searchParams }: { searchParams: Promise<
       <header className={styles.barra}>
         <h1>Bonos y clases sueltas</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

@@ -115,7 +115,7 @@ export default async function AdminClases() {
       <header className={styles.barra}>
         <h1>Clases</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

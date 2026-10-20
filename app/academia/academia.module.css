@@ -207,3 +207,30 @@
   background: var(--oliva-oscuro);
   border-radius: var(--radio);
 }
+
+.filtrosPlano {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.filtrosPlano label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.filtrosPlano select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--carbon);
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}

@@ -140,7 +140,7 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
       <header className={styles.barra}>
         <h1>{nombre}</h1>
         <Link href="/admin/usuarios" className={styles.enlaceBarra}>
-          ← Usuarios
+          ← Volver
         </Link>
       </header>
 

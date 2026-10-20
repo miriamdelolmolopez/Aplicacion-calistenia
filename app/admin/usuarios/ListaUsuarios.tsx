@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import Avatar from "../../Avatar";
+import PanelFiltros from "../../PanelFiltros";
 import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
 import { fechaCorta } from "@/lib/fechas";
@@ -113,10 +114,15 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
   return (
     <>
       <section className={styles.tarjeta}>
-        <div className={styles.campo}>
-          <label htmlFor="buscar">Buscar por nombre o correo</label>
-          <input id="buscar" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
-        </div>
+        <PanelFiltros
+          activos={(estadoFiltro !== "todos" ? 1 : 0) + (tarifa ? 1 : 0) + (filtro !== "todos" ? 1 : 0)}
+          buscador={
+            <div className={styles.campo}>
+              <label htmlFor="buscar">Buscar por nombre o correo</label>
+              <input id="buscar" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+            </div>
+          }
+        >
         <div className={styles.filtros}>
           <div className={styles.campo}>
             <label htmlFor="f-estado">Estado</label>
@@ -150,6 +156,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
             </button>
           ))}
         </div>
+        </PanelFiltros>
         <p className={styles.ayuda}>
           {visibles.length} de {usuarios.length} {usuarios.length === 1 ? "persona" : "personas"}
         </p>

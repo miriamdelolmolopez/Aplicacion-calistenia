@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VolverAtras from "../VolverAtras";
 import type { Bloque, SeccionLegal } from "@/lib/legalTexto";
 import estilos from "./legal.module.css";
 
@@ -43,6 +44,7 @@ export default function PaginaLegal({
 }) {
   return (
     <main className={estilos.pagina}>
+      <VolverAtras />
       <nav className={estilos.enlaces} aria-label="Textos legales">
         {ENLACES.map((e) => (
           <Link key={e.href} href={e.href}>

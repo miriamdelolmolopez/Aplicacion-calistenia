@@ -21,7 +21,7 @@ export default async function AdministrarHistoria() {
       <header className={styles.barra}>
         <h1>Historia</h1>
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
-          ← Aprende
+          ← Volver
         </Link>
       </header>
 

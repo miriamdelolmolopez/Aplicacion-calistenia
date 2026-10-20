@@ -115,7 +115,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
       <header className={styles.barra}>
         <h1>Editar rutina</h1>
         <Link href="/admin/rutinas" className={styles.enlaceBarra}>
-          ← Rutinas
+          ← Volver
         </Link>
       </header>
       <section className={styles.tarjeta}>

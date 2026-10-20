@@ -19,7 +19,7 @@ export default async function AdministrarPreguntas() {
       <header className={styles.barra}>
         <h1>Preguntas del examen</h1>
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
-          ← Aprende
+          ← Volver
         </Link>
       </header>
 

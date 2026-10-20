@@ -90,7 +90,7 @@ export default function Calculadoras() {
     <main className={estilos.perfilPagina}>
       <BarraSuperior />
       <Link href="/perfil" className={estilos.volver}>
-        ← {t.titulo}
+        ← {t.volver}
       </Link>
       <h1 className={estilos.perfilTitulo}>{t.calcTitulo}</h1>
 

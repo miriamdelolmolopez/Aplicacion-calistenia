@@ -31,7 +31,7 @@ export default async function EditarLegal({ params }: { params: Promise<{ doc: s
       <header className={styles.barra}>
         <h1>{TITULO_DOCUMENTO[documento]}</h1>
         <Link href="/admin/legal" className={styles.enlaceBarra}>
-          ← Textos legales
+          ← Volver
         </Link>
       </header>
 

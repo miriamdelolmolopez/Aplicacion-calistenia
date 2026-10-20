@@ -9,6 +9,7 @@ import { obtenerMisBonos } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
 import { obtenerFotos, obtenerProfe } from "../perfil/acciones";
 import { textos, type ClaveTexto } from "../textos";
+import PanelFiltros from "../PanelFiltros";
 import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
 import { obtenerFotosApp } from "../fotos/acciones";
@@ -322,6 +323,7 @@ export default function Clases() {
             {t.verMisReservasBoton} →
           </Link>
 
+          <PanelFiltros etiqueta={idioma === "en" ? "Filters" : "Filtros"} activos={filtro !== "todo" ? 1 : 0}>
           <div className={estilos.filtros} role="tablist" aria-label={t.filtroTodo}>
             {(
               [
@@ -342,6 +344,7 @@ export default function Clases() {
               </button>
             ))}
           </div>
+          </PanelFiltros>
 
           <div className={estilos.cabeceraDia}>
             <span className={estilos.etiquetaDia}>{t.diaLabel}</span>

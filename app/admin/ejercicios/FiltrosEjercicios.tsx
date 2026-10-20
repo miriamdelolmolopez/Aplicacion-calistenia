@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import PanelFiltros from "../../PanelFiltros";
 import styles from "../admin.module.css";
 import { MUSCULOS, TIPOS } from "@/lib/ejercicios";
 
@@ -44,19 +45,25 @@ export default function FiltrosEjercicios({
   }, [f, cat, archivados, router]);
 
   const hayFiltros = !!(f.q || f.musculo || f.material || f.tipo);
+  const activos = [f.musculo, f.material, f.tipo].filter(Boolean).length;
 
   return (
+    <PanelFiltros
+      activos={activos}
+      buscador={
+        <div className={styles.campo}>
+          <label htmlFor="f-q">Buscar</label>
+          <input
+            id="f-q"
+            type="search"
+            value={f.q}
+            placeholder="Nombre del ejercicio"
+            onChange={(e) => setF((v) => ({ ...v, q: e.target.value }))}
+          />
+        </div>
+      }
+    >
     <div className={styles.filtros}>
-      <div className={styles.campo}>
-        <label htmlFor="f-q">Buscar</label>
-        <input
-          id="f-q"
-          type="search"
-          value={f.q}
-          placeholder="Nombre del ejercicio"
-          onChange={(e) => setF((v) => ({ ...v, q: e.target.value }))}
-        />
-      </div>
       <div className={styles.campo}>
         <label htmlFor="f-musculo">Músculo</label>
         <select id="f-musculo" value={f.musculo} onChange={(e) => setF((v) => ({ ...v, musculo: e.target.value }))}>
@@ -100,5 +107,6 @@ export default function FiltrosEjercicios({
         </button>
       )}
     </div>
+    </PanelFiltros>
   );
 }

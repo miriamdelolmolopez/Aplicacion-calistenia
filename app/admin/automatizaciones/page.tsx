@@ -57,7 +57,7 @@ export default async function Automatizaciones() {
       <header className={styles.barra}>
         <h1>Automatizaciones</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

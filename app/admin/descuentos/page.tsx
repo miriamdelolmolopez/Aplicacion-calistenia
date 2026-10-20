@@ -33,7 +33,7 @@ export default async function Descuentos() {
       <header className={styles.barra}>
         <h1>Descuentos</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

@@ -40,7 +40,7 @@ export default async function ImprimirHorario({ params }: { params: Promise<{ id
       `}</style>
       <div className="no-imprimir" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         <Link href="/admin/horarios" className={styles.enlaceBarra}>
-          ← Horarios
+          ← Volver
         </Link>
         <BotonImprimir />
       </div>

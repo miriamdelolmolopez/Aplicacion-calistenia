@@ -38,7 +38,8 @@
   min-height: 44px;
   color: var(--blanco);
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
   white-space: nowrap;
 }
 

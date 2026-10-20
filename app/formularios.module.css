@@ -21,7 +21,8 @@
   padding: 0 4px;
   color: var(--oliva-oscuro);
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .idioma select {

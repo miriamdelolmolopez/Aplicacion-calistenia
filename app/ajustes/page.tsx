@@ -63,7 +63,7 @@ export default function Ajustes() {
   if (!pref) {
     return (
       <main className={styles.pagina}>
-        <BarraSuperior />
+        <BarraSuperior izquierda={{ href: "/perfil", texto: "volver" }} />
         <p className={styles.aviso}>{t.cargando}</p>
       </main>
     );
@@ -103,7 +103,7 @@ export default function Ajustes() {
 
   return (
     <main className={styles.pagina}>
-      <BarraSuperior />
+      <BarraSuperior izquierda={{ href: "/perfil", texto: "volver" }} />
       <CabeceraFoto foto="pino" titulo={t.ajustesTitulo} />
 
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>

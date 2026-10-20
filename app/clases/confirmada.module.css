@@ -125,4 +125,6 @@
   background: transparent;
   border: 0;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }

@@ -52,7 +52,7 @@ export default async function Personas() {
       <header className={styles.barra}>
         <h1>Altas y roles</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

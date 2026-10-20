@@ -129,7 +129,7 @@ export default function MisDatos() {
     <main className={styles.pagina}>
       <BarraSuperior />
       <Link href="/perfil" className={estilos.volver}>
-        ← {t.perfilTitulo}
+        ← {t.volver}
       </Link>
       <div className={styles.cabecera}>
         <h1>{t.misDatos}</h1>

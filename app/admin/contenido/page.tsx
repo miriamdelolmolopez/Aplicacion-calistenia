@@ -21,7 +21,7 @@ export default async function Contenido() {
       <header className={styles.barra}>
         <h1>Fotos y frases</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
-          ← Administración
+          ← Volver
         </Link>
       </header>
 

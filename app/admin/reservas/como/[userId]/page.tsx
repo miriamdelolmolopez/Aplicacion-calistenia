@@ -83,7 +83,7 @@ export default async function ReservarComo({
       <header className={styles.barra}>
         <h1>Reservar como {perfil.nombre ?? "la alumna"}</h1>
         <Link href={`/admin/reservas?dia=${dia}`} className={styles.enlaceBarra}>
-          ← Reservas
+          ← Volver
         </Link>
       </header>
 
