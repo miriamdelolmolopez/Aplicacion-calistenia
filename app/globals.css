@@ -80,6 +80,17 @@ a {
   color: inherit;
 }
 
+/* Desplegables sin estilo propio: redondeados y con la misma letra */
+select {
+  font-family: inherit;
+  color: var(--carbon);
+  background-color: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  min-height: 44px;
+  padding: 0 12px;
+}
+
 /* Cifras y datos: monoespaciada de ancho fijo (no tiembla al cambiar) */
 code,
 kbd,

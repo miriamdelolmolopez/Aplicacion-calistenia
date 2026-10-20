@@ -57,8 +57,8 @@
 
 .subpestanas .activa {
   color: var(--blanco);
-  background: var(--oliva-oscuro);
-  border-color: var(--oliva-oscuro);
+  background: var(--carbon);
+  border-color: var(--carbon);
 }
 
 .resumen {

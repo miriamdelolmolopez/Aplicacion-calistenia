@@ -22,25 +22,35 @@
   }
 }
 
+/* La confirmación se ve como un pase de club: tarjeta blanca con troquel */
 .contenido {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: min(420px, 100%);
-  gap: 18px;
+  gap: 16px;
+  margin-top: 46px;
+  padding: 0 24px 24px;
   text-align: center;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 28px;
+  box-shadow: var(--sombra-alta);
 }
 
 .check {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 92px;
-  height: 92px;
+  width: 84px;
+  height: 84px;
+  margin-top: -42px;
   color: var(--blanco);
   background: var(--oliva-oscuro);
+  border: 6px solid var(--crema);
   border-radius: 50%;
-  box-shadow: 0 8px 24px rgba(90, 94, 59, 0.3);
+  box-shadow: 0 14px 28px -12px rgba(90, 94, 59, 0.55);
 }
 
 .contenido h1 {
@@ -57,16 +67,52 @@
 }
 
 .datos strong {
-  font-size: 1.15rem;
+  font-family: var(--font-titulos), system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--carbon);
+}
+
+.datos span:first-of-type {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.85rem;
   color: var(--carbon);
 }
 
 .botones {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
   margin-top: 8px;
+  padding-top: 24px;
+  border-top: 2px dashed rgba(43, 43, 42, 0.22);
+}
+
+/* Muescas del troquel a los lados */
+.botones::before,
+.botones::after {
+  content: "";
+  position: absolute;
+  top: -13px;
+  width: 24px;
+  height: 24px;
+  background: #efeadc;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+}
+
+.botones::before {
+  left: -37px;
+  clip-path: inset(0 0 0 50%);
+}
+
+.botones::after {
+  right: -37px;
+  clip-path: inset(0 50% 0 0);
 }
 
 .opciones {
@@ -87,9 +133,15 @@
 
 .principal {
   color: var(--blanco);
-  background: var(--oliva-oscuro);
+  background: var(--carbon);
   border: 0;
-  box-shadow: 0 6px 18px rgba(90, 94, 59, 0.25);
+  box-shadow: 0 14px 24px -14px rgba(43, 43, 42, 0.6);
+  transition: background 0.2s, transform 0.25s;
+}
+
+.principal:hover {
+  background: var(--oliva-oscuro);
+  transform: translateY(-1px);
 }
 
 .secundario {

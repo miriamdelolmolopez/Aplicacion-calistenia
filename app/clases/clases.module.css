@@ -5,10 +5,11 @@
 }
 
 .etiquetaDia {
-  font-size: 0.72rem;
-  letter-spacing: 1px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--secundario);
+  color: var(--oliva-oscuro);
 }
 
 .tira {
@@ -29,17 +30,27 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 0;
+  padding: 10px 0;
   font: inherit;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 500;
   color: var(--carbon);
-  background: var(--relleno);
-  border: 0;
-  border-radius: 10px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  box-shadow: var(--sombra);
   cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dia:hover:not(:disabled) {
+  transform: translateY(-2px);
 }
 
 .dia span {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--secundario);
 }
 
@@ -48,10 +59,45 @@
   cursor: default;
 }
 
+@property --ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 .diaElegido {
+  position: relative;
   color: #fff;
-  background: var(--oliva-oscuro);
-  box-shadow: 0 4px 12px rgba(90, 94, 59, 0.3);
+  background: var(--carbon);
+  border-color: var(--carbon);
+  box-shadow: var(--sombra-alta);
+}
+
+/* Borde que da la vuelta alrededor del día elegido */
+.diaElegido::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 62%, #70754b 84%, #b4bb88 92%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: giroDia 3.2s linear infinite;
+}
+
+@keyframes giroDia {
+  to {
+    --ang: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diaElegido::before {
+    animation: none;
+  }
 }
 
 .diaElegido span {
@@ -134,9 +180,10 @@
 }
 
 .hora {
-  font-family: var(--font-titulos), serif;
-  font-size: 1.8rem;
-  font-weight: 600;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 1.7rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .profe {
@@ -207,7 +254,8 @@
 
 .plazas {
   margin: 0;
-  font-size: 0.85rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.78rem;
   color: var(--secundario);
 }
 
@@ -296,8 +344,8 @@
 
 .filtroActivo {
   color: var(--blanco);
-  background: var(--oliva-oscuro);
-  border-color: var(--oliva-oscuro);
+  background: var(--carbon);
+  border-color: var(--carbon);
 }
 
 .noIncluida {

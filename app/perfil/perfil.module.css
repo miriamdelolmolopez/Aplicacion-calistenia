@@ -279,9 +279,11 @@
 }
 
 .numeros strong {
-  font-size: 1.7rem;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   line-height: 1.1;
-  font-family: var(--font-titulos), Georgia, serif;
+  font-family: var(--font-mono), ui-monospace, monospace;
 }
 
 .numeros span {
@@ -449,9 +451,9 @@
 }
 
 .resultadoValor {
-  font-size: 1.8rem;
-  font-weight: 700;
-  font-family: var(--font-titulos), Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+  font-family: var(--font-mono), ui-monospace, monospace;
 }
 
 .rejillaCalc > * {

@@ -38,8 +38,10 @@
 }
 
 .numeroGrande {
-  font-family: var(--font-titulos), serif;
-  font-size: 3rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 2.8rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
   line-height: 1;
   color: var(--oliva-oscuro);
 }
