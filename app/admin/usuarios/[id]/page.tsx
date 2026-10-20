@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
+import { nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Avatar from "../../../Avatar";
 import Medidas from "../../../perfil/Medidas";
@@ -25,7 +26,6 @@ const ESTADOS_BONO: Record<string, string> = {
   caducado: "Caducado",
   anulado: "Anulado",
 };
-const METODOS: Record<string, string> = { efectivo: "Efectivo", bizum: "Bizum", transferencia: "Transferencia", tarjeta: "Tarjeta" };
 
 type Asistencia = {
   total_clases: number;
@@ -59,6 +59,7 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const { supabase } = await requireAdmin();
   const admin = createAdminClient();
+  const METODOS = await nombresFormas();
 
   const { data: p } = await supabase
     .from("profiles")

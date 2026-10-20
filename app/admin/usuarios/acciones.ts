@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { enviarCorreo } from "@/lib/email";
 import { correoInvitacion } from "@/lib/plantillas-email";
+import { formaActiva } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
 import { headers } from "next/headers";
@@ -54,7 +55,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   const tarifa = String(formData.get("tarifa") ?? "");
   const pagoAhora = String(formData.get("pago") ?? "luego") === "ahora";
   const metodo = String(formData.get("metodo") ?? "");
-  if (tarifa && !["efectivo", "bizum", "transferencia"].includes(metodo)) return { error: "Elige cómo paga." };
+  if (tarifa && !(await formaActiva(metodo))) return { error: "Elige cómo paga." };
 
   let servicioTarifa: string | null = null;
   if (tarifa) {

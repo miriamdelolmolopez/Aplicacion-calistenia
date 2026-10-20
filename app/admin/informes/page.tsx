@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
+import { nombresFormas } from "@/lib/formasPago";
 import { claveDia, fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { cumpleanos, informeAtletas, ingresosPorMesYServicio, type PersonaLinea } from "@/lib/informes";
@@ -35,7 +36,6 @@ type Informe = {
 
 type Vista = "atletas" | "pagos" | "cumpleanos";
 
-const METODOS: Record<string, string> = { efectivo: "Efectivo", bizum: "Bizum", transferencia: "Transferencia", tarjeta: "Tarjeta" };
 const SERVICIOS: Record<string, string> = { grupal: "Clases grupales", individual: "Individual", online: "Online", otros: "Otros" };
 const EDADES: [string, string][] = [
   ["menos_18", "Menos de 18"],
@@ -81,6 +81,7 @@ export default async function Informes({
 }) {
   const { vista: v, periodo: p, desde: d, hasta: h } = await searchParams;
   const { supabase } = await requireAdmin();
+  const METODOS = await nombresFormas();
 
   const vista: Vista = v === "pagos" || v === "cumpleanos" ? v : "atletas";
   const periodo: Periodo = PERIODOS.some((x) => x.id === p) ? (p as Periodo) : "mes";

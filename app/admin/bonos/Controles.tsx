@@ -33,7 +33,9 @@ export function FormularioRegistrar({
   alumnos,
   tipos,
   descuentos,
+  formas,
 }: {
+  formas: { clave: string; nombre: string }[];
   alumnos: { id: string; texto: string }[];
   tipos: { id: string; texto: string; precio: number }[];
   descuentos: { id: string; texto: string; tipo: string; valor: number }[];
@@ -112,10 +114,12 @@ export function FormularioRegistrar({
           )}
           <div className={styles.campo}>
             <label htmlFor="metodo">¿Cómo paga?</label>
-            <select id="metodo" name="metodo" defaultValue="efectivo">
-              <option value="efectivo">Efectivo</option>
-              <option value="bizum">Bizum</option>
-              <option value="transferencia">Transferencia</option>
+            <select id="metodo" name="metodo" defaultValue={formas[0]?.clave}>
+              {formas.map((f) => (
+                <option key={f.clave} value={f.clave}>
+                  {f.nombre}
+                </option>
+              ))}
             </select>
           </div>
           <label className={styles.casilla}>

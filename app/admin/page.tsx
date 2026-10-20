@@ -26,6 +26,7 @@ const GRUPOS: { titulo: string; azulejos: Azulejo[] }[] = [
       { href: "/admin/bonos", titulo: "Bonos y pagos", foto: "personal" },
       { href: "/admin/tarifas", titulo: "Bonos y clases sueltas", foto: "calistenia" },
       { href: "/admin/descuentos", titulo: "Descuentos", foto: "progreso" },
+      { href: "/admin/formas-pago", titulo: "Formas de pago", foto: "personal" },
       { href: "/admin/exportar", titulo: "Descargar datos (CSV)", foto: "inicio" },
     ],
   },

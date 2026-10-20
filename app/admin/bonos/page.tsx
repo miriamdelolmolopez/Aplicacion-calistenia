@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
+import { formasActivas, nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import { BotonPagado, EditorBono, FormularioPrecio, FormularioRegistrar } from "./Controles";
@@ -14,13 +15,6 @@ const ESTADOS: Record<string, string> = {
   agotado: "Agotado",
   caducado: "Caducado",
   anulado: "Anulado",
-};
-
-const METODOS: Record<string, string> = {
-  efectivo: "Efectivo",
-  bizum: "Bizum",
-  transferencia: "Transferencia",
-  tarjeta: "Tarjeta",
 };
 
 type Tipo = { id: string; nombre: string; precio_centimos: number; activo: boolean };
@@ -75,6 +69,7 @@ function nombreDe(p: { nombre: string | null; apellidos: string | null; email: s
 
 export default async function AdminBonos() {
   const { supabase } = await requireAdmin();
+  const [formas, METODOS] = await Promise.all([formasActivas(), nombresFormas()]);
 
   // Pone al día caducidades y bonos agotados antes de mostrar nada.
   await createAdminClient().rpc("refrescar_bonos");
@@ -158,6 +153,7 @@ export default async function AdminBonos() {
       </section>
 
       <FormularioRegistrar
+        formas={formas}
         alumnos={alumnos.map((a) => ({
           id: a.id,
           texto: `${nombreDe(a)}${a.email && a.nombre ? " · " + a.email : ""}`,

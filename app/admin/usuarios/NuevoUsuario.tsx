@@ -21,7 +21,7 @@ function euros(centimos: number): string {
 }
 
 // Panel «+ Nuevo»: invitar a una persona o dar de alta a una alumna con su bono.
-export default function NuevoUsuario({ tarifas }: { tarifas: TarifaOpcion[] }) {
+export default function NuevoUsuario({ tarifas, formas }: { tarifas: TarifaOpcion[]; formas: { clave: string; nombre: string }[] }) {
   const [abierto, setAbierto] = useState(false);
   const [tipo, setTipo] = useState<"invitado" | "alumno">("alumno");
   const [tarifa, setTarifa] = useState("");
@@ -100,10 +100,12 @@ export default function NuevoUsuario({ tarifas }: { tarifas: TarifaOpcion[] }) {
                   </fieldset>
                   <div className={styles.campo}>
                     <label htmlFor="nu-metodo">Cómo paga</label>
-                    <select id="nu-metodo" name="metodo" defaultValue="bizum">
-                      <option value="efectivo">Efectivo</option>
-                      <option value="bizum">Bizum</option>
-                      <option value="transferencia">Transferencia</option>
+                    <select id="nu-metodo" name="metodo" defaultValue={formas.find((f) => f.clave === "bizum")?.clave ?? formas[0]?.clave}>
+                      {formas.map((f) => (
+                        <option key={f.clave} value={f.clave}>
+                          {f.nombre}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </>

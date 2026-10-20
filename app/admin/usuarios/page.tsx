@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ListaUsuarios, { type Usuario } from "./ListaUsuarios";
+import { formasActivas } from "@/lib/formasPago";
 import NuevoUsuario, { type TarifaOpcion } from "./NuevoUsuario";
 
 export const metadata = { title: "Usuarios · Administración" };
@@ -54,7 +55,7 @@ export default async function Usuarios() {
           ← Administración
         </Link>
       </header>
-      <NuevoUsuario tarifas={tarifas} />
+      <NuevoUsuario tarifas={tarifas} formas={await formasActivas()} />
       <ListaUsuarios usuarios={usuarios} />
     </main>
   );

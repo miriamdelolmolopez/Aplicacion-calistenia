@@ -3,10 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { aCentimos } from "@/lib/formato";
+import { formaActiva } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Estado } from "../acciones";
-
-const METODOS = ["efectivo", "bizum", "transferencia"];
 
 function entero(valor: FormDataEntryValue | null): number {
   const texto = String(valor ?? "").trim();
@@ -29,7 +28,7 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
   const pagado = formData.get("pagado") === "on";
   const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
   if (!persona || !tipo) return { error: "Elige la persona y el bono." };
-  if (!METODOS.includes(metodo)) return { error: "Elige cómo paga." };
+  if (!(await formaActiva(metodo))) return { error: "Elige cómo paga." };
   const descuento = String(formData.get("descuento") ?? "");
 
   const { error: fallo } = await createAdminClient().rpc("crear_bono", {
