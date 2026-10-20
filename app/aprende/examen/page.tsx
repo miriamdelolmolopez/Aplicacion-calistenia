@@ -5,6 +5,7 @@ import BarraSuperior from "../../BarraSuperior";
 import styles from "../../formularios.module.css";
 import { useIdioma } from "../../useIdioma";
 import estilos from "../aprende.module.css";
+import HistorialExamen, { type Intento } from "./HistorialExamen";
 import { textosAprende } from "../textosAprende";
 import { createClient } from "@/lib/supabase/client";
 
@@ -41,6 +42,7 @@ export default function Examen() {
   const [elegida, setElegida] = useState<number | null>(null);
   const [respuestas, setRespuestas] = useState<(number | null)[]>([]);
   const [viendoResultado, setViendoResultado] = useState(false);
+  const [historial, setHistorial] = useState<Intento[] | null>(null);
 
   useEffect(() => {
     createClient()
@@ -48,6 +50,15 @@ export default function Examen() {
       .select("id, pregunta_es, pregunta_en, opciones_es, opciones_en, correcta, explicacion_es, explicacion_en")
       .eq("activa", true)
       .then(({ data }) => setBanco((data ?? []) as Pregunta[]));
+  }, []);
+
+  useEffect(() => {
+    createClient()
+      .from("intentos_examen")
+      .select("id, aciertos, total, creado_en")
+      .order("creado_en", { ascending: false })
+      .limit(50)
+      .then(({ data }) => setHistorial((data ?? []) as Intento[]));
   }, []);
 
   const total = banco?.length ?? 0;
@@ -82,6 +93,21 @@ export default function Examen() {
     setRespuestas((r) => [...r, i]);
   }
 
+  // Al terminar se guarda solo el resultado (aciertos y total), no las respuestas.
+  async function terminar(lista: Lista[]) {
+    setViendoResultado(true);
+    const aciertos = lista.filter((p, i) => respuestas[i] === p.correcta).length;
+    const supabase = createClient();
+    const { data: sesion } = await supabase.auth.getUser();
+    if (!sesion.user) return;
+    const { data } = await supabase
+      .from("intentos_examen")
+      .insert({ user_id: sesion.user.id, aciertos, total: lista.length })
+      .select("id, aciertos, total, creado_en")
+      .single();
+    if (data) setHistorial((h) => [data as Intento, ...(h ?? [])]);
+  }
+
   function siguiente() {
     setElegida(null);
     setActual((a) => a + 1);
@@ -108,6 +134,12 @@ export default function Examen() {
             <button type="button" className={styles.boton} disabled={cuantas === null} onClick={() => cuantas && empezar(cuantas)}>
               {t.empezar}
             </button>
+          </section>
+        )}
+        {historial !== null && (
+          <section className={estilos.seccion}>
+            <h2>{t.misResultados}</h2>
+            <HistorialExamen intentos={historial} t={t} idioma={idioma} />
           </section>
         )}
       </main>
@@ -194,7 +226,7 @@ export default function Examen() {
               )}
             </p>
             {p.explicacion && <p>{p.explicacion}</p>}
-            <button type="button" className={styles.boton} onClick={ultima ? () => setViendoResultado(true) : siguiente}>
+            <button type="button" className={styles.boton} onClick={ultima ? () => terminar(examen) : siguiente}>
               {ultima ? t.verResultado : t.siguiente}
             </button>
           </>

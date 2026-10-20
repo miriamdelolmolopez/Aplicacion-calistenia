@@ -13,6 +13,8 @@ import styles from "../../admin.module.css";
 import estilos from "../usuarios.module.css";
 import AvancesSesion from "./AvancesSesion";
 import EliminarUsuario from "./EliminarUsuario";
+import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
+import { textosAprende } from "../../../aprende/textosAprende";
 import Notas from "./Notas";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
@@ -82,6 +84,13 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
       .order("creado_en", { ascending: false }),
     supabase.from("notas_usuario").select("texto").eq("user_id", id).maybeSingle(),
   ]);
+  const { data: intentosDatos } = await supabase
+    .from("intentos_examen")
+    .select("id, aciertos, total, creado_en")
+    .eq("user_id", id)
+    .order("creado_en", { ascending: false })
+    .limit(50);
+  const intentos = (intentosDatos ?? []) as Intento[];
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
 
@@ -315,6 +324,11 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
       <section className={styles.tarjeta}>
         <h2>Medidas</h2>
         <Medidas userId={p.id} soloLectura />
+      </section>
+
+      <section className={styles.tarjeta}>
+        <h2>Tests de Aprende</h2>
+        <HistorialExamen intentos={intentos} t={{ ...textosAprende.es, sinIntentos: "Todavía no ha hecho ningún examen." }} idioma="es" />
       </section>
 
       <section className={styles.tarjeta}>
