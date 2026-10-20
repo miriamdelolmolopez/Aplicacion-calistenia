@@ -49,9 +49,9 @@ export default function ResumenAdminTarjetas() {
     { clave: "ingresos", titulo: "Ingresos del mes", valor: euros(datos.ingresosMes), pie: "Pagos cobrados este mes" },
     {
       clave: "diferencia",
-      titulo: "Frente al mes anterior",
-      valor: dif === null ? "—" : `${subida ? "▲ +" : "▼ "}${dif}%`,
-      pie: `Mes anterior: ${euros(datos.ingresosMesAnterior)}`,
+      titulo: "Ingresos mes anterior",
+      valor: euros(datos.ingresosMesAnterior),
+      pie: dif === null ? "Sin comparación (el mes anterior no hubo)" : `Este mes: ${subida ? "▲ +" : "▼ "}${dif}% frente al anterior`,
       tono: dif === null ? undefined : subida ? "bien" : "mal",
     },
     { clave: "activos", titulo: "Alumnos activos", valor: String(datos.activos.total), pie: "Con un bono activo" },
@@ -110,7 +110,7 @@ export default function ResumenAdminTarjetas() {
           )}
           {abierta === "diferencia" && (
             <>
-              <h3>Frente al mes anterior</h3>
+              <h3>Ingresos del mes anterior</h3>
               <p>
                 {dif === null
                   ? "El mes anterior no hubo ingresos, así que no hay porcentaje que comparar."

@@ -3,10 +3,11 @@ import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ListaUsuarios, { type Usuario } from "./ListaUsuarios";
+import NuevoUsuario, { type TarifaOpcion } from "./NuevoUsuario";
 
 export const metadata = { title: "Usuarios · Administración" };
 
-type Fila = Omit<Usuario, "foto"> & { foto_path: string | null };
+type Fila = Omit<Usuario, "foto" | "tarifas"> & { foto_path: string | null };
 
 export default async function Usuarios() {
   const { supabase } = await requireAdmin();
@@ -20,8 +21,28 @@ export default async function Usuarios() {
     ? await createAdminClient().storage.from("avatares").createSignedUrls(rutas, 3600)
     : { data: [] };
 
+  // Tarifa (bono) activa de cada persona, para filtrar y mostrar.
+  const { data: bonosActivos } = await createAdminClient()
+    .from("bonos")
+    .select("user_id, tipos_bono(nombre)")
+    .eq("estado", "activo");
+  const tarifasDe = new Map<string, string[]>();
+  for (const b of (bonosActivos ?? []) as unknown as { user_id: string; tipos_bono: { nombre: string } | null }[]) {
+    if (!b.tipos_bono) continue;
+    tarifasDe.set(b.user_id, [...(tarifasDe.get(b.user_id) ?? []), b.tipos_bono.nombre]);
+  }
+
+  const { data: tarifasDatos } = await createAdminClient()
+    .from("tipos_bono")
+    .select("id, nombre, servicio, precio_centimos")
+    .eq("activo", true)
+    .order("servicio")
+    .order("precio_centimos");
+  const tarifas = (tarifasDatos ?? []) as TarifaOpcion[];
+
   const usuarios: Usuario[] = filas.map(({ foto_path, ...resto }) => ({
     ...resto,
+    tarifas: tarifasDe.get(resto.id) ?? [],
     foto: foto_path ? (firmadas?.find((f) => f.path === foto_path)?.signedUrl ?? null) : null,
   }));
 
@@ -33,6 +54,7 @@ export default async function Usuarios() {
           ← Administración
         </Link>
       </header>
+      <NuevoUsuario tarifas={tarifas} />
       <ListaUsuarios usuarios={usuarios} />
     </main>
   );

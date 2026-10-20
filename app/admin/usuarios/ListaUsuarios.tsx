@@ -17,6 +17,7 @@ export type Usuario = {
   creado_en: string;
   ultima_conexion: string | null;
   servicios: string[];
+  tarifas: string[]; // bonos activos (nombre)
   clases_restantes: number | null;
   bono_caduca: string | null;
   plan_online_hasta: string | null;
@@ -32,6 +33,7 @@ const FILTROS = [
   { id: "grupal", texto: "Grupales" },
   { id: "individual", texto: "Individuales" },
   { id: "online", texto: "Online" },
+  { id: "alumno", texto: "Alumnas" },
   { id: "invitado", texto: "Invitadas" },
   { id: "sin", texto: "Sin servicio" },
 ] as const;
@@ -89,12 +91,19 @@ function resumen(u: Usuario): { texto: string; alerta: boolean } {
 export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["id"]>("todos");
+  const [estadoFiltro, setEstadoFiltro] = useState<"todos" | "activos" | "inactivos">("todos");
+  const [tarifa, setTarifa] = useState("");
+  const nombresTarifa = [...new Set(usuarios.flatMap((u) => u.tarifas))].sort((a, b) => a.localeCompare(b, "es"));
 
   const normal = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const q = normal(busqueda.trim());
 
   const visibles = usuarios.filter((u) => {
     if (filtro === "invitado" && u.rol !== "invitado") return false;
+    if (filtro === "alumno" && u.rol !== "alumno") return false;
+    if (estadoFiltro === "activos" && u.tarifas.length === 0) return false;
+    if (estadoFiltro === "inactivos" && u.tarifas.length > 0) return false;
+    if (tarifa && !u.tarifas.includes(tarifa)) return false;
     if (filtro === "sin" && !(u.rol === "alumno" && u.servicios.length === 0)) return false;
     if (["grupal", "individual", "online"].includes(filtro) && !u.servicios.includes(filtro)) return false;
     if (q && !normal(`${nombreDe(u)} ${u.email ?? ""}`).includes(q)) return false;
@@ -107,6 +116,27 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
         <div className={styles.campo}>
           <label htmlFor="buscar">Buscar por nombre o correo</label>
           <input id="buscar" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        </div>
+        <div className={styles.filtros}>
+          <div className={styles.campo}>
+            <label htmlFor="f-estado">Estado</label>
+            <select id="f-estado" value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value as typeof estadoFiltro)}>
+              <option value="todos">Todos</option>
+              <option value="activos">Activos (con bono activo)</option>
+              <option value="inactivos">Sin bono activo</option>
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="f-tarifa">Tarifa</label>
+            <select id="f-tarifa" value={tarifa} onChange={(e) => setTarifa(e.target.value)}>
+              <option value="">Todas</option>
+              {nombresTarifa.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className={estilos.filtros}>
           {FILTROS.map((f) => (
@@ -136,6 +166,11 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                   <strong>{nombreDe(u)}</strong>
                   <div className={estilos.etiquetas}>
                     {u.rol === "invitado" && <span className={styles.etiquetaSuave}>Invitada</span>}
+                    {u.tarifas.map((n) => (
+                      <span key={n} className={styles.etiquetaSuave}>
+                        {n}
+                      </span>
+                    ))}
                     {u.servicios.map((s) => (
                       <span key={s} className={styles.etiquetaSuave}>
                         {NOMBRE_SERVICIO[s] ?? s}

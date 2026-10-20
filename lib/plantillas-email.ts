@@ -193,3 +193,23 @@ export function correoMinimoNoAlcanzado(p: { para: string; clase: ClaseInfo; apu
   });
   return { para: p.para, asunto: `${titulo} · ${p.clase.nombre}`, ...m };
 }
+
+// Invitación a la app: a una persona nueva (invitada) para que cree su cuenta, o a una alumna dada de alta para que elija su contraseña.
+export function correoInvitacion(p: { para: string; alumno: boolean; ruta: string }): Correo {
+  const titulo = p.alumno ? "Te damos la bienvenida" : "Te invito a mi app";
+  const m = marco({
+    idioma: "es",
+    titulo,
+    parrafos: p.alumno
+      ? [
+          "Miriam del Olmo te ha dado de alta en su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
+          "Pulsa el botón para elegir tu contraseña y entrar. Si no esperabas este correo, puedes ignorarlo.",
+        ]
+      : [
+          "Miriam del Olmo te invita a su app de calistenia y pino. Crea tu cuenta para empezar.",
+          "Pulsa el botón para crear tu cuenta. Si no esperabas este correo, puedes ignorarlo.",
+        ],
+    boton: { texto: p.alumno ? "Elegir mi contraseña" : "Crear mi cuenta", ruta: p.ruta },
+  });
+  return { para: p.para, asunto: p.alumno ? "Te damos la bienvenida · Miriam del Olmo" : "Te invito a mi app · Miriam del Olmo", ...m };
+}
