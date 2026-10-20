@@ -50,6 +50,7 @@ type Clase = {
 type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto; clase?: Clase };
 
 type Datos = {
+  sinEspera: string[]; // tipos de clase sin lista de espera
   horas: number;
   horasIndividual: number;
   dias: number;
@@ -68,6 +69,8 @@ async function obtenerDatos(): Promise<Datos> {
   const { data: ajustes } = await supabase.from("ajustes").select("clave, valor");
   const valor = (clave: string, defecto: number) =>
     Number(ajustes?.find((a) => a.clave === clave)?.valor ?? defecto);
+  const { data: sinListaDatos } = await supabase.from("tipos_clase").select("nombre").eq("lista_espera", false);
+  const sinEspera = ((sinListaDatos ?? []) as { nombre: string }[]).map((t) => t.nombre);
   const horas = valor("cancelacion_horas", 2);
   const horasIndividual = valor("cancelacion_horas_individual", 12);
   const dias = valor("reserva_dias_max", 14);
@@ -94,6 +97,7 @@ async function obtenerDatos(): Promise<Datos> {
   const activos = bonos.filter((b) => b.estado === "activo" && b.servicio !== "online");
 
   return {
+    sinEspera,
     horas,
     horasIndividual,
     dias,
@@ -524,7 +528,7 @@ export default function Clases() {
                       {/* Alumno sin reserva */}
                       {!c.mi_reserva && esAlumno && c.incluido && (
                         <>
-                          {completa && !c.en_espera && (
+                          {completa && !c.en_espera && !datos.sinEspera.includes(c.tipo) && (
                             <button className={styles.boton} style={boton} disabled={trabajando === c.id} onClick={() => unirse(c)}>
                               {trabajando === c.id ? t.cargando : t.unirseEspera}
                             </button>

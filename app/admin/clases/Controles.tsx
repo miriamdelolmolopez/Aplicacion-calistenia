@@ -120,6 +120,9 @@ export function FormularioTipo({
     activo: boolean;
     servicio: string;
     color: string | null;
+    color_texto: string | null;
+    orden: number;
+    lista_espera: boolean;
     descripcion: string | null;
     descripcion_en: string | null;
   };
@@ -150,6 +153,14 @@ export function FormularioTipo({
       <label className={styles.casilla}>
         <input type="checkbox" name="activo" defaultChecked={tipo.activo} />
         <span>Activo (si lo desactivas no se crean clases nuevas de este tipo)</span>
+      </label>
+      <div className={styles.campo}>
+        <label htmlFor={`or-${tipo.id}`}>Orden de aparición (1 sale primero)</label>
+        <input id={`or-${tipo.id}`} name="orden" type="number" min={0} max={9999} defaultValue={tipo.orden} />
+      </div>
+      <label className={styles.casilla}>
+        <input type="checkbox" name="lista_espera" defaultChecked={tipo.lista_espera} />
+        <span>Tiene lista de espera (si está llena, las alumnas pueden apuntarse a la lista)</span>
       </label>
       <div className={styles.campo}>
         <label htmlFor={`pl-${tipo.id}`}>Plazas</label>
@@ -204,6 +215,20 @@ export function FormularioTipo({
           ))}
         </div>
       </fieldset>
+      <fieldset className={styles.grupo}>
+        <legend>Color de la letra sobre ese color</legend>
+        <div className={styles.muestras}>
+          {[
+            { valor: "#FFFFFF", nombre: "Blanca" },
+            { valor: "#2B2B2A", nombre: "Oscura" },
+          ].map((c) => (
+            <label key={c.valor} className={styles.casilla}>
+              <input type="radio" name="color_texto" value={c.valor} defaultChecked={(tipo.color_texto ?? "#FFFFFF").toLowerCase() === c.valor.toLowerCase()} />
+              <span style={{ background: colorActual, color: c.valor, padding: "2px 10px", borderRadius: 8 }}>{c.nombre}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         Guardar
       </button>
@@ -240,6 +265,10 @@ export function NuevoTipo() {
         <label htmlFor="nt-prueba">Plazas para invitados (prueba)</label>
         <input id="nt-prueba" name="plazas_prueba" type="number" min={0} max={100} defaultValue={2} />
       </div>
+      <label className={styles.casilla}>
+        <input type="checkbox" name="lista_espera" defaultChecked />
+        <span>Tiene lista de espera</span>
+      </label>
       <div className={styles.campo}>
         <label htmlFor="nt-dur">Duración (minutos)</label>
         <input id="nt-dur" name="duracion_min" type="number" min={10} max={240} defaultValue={60} />

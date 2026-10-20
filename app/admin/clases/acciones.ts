@@ -198,6 +198,11 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   const activo = formData.get("activo") === "on";
   const color = String(formData.get("color") ?? "");
   if (color && !colorValido(color)) return { error: "Color no válido." };
+  const colorTexto = String(formData.get("color_texto") ?? "");
+  if (colorTexto && !colorValido(colorTexto)) return { error: "Color de letra no válido." };
+  const orden = entero(formData.get("orden"));
+  if (!(orden >= 0 && orden <= 9999)) return { error: "El orden va de 0 a 9999." };
+  const listaEspera = formData.get("lista_espera") === "on";
   const descripcion = String(formData.get("descripcion") ?? "").trim();
   const descripcionEn = String(formData.get("descripcion_en") ?? "").trim();
   if (descripcion.length > 1500 || descripcionEn.length > 1500) return { error: "Las descripciones pueden tener hasta 1500 letras." };
@@ -220,6 +225,9 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
       plazas_prueba: prueba,
       duracion_min: duracion,
       activo,
+      orden,
+      lista_espera: listaEspera,
+      color_texto: colorTexto || null,
       descripcion: descripcion || null,
       descripcion_en: descripcionEn || null,
       ...(color ? { color } : {}),
@@ -255,7 +263,8 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
 
   // Color automático: el primero de la paleta que no usa otro tipo (después se puede cambiar).
   const admin = createAdminClient();
-  const { data: existentes } = await admin.from("tipos_clase").select("color");
+  const { data: existentes } = await admin.from("tipos_clase").select("color, orden");
+  const siguienteOrden = Math.max(0, ...(existentes ?? []).map((e) => Number(e.orden) || 0)) + 10;
   const color = servicio === "individual" ? "#2B2B2A" : colorLibre((existentes ?? []).map((e) => e.color));
 
   const { error } = await admin.from("tipos_clase").insert({
@@ -266,6 +275,8 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
     plazas_prueba: prueba,
     duracion_min: duracion,
     servicio,
+    orden: siguienteOrden,
+    lista_espera: formData.get("lista_espera") === "on",
   });
   if (error) {
     return { error: error.code === "23505" ? "Ya existe un tipo de clase con ese nombre." : "No se ha podido crear." };

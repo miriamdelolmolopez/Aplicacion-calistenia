@@ -55,7 +55,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
       .gte("empieza_en", desde)
       .lt("empieza_en", hasta)
       .order("empieza_en"),
-    supabase.from("tipos_clase").select("id, nombre, plazas_max, plazas_prueba").eq("activo", true).order("nombre"),
+    supabase.from("tipos_clase").select("id, nombre, plazas_max, plazas_prueba").eq("activo", true).order("orden").order("nombre"),
     supabase.from("plantillas_horario").select("id, nombre, principal").order("principal", { ascending: false }).order("nombre"),
     supabase.from("profiles").select("id, nombre, apellidos, email").eq("rol", "alumno").order("nombre"),
     // Días con clases (unos meses antes y después) para marcarlos en los calendarios.

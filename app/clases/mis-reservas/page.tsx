@@ -22,9 +22,10 @@ type Reserva = {
   servicio: string;
   duracion_min: number;
   color: string;
+  colorTexto: string;
 };
 
-type TipoClase = { nombre: string; color: string };
+type TipoClase = { nombre: string; color: string; colorTexto: string };
 
 type Datos = { reservas: Reserva[]; bonos: MiBono[]; horas: number; horasIndividual: number; tipos: TipoClase[] };
 
@@ -36,7 +37,7 @@ async function obtenerDatos(): Promise<Datos> {
   const [{ data }, bonos, { data: ajustes }, { data: tiposData }] = await Promise.all([
     supabase
       .from("reservas")
-      .select("id, sesion_id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre, servicio, duracion_min, color))")
+      .select("id, sesion_id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre, servicio, duracion_min, color, color_texto))")
       .eq("user_id", userId)
       .eq("estado", "reservada")
       .eq("sesiones_clase.estado", "programada")
@@ -44,13 +45,13 @@ async function obtenerDatos(): Promise<Datos> {
       .limit(1000),
     obtenerMisBonos(),
     supabase.from("ajustes").select("clave, valor").in("clave", ["cancelacion_horas", "cancelacion_horas_individual"]),
-    supabase.from("tipos_clase").select("nombre, color, activo").eq("activo", true).order("nombre"),
+    supabase.from("tipos_clase").select("nombre, color, color_texto, activo").eq("activo", true).order("orden").order("nombre"),
   ]);
 
   type Fila = {
     id: string;
     sesion_id: string;
-    sesiones_clase: { empieza_en: string; tipos_clase: { nombre: string; servicio: string; duracion_min: number; color: string | null } | null };
+    sesiones_clase: { empieza_en: string; tipos_clase: { nombre: string; servicio: string; duracion_min: number; color: string | null; color_texto: string | null } | null };
   };
   const reservas = ((data ?? []) as unknown as Fila[]).map((f) => ({
     id: f.id,
@@ -60,10 +61,12 @@ async function obtenerDatos(): Promise<Datos> {
     servicio: f.sesiones_clase.tipos_clase?.servicio ?? "grupal",
     duracion_min: f.sesiones_clase.tipos_clase?.duracion_min ?? 60,
     color: colorDeTipo(f.sesiones_clase.tipos_clase?.color, f.sesiones_clase.tipos_clase?.nombre ?? ""),
+    colorTexto: f.sesiones_clase.tipos_clase?.color_texto ?? "#FFFFFF",
   }));
-  const tipos = ((tiposData ?? []) as { nombre: string; color: string | null }[]).map((t) => ({
+  const tipos = ((tiposData ?? []) as { nombre: string; color: string | null; color_texto: string | null }[]).map((t) => ({
     nombre: t.nombre,
     color: colorDeTipo(t.color, t.nombre),
+    colorTexto: t.color_texto ?? "#FFFFFF",
   }));
   return { reservas, bonos, horas: Number(ajustes?.find((a) => a.clave === "cancelacion_horas")?.valor ?? 2), horasIndividual: Number(ajustes?.find((a) => a.clave === "cancelacion_horas_individual")?.valor ?? 12), tipos };
 }
@@ -218,7 +221,7 @@ export default function MisReservas() {
                   <i
                     key={c.id}
                     className={`${estilos.etiquetaClase} ${c.empieza_en < ahoraIso ? estilos.pasada : ""}`}
-                    style={{ background: c.color }}
+                    style={{ background: c.color, color: c.colorTexto }}
                     title={c.tipo}
                   >
                     {textoHora(c.empieza_en)}
@@ -232,7 +235,7 @@ export default function MisReservas() {
 
         <div className={estilos.leyenda}>
           {datos.tipos.map((tp) => (
-            <span key={tp.nombre} style={{ background: tp.color }}>
+            <span key={tp.nombre} style={{ background: tp.color, color: tp.colorTexto }}>
               {tp.nombre}
             </span>
           ))}
