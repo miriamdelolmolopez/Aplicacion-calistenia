@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
+import CalendarioMes from "../CalendarioMes";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { useEnvio } from "../useEnvio";
@@ -91,22 +93,59 @@ export function CambiarHora({ id, fecha, hora }: { id: string; fecha: string; ho
   );
 }
 
-// Aplicar una plantilla de horario a los días de la semana que elijas.
+// Calendario del Horario: al elegir una semana, la pantalla pasa a esa semana.
+export function CalendarioSemana({
+  hoy,
+  semana,
+  marcados,
+}: {
+  hoy: string;
+  semana: string;
+  marcados: Record<string, number>;
+}) {
+  const router = useRouter();
+  return (
+    <CalendarioMes
+      modo="semana"
+      hoy={hoy}
+      mesInicial={semana.slice(0, 7)}
+      semana={semana}
+      marcados={marcados}
+      alElegirSemana={(lunes) => router.push(`/admin/horario?semana=${lunes}`, { scroll: false })}
+    />
+  );
+}
+
+const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+function textoFecha(fecha: string): string {
+  const [, m, d] = fecha.split("-").map(Number);
+  return `${d} ${MESES_LARGOS[m - 1].slice(0, 3)}`;
+}
+
+// Aplicar una plantilla de horario a los días que elijas a mano en el calendario.
 export function AplicarPlantilla({
   plantillas,
-  dias,
+  hoy,
+  mesInicial,
+  marcados,
 }: {
   plantillas: { id: string; nombre: string; principal: boolean }[];
-  dias: { fecha: string; etiqueta: string }[];
+  hoy: string;
+  mesInicial: string;
+  marcados: Record<string, number>;
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(aplicarPlantillaDias, {});
   const { ref, alEnviar } = useEnvio(accion, estado, false);
+  const [dias, setDias] = useState<string[]>([]);
+  const ordenados = [...dias].sort();
   return (
     <details className={styles.detalles}>
-      <summary>Aplicar una plantilla a días de esta semana</summary>
+      <summary>Aplicar una plantilla a días que elijas</summary>
       <form ref={ref} onSubmit={alEnviar} className={styles.formularioInterno}>
         <p className={styles.ayuda}>
-          Solo se crean las clases que falten en los días que marques. Las que ya existen y sus reservas no se tocan.
+          Elige la plantilla y marca en el calendario los días en los que quieres aplicarla (cualquier mes). Solo se
+          crean las clases que falten: las que ya existen y sus reservas no se tocan.
         </p>
         <div className={styles.campo}>
           <label htmlFor="ap-plantilla">Plantilla</label>
@@ -122,17 +161,33 @@ export function AplicarPlantilla({
             ))}
           </select>
         </div>
-        <fieldset className={styles.grupo}>
-          <legend>Días</legend>
-          {dias.map((d) => (
-            <label key={d.fecha} className={styles.casilla}>
-              <input type="checkbox" name="dias" value={d.fecha} />
-              {d.etiqueta}
-            </label>
-          ))}
-        </fieldset>
-        <button className={styles.boton} type="submit" disabled={pendiente}>
-          {pendiente ? "Aplicando…" : "Aplicar plantilla"}
+        <CalendarioMes
+          modo="dias"
+          hoy={hoy}
+          mesInicial={mesInicial}
+          seleccionados={dias}
+          marcados={marcados}
+          alCambiarDias={setDias}
+        />
+        {ordenados.map((d) => (
+          <input key={d} type="hidden" name="dias" value={d} />
+        ))}
+        <p className={styles.ayuda}>
+          {ordenados.length === 0
+            ? "Todavía no has marcado ningún día."
+            : `Días elegidos (${ordenados.length}): ${ordenados.map(textoFecha).join(", ")}`}
+        </p>
+        {ordenados.length > 0 && (
+          <button
+            type="button"
+            className={`${styles.boton} ${styles.botonSecundario}`}
+            onClick={() => setDias([])}
+          >
+            Quitar la selección
+          </button>
+        )}
+        <button className={styles.boton} type="submit" disabled={pendiente || ordenados.length === 0}>
+          {pendiente ? "Aplicando…" : `Confirmar y aplicar a ${ordenados.length} ${ordenados.length === 1 ? "día" : "días"}`}
         </button>
         <Mensajes estado={estado} />
       </form>

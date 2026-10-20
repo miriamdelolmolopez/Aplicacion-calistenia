@@ -1,0 +1,67 @@
+.desliza {
+  overflow-x: auto;
+}
+
+.cuadricula {
+  display: grid;
+  grid-template-columns: 52px repeat(7, minmax(88px, 1fr));
+  gap: 4px;
+  min-width: 700px;
+}
+
+.cabeceraDia {
+  padding: 4px 0;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--secundario);
+}
+
+.hora {
+  padding-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--secundario);
+}
+
+.celda {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 44px;
+  padding: 3px;
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+}
+
+.clase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  background: var(--blanco);
+  border-left: 5px solid var(--oliva);
+  border-radius: 6px;
+}
+
+.quitar {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--carbon);
+  background: none;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.quitar:hover {
+  color: #a8412f;
+  border-color: #a8412f;
+}

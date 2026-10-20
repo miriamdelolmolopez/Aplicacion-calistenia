@@ -4,7 +4,7 @@ import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, lunesDe, sumarDias, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
 import { FilaClase } from "../clases/Controles";
-import { AnadirClase, AplicarPlantilla, CambiarHora, type TipoOpcion } from "./Controles";
+import { AnadirClase, AplicarPlantilla, CalendarioSemana, CambiarHora, type TipoOpcion } from "./Controles";
 import estilos from "./horario.module.css";
 
 export const metadata = { title: "Horario · Administración" };
@@ -46,7 +46,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
   const desde = instanteMadrid(lunes, "00:00")?.toISOString() ?? new Date().toISOString();
   const hasta = instanteMadrid(sumarDias(lunes, 7), "00:00")?.toISOString() ?? desde;
 
-  const [{ data: clasesDatos }, { data: tiposDatos }, { data: plantillasDatos }, { data: alumnosDatos }] = await Promise.all([
+  const [{ data: clasesDatos }, { data: tiposDatos }, { data: plantillasDatos }, { data: alumnosDatos }, { data: fechasDatos }] = await Promise.all([
     supabase
       .from("sesiones_clase")
       .select(
@@ -58,7 +58,20 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
     supabase.from("tipos_clase").select("id, nombre, plazas_max, plazas_prueba").eq("activo", true).order("nombre"),
     supabase.from("plantillas_horario").select("id, nombre, principal").order("principal", { ascending: false }).order("nombre"),
     supabase.from("profiles").select("id, nombre, apellidos, email").eq("rol", "alumno").order("nombre"),
+    // Días con clases (unos meses antes y después) para marcarlos en los calendarios.
+    supabase
+      .from("sesiones_clase")
+      .select("empieza_en")
+      .eq("estado", "programada")
+      .gte("empieza_en", instanteMadrid(sumarDias(lunes, -62), "00:00")?.toISOString() ?? desde)
+      .lt("empieza_en", instanteMadrid(sumarDias(lunes, 190), "00:00")?.toISOString() ?? hasta)
+      .limit(2000),
   ]);
+  const marcados: Record<string, number> = {};
+  for (const f of (fechasDatos ?? []) as { empieza_en: string }[]) {
+    const d = claveDia(f.empieza_en);
+    marcados[d] = (marcados[d] ?? 0) + 1;
+  }
   const clases = (clasesDatos ?? []) as unknown as Clase[];
   const tipos = (tiposDatos ?? []) as TipoOpcion[];
   const plantillas = (plantillasDatos ?? []) as { id: string; nombre: string; principal: boolean }[];
@@ -94,6 +107,9 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
         </h2>
         <Link href={`/admin/horario?semana=${siguiente}`}>Siguiente →</Link>
       </nav>
+      <div style={{ marginBottom: 12 }}>
+        <CalendarioSemana hoy={hoy} semana={lunes} marcados={marcados} />
+      </div>
       {lunes !== lunesDe(hoy) && (
         <p style={{ margin: "0 0 12px" }}>
           <Link href="/admin/horario" className={styles.enlaceBarra}>
@@ -103,18 +119,18 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
       )}
 
       {plantillas.length > 0 && (
-        <AplicarPlantilla
-          plantillas={plantillas}
-          dias={dias.map((d, i) => ({ fecha: d, etiqueta: etiquetaDia(d, i) }))}
-        />
+        <AplicarPlantilla plantillas={plantillas} hoy={hoy} mesInicial={lunes.slice(0, 7)} marcados={marcados} />
       )}
 
       <div className={estilos.semana}>
         {dias.map((dia, i) => {
           const lista = porDia.get(dia) ?? [];
           return (
-            <section key={dia} className={`${estilos.dia} ${dia === hoy ? estilos.hoy : ""}`}>
-              <h2>{etiquetaDia(dia, i)}</h2>
+            <details key={dia} className={`${estilos.dia} ${dia === hoy ? estilos.hoy : ""}`}>
+              <summary className={estilos.tituloDia}>
+                <span>{etiquetaDia(dia, i)}</span>
+                <small>{lista.length === 0 ? "sin clases" : `${lista.length} ${lista.length === 1 ? "clase" : "clases"}`}</small>
+              </summary>
               {lista.length === 0 && <p className={estilos.vacio}>Sin clases.</p>}
               {lista.map((c) => {
                 const cancelada = c.estado === "cancelada";
@@ -155,7 +171,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
                 );
               })}
               <AnadirClase fecha={dia} tipos={tipos} />
-            </section>
+            </details>
           );
         })}
       </div>

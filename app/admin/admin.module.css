@@ -713,3 +713,13 @@
   gap: 10px;
   align-items: end;
 }
+
+/* Cabecera compacta de una plantilla (se despliega al pulsar) */
+.resumenPlantilla {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+}

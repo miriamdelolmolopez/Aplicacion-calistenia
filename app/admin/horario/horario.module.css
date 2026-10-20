@@ -82,3 +82,20 @@
     align-items: start;
   }
 }
+
+.tituloDia {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tituloDia small {
+  font-weight: 400;
+  text-transform: none;
+  color: var(--secundario);
+}

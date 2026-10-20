@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import estiloCuadricula from "./cuadricula.module.css";
 import {
   anadirClase,
   aplicarPlantilla,
@@ -120,6 +121,20 @@ export function QuitarClase({ id, texto }: { id: string; texto: string }) {
         Quitar
       </button>
       <Mensajes estado={estado} />
+    </form>
+  );
+}
+
+// Botón pequeño para quitar una clase de la cuadrícula de la plantilla.
+export function QuitarCompacto({ id, texto }: { id: string; texto: string }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(quitarClase, {});
+  return (
+    <form action={accion} style={{ display: "inline" }}>
+      <input type="hidden" name="id" value={id} />
+      <button type="submit" className={estiloCuadricula.quitar} disabled={pendiente} aria-label={`Quitar ${texto}`} title="Quitar de la plantilla">
+        ×
+      </button>
+      {estado.error && <span role="alert"> {estado.error}</span>}
     </form>
   );
 }

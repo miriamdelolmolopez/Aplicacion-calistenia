@@ -1,0 +1,112 @@
+.calendario {
+  display: inline-block;
+  max-width: 100%;
+  padding: 12px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 16px;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.cabecera select {
+  flex: 1;
+  min-height: 40px;
+  padding: 0 8px;
+  font: inherit;
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+}
+
+.flecha {
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--carbon);
+  background: var(--crema);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.cuadricula {
+  display: grid;
+  grid-template-columns: 22px repeat(7, minmax(36px, 1fr));
+  gap: 4px;
+  align-items: center;
+}
+
+.cabeceraDia {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--secundario);
+}
+
+.flechaFila {
+  padding: 0;
+  font-size: 0.7rem;
+  color: var(--carbon);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.flechaActiva {
+  color: var(--oliva-oscuro);
+}
+
+.dia {
+  position: relative;
+  min-height: 38px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.dia:hover {
+  border-color: var(--oliva);
+}
+
+.fuera {
+  color: #9a978f;
+  background: var(--crema);
+}
+
+.hoy {
+  font-weight: 700;
+  border-color: var(--oliva-oscuro);
+}
+
+.elegido {
+  color: #fff;
+  background: var(--oliva);
+  border-color: var(--oliva);
+}
+
+.punto {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  background: var(--oliva-oscuro);
+  border-radius: 50%;
+}
+
+.elegido .punto {
+  background: #fff;
+}
