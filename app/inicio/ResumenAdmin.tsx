@@ -105,7 +105,7 @@ export default function ResumenAdminTarjetas() {
               <p>
                 {euros(datos.ingresosMes)} cobrados este mes. Mes anterior: {euros(datos.ingresosMesAnterior)}.
               </p>
-              <Link href="/admin/estadisticas">Ver informe de ingresos →</Link>
+              <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
             </>
           )}
           {abierta === "diferencia" && (
@@ -118,7 +118,7 @@ export default function ResumenAdminTarjetas() {
                     ? `Estás facturando un ${dif}% más que el mes pasado (${euros(datos.ingresosMes)} frente a ${euros(datos.ingresosMesAnterior)}).`
                     : `Estás facturando un ${Math.abs(dif)}% menos que el mes pasado (${euros(datos.ingresosMes)} frente a ${euros(datos.ingresosMesAnterior)}). El mes aún no ha terminado.`}
               </p>
-              <Link href="/admin/estadisticas">Ver informe de ingresos →</Link>
+              <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
             </>
           )}
           {abierta === "activos" && (

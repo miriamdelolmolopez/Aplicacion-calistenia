@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { filasAtletas } from "@/lib/informes";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,6 +42,11 @@ function aCsv(columnas: string[], filas: string[][]): string {
 }
 
 async function construir(tipo: string): Promise<{ nombre: string; csv: string } | null> {
+  if (tipo === "atletas") {
+    const { columnas, filas } = await filasAtletas();
+    return { nombre: "atletas", csv: aCsv(columnas, filas) };
+  }
+
   const perfiles = await leerTodo("profiles");
   const porId = new Map(perfiles.map((p) => [String(p.id), p]));
   const persona = (id: unknown) => {

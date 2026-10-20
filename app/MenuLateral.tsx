@@ -35,7 +35,7 @@ const MENU_ADMIN: { href: string; icono: NombreIcono; texto: string }[] = [
   { href: "/admin/horario", icono: "historial", texto: "Horarios" },
   { href: "/admin/rutinas", icono: "rutina", texto: "Entrenamientos" },
   { href: "/admin/academia", icono: "academia", texto: "Academia" },
-  { href: "/admin/estadisticas", icono: "metricas", texto: "Informes" },
+  { href: "/admin/informes", icono: "metricas", texto: "Informes" },
   { href: "/admin/aprende", icono: "aprende", texto: "Aprende" },
   { href: "/perfil", icono: "perfil", texto: "Perfil" },
 ];
