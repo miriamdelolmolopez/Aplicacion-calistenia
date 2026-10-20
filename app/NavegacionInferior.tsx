@@ -87,14 +87,7 @@ export default function NavegacionInferior() {
     <>
       <nav className={estilos.barra} aria-label={t.barraNavegacion}>
         <div className={estilos.lado}>{izquierda.map(pestana)}</div>
-        {inicio && (
-          <Link href={inicio.href} className={`${estilos.centro} ${esActiva(inicio.href) ? estilos.centroActivo : ""}`}>
-            <span className={estilos.centroIcono}>
-              <Icono nombre={inicio.icono} tamano={26} />
-            </span>
-            {inicio.texto}
-          </Link>
-        )}
+        {inicio && <div className={estilos.centro}>{pestana(inicio)}</div>}
         <div className={estilos.lado}>
           {derecha.map(pestana)}
           <button type="button" className={`${estilos.pestana} ${menu ? estilos.activa : ""}`} onClick={() => setMenu(true)}>
