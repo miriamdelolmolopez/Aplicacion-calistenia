@@ -294,3 +294,18 @@
     max-width: 760px;
   }
 }
+
+/* Foto de fondo de la pantalla de inicio de sesión (20 % de opacidad) */
+.fondoEntrar {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url(/fotos/handstand-v1.webp) 55% 40% / cover no-repeat;
+  opacity: 0.2;
+}
+
+/* El fondo del body se vuelve transparente para que se vea la foto (el gris lo pone el html) */
+:global(body):has(.fondoEntrar) {
+  background: transparent;
+}

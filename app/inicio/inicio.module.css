@@ -1,42 +1,38 @@
 .hero {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 6px;
-  min-height: 640px;
-  margin: 8px 0 0;
-  padding: 24px 22px 90px;
-  color: var(--carbon);
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 220px;
+  margin: 12px 0 16px;
+  padding: 22px;
+  color: var(--blanco);
   background-size: cover;
-  background-position: 80% 30%;
-  border-radius: 36px;
+  background-position: center;
+  border-radius: 32px;
   box-shadow: var(--sombra);
 }
 
 .hero h1 {
   margin: 0;
-  font-size: 2.4rem;
-  line-height: 1.05;
-  color: var(--carbon);
+  font-size: 2.2rem;
+  line-height: 1.1;
+  color: var(--blanco);
 }
 
 .hero p {
   margin: 0;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--secundario);
-  opacity: 1;
+  color: var(--blanco);
+  opacity: 0.92;
 }
 
 .contenido {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: -72px;
-  padding: 0 10px;
 }
 
 .tarjeta {
@@ -174,7 +170,7 @@
 }
 
 .hero .frase {
-  max-width: 62%;
+  max-width: 85%;
   margin: 6px 0 0;
   font-family: var(--font-titulos), Georgia, serif;
   font-size: 1.45rem;

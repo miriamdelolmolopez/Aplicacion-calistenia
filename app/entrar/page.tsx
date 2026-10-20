@@ -107,6 +107,7 @@ function Formulario() {
 export default function Entrar() {
   return (
     <main className={styles.pagina}>
+      <div className={styles.fondoEntrar} aria-hidden="true" />
       <BarraSuperior izquierda={{ href: "/", texto: "volver" }} />
       <Suspense>
         <Formulario />

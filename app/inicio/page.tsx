@@ -180,7 +180,7 @@ export default function Inicio() {
 
       <section
         className={estilos.hero}
-        style={{ backgroundImage: fondoFoto("handstand", propiaInicio, !fotosListas) }}
+        style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio, !fotosListas) }}
       >
         <span className={estilos.vista}>
           {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
