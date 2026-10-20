@@ -48,20 +48,32 @@ export async function reservarComo(userId: string, sesionId: string): Promise<Re
 
 // Cancela como si lo hiciera la persona: si está fuera del plazo de cancelación, la clase le cuenta.
 export async function cancelarComo(userId: string, reservaId: string): Promise<Resultado> {
-  await requireAdmin();
+  const { user } = await requireAdmin();
   if (!UUID.test(userId) || !UUID.test(reservaId)) return { ok: false, error: "Datos no válidos." };
 
   const admin = createAdminClient();
-  const { data: reserva } = await admin.from("reservas").select("sesion_id").eq("id", reservaId).maybeSingle();
-  const { data, error } = await admin.rpc("cancelar_reserva", { p_user: userId, p_reserva: reservaId, p_admin: null, p_devolver: null });
+  const { data: reserva } = await admin
+    .from("reservas")
+    .select("sesion_id, sesiones_clase(empieza_en)")
+    .eq("id", reservaId)
+    .maybeSingle();
+  const empieza = (reserva?.sesiones_clase as unknown as { empieza_en: string } | null)?.empieza_en;
+  const yaPasada = !!empieza && new Date(empieza) <= new Date();
+
+  // En una clase que ya pasó se puede cancelar igualmente: la clase le cuenta (después se puede «Borrar» para devolvérsela).
+  const { data, error } = yaPasada
+    ? await admin.rpc("cancelar_reserva", { p_user: userId, p_reserva: reservaId, p_admin: user.id, p_devolver: false })
+    : await admin.rpc("cancelar_reserva", { p_user: userId, p_reserva: reservaId, p_admin: null, p_devolver: null });
   if (error) return { ok: false, error: error.message };
-  if (reserva) after(() => avisarPlazaLiberada(reserva.sesion_id));
+  if (reserva && !yaPasada) after(() => avisarPlazaLiberada(reserva.sesion_id));
 
   refrescar();
   return {
     ok: true,
     mensaje:
-      data === "devuelta"
+      yaPasada
+        ? "Cancelada. Como la clase ya había pasado, le cuenta como dada. Si quieres devolvérsela, pulsa «Borrar»."
+        : data === "devuelta"
         ? "Cancelada. Se le ha devuelto la clase."
         : "Cancelada fuera del plazo: la clase le cuenta como dada. Si quieres devolvérsela, pulsa «Borrar».",
   };

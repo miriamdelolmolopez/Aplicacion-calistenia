@@ -26,13 +26,16 @@ export type ClaseDelDia = {
   color: string;
   plazas: number;
   cancelada: boolean;
+  pasada: boolean;
   personas: PersonaClase[];
 };
 
-function estadoTexto(p: PersonaClase): string {
+// Si no se marca nada, se entiende que ha venido (solo se anota quien NO se presenta).
+function estadoTexto(p: PersonaClase, pasada: boolean): string {
   const partes: string[] = [];
   if (p.prueba) partes.push("Clase de prueba");
-  partes.push(p.asistencia === "asistio" ? "Vino" : p.asistencia === "no_asistio" ? "No se presentó" : "Sin pasar lista");
+  if (p.asistencia === "no_asistio") partes.push("No se presentó");
+  else if (pasada) partes.push("Vino");
   return partes.join(" · ");
 }
 
@@ -42,10 +45,10 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function marcar(p: PersonaClase, valor: Exclude<Asistencia, null>) {
+  async function marcarNoVino(p: PersonaClase) {
     setTrabajando(true);
     setError(null);
-    const r = await marcarAsistencia(p.reservaId, p.asistencia === valor ? null : valor);
+    const r = await marcarAsistencia(p.reservaId, p.asistencia === "no_asistio" ? null : "no_asistio");
     setTrabajando(false);
     if (!r.ok) return setError(r.error ?? "No se ha podido guardar.");
     router.refresh();
@@ -71,7 +74,7 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
                 <Avatar nombre={p.nombre} url={p.foto} tamano={56} />
                 <div className={estilos.personaDatos}>
                   <strong>{p.nombre}</strong>
-                  <span className={styles.ayuda}>{estadoTexto(p)}</span>
+                  <span className={styles.ayuda}>{estadoTexto(p, clase.pasada)}</span>
                 </div>
               </div>
               <div className={estilos.botonesFila} style={{ marginTop: 8 }}>
@@ -88,23 +91,12 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
                 </Link>
                 <button
                   type="button"
-                  className={`${estilos.marca} ${p.asistencia === "asistio" ? estilos.vino : ""}`}
-                  aria-pressed={p.asistencia === "asistio"}
-                  aria-label={`${p.nombre} vino`}
-                  title="Vino"
-                  disabled={trabajando}
-                  onClick={() => marcar(p, "asistio")}
-                >
-                  ✓
-                </button>
-                <button
-                  type="button"
                   className={`${estilos.marca} ${p.asistencia === "no_asistio" ? estilos.novino : ""}`}
                   aria-pressed={p.asistencia === "no_asistio"}
                   aria-label={`${p.nombre} no se presentó`}
                   title="No se presentó"
                   disabled={trabajando}
-                  onClick={() => marcar(p, "no_asistio")}
+                  onClick={() => marcarNoVino(p)}
                 >
                   ✗
                 </button>
@@ -192,7 +184,7 @@ export function TarjetaClase({ clase }: { clase: ClaseDelDia }) {
           <button
             key={p.reservaId}
             type="button"
-            className={`${estilos.cuadro} ${p.asistencia === "asistio" ? estilos.cuadroVino : p.asistencia === "no_asistio" ? estilos.cuadroNoVino : ""}`}
+            className={`${estilos.cuadro} ${p.asistencia === "no_asistio" ? estilos.cuadroNoVino : ""}`}
             title={p.nombre}
             aria-label={`${p.nombre}: ver opciones`}
             onClick={() => setListado(p.userId)}

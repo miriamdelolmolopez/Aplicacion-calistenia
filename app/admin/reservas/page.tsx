@@ -29,7 +29,8 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
   const { supabase } = await requireAdmin();
   const { dia: diaPedido } = await searchParams;
 
-  const hoy = claveDia(new Date().toISOString());
+  const ahoraIso = new Date().toISOString();
+  const hoy = claveDia(ahoraIso);
   const dia = diaPedido && /^\d{4}-\d{2}-\d{2}$/.test(diaPedido) ? diaPedido : hoy;
   const desde = instanteMadrid(dia, "00:00")?.toISOString() ?? new Date().toISOString();
   const hasta = instanteMadrid(sumarDias(dia, 1), "00:00")?.toISOString() ?? desde;
@@ -61,6 +62,7 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
     color: colorDeTipo(c.tipos_clase?.color, c.tipos_clase?.nombre ?? ""),
     plazas: c.plazas,
     cancelada: c.estado === "cancelada",
+    pasada: new Date(c.empieza_en) <= new Date(ahoraIso),
     personas: c.reservas
       .filter((r) => r.estado === "reservada")
       .map((r) => ({
@@ -95,7 +97,7 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
         )}
       </p>
       <p className={styles.ayuda} style={{ margin: "0 0 12px" }}>
-        Pulsa la foto de una persona para ver sus opciones: perfil, reservas, vino y no se presentó.
+        Pulsa la foto de una persona para ver sus opciones: su perfil, sus reservas (cancelar o borrar, también en clases ya pasadas) y «no se presentó». Si no marcas nada, se entiende que ha venido.
       </p>
 
       {clases.length === 0 && <p className={estilos.vacio}>No hay clases este día.</p>}
