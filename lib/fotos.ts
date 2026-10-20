@@ -3,15 +3,16 @@
 
 export type FotoNombre = "portada" | "inicio" | "calistenia" | "pino" | "personal" | "online" | "progreso";
 
-// Color liso de cada foto: se ve si la foto no carga y, en tarjetas con color, tiñe la foto (efecto duotono).
+// Color liso de cada foto: se ve si la foto no carga y, en tarjetas con color, tiñe la foto.
+// El tono naranja está al 20 %: es un gris medio (que no cambia la foto) mezclado con un 20 % de naranja.
 const DEGRADADOS: Record<FotoNombre, string> = {
-  portada: "linear-gradient(#f0622d, #f0622d)",
-  inicio: "linear-gradient(#f0622d, #f0622d)",
-  calistenia: "linear-gradient(#f0622d, #f0622d)",
-  pino: "linear-gradient(#b8451c, #b8451c)",
-  personal: "linear-gradient(#6b5a50, #6b5a50)",
-  online: "linear-gradient(#e98a5e, #e98a5e)",
-  progreso: "linear-gradient(#f0622d, #f0622d)",
+  portada: "linear-gradient(#967a6f, #967a6f)",
+  inicio: "linear-gradient(#967a6f, #967a6f)",
+  calistenia: "linear-gradient(#967a6f, #967a6f)",
+  pino: "linear-gradient(#8b746c, #8b746c)",
+  personal: "linear-gradient(#7c7876, #7c7876)",
+  online: "linear-gradient(#958279, #958279)",
+  progreso: "linear-gradient(#967a6f, #967a6f)",
 };
 
 // Capa oscura suave para que el texto blanco se lea sobre cualquier foto.
