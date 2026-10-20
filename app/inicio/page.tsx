@@ -13,6 +13,7 @@ import Icono, { type NombreIcono } from "../Icono";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
+import ResumenAdminTarjetas from "./ResumenAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
@@ -183,6 +184,8 @@ export default function Inicio() {
       </section>
 
       <div className={estilos.contenido}>
+        {esAdmin && <ResumenAdminTarjetas />}
+
         <div className={estilos.accesos}>
           {accesos.map((a) => (
             <Link key={a.href} href={a.href} className={estilos.acceso}>
@@ -241,8 +244,8 @@ export default function Inicio() {
           </section>
         )}
 
-        <h2 className={estilos.atajos}>{t.proximosEntrenos}</h2>
-        {extra.reservas.length === 0 && extra.sesionesOnline.length === 0 && (
+        {!esAdmin && <h2 className={estilos.atajos}>{t.proximosEntrenos}</h2>}
+        {!esAdmin && extra.reservas.length === 0 && extra.sesionesOnline.length === 0 && (
           <p className={styles.ayuda}>{t.sinProximosEntrenos}</p>
         )}
         <div className={estilos.entrenos}>

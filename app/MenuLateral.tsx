@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Icono from "./Icono";
+import Icono, { type NombreIcono } from "./Icono";
 import estilos from "./menu.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
@@ -26,6 +26,20 @@ const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   admin: "panelAdmin",
 };
 
+// Opciones del menú de la administradora (en el orden en que se ven).
+const MENU_ADMIN: { href: string; icono: NombreIcono; texto: string }[] = [
+  { href: "/inicio", icono: "inicio", texto: "Inicio" },
+  { href: "/admin", icono: "admin", texto: "Panel" },
+  { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },
+  { href: "/clases", icono: "reservar", texto: "Reservar clases" },
+  { href: "/admin/horarios", icono: "historial", texto: "Horarios" },
+  { href: "/admin/rutinas", icono: "rutina", texto: "Entrenamientos" },
+  { href: "/admin/academia", icono: "academia", texto: "Academia" },
+  { href: "/admin/estadisticas", icono: "metricas", texto: "Informes" },
+  { href: "/admin/aprende", icono: "aprende", texto: "Aprende" },
+  { href: "/perfil", icono: "perfil", texto: "Perfil" },
+];
+
 // Panel lateral con todas las opciones de cada persona. Lo abre el botón «Más»
 // de la barra de abajo (NavegacionInferior).
 export default function MenuLateral({
@@ -40,6 +54,7 @@ export default function MenuLateral({
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const router = useRouter();
+  const esAdmin = perfil.rol === "admin";
 
   useEffect(() => {
     if (!abierto) return;
@@ -71,7 +86,17 @@ export default function MenuLateral({
         </div>
 
         <ul className={estilos.lista}>
-          {seccionesDe(perfil)
+          {esAdmin &&
+            MENU_ADMIN.map((o) => (
+              <li key={o.href}>
+                <Link href={o.href} className={estilos.enlace} onClick={onCerrar}>
+                  <Icono nombre={o.icono} />
+                  {o.texto}
+                </Link>
+              </li>
+            ))}
+          {!esAdmin &&
+            seccionesDe(perfil)
             .filter((s) => s !== "ajustes")
             .map((s) => (
               <li key={s}>
@@ -82,6 +107,13 @@ export default function MenuLateral({
               </li>
             ))}
         </ul>
+
+        {esAdmin && (
+          <Link href={RUTAS.ayuda} className={estilos.enlace} onClick={onCerrar}>
+            <Icono nombre="ayuda" />
+            {t.navAyuda}
+          </Link>
+        )}
 
         <div className={estilos.pie}>
           <button type="button" className={`${estilos.enlace} ${estilos.salir}`} onClick={salir}>

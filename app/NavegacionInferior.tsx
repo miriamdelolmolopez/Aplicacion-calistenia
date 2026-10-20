@@ -19,10 +19,9 @@ const CON_BARRA = ["/inicio", "/clases", "/rutina", "/progreso", "/perfil", "/aj
 function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"]): Pestana[] {
   if (perfil.rol === "admin") {
     return [
+      { href: RUTAS.inicio, icono: "inicio", texto: t.navInicio },
       { href: "/admin", icono: "admin", texto: "Panel" },
-      { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },
-      { href: "/admin/clases", icono: "reservar", texto: "Clases" },
-      { href: "/admin/bonos", icono: "pagos", texto: "Bonos" },
+      { href: "/admin/clases", icono: "reservas", texto: "Reservas" },
       { href: RUTAS.perfil, icono: "perfil", texto: t.perfilTitulo },
     ];
   }
@@ -85,7 +84,7 @@ export default function NavegacionInferior() {
           {t.tabMas}
         </button>
       </nav>
-      <MenuLateral perfil={perfilActual}abierto={menu} onCerrar={cerrar} />
+      <MenuLateral perfil={perfilActual} abierto={menu} onCerrar={cerrar} />
     </>
   );
 }

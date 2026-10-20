@@ -263,3 +263,129 @@
   background: rgba(43, 43, 42, 0.55);
   border-radius: 999px;
 }
+
+/* Resumen del negocio (Inicio de la administradora) */
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.resumenCuadricula {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.resumenTarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 112px;
+  padding: 12px;
+  text-align: left;
+  font: inherit;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.7);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+}
+
+.resumenTarjeta:hover {
+  border-color: var(--oliva);
+}
+
+.resumenActiva {
+  border-color: var(--oliva-oscuro);
+  background: #f3f4ea;
+}
+
+.resumenTitulo {
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.resumenValor {
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.resumenPie {
+  font-size: 0.75rem;
+  color: var(--secundario);
+}
+
+.bien {
+  color: #3f7a3a;
+}
+
+.mal {
+  color: #a8412f;
+}
+
+.resumenDetalle {
+  padding: 14px 16px;
+  background: var(--blanco);
+  border: 1px solid rgba(221, 214, 200, 0.7);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
+}
+
+.resumenDetalle h3 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+}
+
+.resumenDetalle h4 {
+  margin: 12px 0 4px;
+  font-size: 0.95rem;
+}
+
+.resumenDetalle p {
+  margin: 0 0 8px;
+}
+
+.resumenDetalle > a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+}
+
+.resumenLista {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.resumenLista li {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.resumenLista li a {
+  font-weight: 600;
+  color: var(--oliva-oscuro);
+}
+
+.resumenLista small {
+  color: var(--secundario);
+}
+
+.resumenVacio {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--secundario);
+}
+
+@media (min-width: 900px) {
+  .resumenCuadricula {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
