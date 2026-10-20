@@ -99,3 +99,37 @@
   text-transform: none;
   color: var(--secundario);
 }
+
+/* Siete columnas: letra más pequeña y textos que se parten para que no se corte nada */
+@media (min-width: 1280px) {
+  .semana {
+    gap: 8px;
+  }
+
+  .dia {
+    min-width: 0;
+    padding: 8px;
+    overflow-wrap: anywhere;
+  }
+
+  .tituloDia {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    min-height: 36px;
+    font-size: 0.88rem;
+  }
+
+  .tituloDia small {
+    font-size: 0.72rem;
+  }
+
+  .clase {
+    padding: 6px 8px;
+    font-size: 0.78rem;
+  }
+
+  .clase strong {
+    font-size: 0.82rem;
+  }
+}
