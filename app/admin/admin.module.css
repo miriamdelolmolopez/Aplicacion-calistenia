@@ -18,7 +18,7 @@
   color: var(--blanco);
   background-color: #3b3d28;
   background-image: linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.15) 70%),
-    url(/fotos/personal.jpg), linear-gradient(160deg, #6f7351, #3b3d28);
+    url(/fotos/personal-v2.webp), linear-gradient(160deg, #6f7351, #3b3d28);
   background-size: cover;
   background-position: center 30%;
   border-radius: 28px;

@@ -161,6 +161,7 @@ export default function Clases() {
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
+  const [fotosListas, setFotosListas] = useState(false);
   const [verNombres, setVerNombres] = useState<string | null>(null);
   const [descripciones, setDescripciones] = useState<Record<string, { es: string | null; en: string | null }>>({});
   const [saberMas, setSaberMas] = useState<string | null>(null);
@@ -180,7 +181,10 @@ export default function Clases() {
       setFotos(await fotosDe(d));
     });
     obtenerProfe().then(setProfe);
-    obtenerFotosApp().then((f) => setFotosTipos(f.tipos));
+    obtenerFotosApp().then((f) => {
+      setFotosTipos(f.tipos);
+      setFotosListas(true);
+    });
     createClient()
       .from("tipos_clase")
       .select("nombre, descripcion, descripcion_en")
@@ -427,7 +431,7 @@ export default function Clases() {
                 id={`clase-${c.id}`}
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
-                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo]) }}>
+                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo], !fotosListas) }}>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                 </div>

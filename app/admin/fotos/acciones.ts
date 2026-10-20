@@ -66,7 +66,7 @@ export async function cambiarFotoApp(formData: FormData): Promise<ResultadoFoto>
   const ruta = `${destino}/${id || "app"}-${Date.now()}.${TIPOS[archivo.type]}`;
   const { error } = await admin.storage
     .from("fotos")
-    .upload(ruta, Buffer.from(await archivo.arrayBuffer()), { contentType: archivo.type });
+    .upload(ruta, Buffer.from(await archivo.arrayBuffer()), { contentType: archivo.type, cacheControl: "31536000" });
   if (error) return { ok: false, error: "No se ha podido subir la foto." };
 
   const url = admin.storage.from("fotos").getPublicUrl(ruta).data.publicUrl;

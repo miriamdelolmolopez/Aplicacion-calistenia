@@ -107,6 +107,7 @@ export default function Inicio() {
   const [extra, setExtra] = useState<Extra | null>(null);
   const [propiaInicio, setPropiaInicio] = useState<string | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
+  const [fotosListas, setFotosListas] = useState(false);
   const [azar, setAzar] = useState<{ foto: FotoNombre; frase: number } | null>(null);
   const id = perfil && perfil !== "anonimo" ? perfil.id : null;
   const planOnline = !!perfil && perfil !== "anonimo" && perfil.planOnline;
@@ -131,6 +132,7 @@ export default function Inicio() {
     obtenerFotosApp().then((f) => {
       setPropiaInicio(f.inicio);
       setFotosTipos(f.tipos);
+      setFotosListas(true);
     });
   }, []);
 
@@ -172,7 +174,7 @@ export default function Inicio() {
 
       <section
         className={estilos.hero}
-        style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio) }}
+        style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio, !fotosListas) }}
       >
         <span className={estilos.vista}>
           {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
@@ -253,7 +255,7 @@ export default function Inicio() {
             <Link key={r.empieza_en + r.nombre} href={RUTAS.reservar} className={estilos.entreno}>
               <span
                 className={estilos.miniatura}
-                style={{ backgroundImage: fondoFoto(fotoDeClase(r.nombre), fotosTipos[r.nombre]) }}
+                style={{ backgroundImage: fondoFoto(fotoDeClase(r.nombre), fotosTipos[r.nombre], !fotosListas) }}
               />
               <span className={estilos.entrenoTexto}>
                 <strong>{r.nombre}</strong>

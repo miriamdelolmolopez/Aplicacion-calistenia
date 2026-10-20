@@ -8,7 +8,7 @@ import { nombreNivel, textoPrecio, type Curso } from "@/lib/cursos";
 import { fechaCorta } from "@/lib/fechas";
 
 const fondo = (url: string | null) =>
-  url ? `url("${url}")` : "linear-gradient(to top, rgba(30,30,28,0.35), rgba(30,30,28,0.05)), url(/fotos/pino.jpg)";
+  url ? `url("${url}")` : "linear-gradient(to top, rgba(30,30,28,0.35), rgba(30,30,28,0.05)), url(/fotos/pino-v2.webp)";
 
 const titulo = (c: Curso, idioma: "es" | "en") => (idioma === "en" && c.titulo_en) || c.titulo;
 

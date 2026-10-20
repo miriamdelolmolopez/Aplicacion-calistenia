@@ -17,8 +17,10 @@ const DEGRADADOS: Record<FotoNombre, string> = {
 const VELO = "linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.08) 65%)";
 
 // `propia` es la foto que Miriam ha subido; si no hay, se usa la de ejemplo.
-export function fondoFoto(nombre: FotoNombre, propia?: string | null): string {
-  const capas = [propia ? `url("${propia}")` : null, `url(/fotos/${nombre}.jpg)`, DEGRADADOS[nombre]];
+export function fondoFoto(nombre: FotoNombre, propia?: string | null, esperando = false): string {
+  // Con foto propia no se pide también la de ejemplo (el navegador descarga todas las capas).
+  const foto = esperando ? null : propia ? `url("${propia}")` : `url(/fotos/${nombre}-v2.webp)`;
+  const capas = [foto, DEGRADADOS[nombre]];
   return [VELO, ...capas.filter(Boolean)].join(", ");
 }
 
