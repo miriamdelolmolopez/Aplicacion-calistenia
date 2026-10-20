@@ -101,3 +101,11 @@
     display: none;
   }
 }
+
+/* «Más» es un botón: sin la sombra rectangular general, solo el sombreado del icono */
+button.pestana:hover:not(:disabled),
+button.pestana:active:not(:disabled) {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
