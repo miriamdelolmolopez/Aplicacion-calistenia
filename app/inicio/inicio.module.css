@@ -301,13 +301,15 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: var(--sombra);
   cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.2s;
 }
 
 .resumenTarjeta:hover {
   border-color: var(--oliva);
+  transform: translateY(-2px);
 }
 
 .resumenActiva {
@@ -316,12 +318,18 @@
 }
 
 .resumenTitulo {
-  font-size: 0.8rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--secundario);
 }
 
 .resumenValor {
-  font-size: 1.7rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
   line-height: 1.15;
 }
 

@@ -48,8 +48,9 @@
 }
 
 .hora {
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 1rem;
 }
 
 .nombre {
@@ -169,6 +170,10 @@
   text-decoration: none;
 }
 
+.diaTira {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
 .diaTira small {
   font-size: 0.7rem;
   font-weight: 400;
@@ -177,7 +182,7 @@
 
 .diaElegido {
   color: #fff;
-  background: var(--oliva-oscuro);
+  background: var(--carbon);
 }
 
 .diaElegido small {

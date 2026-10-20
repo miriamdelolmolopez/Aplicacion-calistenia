@@ -16,8 +16,8 @@
 
 .periodoActivo {
   color: #fff;
-  background: var(--oliva);
-  border-color: var(--oliva);
+  background: var(--carbon);
+  border-color: var(--carbon);
 }
 
 .cifras {

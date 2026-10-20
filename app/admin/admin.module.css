@@ -77,9 +77,16 @@
   padding: 0 14px;
   font: inherit;
   color: var(--carbon);
-  background: var(--crema);
+  background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo input:focus,
+.campo select:focus {
+  border-color: var(--oliva);
+  box-shadow: 0 0 0 4px rgba(112, 117, 75, 0.16);
 }
 
 .grupo {
@@ -190,7 +197,7 @@
 
 .persona {
   border: 1px solid var(--linea);
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -206,11 +213,14 @@
 }
 
 .etiqueta {
-  background: var(--oliva-oscuro);
-  color: var(--blanco);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 4px 10px;
+  background: rgba(112, 117, 75, 0.14);
+  color: var(--oliva-oscuro);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 11px;
   border-radius: 99px;
   white-space: nowrap;
 }
@@ -464,8 +474,8 @@
 }
 
 .chipActivo {
-  background: var(--oliva-oscuro);
-  border-color: var(--oliva-oscuro);
+  background: var(--carbon);
+  border-color: var(--carbon);
   color: var(--blanco);
   font-weight: 600;
 }
@@ -628,12 +638,13 @@
 
 /* Pantalla principal de Administración: cuadrícula de fotos agrupada */
 .grupoTitulo {
-  margin: 8px 0 -4px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.4px;
+  margin: 14px 0 -4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--secundario);
+  color: var(--oliva-oscuro);
 }
 
 .cuadricula {
@@ -654,17 +665,22 @@
   background-color: #3b3d28;
   background-size: cover;
   background-position: center;
-  border-radius: 22px;
+  border-radius: 24px;
   box-shadow: var(--sombra);
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
+}
+
+.azulejo:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-alta);
 }
 
 .azulejo span {
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
 }
 
 .azulejo:focus-visible {

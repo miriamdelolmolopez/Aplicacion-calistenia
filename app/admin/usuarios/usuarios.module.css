@@ -200,7 +200,7 @@
     overflow-x: auto;
     background: var(--blanco);
     border: 1px solid var(--linea);
-    border-radius: 14px;
+    border-radius: 20px;
   }
 
   .lista {
@@ -217,8 +217,10 @@
 .tabla th {
   padding: 10px 12px;
   text-align: left;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--secundario);
   background: #f3f0e8;
