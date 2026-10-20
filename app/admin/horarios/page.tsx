@@ -4,7 +4,7 @@ import { claveDia } from "@/lib/fechas";
 import styles from "../admin.module.css";
 import { Aplicar, AnadirClase, Borrar, Duplicar, HacerPrincipal, NuevaPlantilla, QuitarClase, Renombrar } from "./Controles";
 
-export const metadata = { title: "Horarios · Administración" };
+export const metadata = { title: "Plantillas de clases · Administración" };
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
@@ -39,7 +39,7 @@ export default async function Horarios() {
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
-        <h1>Horarios</h1>
+        <h1>Plantillas de clases</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Administración
         </Link>

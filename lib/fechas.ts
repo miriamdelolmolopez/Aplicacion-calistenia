@@ -50,3 +50,40 @@ export function textoHora(iso: string): string {
     hour12: false,
   }).format(new Date(iso));
 }
+
+// Fecha AAAA-MM-DD sumándole días (solo calendario, sin horas).
+export function sumarDias(fecha: string, dias: number): string {
+  const d = new Date(`${fecha}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+// Lunes de la semana de una fecha AAAA-MM-DD.
+export function lunesDe(fecha: string): string {
+  const d = new Date(`${fecha}T12:00:00Z`);
+  const dia = (d.getUTCDay() + 6) % 7; // 0 = lunes
+  return sumarDias(fecha, -dia);
+}
+
+// Instante (UTC) que corresponde a una fecha y hora escritas en hora de Madrid. null si no es válida.
+export function instanteMadrid(fecha: string, hora: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !/^\d{2}:\d{2}$/.test(hora)) return null;
+  const [a, m, d] = fecha.split("-").map(Number);
+  const [h, mi] = hora.split(":").map(Number);
+  for (const desfase of [1, 2]) {
+    const candidato = new Date(Date.UTC(a, m - 1, d, h - desfase, mi));
+    const partes = new Intl.DateTimeFormat("en-CA", {
+      timeZone: ZONA,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(candidato);
+    const v = (t: string) => partes.find((p) => p.type === t)?.value ?? "";
+    const hh = v("hour") === "24" ? "00" : v("hour");
+    if (`${v("year")}-${v("month")}-${v("day")}` === fecha && `${hh}:${v("minute")}` === hora) return candidato;
+  }
+  return null;
+}

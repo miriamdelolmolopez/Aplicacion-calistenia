@@ -16,7 +16,8 @@ const GRUPOS: { titulo: string; azulejos: Azulejo[] }[] = [
       { href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" },
       { href: "/admin/personas", titulo: "Altas y roles", foto: "portada" },
       { href: "/admin/clases", titulo: "Clases", foto: "pino" },
-      { href: "/admin/horarios", titulo: "Horarios", foto: "inicio" },
+      { href: "/admin/horario", titulo: "Horario", foto: "inicio" },
+      { href: "/admin/horarios", titulo: "Plantillas", foto: "calistenia" },
     ],
   },
   {
