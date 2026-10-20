@@ -3,12 +3,12 @@
   flex-direction: column;
   justify-content: flex-start;
   gap: 6px;
-  min-height: 430px;
+  min-height: 640px;
   margin: 8px 0 0;
   padding: 24px 22px 90px;
   color: var(--carbon);
   background-size: cover;
-  background-position: 70% 40%;
+  background-position: 80% 30%;
   border-radius: 36px;
   box-shadow: var(--sombra);
 }
@@ -174,7 +174,7 @@
 }
 
 .hero .frase {
-  max-width: 85%;
+  max-width: 62%;
   margin: 6px 0 0;
   font-family: var(--font-titulos), Georgia, serif;
   font-size: 1.45rem;

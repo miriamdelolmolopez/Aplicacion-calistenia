@@ -11,7 +11,7 @@
   background-position: center;
   border-radius: 28px;
   box-shadow: var(--sombra);
-  background-blend-mode: normal, multiply, normal;
+  background-blend-mode: normal, overlay, normal;
 }
 
 .cabecera h1 {

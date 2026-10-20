@@ -170,7 +170,7 @@
   color: var(--blanco);
   background-size: cover;
   background-position: center;
-  background-blend-mode: normal, multiply, normal;
+  background-blend-mode: normal, overlay, normal;
 }
 
 .titulo h2 {
