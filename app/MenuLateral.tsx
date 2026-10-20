@@ -11,7 +11,7 @@ import { useIdioma } from "./useIdioma";
 import { RUTAS, seccionesDe, type MiPerfil, type Seccion } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
 
-const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
+export const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   inicio: "navInicio",
   reservar: "navReservar",
   reservas: "misReservasTitulo",
@@ -27,7 +27,7 @@ const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
 };
 
 // Opciones del menú de la administradora (en el orden en que se ven).
-const MENU_ADMIN: { href: string; icono: NombreIcono; texto: string }[] = [
+export const MENU_ADMIN: { href: string; icono: NombreIcono; texto: string }[] = [
   { href: "/inicio", icono: "inicio", texto: "Inicio" },
   { href: "/admin", icono: "admin", texto: "Panel" },
   { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },

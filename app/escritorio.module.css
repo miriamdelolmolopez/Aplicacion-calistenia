@@ -1,0 +1,98 @@
+/* Menú lateral fijo: solo en pantallas grandes */
+.menu {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .menu {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 260px;
+    padding: 16px 12px;
+    overflow-y: auto;
+    background: var(--blanco);
+    border-right: 1px solid var(--linea);
+  }
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.cabecera div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cabecera strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cabecera span {
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.lista {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enlace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--carbon);
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.enlace:hover {
+  background: var(--relleno);
+}
+
+.enlace svg {
+  color: var(--oliva);
+}
+
+.activo {
+  color: var(--oliva-oscuro);
+  background: #e4e7d2;
+}
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--linea);
+}

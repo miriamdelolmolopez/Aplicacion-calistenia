@@ -723,3 +723,16 @@
   min-height: 44px;
   cursor: pointer;
 }
+
+@media (min-width: 1024px) {
+  .pagina {
+    max-width: 1180px;
+    padding: 24px 32px 64px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .cuadricula {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

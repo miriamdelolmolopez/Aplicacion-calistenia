@@ -155,6 +155,56 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
         </p>
       </section>
 
+      <div className={estilos.tablaCaja}>
+        <table className={estilos.tabla}>
+          <thead>
+            <tr>
+              <th>Persona</th>
+              <th>Tipo</th>
+              <th>Servicios</th>
+              <th>Tarifa</th>
+              <th>Bono / plan</th>
+              <th>Última clase</th>
+              <th>Última conexión</th>
+              <th>Alta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibles.map((u) => (
+              <tr key={u.id}>
+                <td>
+                  <Link href={`/admin/usuarios/${u.id}`} className={estilos.celdaPersona}>
+                    <Avatar nombre={nombreDe(u)} url={u.foto} tamano={36} />
+                    <span>
+                      <strong>{nombreDe(u)}</strong>
+                      <small>{u.email}</small>
+                    </span>
+                  </Link>
+                </td>
+                <td>{u.rol === "invitado" ? "Invitada" : "Alumna"}</td>
+                <td>{u.servicios.map((x) => NOMBRE_SERVICIO[x] ?? x).join(", ") || "—"}</td>
+                <td>{u.tarifas.join(" + ") || "—"}</td>
+                <td>
+                  {u.clases_restantes !== null
+                    ? `${u.clases_restantes} ${u.clases_restantes === 1 ? "clase" : "clases"}${u.bono_caduca ? ` · caduca ${fechaCorta(u.bono_caduca)}` : ""}`
+                    : u.plan_online_hasta
+                      ? `Online hasta ${fechaCorta(u.plan_online_hasta)}`
+                      : "Sin bono activo"}
+                </td>
+                <td>{u.ultima_clase ? fechaCorta(u.ultima_clase) : "—"}</td>
+                <td>{u.ultima_conexion ? fechaCorta(u.ultima_conexion) : "—"}</td>
+                <td>{fechaCorta(u.creado_en)}</td>
+              </tr>
+            ))}
+            {visibles.length === 0 && (
+              <tr>
+                <td colSpan={8}>No hay nadie que coincida.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       <ul className={estilos.lista}>
         {visibles.map((u) => {
           const r = resumen(u);

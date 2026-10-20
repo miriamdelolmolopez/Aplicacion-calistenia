@@ -48,3 +48,11 @@ a {
   outline: 3px solid var(--oliva-oscuro);
   outline-offset: 2px;
 }
+
+/* Pantallas grandes: menú lateral fijo en vez de la barra de abajo */
+@media (min-width: 1024px) {
+  body.con-barra {
+    padding-bottom: 0;
+    padding-left: 260px;
+  }
+}

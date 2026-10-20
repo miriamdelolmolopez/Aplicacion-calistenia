@@ -1,0 +1,78 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import Icono, { type NombreIcono } from "./Icono";
+import { CLAVE_TEXTO, MENU_ADMIN } from "./MenuLateral";
+import estilos from "./escritorio.module.css";
+import { textos, type ClaveTexto } from "./textos";
+import { useIdioma } from "./useIdioma";
+import { RUTAS, seccionesDe, type MiPerfil } from "./useMiPerfil";
+import { createClient } from "@/lib/supabase/client";
+
+type Opcion = { href: string; icono: NombreIcono; texto: string };
+
+// Menú fijo a la izquierda en pantallas grandes (en el móvil se usa la barra de abajo).
+export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
+  const [idioma] = useIdioma();
+  const t = textos[idioma];
+  const ruta = usePathname();
+  const router = useRouter();
+  const esAdmin = perfil.rol === "admin";
+
+  const opciones: Opcion[] = esAdmin
+    ? MENU_ADMIN
+    : seccionesDe(perfil)
+        .filter((s) => s !== "ajustes")
+        .map((s) => ({ href: RUTAS[s], icono: s as NombreIcono, texto: t[CLAVE_TEXTO[s]] }));
+
+  const activa = (href: string) => {
+    if (href === "/admin") return ruta === "/admin";
+    if (href === "/inicio") return ruta === "/inicio";
+    return ruta === href || ruta.startsWith(href + "/");
+  };
+
+  async function salir() {
+    await createClient().auth.signOut();
+    router.push("/");
+  }
+
+  return (
+    <aside className={estilos.menu} aria-label={t.menuAbrir}>
+      <div className={estilos.cabecera}>
+        <Image src="/logos/logo_olive.png" alt="" width={44} height={39} />
+        <div>
+          <strong>{perfil.nombre || "Miriam del Olmo"}</strong>
+          <span>{t[`rol_${perfil.rol}` as ClaveTexto]}</span>
+        </div>
+      </div>
+
+      <ul className={estilos.lista}>
+        {opciones.map((o) => (
+          <li key={o.href}>
+            <Link href={o.href} className={`${estilos.enlace} ${activa(o.href) ? estilos.activo : ""}`}>
+              <Icono nombre={o.icono} />
+              {o.texto}
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <div className={estilos.pie}>
+        <Link href={RUTAS.ayuda} className={`${estilos.enlace} ${activa(RUTAS.ayuda) ? estilos.activo : ""}`}>
+          <Icono nombre="ayuda" />
+          {t.navAyuda}
+        </Link>
+        <Link href={RUTAS.ajustes} className={`${estilos.enlace} ${activa(RUTAS.ajustes) ? estilos.activo : ""}`}>
+          <Icono nombre="ajustes" />
+          {t.navAjustes}
+        </Link>
+        <button type="button" className={estilos.enlace} onClick={salir}>
+          <Icono nombre="salir" />
+          {t.salir}
+        </button>
+      </div>
+    </aside>
+  );
+}

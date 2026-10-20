@@ -272,3 +272,9 @@
   padding: 4px 0 8px;
 }
 
+
+@media (min-width: 1024px) {
+  .pagina {
+    max-width: 760px;
+  }
+}
