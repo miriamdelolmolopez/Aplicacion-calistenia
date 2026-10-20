@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { aceptadoVigente } from "@/lib/legal";
+import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 export type MiPerfil = {
@@ -24,12 +24,13 @@ async function cargarPerfil(): Promise<Estado> {
   if (!sesion.user) return "anonimo";
   const id = sesion.user.id;
 
-  const [{ data: perfil }, { data: servicios }, { data: bonos }, { data: plan }, { data: aceptaciones }] = await Promise.all([
+  const [{ data: perfil }, { data: servicios }, { data: bonos }, { data: plan }, { data: aceptaciones }, versiones] = await Promise.all([
     supabase.from("profiles").select("nombre, rol, datos_completos").eq("id", id).maybeSingle(),
     supabase.from("perfil_servicios").select("servicio").eq("user_id", id),
     supabase.from("bonos").select("servicio").in("estado", ["activo", "en_cola"]),
     supabase.rpc("mi_plan_online"),
     supabase.from("consentimientos").select("tipo, version").eq("user_id", id),
+    versionesVigentes(supabase),
   ]);
   if (!perfil) return "anonimo";
 
@@ -40,7 +41,7 @@ async function cargarPerfil(): Promise<Estado> {
     servicios: [...new Set([...(servicios ?? []).map((s) => s.servicio), ...(bonos ?? []).map((b) => b.servicio)])],
     planOnline: plan === true,
     datosCompletos: !!perfil.datos_completos,
-    legalAceptado: aceptadoVigente(aceptaciones),
+    legalAceptado: aceptadoVigente(aceptaciones, versiones),
   };
 }
 

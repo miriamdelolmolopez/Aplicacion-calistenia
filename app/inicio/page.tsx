@@ -17,7 +17,7 @@ import ResumenAdminTarjetas from "./ResumenAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
-import { aceptadoVigente } from "@/lib/legal";
+import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 type Reserva = { empieza_en: string; nombre: string };
@@ -87,7 +87,7 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
     sesionesOnline,
     bonos: await obtenerMisBonos(),
     entrenoId: curso?.id ?? null,
-    completo: aceptadoVigente(consentimientos),
+    completo: aceptadoVigente(consentimientos, await versionesVigentes(supabase)),
     cumples,
     fotos,
     frases: (frases ?? []) as Frase[],

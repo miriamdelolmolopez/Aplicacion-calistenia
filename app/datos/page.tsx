@@ -13,7 +13,7 @@ import {
   normalizarDni,
   telefonoValido,
 } from "@/lib/validaciones";
-import { aceptadoVigente, VERSION_LEGAL } from "@/lib/legal";
+import { aceptadoVigente, versionesVigentes, type Versiones, VERSION_RESPALDO } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 
@@ -48,6 +48,7 @@ export default function Datos() {
   const [terminos, setTerminos] = useState(false);
   const [imagen, setImagen] = useState(false);
   const [yaAceptado, setYaAceptado] = useState(false);
+  const [versiones, setVersiones] = useState<Versiones>({ privacidad: VERSION_RESPALDO, terminos: VERSION_RESPALDO });
   const [errores, setErrores] = useState<Partial<Record<Campo, ClaveTexto>>>({});
   const [errorGeneral, setErrorGeneral] = useState<ClaveTexto | "">("");
   const [cargando, setCargando] = useState(false);
@@ -87,7 +88,9 @@ export default function Datos() {
           emTelefono: perfil.contacto_emergencia_telefono ?? "",
         });
       }
-      setYaAceptado(aceptadoVigente(consentimientos));
+      const v = await versionesVigentes(supabase);
+      setVersiones(v);
+      setYaAceptado(aceptadoVigente(consentimientos, v));
       setListo(true);
     }
     cargar();
@@ -145,9 +148,9 @@ export default function Datos() {
       const { error: falloConsentimiento } = await supabase
         .from("consentimientos")
         .insert([
-          { user_id: sesion.user.id, tipo: "privacidad", version: VERSION_LEGAL, concedido: true },
-          { user_id: sesion.user.id, tipo: "terminos", version: VERSION_LEGAL, concedido: true },
-          { user_id: sesion.user.id, tipo: "imagen", version: VERSION_LEGAL, concedido: imagen },
+          { user_id: sesion.user.id, tipo: "privacidad", version: versiones.privacidad, concedido: true },
+          { user_id: sesion.user.id, tipo: "terminos", version: versiones.terminos, concedido: true },
+          { user_id: sesion.user.id, tipo: "imagen", version: versiones.terminos, concedido: imagen },
         ]);
       if (falloConsentimiento) {
         setCargando(false);

@@ -10,7 +10,7 @@ import estilos from "../perfil/perfil.module.css";
 import { textos } from "../textos";
 import { IDIOMAS, type Idioma } from "../textos";
 import { useIdioma } from "../useIdioma";
-import { VERSION_LEGAL } from "@/lib/legal";
+import { versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
 type Preferencias = {
@@ -78,9 +78,11 @@ export default function Ajustes() {
   // La autorización de imagen se guarda como una fila nueva cada vez (queda el historial); vale la más reciente.
   async function cambiarImagen(valor: boolean) {
     setPref((p) => (p ? { ...p, imagen: valor } : p));
-    const { error: fallo } = await createClient()
+    const supabase = createClient();
+    const versiones = await versionesVigentes(supabase);
+    const { error: fallo } = await supabase
       .from("consentimientos")
-      .insert({ user_id: pref!.id, tipo: "imagen", version: VERSION_LEGAL, concedido: valor });
+      .insert({ user_id: pref!.id, tipo: "imagen", version: versiones.terminos, concedido: valor });
     if (fallo) setPref((p) => (p ? { ...p, imagen: !valor } : p));
   }
 

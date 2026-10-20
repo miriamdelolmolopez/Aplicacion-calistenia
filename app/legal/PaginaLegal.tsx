@@ -1,9 +1,6 @@
 import Link from "next/link";
-import { FECHA_LEGAL, VERSION_LEGAL } from "@/lib/legal";
+import type { Bloque, SeccionLegal } from "@/lib/legalTexto";
 import estilos from "./legal.module.css";
-
-export type Bloque = { p?: string; lista?: string[] };
-export type SeccionLegal = { titulo: string; bloques: Bloque[] };
 
 const ENLACES = [
   { href: "/legal/terminos", texto: "Términos y condiciones" },
@@ -12,13 +9,36 @@ const ENLACES = [
   { href: "/legal/cookies", texto: "Cookies" },
 ];
 
+export function Bloques({ bloques }: { bloques: Bloque[] }) {
+  return (
+    <>
+      {bloques.map((b, i) => (
+        <div key={i}>
+          {b.p && <p>{b.p}</p>}
+          {b.lista && (
+            <ul>
+              {b.lista.map((l, n) => (
+                <li key={n}>{l}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
+
 export default function PaginaLegal({
   titulo,
-  intro,
+  version,
+  fecha,
+  intro = [],
   secciones,
 }: {
   titulo: string;
-  intro?: string;
+  version?: string;
+  fecha?: string;
+  intro?: Bloque[];
   secciones: SeccionLegal[];
 }) {
   return (
@@ -32,25 +52,17 @@ export default function PaginaLegal({
       </nav>
       <article className={estilos.tarjeta}>
         <h1>{titulo}</h1>
-        <p className={estilos.version}>
-          Versión {VERSION_LEGAL} · Última actualización: {FECHA_LEGAL}. Texto legal en español.
-        </p>
-        {intro && <p>{intro}</p>}
+        {version && (
+          <p className={estilos.version}>
+            Versión {version}
+            {fecha ? ` · Última actualización: ${fecha}` : ""}. Texto legal en español.
+          </p>
+        )}
+        <Bloques bloques={intro} />
         {secciones.map((s) => (
           <section key={s.titulo}>
             <h2>{s.titulo}</h2>
-            {s.bloques.map((b, i) => (
-              <div key={i}>
-                {b.p && <p>{b.p}</p>}
-                {b.lista && (
-                  <ul>
-                    {b.lista.map((l) => (
-                      <li key={l}>{l}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+            <Bloques bloques={s.bloques} />
           </section>
         ))}
       </article>

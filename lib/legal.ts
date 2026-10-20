@@ -1,8 +1,9 @@
-// Datos de la titular y versión de los textos legales.
-// Si cambias algún texto legal, cambia VERSION_LEGAL: todas las personas
-// tendrán que volver a aceptarlos para seguir usando la app.
-export const VERSION_LEGAL = "2026-10-v2";
-export const FECHA_LEGAL = "19 de octubre de 2026";
+// Datos de la titular y utilidades de la aceptación de los textos legales.
+// Los textos y sus versiones viven en la base de datos (tabla textos_legales) y se editan
+// desde Administración → Textos legales.
+
+// Solo se usa si no se pueden leer las versiones de la base de datos.
+export const VERSION_RESPALDO = "2026-10-v2";
 
 export const TITULAR = {
   nombre: "Miriam del Olmo López de la Isidra",
@@ -13,9 +14,28 @@ export const TITULAR = {
 };
 
 type Aceptacion = { tipo: string; version: string };
+export type Versiones = { privacidad: string; terminos: string };
 
-// ¿Ha aceptado la persona la política de privacidad y los términos de la versión actual?
-export function aceptadoVigente(filas: Aceptacion[] | null | undefined): boolean {
-  const vigentes = new Set((filas ?? []).filter((f) => f.version === VERSION_LEGAL).map((f) => f.tipo));
-  return vigentes.has("privacidad") && vigentes.has("terminos");
+type ClienteLector = {
+  from: (tabla: string) => {
+    select: (columnas: string) => {
+      eq: (columna: string, valor: boolean) => PromiseLike<{ data: { documento: string; version: string }[] | null }>;
+    };
+  };
+};
+
+// Versión vigente de la política de privacidad y de los términos.
+export async function versionesVigentes(supabase: unknown): Promise<Versiones> {
+  const { data } = await (supabase as ClienteLector).from("textos_legales").select("documento, version").eq("vigente", true);
+  const v = (doc: string) => data?.find((d) => d.documento === doc)?.version ?? VERSION_RESPALDO;
+  return { privacidad: v("privacidad"), terminos: v("terminos") };
+}
+
+// ¿Ha aceptado la persona la versión vigente de la política de privacidad y de los términos?
+export function aceptadoVigente(filas: Aceptacion[] | null | undefined, versiones: Versiones): boolean {
+  const lista = filas ?? [];
+  return (
+    lista.some((f) => f.tipo === "privacidad" && f.version === versiones.privacidad) &&
+    lista.some((f) => f.tipo === "terminos" && f.version === versiones.terminos)
+  );
 }
