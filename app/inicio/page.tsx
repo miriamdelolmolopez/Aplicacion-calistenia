@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
-import { obtenerFotosApp } from "../fotos/acciones";
+import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import { obtenerFotos } from "../perfil/acciones";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
@@ -38,15 +38,36 @@ type Extra = {
 
 async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> {
   const supabase = createClient();
-  const { data: consentimientos } = await supabase.from("consentimientos").select("tipo, version").eq("user_id", userId);
 
-  const { data: reservas } = await supabase
-    .from("reservas")
-    .select("sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre))")
-    .eq("user_id", userId)
-    .eq("estado", "reservada")
-    .gt("sesiones_clase.empieza_en", new Date().toISOString())
-    .eq("sesiones_clase.estado", "programada");
+  // Todo lo que no depende de otra consulta se pide a la vez (antes iba una tras otra).
+  const [{ data: consentimientos }, { data: reservas }, rutinaRespuesta, { data: curso }, { data: cumplesDatos }, { data: frases }, bonos, versiones] =
+    await Promise.all([
+      supabase.from("consentimientos").select("tipo, version").eq("user_id", userId),
+      supabase
+        .from("reservas")
+        .select("sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre))")
+        .eq("user_id", userId)
+        .eq("estado", "reservada")
+        .gt("sesiones_clase.empieza_en", new Date().toISOString())
+        .eq("sesiones_clase.estado", "programada"),
+      // Las sesiones de su rutina online actual.
+      planOnline
+        ? supabase
+            .from("rutinas")
+            .select("nombre, rutina_sesiones(id, nombre, orden)")
+            .eq("user_id", userId)
+            .eq("estado", "publicada")
+            .limit(1)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle(),
+      // Quién cumple años hoy (solo salen las personas que lo tienen activado en Ajustes).
+      supabase.rpc("cumpleanos_hoy"),
+      supabase.from("frases_inicio").select("texto_es, texto_en").eq("activa", true),
+      obtenerMisBonos(),
+      versionesVigentes(supabase),
+    ]);
+
   const filas = (reservas ?? []) as unknown as {
     sesiones_clase: { empieza_en: string; tipos_clase: { nombre: string } | null };
   }[];
@@ -54,40 +75,24 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
     .map((f) => ({ empieza_en: f.sesiones_clase.empieza_en, nombre: f.sesiones_clase.tipos_clase?.nombre ?? "" }))
     .sort((a, b) => a.empieza_en.localeCompare(b.empieza_en));
 
-  // Las sesiones de su rutina online actual.
   let rutinaNombre: string | null = null;
   let sesionesOnline: SesionOnline[] = [];
-  if (planOnline) {
-    const { data: rutina } = await supabase
-      .from("rutinas")
-      .select("nombre, rutina_sesiones(id, nombre, orden)")
-      .eq("user_id", userId)
-      .eq("estado", "publicada")
-      .limit(1)
-      .maybeSingle();
-    const r = rutina as { nombre: string; rutina_sesiones: { id: string; nombre: string; orden: number }[] } | null;
-    if (r) {
-      rutinaNombre = r.nombre;
-      sesionesOnline = [...r.rutina_sesiones].sort((a, b) => a.orden - b.orden).map((s) => ({ id: s.id, nombre: s.nombre }));
-    }
+  const r = rutinaRespuesta.data as { nombre: string; rutina_sesiones: { id: string; nombre: string; orden: number }[] } | null;
+  if (r) {
+    rutinaNombre = r.nombre;
+    sesionesOnline = [...r.rutina_sesiones].sort((a, b) => a.orden - b.orden).map((s) => ({ id: s.id, nombre: s.nombre }));
   }
 
-  const { data: curso } = await supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle();
-
-  // Quién cumple años hoy (solo salen las personas que lo tienen activado en Ajustes).
-  const { data: cumplesDatos } = await supabase.rpc("cumpleanos_hoy");
   const cumples = (cumplesDatos ?? []) as Cumple[];
   const fotos = cumples.length ? await obtenerFotos(cumples.map((c) => c.id)) : {};
-
-  const { data: frases } = await supabase.from("frases_inicio").select("texto_es, texto_en").eq("activa", true);
 
   return {
     reservas: proximas,
     rutinaNombre,
     sesionesOnline,
-    bonos: await obtenerMisBonos(),
+    bonos,
     entrenoId: curso?.id ?? null,
-    completo: aceptadoVigente(consentimientos, await versionesVigentes(supabase)),
+    completo: aceptadoVigente(consentimientos, versiones),
     cumples,
     fotos,
     frases: (frases ?? []) as Frase[],
@@ -129,7 +134,7 @@ export default function Inicio() {
   }, [id, planOnline]);
 
   useEffect(() => {
-    obtenerFotosApp().then((f) => {
+    obtenerFotosAppCliente().then((f) => {
       setPropiaInicio(f.inicio);
       setFotosTipos(f.tipos);
       setFotosListas(true);

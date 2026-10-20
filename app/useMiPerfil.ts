@@ -45,6 +45,19 @@ async function cargarPerfil(): Promise<Estado> {
   };
 }
 
+// La barra de abajo, los menús y la propia pantalla piden el perfil a la vez: se comparte una sola carga
+// (y la respuesta se reutiliza unos segundos) en vez de repetir las mismas consultas varias veces.
+let cargaCompartida: { inicio: number; promesa: Promise<Estado> } | null = null;
+const VIGENCIA_MS = 3000;
+
+function cargarPerfilCompartido(): Promise<Estado> {
+  const ahora = Date.now();
+  if (!cargaCompartida || ahora - cargaCompartida.inicio > VIGENCIA_MS) {
+    cargaCompartida = { inicio: ahora, promesa: cargarPerfil() };
+  }
+  return cargaCompartida.promesa;
+}
+
 // `recargarCon`: si cambia (por ejemplo la ruta), se vuelve a leer el perfil.
 export function useMiPerfil(recargarCon?: string): Estado {
   // Se guarda con qué valor de `recargarCon` se leyó, para no actuar con datos de una pantalla anterior.
@@ -55,7 +68,7 @@ export function useMiPerfil(recargarCon?: string): Estado {
   const actualizado = leido.con === recargarCon;
 
   useEffect(() => {
-    cargarPerfil().then((p) => setLeido({ perfil: p, con: recargarCon }));
+    cargarPerfilCompartido().then((p) => setLeido({ perfil: p, con: recargarCon }));
   }, [recargarCon]);
 
   // Si los textos legales cambian, hay que aceptarlos de nuevo para seguir usando la app.

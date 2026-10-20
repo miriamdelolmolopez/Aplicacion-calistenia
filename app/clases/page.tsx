@@ -12,7 +12,7 @@ import { textos, type ClaveTexto } from "../textos";
 import PanelFiltros from "../PanelFiltros";
 import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
-import { obtenerFotosApp } from "../fotos/acciones";
+import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
 import { descargarIcs } from "@/lib/calendario";
@@ -69,10 +69,19 @@ type Datos = {
 async function obtenerDatos(): Promise<Datos> {
   const supabase = createClient();
 
-  const { data: ajustes } = await supabase.from("ajustes").select("clave, valor");
-  const valor = (clave: string, defecto: number) =>
-    Number(ajustes?.find((a) => a.clave === clave)?.valor ?? defecto);
-  const { data: tiposDatos } = await supabase.from("tipos_clase").select("nombre, lista_espera, cancelacion_horas, reserva_dias_max, creditos");
+  // Lo que no depende de otra consulta se pide a la vez (antes iba todo una consulta tras otra).
+  const { data: datosSesion } = await supabase.auth.getSession();
+  const usuario = datosSesion.session?.user ?? null;
+  const [{ data: ajustes }, { data: tiposDatos }, { data: perfil }, { data: gastada }, bonos] = await Promise.all([
+    supabase.from("ajustes").select("clave, valor"),
+    supabase.from("tipos_clase").select("nombre, lista_espera, cancelacion_horas, reserva_dias_max, creditos"),
+    usuario
+      ? supabase.from("profiles").select("rol, datos_completos").eq("id", usuario.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.rpc("mi_prueba_gastada"),
+    obtenerMisBonos(),
+  ]);
+  const valor = (clave: string, defecto: number) => Number(ajustes?.find((a) => a.clave === clave)?.valor ?? defecto);
   const tiposReglas = new Map(
     ((tiposDatos ?? []) as { nombre: string; lista_espera: boolean; cancelacion_horas: number | null; reserva_dias_max: number | null; creditos: number }[]).map((t) => [t.nombre, t]),
   );
@@ -80,16 +89,6 @@ async function obtenerDatos(): Promise<Datos> {
   const horas = valor("cancelacion_horas", 2);
   const horasIndividual = valor("cancelacion_horas_individual", 12);
   const dias = valor("reserva_dias_max", 14);
-
-  const { data: datosSesion } = await supabase.auth.getSession();
-  const sesion = { user: datosSesion.session?.user ?? null };
-  const { data: perfil } = sesion.user
-    ? await supabase
-        .from("profiles")
-        .select("rol, datos_completos")
-        .eq("id", sesion.user.id)
-        .maybeSingle()
-    : { data: null };
 
   // Si algún tipo de clase se puede reservar con más antelación que el ajuste general, se piden también esos días.
   const diasConsulta = Math.max(dias, ...[...tiposReglas.values()].map((t) => t.reserva_dias_max ?? 0));
@@ -107,8 +106,6 @@ async function obtenerDatos(): Promise<Datos> {
       };
     });
 
-  const { data: gastada } = await supabase.rpc("mi_prueba_gastada");
-  const bonos = await obtenerMisBonos();
   // Solo cuenta el bono de clases grupales (el plan online no tiene clases).
   const activos = bonos.filter((b) => b.estado === "activo" && b.servicio !== "online");
 
@@ -181,7 +178,7 @@ export default function Clases() {
       setFotos(await fotosDe(d));
     });
     obtenerProfe().then(setProfe);
-    obtenerFotosApp().then((f) => {
+    obtenerFotosAppCliente().then((f) => {
       setFotosTipos(f.tipos);
       setFotosListas(true);
     });

@@ -46,12 +46,11 @@ type Fila = {
 // Antes los pone al día para no enseñar un bono que ya ha caducado.
 export async function obtenerMisBonos(): Promise<MiBono[]> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  const { data: datosSesion } = await supabase.auth.getClaims();
+  const userId = datosSesion?.claims?.sub;
+  if (!userId) return [];
 
-  await createAdminClient().rpc("refrescar_bonos", { p_user: user.id });
+  await createAdminClient().rpc("refrescar_bonos", { p_user: userId });
 
   const { data } = await supabase
     .from("bonos")
