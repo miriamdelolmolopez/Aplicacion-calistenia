@@ -43,6 +43,8 @@ type Clase = {
   prioridad: boolean;
   duracion_min: number;
   tarde: boolean; // quedan menos horas que el límite de cancelación
+  horasCancelacion: number; // límite de cancelación de este tipo de clase
+  creditos: number; // cuántas clases del bono gasta
   servicio: string;
   incluido: boolean; // puede reservarla según lo que tiene contratado
 };
@@ -69,8 +71,11 @@ async function obtenerDatos(): Promise<Datos> {
   const { data: ajustes } = await supabase.from("ajustes").select("clave, valor");
   const valor = (clave: string, defecto: number) =>
     Number(ajustes?.find((a) => a.clave === clave)?.valor ?? defecto);
-  const { data: sinListaDatos } = await supabase.from("tipos_clase").select("nombre").eq("lista_espera", false);
-  const sinEspera = ((sinListaDatos ?? []) as { nombre: string }[]).map((t) => t.nombre);
+  const { data: tiposDatos } = await supabase.from("tipos_clase").select("nombre, lista_espera, cancelacion_horas, reserva_dias_max, creditos");
+  const tiposReglas = new Map(
+    ((tiposDatos ?? []) as { nombre: string; lista_espera: boolean; cancelacion_horas: number | null; reserva_dias_max: number | null; creditos: number }[]).map((t) => [t.nombre, t]),
+  );
+  const sinEspera = [...tiposReglas.values()].filter((t) => !t.lista_espera).map((t) => t.nombre);
   const horas = valor("cancelacion_horas", 2);
   const horasIndividual = valor("cancelacion_horas_individual", 12);
   const dias = valor("reserva_dias_max", 14);
@@ -84,12 +89,21 @@ async function obtenerDatos(): Promise<Datos> {
         .maybeSingle()
     : { data: null };
 
-  const { data } = await supabase.rpc("clases_proximas", { p_dias: dias });
+  // Si algún tipo de clase se puede reservar con más antelación que el ajuste general, se piden también esos días.
+  const diasConsulta = Math.max(dias, ...[...tiposReglas.values()].map((t) => t.reserva_dias_max ?? 0));
+  const { data } = await supabase.rpc("clases_proximas", { p_dias: diasConsulta });
   const ahora = Date.now();
-  const lista = ((data ?? []) as Omit<Clase, "tarde">[]).map((c) => ({
-    ...c,
-    tarde: new Date(c.empieza_en).getTime() - (c.servicio === "individual" ? horasIndividual : horas) * 3600 * 1000 < ahora,
-  }));
+  const lista = ((data ?? []) as Omit<Clase, "tarde" | "horasCancelacion" | "creditos">[])
+    .filter((c) => new Date(c.empieza_en).getTime() - ahora <= (tiposReglas.get(c.tipo)?.reserva_dias_max ?? dias) * 86400000)
+    .map((c) => {
+      const horasC = tiposReglas.get(c.tipo)?.cancelacion_horas ?? (c.servicio === "individual" ? horasIndividual : horas);
+      return {
+        ...c,
+        horasCancelacion: horasC,
+        creditos: tiposReglas.get(c.tipo)?.creditos ?? 1,
+        tarde: new Date(c.empieza_en).getTime() - horasC * 3600 * 1000 < ahora,
+      };
+    });
 
   const { data: gastada } = await supabase.rpc("mi_prueba_gastada");
   const bonos = await obtenerMisBonos();
@@ -482,6 +496,7 @@ export default function Clases() {
                     <p className={estilos.plazas}>
                       {libres} {libres === 1 ? t.libre : t.libres} · {c.ocupadas}/{c.plazas} {t.plazasTotales}
                       {c.hay_espera > 0 && ` · ${t.listaEspera}: ${c.hay_espera}`}
+                      {c.creditos > 1 && ` · ${idioma === "en" ? "uses" : "gasta"} ${c.creditos} ${idioma === "en" ? "credits" : "clases"}`}
                     </p>
                   </>
                 )}
@@ -589,10 +604,10 @@ export default function Clases() {
                     <p style={{ margin: "0 0 10px" }}>
                       {esInvitado
                         ? c.tarde
-                          ? t.confirmaPierdePrueba.replace("{h}", String(c.servicio === "individual" ? datos.horasIndividual : datos.horas))
+                          ? t.confirmaPierdePrueba.replace("{h}", String(c.horasCancelacion))
                           : t.confirmaConservaPrueba
                         : c.tarde
-                          ? t.confirmaPierde.replace("{h}", String(c.servicio === "individual" ? datos.horasIndividual : datos.horas))
+                          ? t.confirmaPierde.replace("{h}", String(c.horasCancelacion))
                           : t.confirmaDevuelve}
                     </p>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

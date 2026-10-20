@@ -203,6 +203,12 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
   const orden = entero(formData.get("orden"));
   if (!(orden >= 0 && orden <= 9999)) return { error: "El orden va de 0 a 9999." };
   const listaEspera = formData.get("lista_espera") === "on";
+  const diasReserva = String(formData.get("reserva_dias_max") ?? "").trim() === "" ? null : entero(formData.get("reserva_dias_max"));
+  const horasCancelar = String(formData.get("cancelacion_horas") ?? "").trim() === "" ? null : entero(formData.get("cancelacion_horas"));
+  const creditos = entero(formData.get("creditos"));
+  if (diasReserva !== null && !(diasReserva >= 1 && diasReserva <= 365)) return { error: "Los días para reservar van de 1 a 365 (o déjalo vacío)." };
+  if (horasCancelar !== null && !(horasCancelar >= 0 && horasCancelar <= 168)) return { error: "Las horas para cancelar van de 0 a 168 (o déjalo vacío)." };
+  if (!(creditos >= 1 && creditos <= 20)) return { error: "Los créditos van de 1 a 20." };
   const descripcion = String(formData.get("descripcion") ?? "").trim();
   const descripcionEn = String(formData.get("descripcion_en") ?? "").trim();
   if (descripcion.length > 1500 || descripcionEn.length > 1500) return { error: "Las descripciones pueden tener hasta 1500 letras." };
@@ -227,6 +233,9 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
       activo,
       orden,
       lista_espera: listaEspera,
+      reserva_dias_max: diasReserva,
+      cancelacion_horas: horasCancelar,
+      creditos,
       color_texto: colorTexto || null,
       descripcion: descripcion || null,
       descripcion_en: descripcionEn || null,

@@ -23,6 +23,7 @@ type Reserva = {
   duracion_min: number;
   color: string;
   colorTexto: string;
+  horasCancelacion: number | null;
 };
 
 type TipoClase = { nombre: string; color: string; colorTexto: string };
@@ -37,7 +38,7 @@ async function obtenerDatos(): Promise<Datos> {
   const [{ data }, bonos, { data: ajustes }, { data: tiposData }] = await Promise.all([
     supabase
       .from("reservas")
-      .select("id, sesion_id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre, servicio, duracion_min, color, color_texto))")
+      .select("id, sesion_id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre, servicio, duracion_min, color, color_texto, cancelacion_horas))")
       .eq("user_id", userId)
       .eq("estado", "reservada")
       .eq("sesiones_clase.estado", "programada")
@@ -51,7 +52,7 @@ async function obtenerDatos(): Promise<Datos> {
   type Fila = {
     id: string;
     sesion_id: string;
-    sesiones_clase: { empieza_en: string; tipos_clase: { nombre: string; servicio: string; duracion_min: number; color: string | null; color_texto: string | null } | null };
+    sesiones_clase: { empieza_en: string; tipos_clase: { nombre: string; servicio: string; duracion_min: number; color: string | null; color_texto: string | null; cancelacion_horas: number | null } | null };
   };
   const reservas = ((data ?? []) as unknown as Fila[]).map((f) => ({
     id: f.id,
@@ -62,6 +63,7 @@ async function obtenerDatos(): Promise<Datos> {
     duracion_min: f.sesiones_clase.tipos_clase?.duracion_min ?? 60,
     color: colorDeTipo(f.sesiones_clase.tipos_clase?.color, f.sesiones_clase.tipos_clase?.nombre ?? ""),
     colorTexto: f.sesiones_clase.tipos_clase?.color_texto ?? "#FFFFFF",
+    horasCancelacion: f.sesiones_clase.tipos_clase?.cancelacion_horas ?? null,
   }));
   const tipos = ((tiposData ?? []) as { nombre: string; color: string | null; color_texto: string | null }[]).map((t) => ({
     nombre: t.nombre,
@@ -247,7 +249,7 @@ export default function MisReservas() {
           <h2>{textoDia(`${dia}T12:00:00Z`, idioma)}</h2>
           {delDia.map((r) => {
             const pasada = r.empieza_en < ahoraIso;
-            const horasLimite = r.servicio === "individual" ? datos.horasIndividual : datos.horas;
+            const horasLimite = r.horasCancelacion ?? (r.servicio === "individual" ? datos.horasIndividual : datos.horas);
             const tarde = new Date(r.empieza_en).getTime() - horasLimite * 3600 * 1000 < new Date(ahoraIso).getTime();
             return (
               <article key={r.id} className={estilos.clase} style={{ borderLeft: `6px solid ${r.color}` }}>

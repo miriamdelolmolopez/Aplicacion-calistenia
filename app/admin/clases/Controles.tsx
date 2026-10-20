@@ -123,6 +123,9 @@ export function FormularioTipo({
     color_texto: string | null;
     orden: number;
     lista_espera: boolean;
+    reserva_dias_max: number | null;
+    cancelacion_horas: number | null;
+    creditos: number;
     descripcion: string | null;
     descripcion_en: string | null;
   };
@@ -194,6 +197,19 @@ export function FormularioTipo({
           max={100}
           defaultValue={tipo.plazas_prueba}
         />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`cr-${tipo.id}`}>Créditos que gasta cada reserva (1 = una clase del bono)</label>
+        <input id={`cr-${tipo.id}`} name="creditos" type="number" min={1} max={20} defaultValue={tipo.creditos} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`rd-${tipo.id}`}>Cuántos días antes se puede reservar</label>
+        <input id={`rd-${tipo.id}`} name="reserva_dias_max" type="number" min={1} max={365} defaultValue={tipo.reserva_dias_max ?? ""} placeholder="Vacío = el ajuste general" />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`ch-${tipo.id}`}>Horas antes para cancelar sin perder la clase</label>
+        <input id={`ch-${tipo.id}`} name="cancelacion_horas" type="number" min={0} max={168} defaultValue={tipo.cancelacion_horas ?? ""} placeholder="Vacío = el ajuste general" />
+        <span className={styles.ayuda}>Lo que dejes vacío sigue el ajuste general de «Ajustes de reservas».</span>
       </div>
       <div className={styles.campo}>
         <label htmlFor={`de-${tipo.id}`}>Descripción («Saber más» en Reservas)</label>
