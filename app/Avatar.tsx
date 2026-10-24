@@ -18,7 +18,7 @@ export default function Avatar({
       .join("") || "·";
 
   // Color según el nombre (siempre el mismo para la misma persona): terracota y neutros cálidos
-  const COLORES = ["#e8602c", "#17181a", "#c9471a", "#8a6f5a", "#f0834f"];
+  const COLORES = ["#0d9488", "#17181a", "#115e59", "#8a6f5a", "#2dd4bf"];
   const color = COLORES[[...nombre].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORES.length];
 
   const caja: React.CSSProperties = {

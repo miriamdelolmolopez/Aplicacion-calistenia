@@ -1,7 +1,7 @@
 // Avatar de la alumna: una planta que crece con los entrenos y se marchita si deja de entrenar.
 // nivel 1..6 · marchita 0 (sana), 1 (más de 5 días sin entrenar), 2 (más de 14) · brillante = racha en marcha.
 
-const VERDE = ["#e8602c", "#f2a07c"];
+const VERDE = ["#0d9488", "#2dd4bf"];
 const SECO1 = ["#a49a57", "#bfae6a"];
 const SECO2 = ["#8a6f4e", "#a08560"];
 const TRONCO = "#7a5f43";
@@ -60,7 +60,7 @@ export default function PlantaAvatar({
   if (nivel <= 1) {
     partes.push(
       <ellipse key="semilla" cx={100} cy={184} rx={11} ry={7} fill="#8a6b4a" />,
-      <path key="raya" d="M93 184 Q100 180 107 184" stroke="#c9471a" strokeWidth={2} fill="none" />,
+      <path key="raya" d="M93 184 Q100 180 107 184" stroke="#115e59" strokeWidth={2} fill="none" />,
     );
   } else if (nivel === 2) {
     partes.push(
@@ -109,7 +109,7 @@ export default function PlantaAvatar({
       <path
         key="tronco"
         d={`M92 190 L96 ${nivel === 5 ? 110 : 95} L104 ${nivel === 5 ? 110 : 95} L108 190 Z`}
-        fill={marchita ? "#c9471a" : TRONCO}
+        fill={marchita ? "#115e59" : TRONCO}
       />,
       ...copa.map(([x, y, r], i) => (
         <circle key={`c${i}`} cx={x} cy={y + caida / 6} r={r} fill={i % 2 ? claro : oscuro} />

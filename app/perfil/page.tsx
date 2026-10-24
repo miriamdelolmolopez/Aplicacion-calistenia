@@ -7,7 +7,7 @@ import BarraSuperior from "../BarraSuperior";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
-import Tacometro from "../ui/Tacometro";
+import Anillo from "../ui/Anillo";
 import { useIdioma } from "../useIdioma";
 import { useMiPerfil } from "../useMiPerfil";
 import estilos from "./perfil.module.css";
@@ -165,7 +165,7 @@ export default function Perfil() {
           </div>
         </div>
         <div className={clay.gaugeWrap}>
-          <Tacometro porcentaje={pct} />
+          <Anillo porcentaje={pct} />
           <span className={clay.gaugePct}>{pct}%</span>
         </div>
       </div>

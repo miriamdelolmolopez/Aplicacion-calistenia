@@ -15,7 +15,7 @@ import { useIdioma } from "../useIdioma";
 import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoFlecha, IconoReloj } from "../ui/Mini";
-import Tacometro from "../ui/Tacometro";
+import Anillo from "../ui/Anillo";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
@@ -273,7 +273,7 @@ export default function Inicio() {
                 </div>
               </div>
               <div className={clay.gaugeWrap}>
-                <Tacometro porcentaje={pct} />
+                <Anillo porcentaje={pct} />
                 <span className={clay.gaugePct}>{pct}%</span>
               </div>
             </section>

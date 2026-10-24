@@ -136,7 +136,7 @@
   flex: none;
   width: 96px;
   height: 96px;
-  background-color: #e8602c;
+  background-color: #0d9488;
   background-size: cover;
   background-position: center;
   border-radius: 14px;
@@ -173,7 +173,7 @@
 .detalleFoto {
   height: 170px;
   margin: -6px 0 14px;
-  background-color: #e8602c;
+  background-color: #0d9488;
   background-size: cover;
   background-position: center;
   border-radius: 18px;
@@ -191,7 +191,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--oliva-oscuro);
-  background: #fdebe3;
+  background: #e3f5f2;
   border-radius: 99px;
 }
 

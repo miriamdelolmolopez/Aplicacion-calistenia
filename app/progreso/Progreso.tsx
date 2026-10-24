@@ -584,7 +584,7 @@ function Grafica({
         return (
           <g key={f}>
             <line x1={izq} x2={W - der} y1={y(v)} y2={y(v)} stroke="#e4e1dc" />
-            <text x={izq - 4} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#c9471a">
+            <text x={izq - 4} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#115e59">
               {Math.round(v * 10) / 10}
             </text>
           </g>
@@ -598,17 +598,17 @@ function Grafica({
           </text>
         </g>
       )}
-      <path d={camino} fill="none" stroke="#e8602c" strokeWidth={2.5} strokeLinejoin="round" />
+      <path d={camino} fill="none" stroke="#0d9488" strokeWidth={2.5} strokeLinejoin="round" />
       {puntos.map((p, i) => (
-        <circle key={p.fecha} cx={x(i)} cy={y(p.valor)} r={4} fill="#e8602c">
+        <circle key={p.fecha} cx={x(i)} cy={y(p.valor)} r={4} fill="#0d9488">
           <title>{`${fechaCorta(p.fecha, idioma)}: ${p.valor} ${unidad}`}</title>
         </circle>
       ))}
-      <text x={izq} y={H - 8} fontSize="10" fill="#c9471a">
+      <text x={izq} y={H - 8} fontSize="10" fill="#115e59">
         {fechaCorta(puntos[0].fecha, idioma)}
       </text>
       {puntos.length > 1 && (
-        <text x={W - der} y={H - 8} fontSize="10" textAnchor="end" fill="#c9471a">
+        <text x={W - der} y={H - 8} fontSize="10" textAnchor="end" fill="#115e59">
           {fechaCorta(puntos[puntos.length - 1].fecha, idioma)}
         </text>
       )}

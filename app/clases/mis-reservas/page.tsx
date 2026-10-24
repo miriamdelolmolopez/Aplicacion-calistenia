@@ -7,7 +7,7 @@ import styles from "../../formularios.module.css";
 import { textos, type ClaveTexto } from "../../textos";
 import clay from "../../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../../ui/Mini";
-import Tacometro from "../../ui/Tacometro";
+import Anillo from "../../ui/Anillo";
 import { useIdioma } from "../../useIdioma";
 import { cancelarMiReserva } from "../acciones";
 import estilos from "./mis-reservas.module.css";
@@ -187,7 +187,7 @@ export default function MisReservas() {
               </div>
             </div>
             <div className={clay.gaugeWrap}>
-              <Tacometro porcentaje={pct} />
+              <Anillo porcentaje={pct} />
               <span className={clay.gaugePct}>{pct}%</span>
             </div>
           </section>

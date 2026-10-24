@@ -118,41 +118,37 @@
   position: relative;
   display: flex;
   flex: none;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 80px;
+  width: 86px;
+  height: 86px;
 }
 
-.tacometro {
-  width: 120px;
-  height: 75px;
-  overflow: visible;
+.anillo {
+  width: 86px;
+  height: 86px;
+}
+
+.anilloArco {
+  animation: dibujarAnillo 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dibujarAnillo {
+  from {
+    stroke-dashoffset: var(--longitud);
+  }
 }
 
 .gaugePct {
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 19px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.5px;
   color: var(--ui-title);
-}
-
-.aguja {
-  transform-origin: 0 0;
-  animation: girarAguja 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes girarAguja {
-  from {
-    transform: rotate(-70deg);
-  }
-  to {
-    transform: rotate(var(--angulo, 40deg));
-  }
 }
 
 /* ── 3. Pastillas (selector horizontal) ── */
@@ -334,13 +330,13 @@
 
 @keyframes ondaToque {
   0% {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(222, 93, 53, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(13, 148, 136, 0.4);
   }
   70% {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 12px rgba(222, 93, 53, 0);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 12px rgba(13, 148, 136, 0);
   }
   100% {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(222, 93, 53, 0);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(13, 148, 136, 0);
   }
 }
 
@@ -353,7 +349,7 @@
   color: #ffffff;
   background: var(--ui-primary);
   border-radius: 30px;
-  box-shadow: 0 16px 36px -6px rgba(222, 93, 53, 0.45);
+  box-shadow: 0 16px 36px -6px rgba(13, 148, 136, 0.45);
 }
 
 .consejoTexto {
@@ -392,7 +388,7 @@
 }
 
 .botonSuave:hover {
-  background: #de6d49;
+  background: #14b8a6;
 }
 
 .botonBlanco {
@@ -514,13 +510,13 @@
 }
 
 .pistaColumna.destacada .pista {
-  background: rgba(222, 93, 53, 0.2);
+  background: rgba(13, 148, 136, 0.2);
 }
 
 .pistaColumna.destacada .cuenta {
   height: 18px;
   background: var(--ui-primary);
-  box-shadow: 0 2px 8px rgba(222, 93, 53, 0.5);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.5);
 }
 
 .pistaEtiqueta {
@@ -594,7 +590,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aguja,
+  .anilloArco,
   .insignia {
     animation: none;
   }

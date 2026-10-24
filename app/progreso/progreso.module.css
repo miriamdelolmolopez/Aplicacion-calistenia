@@ -32,7 +32,7 @@
 .alerta {
   margin: 8px 0 0;
   font-size: 0.9rem;
-  color: #b4501f;
+  color: #115e59;
   font-weight: 600;
 }
 
@@ -87,7 +87,7 @@
   padding: 2px 8px;
   font-size: 0.78rem;
   color: #fff;
-  background: #e8602c;
+  background: #0d9488;
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -101,14 +101,14 @@
 
 .barraRelleno {
   height: 100%;
-  background: #e8602c;
+  background: #0d9488;
   border-radius: 999px;
 }
 
 .botonMini {
   border: 0;
   background: transparent;
-  color: #b4501f;
+  color: #115e59;
   font-size: 1rem;
   cursor: pointer;
 }
@@ -141,7 +141,7 @@
   padding: 10px 16px;
   font: inherit;
   color: #fff;
-  background: #e8602c;
+  background: #0d9488;
   border: 0;
   border-radius: 10px;
   cursor: pointer;
@@ -210,7 +210,7 @@
 .barraMesRelleno {
   width: 100%;
   min-height: 2px;
-  background: #e8602c;
+  background: #0d9488;
   border-radius: 6px 6px 0 0;
 }
 
@@ -236,8 +236,8 @@
 
 .chipActivo {
   color: #fff;
-  background: #c9471a;
-  border-color: #c9471a;
+  background: #115e59;
+  border-color: #115e59;
 }
 
 .selectorEj {
@@ -282,7 +282,7 @@
 
 .selectorAcciones .selectorActivo {
   color: #fff;
-  background: #c9471a;
+  background: #115e59;
 }
 
 .selectorAcciones button {
@@ -291,9 +291,9 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #c9471a;
+  color: #115e59;
   background: transparent;
-  border: 1px solid #c9471a;
+  border: 1px solid #115e59;
   border-radius: 999px;
   cursor: pointer;
 }
@@ -323,7 +323,7 @@
 .selectorPanel input[type="checkbox"] {
   width: 22px;
   height: 22px;
-  accent-color: #c9471a;
+  accent-color: #115e59;
 }
 
 .borrarEntreno {
@@ -352,9 +352,9 @@
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #c9471a;
+  color: #115e59;
   background: transparent;
-  border: 1px solid #c9471a;
+  border: 1px solid #115e59;
   border-radius: 999px;
   cursor: pointer;
 }

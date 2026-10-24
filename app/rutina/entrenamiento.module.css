@@ -141,7 +141,7 @@
   width: 38px;
   height: 38px;
   color: var(--oliva-oscuro);
-  background: #fcece4;
+  background: #e3f5f2;
   border-radius: 12px;
 }
 
@@ -156,8 +156,8 @@
   gap: 10px;
   padding: 16px 18px;
   margin-bottom: 14px;
-  background: #fef6f2;
-  border: 1px solid #f7d0c0;
+  background: #e3f5f2;
+  border: 1px solid #b7e6e0;
   border-radius: 20px;
 }
 

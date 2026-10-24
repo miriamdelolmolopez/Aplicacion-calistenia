@@ -153,11 +153,11 @@
 }
 
 .oliva {
-  background: linear-gradient(160deg, #e8602c, #e8602c);
+  background: linear-gradient(160deg, #0d9488, #0d9488);
 }
 
 .olivaOscuro {
-  background: linear-gradient(160deg, #e8602c, #2a2b2f);
+  background: linear-gradient(160deg, #0d9488, #2a2b2f);
 }
 
 .carbon {
@@ -315,7 +315,7 @@
 
 .resumenActiva {
   border-color: var(--oliva-oscuro);
-  background: #fef6f2;
+  background: #e3f5f2;
 }
 
 .resumenTitulo {
@@ -344,7 +344,7 @@
 }
 
 .mal {
-  color: #c9471a;
+  color: #115e59;
 }
 
 .resumenDetalle {

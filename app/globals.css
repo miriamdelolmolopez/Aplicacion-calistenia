@@ -6,17 +6,17 @@
   --secundario: #6b6e75;
   --relleno: #ecebe7;
   --linea: rgba(23, 24, 26, 0.08);
-  /* Acento: naranja cálido / terracota vibrante */
-  --acento: #e8602c;
-  --acento-oscuro: #c9471a;
-  --acento-suave: #fdebe3;
-  --oliva: #e8602c;
-  --oliva-oscuro: #c9471a;
+  /* Acento: azul turquesa */
+  --acento: #0d9488;
+  --acento-oscuro: #115e59;
+  --acento-suave: #e3f5f2;
+  --oliva: #0d9488;
+  --oliva-oscuro: #115e59;
   --radio: 28px;
   /* Sombras muy suaves, solo para dar un poco de profundidad */
   --sombra: 0 4px 18px -10px rgba(23, 24, 26, 0.12);
   --sombra-alta: 0 16px 34px -16px rgba(23, 24, 26, 0.22);
-  --sombra-acento: 0 12px 24px -12px rgba(232, 96, 44, 0.55);
+  --sombra-acento: 0 12px 24px -12px rgba(13, 148, 136, 0.55);
   --font-titulos: var(--font-outfit);
   --font-cuerpo: var(--font-outfit);
 }
@@ -151,11 +151,11 @@ time,
 
 /* Sistema de diseño Calistenia UI (solo lo usan las pantallas migradas; ver app/ui/clay.module.css) */
 :root {
-  --ui-primary: #de5d35;
-  --ui-primary-hover: #cf4e27;
-  --ui-primary-active: #b83e1a;
-  --ui-primary-light: #fbefea;
-  --ui-primary-soft-btn: #e57d5c;
+  --ui-primary: #0d9488;
+  --ui-primary-hover: #0f766e;
+  --ui-primary-active: #115e59;
+  --ui-primary-light: #e3f5f2;
+  --ui-primary-soft-btn: #2dd4bf;
   --ui-surface-pure: #ffffff;
   --ui-surface-screen: #f8f8fa;
   --ui-surface-subtle: #f6f6f9;
@@ -167,5 +167,5 @@ time,
   --ui-barra-inactiva: #ececee;
   --ui-sombra-card: 0 10px 30px -4px rgba(28, 28, 30, 0.05), 0 4px 12px -2px rgba(28, 28, 30, 0.02);
   --ui-sombra-card-hover: 0 14px 34px -4px rgba(28, 28, 30, 0.09), 0 6px 16px -2px rgba(28, 28, 30, 0.04);
-  --ui-sombra-boton: 0 8px 22px -3px rgba(222, 93, 53, 0.35);
+  --ui-sombra-boton: 0 8px 22px -3px rgba(13, 148, 136, 0.35);
 }
