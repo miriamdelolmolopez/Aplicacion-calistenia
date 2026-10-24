@@ -9,7 +9,7 @@
   padding: 10px 14px;
   margin: 0 0 12px;
   background: #17181a;
-  color: #f4f3f1;
+  color: #f3f4f5;
   border-radius: 12px;
 }
 
@@ -40,11 +40,11 @@
   gap: 8px;
   padding: 10px;
   border-radius: 10px;
-  background: #f4f3f1;
+  background: #f3f4f5;
 }
 
 .serieHecha {
-  background: #e0f9fc;
+  background: #f1f2f4;
 }
 
 .serieCabecera {
@@ -133,7 +133,7 @@
   flex: 1 1 100px;
   padding: 12px;
   text-align: center;
-  background: #f4f3f1;
+  background: #f3f4f5;
   border-radius: 10px;
 }
 

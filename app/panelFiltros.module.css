@@ -24,7 +24,7 @@
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0e7490;
+  color: #3a3a3c;
   cursor: pointer;
   background: #ffffff;
   border: 1px solid rgba(10, 168, 192, 0.45);
@@ -37,7 +37,7 @@
 }
 
 .embudoActivo {
-  background: #e0f9fc;
+  background: #f1f2f4;
   border-color: #0aa8c0;
 }
 

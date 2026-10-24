@@ -315,7 +315,7 @@
 
 .resumenActiva {
   border-color: var(--oliva-oscuro);
-  background: #e0f9fc;
+  background: #f1f2f4;
 }
 
 .resumenTitulo {
@@ -344,7 +344,7 @@
 }
 
 .mal {
-  color: #0e7490;
+  color: #3a3a3c;
 }
 
 .resumenDetalle {

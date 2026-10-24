@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Calistenia y pino · Fuengirola",
     start_url: "/",
     display: "standalone",
-    background_color: "#f4f3f1",
-    theme_color: "#f4f3f1",
+    background_color: "#f3f4f5",
+    theme_color: "#f3f4f5",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },

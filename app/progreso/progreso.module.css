@@ -32,7 +32,7 @@
 .alerta {
   margin: 8px 0 0;
   font-size: 0.9rem;
-  color: #0e7490;
+  color: #3a3a3c;
   font-weight: 600;
 }
 
@@ -72,7 +72,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 10px;
-  background: #f4f3f1;
+  background: #f3f4f5;
   border-radius: 10px;
 }
 
@@ -108,7 +108,7 @@
 .botonMini {
   border: 0;
   background: transparent;
-  color: #0e7490;
+  color: #3a3a3c;
   font-size: 1rem;
   cursor: pointer;
 }
@@ -237,7 +237,7 @@
 .chipActivo {
   color: #fff;
   background: #0e7490;
-  border-color: #0e7490;
+  border-color: #3a3a3c;
 }
 
 .selectorEj {
@@ -291,7 +291,7 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #0e7490;
+  color: #3a3a3c;
   background: transparent;
   border: 1px solid #0e7490;
   border-radius: 999px;
@@ -323,7 +323,7 @@
 .selectorPanel input[type="checkbox"] {
   width: 22px;
   height: 22px;
-  accent-color: #0e7490;
+  accent-color: #3a3a3c;
 }
 
 .borrarEntreno {
@@ -352,7 +352,7 @@
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0e7490;
+  color: #3a3a3c;
   background: transparent;
   border: 1px solid #0e7490;
   border-radius: 999px;

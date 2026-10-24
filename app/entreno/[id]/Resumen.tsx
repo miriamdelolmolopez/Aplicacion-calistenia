@@ -83,7 +83,7 @@ async function crearImagen(opciones: {
   c.fillStyle = degradado;
   c.fillRect(0, ALTO - alturaFranja - 120, ANCHO, alturaFranja + 120);
 
-  c.fillStyle = "#f4f3f1";
+  c.fillStyle = "#f3f4f5";
   c.textBaseline = "alphabetic";
   c.font = "600 64px Montserrat, Arial, sans-serif";
   c.fillText(opciones.sesion.slice(0, 26), 60, ALTO - 360);

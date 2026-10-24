@@ -30,7 +30,7 @@ export default async function ImprimirHorario({ params }: { params: Promise<{ id
         .hoja h1 { margin: 0 0 4px; }
         .hoja table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 16px; }
         .hoja th, .hoja td { border: 1px solid #bbb; padding: 8px; vertical-align: top; text-align: left; font-size: 0.9rem; }
-        .hoja th { background: #ecebe7; }
+        .hoja th { background: #ececee; }
         .hoja td div { margin-bottom: 8px; }
         .hoja td small { color: #555; }
         @media print {
