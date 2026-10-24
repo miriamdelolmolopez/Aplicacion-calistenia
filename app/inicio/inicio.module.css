@@ -425,15 +425,3 @@
   gap: 8px;
   min-width: 0;
 }
-
-.resumenCuadricula > .resumenTarjeta:first-child {
-  color: #ffffff;
-  background: var(--acento);
-  border-color: transparent;
-  box-shadow: var(--sombra-acento);
-}
-
-.resumenCuadricula > .resumenTarjeta:first-child .resumenTitulo,
-.resumenCuadricula > .resumenTarjeta:first-child .resumenPie {
-  color: rgba(255, 255, 255, 0.9);
-}
