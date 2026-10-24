@@ -319,17 +319,18 @@
 }
 
 .resumenTitulo {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--secundario);
 }
 
 .resumenValor {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 1.6rem;
-  font-weight: 500;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.15;
 }
