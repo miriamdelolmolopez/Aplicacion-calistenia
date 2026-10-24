@@ -48,7 +48,7 @@
 }
 
 .hora {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-weight: 500;
   font-size: 1rem;
 }
@@ -171,7 +171,7 @@
 }
 
 .diaTira {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
 }
 
 .diaTira small {

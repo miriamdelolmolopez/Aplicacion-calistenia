@@ -112,7 +112,7 @@ kbd,
 output,
 time,
 .mono {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 

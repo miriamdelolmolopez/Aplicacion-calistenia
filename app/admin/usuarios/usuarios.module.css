@@ -217,11 +217,11 @@
 .tabla th {
   padding: 10px 12px;
   text-align: left;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 0.68rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--secundario);
   background: #f1f0ec;
   border-bottom: 1px solid var(--linea);

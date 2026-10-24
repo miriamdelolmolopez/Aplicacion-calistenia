@@ -283,7 +283,7 @@
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
 }
 
 .numeros span {
@@ -453,7 +453,7 @@
 .resultadoValor {
   font-size: 1.7rem;
   font-weight: 600;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
 }
 
 .rejillaCalc > * {

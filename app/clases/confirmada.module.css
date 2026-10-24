@@ -76,7 +76,7 @@
 }
 
 .datos span:first-of-type {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 0.85rem;
   color: var(--carbon);
 }
