@@ -23,12 +23,12 @@
 .resumen strong {
   font-family: "Cormorant Garamond", serif;
   font-size: 1.7rem;
-  color: #c9471a;
+  color: var(--ui-title);
 }
 
 .resumen span {
   font-size: 0.75rem;
-  color: #c9471a;
+  color: var(--ui-secundario);
 }
 
 .titulo {
@@ -68,7 +68,7 @@
 .columna small {
   margin-top: 2px;
   font-size: 0.65rem;
-  color: #c9471a;
+  color: var(--ui-secundario);
 }
 
 .lista {

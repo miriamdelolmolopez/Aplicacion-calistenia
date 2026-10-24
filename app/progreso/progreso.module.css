@@ -26,7 +26,7 @@
 
 .ayuda {
   font-size: 0.85rem;
-  color: #c9471a;
+  color: var(--ui-secundario);
 }
 
 .alerta {
