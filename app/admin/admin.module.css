@@ -87,7 +87,7 @@
 .campo input:focus,
 .campo select:focus {
   border-color: var(--oliva);
-  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.16);
+  box-shadow: 0 0 0 4px rgba(10, 168, 192, 0.16);
 }
 
 .grupo {
@@ -214,7 +214,7 @@
 }
 
 .etiqueta {
-  background: rgba(13, 148, 136, 0.14);
+  background: rgba(10, 168, 192, 0.14);
   color: var(--oliva-oscuro);
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.7rem;
@@ -496,8 +496,8 @@
 }
 
 .alerta {
-  background: #e3f5f2;
-  color: #134e4a;
+  background: #e0f9fc;
+  color: #164e63;
   font-size: 0.85rem;
   font-weight: 600;
   padding: 6px 10px;

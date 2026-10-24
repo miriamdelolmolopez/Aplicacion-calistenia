@@ -153,7 +153,7 @@
   align-items: center;
   gap: 10px;
   padding: 14px;
-  background: #e3f5f2;
+  background: #e0f9fc;
   border-radius: 22px;
 }
 
@@ -198,8 +198,8 @@
 }
 
 .cronoBotones .cronoParar {
-  background: #115e59;
-  border-color: #115e59;
+  background: #0e7490;
+  border-color: #0e7490;
 }
 
 .campos {
@@ -395,7 +395,7 @@
   font-size: 5rem;
   line-height: 1;
   font-weight: 600;
-  color: #115e59;
+  color: #0e7490;
   font-variant-numeric: tabular-nums;
 }
 
@@ -496,7 +496,7 @@
 
 .progreso > div {
   background: var(--ui-primary);
-  box-shadow: 0 0 10px rgba(13, 148, 136, 0.45);
+  box-shadow: 0 0 10px rgba(10, 168, 192, 0.45);
 }
 
 .ejercicio {

@@ -41,8 +41,8 @@ export default function GraficaLinea({
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }} role="img">
       <defs>
         <linearGradient id="relleno-linea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0d9488" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="#0d9488" stopOpacity="0" />
+          <stop offset="0%" stopColor="#0aa8c0" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#0aa8c0" stopOpacity="0" />
         </linearGradient>
       </defs>
       {[bajo, (bajo + alto) / 2, alto].map((v) => (
@@ -54,14 +54,14 @@ export default function GraficaLinea({
         </g>
       ))}
       {puntos.length > 1 && <path d={area} fill="url(#relleno-linea)" />}
-      <path d={camino} fill="none" stroke="#0d9488" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={camino} fill="none" stroke="#0aa8c0" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
       {/* El último punto late suavemente */}
-      <circle cx={x(puntos.length - 1)} cy={y(puntos[puntos.length - 1].valor)} r={4} fill="none" stroke="#0d9488" strokeWidth={2}>
+      <circle cx={x(puntos.length - 1)} cy={y(puntos[puntos.length - 1].valor)} r={4} fill="none" stroke="#0aa8c0" strokeWidth={2}>
         <animate attributeName="r" values="4;12" dur="2s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="0.55;0" dur="2s" repeatCount="indefinite" />
       </circle>
       {puntos.map((p, i) => (
-        <circle key={p.fecha} cx={x(i)} cy={y(p.valor)} r={4} fill="#ffffff" stroke="#0d9488" strokeWidth={2.5}>
+        <circle key={p.fecha} cx={x(i)} cy={y(p.valor)} r={4} fill="#ffffff" stroke="#0aa8c0" strokeWidth={2.5}>
           <title>{`${fechaCorta(p.fecha, idioma)}: ${p.valor} ${unidad}`}</title>
         </circle>
       ))}

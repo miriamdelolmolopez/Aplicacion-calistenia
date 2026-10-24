@@ -8,8 +8,10 @@ import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
+import AvisoVistaAlumna from "../AvisoVistaAlumna";
+import vistaEstilos from "../vistaAlumna.module.css";
 import { useIdioma } from "../useIdioma";
-import { useMiPerfil } from "../useMiPerfil";
+import { useMiPerfil, cambiarVistaAlumna } from "../useMiPerfil";
 import estilos from "./perfil.module.css";
 import { obtenerFotos, quitarFoto, subirFoto } from "./acciones";
 import { textosPerfil } from "./textosPerfil";
@@ -235,6 +237,13 @@ export default function Perfil() {
         <h2 className={estilos.nombre}>{datos.nombre || datos.email}</h2>
         <p className={estilos.correo}>{datos.email}</p>
       </section>
+
+      <AvisoVistaAlumna perfil={mi} />
+      {esAdmin && (
+        <button type="button" className={vistaEstilos.cambiar} onClick={() => cambiarVistaAlumna(true)}>
+          👁️ {idioma === "en" ? "Switch to student view" : "Cambiar a vista de alumna"}
+        </button>
+      )}
 
       {!esAdmin && (
         <section className={estilos.numeros} style={{ gridTemplateColumns: `repeat(${numeros.length}, 1fr)` }}>

@@ -16,6 +16,7 @@ import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoFlecha, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
+import AvisoVistaAlumna from "../AvisoVistaAlumna";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
@@ -180,6 +181,7 @@ export default function Inicio() {
     <main className={styles.pagina}>
       <BarraSuperior />
 
+      <AvisoVistaAlumna perfil={perfil} />
       <header className={clay.cabecera}>
         <span className={clay.avatar}>
           <Avatar nombre={perfil.nombre} tamano={40} />

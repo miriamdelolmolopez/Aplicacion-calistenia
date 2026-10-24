@@ -1,7 +1,7 @@
 // Colores de los tipos de clase. Todos son lo bastante oscuros para llevar texto blanco encima.
 export const PALETA_CLASES = [
   { color: "#5A5E3B", nombre: "Oliva" },
-  { color: "#0f766e", nombre: "Terracota" },
+  { color: "#0b8aa3", nombre: "Terracota" },
   { color: "#3F6A8A", nombre: "Azul pizarra" },
   { color: "#9A6F1C", nombre: "Mostaza" },
   { color: "#7A4B7A", nombre: "Ciruela" },

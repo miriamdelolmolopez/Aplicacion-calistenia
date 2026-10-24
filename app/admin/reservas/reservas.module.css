@@ -126,8 +126,8 @@
 
 .novino {
   color: #fff;
-  background: #115e59;
-  border-color: #115e59;
+  background: #0e7490;
+  border-color: #0e7490;
 }
 
 .panelPersona {
@@ -235,7 +235,7 @@
 }
 
 .cuadroNoVino {
-  border-color: #115e59;
+  border-color: #0e7490;
 }
 
 .cuadroLibre {
@@ -322,7 +322,7 @@
   gap: 14px;
   margin-bottom: 12px;
   padding: 14px;
-  background: #e3f5f2;
+  background: #e0f9fc;
   border-radius: 14px;
 }
 

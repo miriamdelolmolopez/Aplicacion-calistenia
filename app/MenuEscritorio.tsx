@@ -8,7 +8,7 @@ import { CLAVE_TEXTO, MENU_ADMIN } from "./MenuLateral";
 import estilos from "./escritorio.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
-import { RUTAS, seccionesDe, type MiPerfil } from "./useMiPerfil";
+import { RUTAS, seccionesDe, type MiPerfil, olvidarVistaAlumna } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
 
 type Opcion = { href: string; icono: NombreIcono; texto: string };
@@ -34,6 +34,7 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
   };
 
   async function salir() {
+    olvidarVistaAlumna();
     await createClient().auth.signOut();
     router.push("/");
   }

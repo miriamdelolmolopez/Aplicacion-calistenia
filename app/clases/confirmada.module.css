@@ -198,7 +198,7 @@
 .check {
   margin-top: 0;
   border: 0;
-  box-shadow: 0 14px 28px -12px rgba(13, 148, 136, 0.55);
+  box-shadow: 0 14px 28px -12px rgba(10, 168, 192, 0.55);
   background: var(--ui-primary);
 }
 

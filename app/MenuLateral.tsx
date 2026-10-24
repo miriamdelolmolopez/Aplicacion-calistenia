@@ -8,7 +8,7 @@ import Icono, { type NombreIcono } from "./Icono";
 import estilos from "./menu.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
-import { RUTAS, seccionesDe, type MiPerfil, type Seccion } from "./useMiPerfil";
+import { RUTAS, seccionesDe, type MiPerfil, type Seccion, olvidarVistaAlumna } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
 
 export const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
@@ -66,6 +66,7 @@ export default function MenuLateral({
   if (!abierto) return null;
 
   async function salir() {
+    olvidarVistaAlumna();
     await createClient().auth.signOut();
     onCerrar();
     router.push("/");

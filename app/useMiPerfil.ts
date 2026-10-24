@@ -8,7 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 export type MiPerfil = {
   id: string;
   nombre: string;
-  rol: string;
+  rol: string; // el que se usa para pintar la app (con «vista de alumna» una administradora sale como alumna)
+  rolReal: string; // el de verdad; manda en los permisos
   servicios: string[]; // los marcados en su perfil y los de sus bonos
   planOnline: boolean; // tiene un plan online activo ahora mismo
   datosCompletos: boolean;
@@ -17,6 +18,35 @@ export type MiPerfil = {
 
 // null = cargando · "anonimo" = no ha iniciado sesión
 export type Estado = MiPerfil | null | "anonimo";
+
+// Una administradora puede ver la app como la ve una alumna. Solo cambia lo que se muestra: los permisos siguen siendo los suyos.
+const CLAVE_VISTA_ALUMNA = "vistaAlumna";
+
+function vistaAlumnaActiva(): boolean {
+  try {
+    return localStorage.getItem(CLAVE_VISTA_ALUMNA) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function cambiarVistaAlumna(activar: boolean) {
+  try {
+    if (activar) localStorage.setItem(CLAVE_VISTA_ALUMNA, "1");
+    else localStorage.removeItem(CLAVE_VISTA_ALUMNA);
+  } catch {
+    // Sin almacenamiento no se puede cambiar de vista.
+  }
+  window.location.href = "/inicio";
+}
+
+export function olvidarVistaAlumna() {
+  try {
+    localStorage.removeItem(CLAVE_VISTA_ALUMNA);
+  } catch {
+    // Nada que olvidar.
+  }
+}
 
 async function cargarPerfil(): Promise<Estado> {
   const supabase = createClient();
@@ -37,7 +67,8 @@ async function cargarPerfil(): Promise<Estado> {
   return {
     id,
     nombre: perfil.nombre ?? "",
-    rol: perfil.rol,
+    rol: perfil.rol === "admin" && vistaAlumnaActiva() ? "alumno" : perfil.rol,
+    rolReal: perfil.rol,
     servicios: [...new Set([...(servicios ?? []).map((s) => s.servicio), ...(bonos ?? []).map((b) => b.servicio)])],
     planOnline: plan === true,
     datosCompletos: !!perfil.datos_completos,
@@ -75,7 +106,7 @@ export function useMiPerfil(recargarCon?: string): Estado {
   // Solo se decide con datos recién leídos (si no, tras aceptar volvería a la pantalla de datos).
   useEffect(() => {
     if (!actualizado) return;
-    if (perfil && perfil !== "anonimo" && perfil.rol !== "admin" && !perfil.legalAceptado) {
+    if (perfil && perfil !== "anonimo" && perfil.rolReal !== "admin" && !perfil.legalAceptado) {
       if (!ruta.startsWith("/datos") && !ruta.startsWith("/legal")) router.replace("/datos");
     }
   }, [perfil, actualizado, ruta, router]);
