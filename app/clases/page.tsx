@@ -272,6 +272,11 @@ export default function Clases() {
   const clasesDelDia = (datos?.lista ?? []).filter(
     (c) => claveDia(c.empieza_en) === diaElegido && (filtro === "todo" || c.servicio === filtro),
   );
+  // Si el día elegido no tiene clases, se ofrece saltar al siguiente que sí las tenga.
+  const siguienteConClases = (datos?.lista ?? [])
+    .filter((c) => claveDia(c.empieza_en) > diaElegido && (filtro === "todo" || c.servicio === filtro))
+    .map((c) => claveDia(c.empieza_en))
+    .sort()[0];
   const etiquetaDia = (() => {
     if (!datos) return "";
     const texto = textoDia(`${diaElegido}T12:00:00Z`, idioma);
@@ -410,6 +415,20 @@ export default function Clases() {
           )}
 
           {clasesDelDia.length === 0 && <p className={styles.aviso}>{filtro === "todo" ? t.sinClasesDia : t.sinClasesFiltro}</p>}
+          {clasesDelDia.length === 0 && siguienteConClases && (
+            <button
+              type="button"
+              className={estilos.filtro}
+              onClick={() => {
+                setDia(siguienteConClases);
+                setSemana(Math.floor((new Date(`${siguienteConClases}T12:00:00Z`).getTime() - new Date(`${primerLunes}T12:00:00Z`).getTime()) / (7 * 86400000)));
+                setConfirmando(null);
+                setVerNombres(null);
+              }}
+            >
+              {t.verSiguienteDia} · {textoDia(`${siguienteConClases}T12:00:00Z`, idioma)}
+            </button>
+          )}
 
           {clasesDelDia.map((c) => {
             const cancelada = c.estado === "cancelada";
