@@ -35,6 +35,7 @@ function mensajeDe(error: { message: string } | null): string {
 
 function refrescar(rutinaId?: string) {
   revalidatePath("/admin/rutinas");
+  revalidatePath("/admin/plantillas-online");
   if (rutinaId) revalidatePath(`/admin/rutinas/${rutinaId}`);
 }
 
@@ -369,4 +370,72 @@ export async function guardarItem(_previo: Estado, formData: FormData): Promise<
 
   refrescar(rutinaId);
   return { mensaje: "Guardado." };
+}
+
+// ---------- Carpetas (como en un Drive) ----------
+
+export async function crearCarpeta(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+  const nombre = texto(formData, "nombre");
+  const padre = texto(formData, "padre");
+  if (nombre.length < 1 || nombre.length > 60) return { error: "El nombre debe tener entre 1 y 60 letras." };
+  if (padre && !UUID.test(padre)) return { error: "Carpeta no válida." };
+
+  const { error } = await createAdminClient().from("carpetas_rutinas").insert({ nombre, padre_id: padre || null });
+  if (error) return { error: "No se ha podido crear la carpeta. ¿Has ejecutado el archivo 044 en Supabase?" };
+  refrescar();
+  return { mensaje: "Carpeta creada." };
+}
+
+export async function renombrarCarpeta(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+  const id = texto(formData, "id");
+  const nombre = texto(formData, "nombre");
+  if (!UUID.test(id)) return { error: "Carpeta no válida." };
+  if (nombre.length < 1 || nombre.length > 60) return { error: "El nombre debe tener entre 1 y 60 letras." };
+  const { error } = await createAdminClient().from("carpetas_rutinas").update({ nombre }).eq("id", id);
+  if (error) return { error: "No se ha podido guardar." };
+  refrescar();
+  return { mensaje: "Guardado." };
+}
+
+// Borra una carpeta y sus subcarpetas. Las rutinas no se borran: vuelven al inicio.
+export async function eliminarCarpeta(id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { error: "Carpeta no válida." };
+  const { error } = await createAdminClient().from("carpetas_rutinas").delete().eq("id", id);
+  if (error) return { error: "No se ha podido eliminar la carpeta." };
+  refrescar();
+  return { mensaje: "Carpeta eliminada. Sus rutinas han vuelto al inicio." };
+}
+
+export async function moverRutina(rutinaId: string, carpetaId: string | null): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(rutinaId) || (carpetaId !== null && !UUID.test(carpetaId))) return { error: "No válido." };
+  const { error } = await createAdminClient().from("rutinas").update({ carpeta_id: carpetaId }).eq("id", rutinaId);
+  if (error) return { error: "No se ha podido mover la rutina." };
+  refrescar();
+  return { mensaje: carpetaId ? "Rutina movida a la carpeta." : "Rutina movida al inicio." };
+}
+
+// ---------- Duplicar y eliminar con el mismo formato que el resto de listas ----------
+
+// Copia una rutina para la misma persona (o una plantilla), con «(copia)» en el nombre. Queda como borrador.
+export async function duplicarRutinaLista(id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { error: "Rutina no válida." };
+  const admin = createAdminClient();
+  const { data: o } = await admin.from("rutinas").select("nombre, user_id").eq("id", id).maybeSingle();
+  if (!o) return { error: "No se ha encontrado la rutina." };
+
+  const { error } = await admin.rpc("duplicar_rutina", { p_rutina: id, p_user_destino: o.user_id, p_nombre: `${o.nombre} (copia)` });
+  if (error) return { error: mensajeDe(error) };
+  refrescar();
+  return { mensaje: `Creada «${o.nombre} (copia)».` };
+}
+
+export async function eliminarRutinaLista(id: string): Promise<Estado> {
+  const datos = new FormData();
+  datos.set("id", id);
+  return eliminarRutina({}, datos);
 }

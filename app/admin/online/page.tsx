@@ -11,6 +11,7 @@ export default async function Online() {
       azulejos={[
         { href: "/admin/ejercicios", titulo: "Biblioteca", foto: "calistenia" },
         { href: "/admin/rutinas", titulo: "Rutinas", foto: "online" },
+        { href: "/admin/plantillas-online", titulo: "Plantillas online", foto: "progreso" },
       ]}
     />
   );

@@ -29,7 +29,6 @@ export function NuevaRutina({
 
   return (
     <form action={accion} className={styles.tarjeta}>
-      <h2>Nueva rutina</h2>
       <div className={styles.campo}>
         <label htmlFor="nueva-nombre">Nombre</label>
         <input id="nueva-nombre" name="nombre" required maxLength={80} placeholder="Octubre 2026" />
@@ -40,7 +39,6 @@ export function NuevaRutina({
           <option value="" disabled>
             Elige…
           </option>
-          <option value="plantilla">Plantilla (sin alumno)</option>
           {alumnos.map((a) => (
             <option key={a.id} value={a.id}>
               {a.texto}
@@ -59,7 +57,7 @@ export function NuevaRutina({
           ))}
         </select>
         <span className={styles.ayuda}>
-          Copia las sesiones y ejercicios de una plantilla o de otra rutina; luego la editas sin
+          Copia las sesiones y ejercicios de una plantilla online o de otra rutina; luego la editas sin
           tocar la original.
         </span>
       </div>
