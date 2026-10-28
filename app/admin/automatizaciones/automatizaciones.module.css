@@ -1,0 +1,72 @@
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filtros > div {
+  flex: 1 1 200px;
+}
+
+.vacio {
+  margin: 0;
+  color: var(--secundario);
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.datos > div {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--acento) 7%, var(--blanco));
+  border-radius: 14px;
+  font-size: 0.9rem;
+}
+
+.datos dt {
+  font-weight: 700;
+  color: var(--acento-oscuro);
+}
+
+.datos dd {
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .datos > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+.estado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--relleno);
+  color: var(--carbon);
+}
+
+.chipOn {
+  background: color-mix(in srgb, #2fb57a 18%, var(--blanco));
+  color: #1f7a52;
+}
+
+.chipOff {
+  background: color-mix(in srgb, #94a3b8 22%, var(--blanco));
+  color: #475569;
+}

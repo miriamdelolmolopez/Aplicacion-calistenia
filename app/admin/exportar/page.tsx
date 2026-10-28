@@ -27,6 +27,12 @@ export default async function Exportar() {
         salud: guárdalo en un sitio seguro y bórralo cuando ya no lo necesites.
       </p>
       <section className={styles.tarjeta}>
+        <div style={{ marginBottom: 14 }}>
+          <a href="/admin/exportar/todo" download className={styles.boton}>
+            Descargar todo junto (un solo CSV)
+          </a>
+          <p className={styles.ayuda}>Un solo archivo con todo: alumnos, atletas, pagos, bonos, historial de clases y aceptaciones. Cada bloque va uno detrás de otro, con su título y sus propias columnas.</p>
+        </div>
         {ARCHIVOS.map((a) => (
           <div key={a.tipo} style={{ marginBottom: 14 }}>
             <a href={`/admin/exportar/${a.tipo}`} download className={styles.boton}>

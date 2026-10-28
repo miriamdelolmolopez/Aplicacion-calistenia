@@ -5,6 +5,8 @@ import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { useEnvio } from "../useEnvio";
 import { guardarAutomatizacion } from "./acciones";
+import estilos from "./automatizaciones.module.css";
+import type { Envios, Info } from "./ListaAutomatizaciones";
 
 export type Auto = {
   clave: string;
@@ -16,7 +18,7 @@ export type Auto = {
   mensaje_en: string;
 };
 
-export function FormularioAutomatizacion({ auto, titulo, cuando, variables }: { auto: Auto; titulo: string; cuando: string; variables: string }) {
+export function FormularioAutomatizacion({ auto, info, envios }: { auto: Auto; info: Info; envios: Envios }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarAutomatizacion, {});
   const { ref, alEnviar } = useEnvio(accion, estado, false);
   const p = auto.clave;
@@ -24,8 +26,29 @@ export function FormularioAutomatizacion({ auto, titulo, cuando, variables }: { 
   return (
     <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       <input type="hidden" name="clave" value={auto.clave} />
-      <h2>{titulo}</h2>
-      <p className={styles.ayuda}>{cuando}</p>
+      <h2>{info.titulo}</h2>
+      <div className={estilos.estado}>
+        <span className={`${estilos.chip} ${auto.activa ? estilos.chipOn : estilos.chipOff}`}>{auto.activa ? "Activada" : "Apagada"}</span>
+        <span className={estilos.chip}>
+          {envios.total === 0
+            ? "Todavía no se ha enviado ninguno"
+            : `Enviados: ${envios.total}${envios.ultimo ? ` · último: ${envios.ultimo}` : ""}`}
+        </span>
+      </div>
+      <dl className={estilos.datos}>
+        <div>
+          <dt>Cuándo actúa</dt>
+          <dd>{info.cuando}</dd>
+        </div>
+        <div>
+          <dt>A quién</dt>
+          <dd>{info.aQuien}</dd>
+        </div>
+        <div>
+          <dt>Qué hace</dt>
+          <dd>{info.queHace}</dd>
+        </div>
+      </dl>
       <label className={styles.casilla}>
         <input type="checkbox" name="activa" defaultChecked={auto.activa} />
         <span>Activada</span>
@@ -33,7 +56,7 @@ export function FormularioAutomatizacion({ auto, titulo, cuando, variables }: { 
 
       {auto.clave === "bono_caduca" && (
         <div className={styles.campo}>
-          <label htmlFor={`a-d-${p}`}>Días de antelación</label>
+          <label htmlFor={`a-d-${p}`}>Días de antelación (avisa cuando al bono le quedan estos días o menos)</label>
           <input id={`a-d-${p}`} name="dias" type="number" min={1} max={60} required defaultValue={auto.dias} />
         </div>
       )}
@@ -41,7 +64,7 @@ export function FormularioAutomatizacion({ auto, titulo, cuando, variables }: { 
       <details className={styles.detalles}>
         <summary>Cambiar el texto del correo</summary>
         <p className={styles.ayuda}>
-          Puedes poner estas palabras entre llaves y se sustituyen solas: {variables}. Una línea en blanco separa párrafos.
+          Puedes poner estas palabras entre llaves y se sustituyen solas: {info.variables}. Una línea en blanco separa párrafos.
         </p>
         <div className={styles.campo}>
           <label htmlFor={`a-ae-${p}`}>Asunto (español)</label>

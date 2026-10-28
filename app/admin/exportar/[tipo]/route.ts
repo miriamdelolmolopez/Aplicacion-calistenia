@@ -41,6 +41,15 @@ function aCsv(columnas: string[], filas: string[][]): string {
   return "﻿" + [columnas, ...filas].map((f) => f.map(celda).join(";")).join("\r\n");
 }
 
+const TITULOS_TODO: [string, string][] = [
+  ["alumnos", "ALUMNOS"],
+  ["atletas", "ATLETAS"],
+  ["pagos", "PAGOS"],
+  ["bonos", "BONOS"],
+  ["reservas", "HISTORIAL DE CLASES"],
+  ["aceptaciones", "ACEPTACIONES LEGALES"],
+];
+
 async function construir(tipo: string): Promise<{ nombre: string; csv: string } | null> {
   if (tipo === "atletas") {
     const { columnas, filas } = await filasAtletas();
@@ -159,10 +168,28 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ tipo
   if (perfil?.rol !== "admin") return new NextResponse("No autorizado", { status: 403 });
 
   const { tipo } = await contexto.params;
+  const hoy = new Date().toISOString().slice(0, 10);
+
+  // Todo junto en un solo CSV: un bloque detrás de otro, cada uno con su título y sus columnas.
+  if (tipo === "todo") {
+    const bloques: string[] = [];
+    for (const [t, titulo] of TITULOS_TODO) {
+      const parte = await construir(t).catch(() => null);
+      if (parte) bloques.push(`${celda(titulo)}\r\n${parte.csv.replace(/^\uFEFF/, "")}`);
+    }
+    if (bloques.length === 0) return new NextResponse("No se han podido preparar los datos", { status: 500 });
+    return new NextResponse("\uFEFF" + bloques.join("\r\n\r\n"), {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="caliscoach-todo-${hoy}.csv"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
   const resultado = await construir(tipo).catch(() => null);
   if (!resultado) return new NextResponse("No encontrado", { status: 404 });
 
-  const hoy = new Date().toISOString().slice(0, 10);
   return new NextResponse(resultado.csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
