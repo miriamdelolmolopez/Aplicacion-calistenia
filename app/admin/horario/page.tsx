@@ -1,15 +1,17 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, lunesDe, sumarDias, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
-import { FilaClase } from "../clases/Controles";
-import { AnadirClase, AplicarPlantilla, CalendarioSemana, CambiarHora, type TipoOpcion } from "./Controles";
+import AnadirClaseGeneral from "./AnadirClaseGeneral";
+import { AplicarPlantilla, CalendarioSemana, type TipoOpcion } from "./Controles";
+import { IconoArena, IconoProhibido, IconoUsuario } from "./iconos";
+import TarjetaClase from "./TarjetaClase";
 import estilos from "./horario.module.css";
 
-export const metadata = { title: "Horario · Administración" };
+export const metadata = { title: "Horarios presenciales · Administración" };
 
-type Persona = { nombre: string | null; apellidos: string | null; email: string | null };
 type Clase = {
   id: string;
   empieza_en: string;
@@ -17,22 +19,18 @@ type Clase = {
   plazas_prueba: number;
   estado: string;
   motivo_cancelacion: string | null;
-  tipos_clase: { nombre: string; color: string | null } | null;
-  reservas: { id: string; estado: string; user_id: string; es_prueba: boolean; profiles: Persona | null }[];
-  lista_espera: { id: string; creado_en: string; profiles: Persona | null }[];
+  tipo_id: string;
+  tipos_clase: {
+    nombre: string;
+    color: string | null;
+    servicio: string;
+    cancelacion_horas: number | null;
+    reserva_dias_max: number | null;
+  } | null;
+  reservas: { id: string; estado: string }[];
 };
 
-function nombreDe(p: Persona | null) {
-  if (!p) return "(persona borrada)";
-  return [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
-}
-
 const DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
-
-function etiquetaDia(fecha: string, i: number): string {
-  const [, m, d] = fecha.split("-").map(Number);
-  return `${DIAS[i]} ${d}/${m}`;
-}
 
 export default async function Horario({ searchParams }: { searchParams: Promise<{ semana?: string }> }) {
   const { supabase } = await requireAdmin();
@@ -46,18 +44,18 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
   const desde = instanteMadrid(lunes, "00:00")?.toISOString() ?? new Date().toISOString();
   const hasta = instanteMadrid(sumarDias(lunes, 7), "00:00")?.toISOString() ?? desde;
 
-  const [{ data: clasesDatos }, { data: tiposDatos }, { data: plantillasDatos }, { data: alumnosDatos }, { data: fechasDatos }] = await Promise.all([
+  const [{ data: clasesDatos }, { data: tiposDatos }, { data: plantillasDatos }, { data: ajustesDatos }, { data: fechasDatos }] = await Promise.all([
     supabase
       .from("sesiones_clase")
       .select(
-        "id, empieza_en, plazas, plazas_prueba, estado, motivo_cancelacion, tipos_clase(nombre, color), reservas(id, estado, user_id, es_prueba, profiles(nombre, apellidos, email)), lista_espera(id, creado_en, profiles(nombre, apellidos, email))",
+        "id, empieza_en, plazas, plazas_prueba, estado, tipo_id, tipos_clase(nombre, color, servicio, cancelacion_horas, reserva_dias_max), reservas(id, estado)",
       )
       .gte("empieza_en", desde)
       .lt("empieza_en", hasta)
       .order("empieza_en"),
     supabase.from("tipos_clase").select("id, nombre, plazas_max, plazas_prueba").eq("activo", true).order("orden").order("nombre"),
     supabase.from("plantillas_horario").select("id, nombre, principal").order("principal", { ascending: false }).order("nombre"),
-    supabase.from("profiles").select("id, nombre, apellidos, email").eq("rol", "alumno").order("nombre"),
+    supabase.from("ajustes").select("clave, valor"),
     // Días con clases (unos meses antes y después) para marcarlos en los calendarios.
     supabase
       .from("sesiones_clase")
@@ -75,10 +73,10 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
   const clases = (clasesDatos ?? []) as unknown as Clase[];
   const tipos = (tiposDatos ?? []) as TipoOpcion[];
   const plantillas = (plantillasDatos ?? []) as { id: string; nombre: string; principal: boolean }[];
-  const alumnos = ((alumnosDatos ?? []) as (Persona & { id: string })[]).map((a) => ({
-    id: a.id,
-    texto: nombreDe(a) + (a.nombre && a.email ? ` · ${a.email}` : ""),
-  }));
+  const ajuste = (clave: string, defecto: number) => {
+    const v = Number(ajustesDatos?.find((a) => a.clave === clave)?.valor);
+    return Number.isFinite(v) ? v : defecto;
+  };
 
   const porDia = new Map<string, Clase[]>();
   for (const c of clases) {
@@ -91,6 +89,9 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
   const [, m1, d1] = lunes.split("-").map(Number);
   const [, m2, d2] = dias[6].split("-").map(Number);
 
+  // Filas de la rejilla: una por cada hora a la que hay clases esta semana.
+  const horas = [...new Set(clases.map((c) => textoHora(c.empieza_en)))].sort();
+
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
@@ -99,6 +100,8 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
           Plantillas
         </Link>
       </header>
+
+      <AnadirClaseGeneral fecha={base < hoy ? hoy : base} tipos={tipos} />
 
       <nav className={estilos.navegacion} aria-label="Cambiar de semana">
         <Link href={`/admin/horario?semana=${anterior}`}>← Anterior</Link>
@@ -122,58 +125,76 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
         <AplicarPlantilla plantillas={plantillas} hoy={hoy} mesInicial={lunes.slice(0, 7)} marcados={marcados} />
       )}
 
-      <div className={estilos.semana}>
-        {dias.map((dia, i) => {
-          const lista = porDia.get(dia) ?? [];
-          return (
-            <details key={dia} className={`${estilos.dia} ${dia === hoy ? estilos.hoy : ""}`}>
-              <summary className={estilos.tituloDia}>
-                <span>{etiquetaDia(dia, i)}</span>
-                <small>{lista.length === 0 ? "sin clases" : `${lista.length} ${lista.length === 1 ? "clase" : "clases"}`}</small>
-              </summary>
-              {lista.length === 0 && <p className={estilos.vacio}>Sin clases.</p>}
-              {lista.map((c) => {
-                const cancelada = c.estado === "cancelada";
-                const apuntados = c.reservas
-                  .filter((r) => r.estado === "reservada")
-                  .map((r) => ({ reservaId: r.id, userId: r.user_id, nombre: nombreDe(r.profiles), prueba: r.es_prueba }));
-                const espera = [...c.lista_espera]
-                  .sort((a, b) => a.creado_en.localeCompare(b.creado_en))
-                  .map((e) => ({ esperaId: e.id, nombre: nombreDe(e.profiles) }));
-                const nombre = c.tipos_clase?.nombre ?? "";
-                return (
-                  <div
-                    key={c.id}
-                    className={`${estilos.clase} ${cancelada ? estilos.cancelada : ""}`}
-                    style={{ borderLeftColor: colorDeTipo(c.tipos_clase?.color, nombre) }}
-                  >
-                    <strong>
-                      {textoHora(c.empieza_en)} · {nombre}
-                      {cancelada && " (cancelada)"}
-                    </strong>
-                    <small>
-                      {apuntados.length}/{c.plazas} plazas
-                    </small>
-                    <FilaClase
-                      clase={{
-                        id: c.id,
-                        plazas: c.plazas,
-                        plazasPrueba: c.plazas_prueba,
-                        cancelada,
-                        motivo: c.motivo_cancelacion,
-                        apuntados,
-                        espera,
-                        alumnos,
-                      }}
-                    />
-                    {!cancelada && <CambiarHora id={c.id} fecha={dia} hora={textoHora(c.empieza_en)} />}
+      <p className={estilos.leyenda}>
+        <span>
+          <IconoUsuario color="#1f9d63" titulo="Apuntadas" /> apuntadas
+        </span>
+        <span>
+          <IconoProhibido color="#d6453d" titulo="Horas para cancelar" /> horas para cancelar
+        </span>
+        <span>
+          <IconoArena color="#e8890c" titulo="Preinscripción" /> días de preinscripción
+        </span>
+        <span>
+          <IconoUsuario color="#3a3a3c" titulo="Alumnas" /> plazas alumnas
+        </span>
+        <span>
+          <IconoUsuario color="#b5b8bd" titulo="Invitadas" /> plazas invitadas
+        </span>
+      </p>
+
+      <div className={estilos.marco}>
+        {horas.length === 0 ? (
+          <p className={estilos.vacioSemana}>No hay clases esta semana. Añádelas con el botón de arriba o aplicando una plantilla.</p>
+        ) : (
+          <div className={estilos.rejilla}>
+            <div className={estilos.cabHora}>Hora</div>
+            {dias.map((dia, i) => (
+              <div key={dia} className={`${estilos.cabDia} ${dia === hoy ? estilos.cabHoy : ""}`}>
+                {DIAS[i].slice(0, 3)}
+                <small>
+                  {Number(dia.slice(8))}/{Number(dia.slice(5, 7))}
+                </small>
+              </div>
+            ))}
+            {horas.map((hora) => (
+              <Fragment key={hora}>
+                <div className={estilos.hora}>{hora}</div>
+                {dias.map((dia) => (
+                  <div key={dia + hora} className={estilos.celda}>
+                    {(porDia.get(dia) ?? [])
+                      .filter((c) => textoHora(c.empieza_en) === hora)
+                      .map((c) => {
+                        const t = c.tipos_clase;
+                        const horasGenerales = t?.servicio === "individual" ? ajuste("cancelacion_horas_individual", 12) : ajuste("cancelacion_horas", 2);
+                        return (
+                          <TarjetaClase
+                            key={c.id}
+                            c={{
+                              id: c.id,
+                              tipoId: c.tipo_id,
+                              fecha: dia,
+                              hora,
+                              nombre: t?.nombre ?? "",
+                              color: colorDeTipo(t?.color, t?.nombre ?? ""),
+                              cancelada: c.estado === "cancelada",
+                              apuntadas: c.reservas.filter((r) => r.estado === "reservada").length,
+                              plazas: c.plazas,
+                              plazasPrueba: c.plazas_prueba,
+                              horasCancelar: t?.cancelacion_horas ?? horasGenerales,
+                              diasPreinscripcion: t?.reserva_dias_max ?? ajuste("reserva_dias_max", 14),
+                              horasPropias: t?.cancelacion_horas ?? null,
+                              diasPropios: t?.reserva_dias_max ?? null,
+                            }}
+                          />
+                        );
+                      })}
                   </div>
-                );
-              })}
-              <AnadirClase fecha={dia} tipos={tipos} />
-            </details>
-          );
-        })}
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

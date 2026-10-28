@@ -133,3 +133,234 @@
     font-size: 0.82rem;
   }
 }
+
+/* Horario semanal por horas, al estilo de un horario de box */
+.anadir {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  margin: 0 0 14px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
+  background: var(--acento);
+  border: 0;
+  border-radius: 9999px;
+  box-shadow: var(--sombra-acento);
+}
+
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.leyenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.marco {
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: var(--sombra);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 58px repeat(7, minmax(150px, 1fr));
+  min-width: 1110px;
+}
+
+.cabHora,
+.cabDia {
+  position: sticky;
+  top: 0;
+  padding: 12px 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--secundario);
+  background: #ffffff;
+  border-bottom: 2px solid var(--carbon);
+}
+
+.cabDia small {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cabHoy {
+  color: var(--acento);
+}
+
+.hora {
+  padding: 14px 4px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: center;
+  border-top: 1px solid var(--linea);
+}
+
+.celda {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 6px;
+  border-top: 1px solid var(--linea);
+  border-left: 1px solid var(--linea);
+}
+
+.vacioSemana {
+  padding: 22px;
+  color: var(--secundario);
+}
+
+.tarjetaClase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 8px 10px;
+  background: #ffffff;
+  border: 2px solid var(--carbon);
+  border-radius: 20px;
+}
+
+.acciones {
+  display: flex;
+  gap: 6px;
+}
+
+.acciones button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  border: 0;
+  border-radius: 9999px;
+}
+
+.accionEditar {
+  background: var(--carbon);
+}
+
+.accionBorrar {
+  background: #ef6a63;
+}
+
+.nombreClase {
+  font-size: 0.92rem;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.etiquetaCancelada {
+  padding: 1px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #a1302a;
+  background: #fde8e6;
+  border-radius: 9999px;
+}
+
+.cifras {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.cifras span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.apuntadas {
+  padding: 2px 12px;
+  background: #e7f6ee;
+  border-radius: 9999px;
+}
+
+.confirmar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.confirmar button {
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid var(--linea);
+  border-radius: 9999px;
+}
+
+.errorClase {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: #a1302a;
+  text-align: center;
+}
+
+.capa {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgba(23, 24, 26, 0.45);
+}
+
+.modal {
+  width: 100%;
+  max-width: 440px;
+  max-height: 92vh;
+  padding: 20px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
+}
+
+.modal h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.cerrar {
+  padding: 12px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--secundario);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}

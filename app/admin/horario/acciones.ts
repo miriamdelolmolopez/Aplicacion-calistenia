@@ -102,3 +102,69 @@ export async function aplicarPlantillaDias(_previo: Estado, formData: FormData):
         : `Se han creado ${creadas} ${creadas === 1 ? "clase" : "clases"}. Las que ya existían no se han tocado.`,
   };
 }
+
+// Edita una clase concreta: día, hora, plazas y plazas de invitadas. Las reglas de cancelación y de
+// preinscripción son del tipo de clase, así que cambian para todas las clases de ese tipo.
+export async function editarClase(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+
+  const id = texto(formData, "sesionId");
+  const tipoId = texto(formData, "tipoId");
+  const inicio = instanteMadrid(texto(formData, "fecha"), texto(formData, "hora"));
+  if (!inicio) return { error: "Elige el día y la hora." };
+  const plazas = entero(texto(formData, "plazas"));
+  const prueba = entero(texto(formData, "plazas_prueba")) ?? 0;
+  if (plazas === null || !(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
+  if (!(prueba >= 0 && prueba <= plazas)) return { error: "Las plazas de invitadas no pueden ser más que las plazas." };
+  const horas = entero(texto(formData, "cancelacion_horas"));
+  const dias = entero(texto(formData, "reserva_dias_max"));
+  if (horas !== null && !(horas >= 0 && horas <= 168)) return { error: "Las horas para cancelar van de 0 a 168 (o déjalo vacío)." };
+  if (dias !== null && !(dias >= 1 && dias <= 365)) return { error: "Los días de preinscripción van de 1 a 365 (o déjalo vacío)." };
+
+  const admin = createAdminClient();
+  const { data: actual } = await admin.from("sesiones_clase").select("empieza_en, tipo_id").eq("id", id).maybeSingle();
+  if (!actual) return { error: "No se ha encontrado la clase." };
+  const mismaHora = new Date(actual.empieza_en as string).getTime() === inicio.getTime();
+  if (!mismaHora && inicio.getTime() <= Date.now()) return { error: "La nueva hora tiene que ser en el futuro." };
+
+  const { count: apuntadas } = await admin
+    .from("reservas")
+    .select("id", { count: "exact", head: true })
+    .eq("sesion_id", id)
+    .eq("estado", "reservada");
+  if ((apuntadas ?? 0) > plazas) return { error: `Hay ${apuntadas} personas apuntadas: no puedes dejar menos plazas.` };
+
+  const { error } = await admin.from("sesiones_clase").update({ empieza_en: inicio.toISOString(), plazas, plazas_prueba: prueba }).eq("id", id);
+  if (error) {
+    return { error: error.code === "23505" ? "Ya hay una clase de ese tipo a esa hora." : "No se ha podido guardar la clase." };
+  }
+  if (tipoId === actual.tipo_id) {
+    const { error: eTipo } = await admin.from("tipos_clase").update({ cancelacion_horas: horas, reserva_dias_max: dias }).eq("id", tipoId);
+    if (eTipo) return { error: "La clase se guardó, pero no se han podido guardar las reglas de cancelación y preinscripción." };
+  }
+
+  refrescar();
+  revalidatePath("/admin/horarios");
+  return { mensaje: "Guardado." };
+}
+
+// Elimina una clase. Si tiene personas apuntadas no se borra: hay que cancelarla desde Reservar clases (así se avisa y se devuelven los bonos).
+export async function eliminarClase(sesionId: string): Promise<Estado> {
+  await requireAdmin();
+  const admin = createAdminClient();
+
+  const { count } = await admin
+    .from("reservas")
+    .select("id", { count: "exact", head: true })
+    .eq("sesion_id", sesionId)
+    .eq("estado", "reservada");
+  if ((count ?? 0) > 0) {
+    return { error: "Tiene personas apuntadas. Cancélala desde «Reservar clases»: así se les avisa y se devuelven sus clases." };
+  }
+
+  const { error } = await admin.from("sesiones_clase").delete().eq("id", sesionId);
+  if (error) return { error: "No se ha podido eliminar la clase." };
+
+  refrescar();
+  return { mensaje: "Clase eliminada." };
+}
