@@ -3,7 +3,8 @@ import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import BotonFoto from "../../fotos/BotonFoto";
 import styles from "../../admin.module.css";
-import { FormularioTermino, type Termino } from "../Controles";
+import type { Termino } from "../Controles";
+import { ListaGlosario } from "../ListasAprende";
 
 export const metadata = { title: "Glosario · Administración" };
 
@@ -23,20 +24,11 @@ export default async function AdministrarGlosario() {
         </Link>
       </header>
 
-      <FormularioTermino />
-
       <section className={styles.tarjeta}>
-        <h2>Términos ({terminos.length})</h2>
-        {terminos.map((t) => (
-          <details key={t.id} className={styles.detalles}>
-            <summary>
-              {t.termino_es}
-              {t.activo ? "" : " · oculto"}
-            </summary>
-            <BotonFoto destino="glosario" id={t.id} actual={t.foto_url} />
-            <FormularioTermino termino={t} />
-          </details>
-        ))}
+        <ListaGlosario
+          terminos={terminos}
+          fotos={Object.fromEntries(terminos.map((t) => [t.id, <BotonFoto key={t.id} destino="glosario" id={t.id} actual={t.foto_url} />]))}
+        />
       </section>
     </main>
   );

@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { useEnvio } from "../useEnvio";
-import { borrarContenido, guardarPregunta, guardarSeccion, guardarTermino } from "./acciones";
+import { guardarPregunta, guardarSeccion, guardarTermino } from "./acciones";
 
 export type Termino = {
   id: string;
@@ -55,29 +54,13 @@ function Mensajes({ estado }: { estado: Estado }) {
   );
 }
 
-// Botón «Borrar» con confirmación.
-function Borrar({ tabla, id, nombre }: { tabla: "glosario" | "historia" | "preguntas"; id: string; nombre: string }) {
-  const router = useRouter();
-  const [trabajando, setTrabajando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function borrar() {
-    if (!confirm(`¿Borrar «${nombre}»? No se puede deshacer.`)) return;
-    setTrabajando(true);
-    const r = await borrarContenido(tabla, id);
-    setTrabajando(false);
-    if (!r.ok) return setError(r.error ?? "No se ha podido borrar.");
-    router.refresh();
-  }
-
-  return (
-    <>
-      <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={trabajando} onClick={borrar}>
-        {trabajando ? "Borrando…" : "Borrar"}
-      </button>
-      {error && <p className={styles.error}>{error}</p>}
-    </>
-  );
+// Cierra la pantalla poco después de guardar una cosa nueva.
+function useCerrar(estado: Estado, nuevo: boolean, alTerminar?: () => void) {
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar || !nuevo) return;
+    const t = setTimeout(alTerminar, 800);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar, nuevo]);
 }
 
 function Campo({ id, etiqueta, children }: { id: string; etiqueta: string; children: React.ReactNode }) {
@@ -89,13 +72,14 @@ function Campo({ id, etiqueta, children }: { id: string; etiqueta: string; child
   );
 }
 
-export function FormularioTermino({ termino }: { termino?: Termino }) {
+export function FormularioTermino({ termino, alTerminar }: { termino?: Termino; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarTermino, {});
+  useCerrar(estado, !termino, alTerminar);
   const { ref, alEnviar } = useEnvio(accion, estado, !termino);
   const p = termino?.id ?? "nuevo";
   return (
-    <form ref={ref} onSubmit={alEnviar} className={termino ? styles.formularioInterno : styles.tarjeta}>
-      {termino ? <input type="hidden" name="id" value={termino.id} /> : <h2>Nuevo término</h2>}
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
+      {termino && <input type="hidden" name="id" value={termino.id} />}
       <Campo id={`te-${p}`} etiqueta="Término">
         <input id={`te-${p}`} name="termino_es" required maxLength={60} defaultValue={termino?.termino_es ?? ""} />
       </Campo>
@@ -116,18 +100,18 @@ export function FormularioTermino({ termino }: { termino?: Termino }) {
         {pendiente ? "Guardando…" : termino ? "Guardar cambios" : "Añadir término"}
       </button>
       <Mensajes estado={estado} />
-      {termino && <Borrar tabla="glosario" id={termino.id} nombre={termino.termino_es} />}
     </form>
   );
 }
 
-export function FormularioSeccion({ seccion, siguienteOrden }: { seccion?: Seccion; siguienteOrden?: number }) {
+export function FormularioSeccion({ seccion, siguienteOrden, alTerminar }: { seccion?: Seccion; siguienteOrden?: number; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarSeccion, {});
+  useCerrar(estado, !seccion, alTerminar);
   const { ref, alEnviar } = useEnvio(accion, estado, !seccion);
   const p = seccion?.id ?? "nuevo";
   return (
-    <form ref={ref} onSubmit={alEnviar} className={seccion ? styles.formularioInterno : styles.tarjeta}>
-      {seccion ? <input type="hidden" name="id" value={seccion.id} /> : <h2>Nuevo apartado</h2>}
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
+      {seccion && <input type="hidden" name="id" value={seccion.id} />}
       <Campo id={`ti-${p}`} etiqueta="Título">
         <input id={`ti-${p}`} name="titulo_es" required maxLength={80} defaultValue={seccion?.titulo_es ?? ""} />
       </Campo>
@@ -151,18 +135,18 @@ export function FormularioSeccion({ seccion, siguienteOrden }: { seccion?: Secci
         {pendiente ? "Guardando…" : seccion ? "Guardar cambios" : "Añadir apartado"}
       </button>
       <Mensajes estado={estado} />
-      {seccion && <Borrar tabla="historia" id={seccion.id} nombre={seccion.titulo_es} />}
     </form>
   );
 }
 
-export function FormularioPregunta({ pregunta }: { pregunta?: Pregunta }) {
+export function FormularioPregunta({ pregunta, alTerminar }: { pregunta?: Pregunta; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarPregunta, {});
+  useCerrar(estado, !pregunta, alTerminar);
   const { ref, alEnviar } = useEnvio(accion, estado, !pregunta);
   const p = pregunta?.id ?? "nuevo";
   return (
-    <form ref={ref} onSubmit={alEnviar} className={pregunta ? styles.formularioInterno : styles.tarjeta}>
-      {pregunta ? <input type="hidden" name="id" value={pregunta.id} /> : <h2>Nueva pregunta</h2>}
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
+      {pregunta && <input type="hidden" name="id" value={pregunta.id} />}
       <Campo id={`pe-${p}`} etiqueta="Pregunta">
         <input id={`pe-${p}`} name="pregunta_es" required maxLength={300} defaultValue={pregunta?.pregunta_es ?? ""} />
       </Campo>
@@ -221,7 +205,6 @@ export function FormularioPregunta({ pregunta }: { pregunta?: Pregunta }) {
         {pendiente ? "Guardando…" : pregunta ? "Guardar cambios" : "Añadir pregunta"}
       </button>
       <Mensajes estado={estado} />
-      {pregunta && <Borrar tabla="preguntas" id={pregunta.id} nombre={pregunta.pregunta_es.slice(0, 40)} />}
     </form>
   );
 }

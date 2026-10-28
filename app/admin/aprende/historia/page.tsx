@@ -3,7 +3,8 @@ import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import BotonFoto from "../../fotos/BotonFoto";
 import styles from "../../admin.module.css";
-import { FormularioSeccion, type Seccion } from "../Controles";
+import type { Seccion } from "../Controles";
+import { ListaHistoria } from "../ListasAprende";
 
 export const metadata = { title: "Historia · Administración" };
 
@@ -25,20 +26,12 @@ export default async function AdministrarHistoria() {
         </Link>
       </header>
 
-      <FormularioSeccion siguienteOrden={siguiente} />
-
       <section className={styles.tarjeta}>
-        <h2>Apartados ({secciones.length})</h2>
-        {secciones.map((s) => (
-          <details key={s.id} className={styles.detalles}>
-            <summary>
-              {s.orden}. {s.titulo_es}
-              {s.activo ? "" : " · oculto"}
-            </summary>
-            <BotonFoto destino="historia" id={s.id} actual={s.foto_url} />
-            <FormularioSeccion seccion={s} />
-          </details>
-        ))}
+        <ListaHistoria
+          secciones={secciones}
+          siguienteOrden={siguiente}
+          fotos={Object.fromEntries(secciones.map((s) => [s.id, <BotonFoto key={s.id} destino="historia" id={s.id} actual={s.foto_url} />]))}
+        />
       </section>
     </main>
   );

@@ -126,3 +126,41 @@ export async function borrarContenido(tabla: keyof typeof TABLAS, id: string): P
   repasar();
   return { ok: true };
 }
+
+// Copia un término, apartado o pregunta (la copia queda oculta hasta que la revises).
+export async function duplicarContenido(tabla: keyof typeof TABLAS, id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!(tabla in TABLAS) || !UUID.test(id)) return { error: "No válido." };
+  const admin = createAdminClient();
+
+  if (tabla === "glosario") {
+    const { data: o } = await admin.from("glosario").select("termino_es, termino_en, definicion_es, definicion_en").eq("id", id).maybeSingle();
+    if (!o) return { error: "No se ha encontrado." };
+    const { error } = await admin.from("glosario").insert({ ...o, termino_es: `${o.termino_es} (copia)`, activo: false });
+    if (error) return { error: "No se ha podido duplicar." };
+  } else if (tabla === "historia") {
+    const { data: o } = await admin.from("historia").select("titulo_es, titulo_en, texto_es, texto_en, orden").eq("id", id).maybeSingle();
+    if (!o) return { error: "No se ha encontrado." };
+    const { data: todos } = await admin.from("historia").select("orden");
+    const orden = Math.max(0, ...(todos ?? []).map((t) => Number(t.orden) || 0)) + 1;
+    const { error } = await admin.from("historia").insert({ ...o, titulo_es: `${o.titulo_es} (copia)`, orden, activo: false });
+    if (error) return { error: "No se ha podido duplicar." };
+  } else {
+    const { data: o } = await admin
+      .from("preguntas")
+      .select("pregunta_es, pregunta_en, opciones_es, opciones_en, correcta, explicacion_es, explicacion_en")
+      .eq("id", id)
+      .maybeSingle();
+    if (!o) return { error: "No se ha encontrado." };
+    const { error } = await admin.from("preguntas").insert({ ...o, pregunta_es: `${o.pregunta_es} (copia)`, activa: false });
+    if (error) return { error: "No se ha podido duplicar." };
+  }
+  repasar();
+  return { mensaje: "Copia creada y oculta: revísala y márcala como visible cuando quieras." };
+}
+
+// Igual que borrarContenido, con el formato de respuesta del resto de listas.
+export async function eliminarContenido(tabla: keyof typeof TABLAS, id: string): Promise<Estado> {
+  const r = await borrarContenido(tabla, id);
+  return r.ok ? { mensaje: "Eliminado." } : { error: r.error ?? "No se ha podido eliminar." };
+}

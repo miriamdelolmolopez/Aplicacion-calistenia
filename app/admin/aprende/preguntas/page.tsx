@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../admin.module.css";
-import { FormularioPregunta, type Pregunta } from "../Controles";
+import type { Pregunta } from "../Controles";
+import { ListaPreguntas } from "../ListasAprende";
 
 export const metadata = { title: "Preguntas del examen · Administración" };
 
@@ -23,19 +24,8 @@ export default async function AdministrarPreguntas() {
         </Link>
       </header>
 
-      <FormularioPregunta />
-
       <section className={styles.tarjeta}>
-        <h2>Preguntas ({preguntas.length})</h2>
-        {preguntas.map((p) => (
-          <details key={p.id} className={styles.detalles}>
-            <summary>
-              {p.pregunta_es}
-              {p.activa ? "" : " · oculta"}
-            </summary>
-            <FormularioPregunta pregunta={p} />
-          </details>
-        ))}
+        <ListaPreguntas preguntas={preguntas} />
       </section>
     </main>
   );
