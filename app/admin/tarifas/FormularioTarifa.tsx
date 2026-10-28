@@ -84,7 +84,11 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
       </div>
 
       {servicio === "online" ? (
-        <input type="hidden" name="clases" value={1} />
+        <div className={styles.campo}>
+          <label htmlFor={`tf-c-${p}`}>Entrenos incluidos (para el círculo de progreso de la alumna)</label>
+          <input id={`tf-c-${p}`} name="clases" type="number" min={1} max={100} required defaultValue={tarifa && tarifa.servicio === "online" ? tarifa.clases : 12} />
+          <span className={styles.ayuda}>Los entrenos que haga desde la app cuentan hasta este número.</span>
+        </div>
       ) : (
         <div className={styles.campo}>
           <label htmlFor={`tf-c-${p}`}>Créditos (cuántas clases incluye)</label>
@@ -136,7 +140,10 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
             </select>
           </div>
           {segundoValido === "online" ? (
-            <input type="hidden" name="clases2" value={1} />
+            <div className={styles.campo}>
+              <label htmlFor={`tf-c2-${p}`}>Entrenos incluidos</label>
+              <input id={`tf-c2-${p}`} name="clases2" type="number" min={1} max={100} required defaultValue={tarifa?.servicio2 === "online" && tarifa.clases2 ? tarifa.clases2 : 12} />
+            </div>
           ) : (
             <div className={styles.campo}>
               <label htmlFor={`tf-c2-${p}`}>Créditos de este servicio</label>

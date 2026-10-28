@@ -35,6 +35,7 @@ type Extra = {
   rutinaNombre: string | null;
   sesionesOnline: SesionOnline[];
   bonos: MiBono[];
+  entrenosOnlineHechos: number;
   entrenoId: string | null;
   completo: boolean;
   cumples: Cumple[];
@@ -89,6 +90,15 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
     sesionesOnline = [...r.rutina_sesiones].sort((a, b) => a.orden - b.orden).map((s) => ({ id: s.id, nombre: s.nombre }));
   }
 
+  // Entrenos online terminados desde que empezó su plan (cuentan para el círculo).
+  const planOnlineActivo = bonos.find((b) => b.servicio === "online" && b.estado === "activo");
+  let entrenosOnlineHechos = 0;
+  if (planOnlineActivo) {
+    let consulta = supabase.from("entrenos").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("estado", "terminado");
+    if (planOnlineActivo.activoDesde) consulta = consulta.gte("empezado_en", planOnlineActivo.activoDesde);
+    entrenosOnlineHechos = (await consulta).count ?? 0;
+  }
+
   const cumples = (cumplesDatos ?? []) as Cumple[];
   const fotos = cumples.length ? await obtenerFotos(cumples.map((c) => c.id)) : {};
 
@@ -97,6 +107,7 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
     rutinaNombre,
     sesionesOnline,
     bonos,
+    entrenosOnlineHechos,
     entrenoId: curso?.id ?? null,
     completo: aceptadoVigente(consentimientos, versiones),
     cumples,
@@ -299,22 +310,39 @@ export default function Inicio() {
           );
         })}
 
-        {planOnlineBono && (
-          <section className={clay.tarjetaProgreso}>
-            <div className={clay.progresoInfo}>
-              <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
-              <h3 className={clay.progresoNombre}>{planOnlineBono.nombre}</h3>
-              {planOnlineBono.caducaEn && (
+        {planOnlineBono && (() => {
+          const total = planOnlineBono.clasesTotal;
+          const hechos = Math.min(extra.entrenosOnlineHechos, total);
+          const pct = total > 1 ? Math.round((hechos / total) * 100) : 0;
+          return (
+            <section className={clay.tarjetaProgreso}>
+              <div className={clay.progresoInfo}>
+                <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
+                <h3 className={clay.progresoNombre}>{planOnlineBono.nombre}</h3>
                 <div className={clay.metaFila}>
-                  <span className={clay.metaChip}>
-                    <IconoReloj />
-                    {t.caducaEl} {fechaCorta(planOnlineBono.caducaEn, idioma)}
-                  </span>
+                  {total > 1 && (
+                    <span className={clay.metaChip}>
+                      <IconoCorona />
+                      {hechos} {t.clasesDeTotal} {total} {t.entrenosHechos}
+                    </span>
+                  )}
+                  {planOnlineBono.caducaEn && (
+                    <span className={clay.metaChip}>
+                      <IconoReloj />
+                      {t.caducaEl} {fechaCorta(planOnlineBono.caducaEn, idioma)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {total > 1 && (
+                <div className={clay.gaugeWrap}>
+                  <Anillo porcentaje={pct} />
+                  <span className={clay.gaugePct}>{pct}%</span>
                 </div>
               )}
-            </div>
-          </section>
-        )}
+            </section>
+          );
+        })()}
 
         {!esAdmin && <h2 className={estilos.atajos}>{t.proximosEntrenos}</h2>}
         {!esAdmin && extra.reservas.length === 0 && extra.sesionesOnline.length === 0 && (

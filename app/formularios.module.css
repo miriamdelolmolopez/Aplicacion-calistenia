@@ -314,3 +314,30 @@
 :global(html[data-tema="oscuro"]) .fondoEntrar {
   filter: contrast(1.136) hue-rotate(180deg) invert(1);
 }
+
+/* Botón principal con acabado metálico: degradado con brillo y destello al pasar por encima */
+.boton:not(.botonSecundario) {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2fc3d8 0%, #0aa8c0 45%, #08889c 70%, #34c6da 100%);
+}
+
+.boton:not(.botonSecundario)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+
+.boton:not(.botonSecundario):hover:not(:disabled)::after {
+  transform: translateX(120%);
+  transition: transform 0.8s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton:not(.botonSecundario)::after {
+    display: none;
+  }
+}

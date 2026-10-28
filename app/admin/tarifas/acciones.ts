@@ -29,14 +29,14 @@ export async function guardarTipoBono(_previo: Estado, formData: FormData): Prom
   const id = texto(formData, "id");
   const nombre = texto(formData, "nombre");
   const servicio = texto(formData, "servicio");
-  const clases = servicioEsOnline(texto(formData, "servicio")) ? 1 : entero(texto(formData, "clases"));
+  const clases = servicioEsOnline(texto(formData, "servicio")) ? entero(texto(formData, "clases") || "1") : entero(texto(formData, "clases"));
   const precio = aCentimos(texto(formData, "precio"));
   const validez = entero(texto(formData, "validez_dias"));
   const orden = entero(texto(formData, "orden") || "0");
   const activo = formData.get("activo") === "on";
   const requierePago = formData.get("requiere_pago") === "on";
   const servicio2 = texto(formData, "servicio2");
-  const clases2 = servicio2 ? (servicio2 === "online" ? 1 : entero(texto(formData, "clases2"))) : null;
+  const clases2 = servicio2 ? (servicio2 === "online" ? entero(texto(formData, "clases2") || "1") : entero(texto(formData, "clases2"))) : null;
   const iva = entero(texto(formData, "iva_porcentaje") || "21");
   const misma = formData.get("misma_duracion") === "on";
   const validez2 = servicio2 && !misma ? entero(texto(formData, "validez_dias2")) : null;

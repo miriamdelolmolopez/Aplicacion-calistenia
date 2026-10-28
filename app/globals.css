@@ -185,3 +185,52 @@ html[data-tema="oscuro"] iframe,
 html[data-tema="oscuro"] [style*="background-image"] {
   filter: contrast(1.136) hue-rotate(180deg) invert(1);
 }
+
+/* ---------- Movimiento ---------- */
+
+/* Ángulo que va girando (lo usan las luces que dan la vuelta a lo elegido) */
+@property --ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes giroLuz {
+  to {
+    --ang: 360deg;
+  }
+}
+
+/* Cada pantalla aparece con un deslizamiento suave */
+@keyframes aparecerPantalla {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+main {
+  animation: aparecerPantalla 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Al pulsar, botones y tarjetas con enlace «se hunden» un poco */
+button:not(:disabled):active,
+a[class]:active {
+  transition: transform 0.12s ease-out;
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main {
+    animation: none;
+  }
+
+  button:not(:disabled):active,
+  a[class]:active {
+    transform: none;
+  }
+}

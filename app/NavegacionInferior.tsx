@@ -86,18 +86,16 @@ export default function NavegacionInferior() {
 
   return (
     <>
-      <nav className={estilos.barra} aria-label={t.barraNavegacion}>
-        <div className={estilos.lado}>{izquierda.map(pestana)}</div>
-        {inicio && <div className={estilos.centro}>{pestana(inicio)}</div>}
-        <div className={estilos.lado}>
-          {derecha.map(pestana)}
+      <nav className={estilos.barra} style={{ "--columnas": otras.length + (inicio ? 1 : 0) + 1 } as React.CSSProperties} aria-label={t.barraNavegacion}>
+        {izquierda.map(pestana)}
+        {inicio && pestana(inicio)}
+        {derecha.map(pestana)}
           <button type="button" className={`${estilos.pestana} ${menu ? estilos.activa : ""}`} onClick={() => setMenu(true)}>
             <span className={estilos.icono}>
               <Icono nombre="mas" tamano={22} />
             </span>
             {t.tabMas}
           </button>
-        </div>
       </nav>
       <MenuLateral perfil={perfilActual} abierto={menu} onCerrar={cerrar} />
       <MenuEscritorio perfil={perfilActual} />

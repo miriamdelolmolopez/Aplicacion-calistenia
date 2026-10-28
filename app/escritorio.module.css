@@ -85,8 +85,30 @@
 }
 
 .activo {
+  position: relative;
   color: var(--oliva-oscuro);
   background: #f1f2f4;
+}
+
+/* Opción elegida: una luz da la vuelta al borde */
+.activo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 62%, rgba(10, 168, 192, 0.9) 88%, #a8eef5 96%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: giroLuz 3.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activo::before {
+    animation: none;
+  }
 }
 
 .pie {
