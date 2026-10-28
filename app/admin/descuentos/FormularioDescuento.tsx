@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import { useEnvio } from "../useEnvio";
 import { guardarDescuento } from "./acciones";
 
 export type DescuentoDatos = {
@@ -18,6 +19,7 @@ export type DescuentoDatos = {
 // Crear (sin descuento) o editar (con descuento).
 export default function FormularioDescuento({ descuento, alTerminar }: { descuento?: DescuentoDatos; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarDescuento, {});
+  const { ref, alEnviar } = useEnvio(accion, estado, !descuento);
   const [tipo, setTipo] = useState(descuento?.tipo ?? "porcentaje");
   const p = descuento?.id ?? "nuevo";
 
@@ -30,7 +32,7 @@ export default function FormularioDescuento({ descuento, alTerminar }: { descuen
   const valorInicial = descuento ? (descuento.tipo === "porcentaje" ? String(descuento.valor) : (descuento.valor / 100).toFixed(2).replace(".", ",")) : "";
 
   return (
-    <form action={accion} className={styles.tarjeta}>
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {descuento && <input type="hidden" name="id" value={descuento.id} />}
       <div className={styles.campo}>
         <label htmlFor={`d-n-${p}`}>Nombre (por ejemplo «Alumnas de siempre»)</label>

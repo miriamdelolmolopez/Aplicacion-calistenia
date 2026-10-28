@@ -9,6 +9,7 @@ import Buscador from "../comunes/Buscador";
 import comunes from "../comunes/comunes.module.css";
 import Nuevo from "../comunes/Nuevo";
 import PanelCompleto from "../comunes/PanelCompleto";
+import { useEnvio } from "../useEnvio";
 import { crearMaterial, duplicarMaterial, editarMaterial, eliminarMaterial } from "./acciones";
 
 export type MaterialFila = { id: string; nombre: string; nombre_en: string | null; activo: boolean; usos: number };
@@ -17,6 +18,7 @@ export type MaterialFila = { id: string; nombre: string; nombre_en: string | nul
 function FormularioMaterialCompleto({ material, alTerminar }: { material?: MaterialFila; alTerminar: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(material ? editarMaterial : crearMaterial, {});
   const p = material?.id ?? "nuevo";
+  const { ref, alEnviar } = useEnvio(accion, estado, !material);
 
   useEffect(() => {
     if (!estado.mensaje) return;
@@ -25,7 +27,7 @@ function FormularioMaterialCompleto({ material, alTerminar }: { material?: Mater
   }, [estado, alTerminar]);
 
   return (
-    <form action={accion} className={styles.tarjeta}>
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {material && <input type="hidden" name="id" value={material.id} />}
       <div className={styles.campo}>
         <label htmlFor={`mn-${p}`}>Nombre</label>

@@ -12,6 +12,7 @@ import {
   intensidadesDeEjercicio,
   type MusculoDeEjercicio,
 } from "@/lib/ejercicios";
+import { useEnvio } from "../useEnvio";
 import { crearEjercicio, crearMaterial, editarEjercicio } from "./acciones";
 
 export type EjercicioForm = {
@@ -62,6 +63,7 @@ export function FormularioEjercicio({
     {},
   );
   const p = ejercicio?.id ?? "nuevo";
+  const { ref, alEnviar } = useEnvio(accion, estado, !ejercicio);
 
   useEffect(() => {
     if (!estado.mensaje || !alTerminar || ejercicio) return;
@@ -84,7 +86,7 @@ export function FormularioEjercicio({
   const opcionesMusculo = MUSCULOS.map((m) => ({ valor: m.valor, etiqueta: m.es }));
 
   return (
-    <form action={accion} className={styles.tarjeta}>
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {ejercicio && <input type="hidden" name="id" value={ejercicio.id} />}
 
       <div className={styles.campo}>
