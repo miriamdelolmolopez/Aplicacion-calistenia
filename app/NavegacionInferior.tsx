@@ -60,12 +60,9 @@ export default function NavegacionInferior() {
     barraAdmin.map((o) => ({ href: o.href, icono: o.icono, texto: o.texto })),
   );
 
-  // Inicio va en el centro de la barra; el resto se reparte a los lados (con «Más» a la derecha).
+  // Inicio va la primera de la barra, luego el resto y «Más» al final.
   const inicio = pestanas.find((p) => p.href === RUTAS.inicio);
   const otras = pestanas.filter((p) => p !== inicio);
-  const mitad = Math.floor((otras.length + 1) / 2);
-  const izquierda = otras.slice(0, mitad);
-  const derecha = otras.slice(mitad);
 
   const esActiva = (href: string) =>
     href === "/admin"
@@ -87,9 +84,8 @@ export default function NavegacionInferior() {
   return (
     <>
       <nav className={estilos.barra} style={{ "--columnas": otras.length + (inicio ? 1 : 0) + 1 } as React.CSSProperties} aria-label={t.barraNavegacion}>
-        {izquierda.map(pestana)}
         {inicio && pestana(inicio)}
-        {derecha.map(pestana)}
+        {otras.map(pestana)}
           <button type="button" className={`${estilos.pestana} ${menu ? estilos.activa : ""}`} onClick={() => setMenu(true)}>
             <span className={estilos.icono}>
               <Icono nombre="mas" tamano={22} />

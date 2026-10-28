@@ -150,7 +150,7 @@ export default function Ajustes() {
           <section className={`${styles.tarjeta} ${estilos.seccion}`}>
             <h2>Barra de abajo</h2>
             <p className={styles.ayuda}>
-              Elige hasta {MAX_BARRA} opciones y su orden. Inicio va siempre en el centro y «Más» a la derecha.
+              Elige hasta {MAX_BARRA} opciones y su orden. Inicio va siempre la primera y «Más» al final.
             </p>
             {menu.barra.map((o, i) => (
               <div key={o.href} style={{ display: "flex", alignItems: "center", gap: 8 }}>
