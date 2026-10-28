@@ -313,17 +313,34 @@ export default function Inicio() {
         {planOnlineBono && (() => {
           const total = planOnlineBono.clasesTotal;
           const hechos = Math.min(extra.entrenosOnlineHechos, total);
-          const pct = total > 1 ? Math.round((hechos / total) * 100) : 0;
+          // Sin total de entrenos, el aro cuenta el tiempo que lleva el plan sobre lo que dura.
+          const porEntrenos = total > 1;
+          const desde = planOnlineBono.activoDesde ? new Date(planOnlineBono.activoDesde).getTime() : null;
+          const hasta = planOnlineBono.caducaEn ? new Date(planOnlineBono.caducaEn).getTime() : null;
+          const duracion = desde !== null && hasta !== null ? hasta - desde : 0;
+          const porTiempo = !porEntrenos && duracion > 0;
+          const diasRestantes = hasta !== null ? Math.max(0, Math.ceil((hasta - Date.now()) / 86_400_000)) : 0;
+          const pct = porEntrenos
+            ? Math.round((hechos / total) * 100)
+            : porTiempo
+              ? Math.min(100, Math.max(0, Math.round(((Date.now() - (desde as number)) / duracion) * 100)))
+              : 0;
           return (
             <section className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
                 <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
                 <h3 className={clay.progresoNombre}>{planOnlineBono.nombre}</h3>
                 <div className={clay.metaFila}>
-                  {total > 1 && (
+                  {porEntrenos && (
                     <span className={clay.metaChip}>
                       <IconoCorona />
                       {hechos} {t.clasesDeTotal} {total} {t.entrenosHechos}
+                    </span>
+                  )}
+                  {porTiempo && (
+                    <span className={clay.metaChip}>
+                      <IconoCorona />
+                      {diasRestantes} {t.diasRestantes}
                     </span>
                   )}
                   {planOnlineBono.caducaEn && (
@@ -334,7 +351,7 @@ export default function Inicio() {
                   )}
                 </div>
               </div>
-              {total > 1 && (
+              {(porEntrenos || porTiempo) && (
                 <div className={clay.gaugeWrap}>
                   <Anillo porcentaje={pct} />
                   <span className={clay.gaugePct}>{pct}%</span>
