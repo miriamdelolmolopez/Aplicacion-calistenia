@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
 import { useEnvio } from "../useEnvio";
 import { ESTADOS_CURSO, NIVELES, type Curso } from "@/lib/cursos";
-import { borrarCurso, guardarCurso } from "./acciones";
+import { guardarCurso } from "./acciones";
 
 function Mensajes({ estado }: { estado: Estado }) {
   return (
@@ -27,26 +26,20 @@ function Mensajes({ estado }: { estado: Estado }) {
 }
 
 // Formulario para crear un curso (sin curso) o cambiar uno (con curso).
-export function FormularioCurso({ curso, categorias }: { curso?: Curso; categorias: string[] }) {
-  const router = useRouter();
+export function FormularioCurso({ curso, categorias, alTerminar }: { curso?: Curso; categorias: string[]; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarCurso, {});
   const { ref, alEnviar } = useEnvio(accion, estado, !curso);
-  const [borrando, setBorrando] = useState(false);
-  const [errorBorrar, setErrorBorrar] = useState<string | null>(null);
   const p = curso?.id ?? "nuevo";
 
-  async function borrar() {
-    if (!curso || !confirm(`¿Borrar el curso «${curso.titulo}»? No se puede deshacer.`)) return;
-    setBorrando(true);
-    const r = await borrarCurso(curso.id);
-    setBorrando(false);
-    if (!r.ok) return setErrorBorrar(r.error ?? "No se ha podido borrar.");
-    router.refresh();
-  }
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar || curso) return;
+    const t = setTimeout(alTerminar, 900);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar, curso]);
 
   return (
-    <form ref={ref} onSubmit={alEnviar} className={curso ? styles.formularioInterno : styles.tarjeta}>
-      {curso ? <input type="hidden" name="id" value={curso.id} /> : <h2>Nuevo curso</h2>}
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
+      {curso && <input type="hidden" name="id" value={curso.id} />}
 
       <div className={styles.campo}>
         <label htmlFor={`titulo-${p}`}>Título</label>
@@ -124,10 +117,6 @@ export function FormularioCurso({ curso, categorias }: { curso?: Curso; categori
         <>
           <strong>Foto del curso</strong>
           <BotonFoto destino="curso" id={curso.id} actual={curso.foto_url} />
-          <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={borrando} onClick={borrar}>
-            {borrando ? "Borrando…" : "Borrar curso"}
-          </button>
-          {errorBorrar && <p className={styles.error}>{errorBorrar}</p>}
         </>
       )}
     </form>

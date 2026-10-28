@@ -85,3 +85,28 @@ export async function borrarCurso(id: string): Promise<{ ok: boolean; error?: st
   revalidatePath("/academia", "layout");
   return { ok: true };
 }
+
+// Copia un curso (queda oculto para que no salga a las alumnas hasta que lo revises).
+export async function duplicarCurso(id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { error: "Curso no válido." };
+  const admin = createAdminClient();
+  const { data: origen } = await admin
+    .from("cursos")
+    .select("titulo, titulo_en, descripcion, descripcion_en, categoria, nivel, enlace, fecha_prevista, precio_centimos, popularidad, valoracion")
+    .eq("id", id)
+    .maybeSingle();
+  if (!origen) return { error: "No se ha encontrado ese curso." };
+
+  const { error } = await admin.from("cursos").insert({ ...origen, titulo: `${origen.titulo} (copia)`, estado: "oculto" });
+  if (error) return { error: "No se ha podido duplicar el curso." };
+
+  revalidatePath("/admin/academia");
+  return { mensaje: `Creado «${origen.titulo} (copia)». Está oculto: revísalo y actívalo cuando quieras.` };
+}
+
+// Igual que borrarCurso, pero con el mismo formato de respuesta que el resto de listas.
+export async function eliminarCurso(id: string): Promise<Estado> {
+  const r = await borrarCurso(id);
+  return r.ok ? { mensaje: "Curso eliminado." } : { error: r.error ?? "No se ha podido eliminar el curso." };
+}
