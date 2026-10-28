@@ -1,13 +1,15 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import estilos from "./MenuUsuario.module.css";
 import { obtenerFotos } from "./perfil/acciones";
 import { IDIOMAS, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
-import { useMiPerfil } from "./useMiPerfil";
+import { olvidarVistaAlumna, useMiPerfil } from "./useMiPerfil";
+import { createClient } from "@/lib/supabase/client";
 import { useTema, type Tema } from "./useTema";
 
 // Pantallas donde no se muestra (el entreno ocupa toda la pantalla y la vista de imprimir va sin adornos).
@@ -18,6 +20,7 @@ const EMOJI_IDIOMA: Record<string, string> = { es: "🇪🇸", en: "🇬🇧" };
 // Tu foto, siempre arriba a la derecha. Al pulsarla: cambiar de idioma y de tema (claro u oscuro).
 export default function MenuUsuario() {
   const ruta = usePathname();
+  const router = useRouter();
   const perfil = useMiPerfil(ruta);
   const [idioma, cambiarIdioma] = useIdioma();
   const [tema, cambiarTema] = useTema();
@@ -56,6 +59,14 @@ export default function MenuUsuario() {
   if (!conSesion || SIN_MENU.some((p) => ruta === p || ruta.startsWith(p + "/")) || ruta.endsWith("/imprimir")) return null;
 
   const en = idioma === "en";
+
+  async function salir() {
+    setAbierto(false);
+    olvidarVistaAlumna();
+    await createClient().auth.signOut();
+    router.push("/");
+  }
+
   const temas: { valor: Tema; texto: string; icono: string }[] = [
     { valor: "claro", texto: en ? "Light" : "Claro", icono: "☀️" },
     { valor: "oscuro", texto: en ? "Dark" : "Oscuro", icono: "🌙" },
@@ -69,6 +80,10 @@ export default function MenuUsuario() {
       {abierto && (
         <div className={estilos.menu} role="menu">
           <div className={estilos.nombre}>{conSesion.nombre}</div>
+
+          <Link href="/perfil" className={estilos.opcion} role="menuitem" onClick={() => setAbierto(false)}>
+            <span>👤 {en ? "View profile" : "Ver perfil"}</span>
+          </Link>
 
           <div className={estilos.titulo}>🌐 {en ? "Language" : "Idioma"}</div>
           {IDIOMAS.map((i) => (
@@ -103,6 +118,10 @@ export default function MenuUsuario() {
               {tema === t.valor && <span className={estilos.marca}>✓</span>}
             </button>
           ))}
+
+          <button type="button" role="menuitem" className={`${estilos.opcion} ${estilos.salir}`} onClick={salir}>
+            <span>🚪 {en ? "Log out" : "Salir"}</span>
+          </button>
         </div>
       )}
     </div>
