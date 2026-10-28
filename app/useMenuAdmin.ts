@@ -9,7 +9,7 @@ const CLAVE_ORDEN = "menuAdminOrden"; // en qué orden
 const CLAVE_BARRA = "barraAdmin"; // qué opciones salen en la barra de abajo (sin Inicio ni «Más»)
 const EVENTO = "cambio-menu-admin";
 
-export const MAX_BARRA = 4;
+export const MAX_BARRA = 5;
 export const BARRA_POR_DEFECTO = ["/admin", "/admin/usuarios", "/admin/reservas", "/perfil"];
 
 function suscribir(avisar: () => void) {
@@ -72,7 +72,7 @@ export function useMenuAdmin(): {
   const ordenadas = useMemo(() => {
     const conocidas = orden.filter((h) => porHref.has(h));
     const resto = OPCIONES_MENU_ADMIN.filter((o) => !conocidas.includes(o.href)).map((o) => o.href);
-    return [...conocidas, ...resto].map((h) => porHref.get(h)!);
+    return [...conocidas, ...resto].map((h) => porHref.get(h)!).filter((o) => !o.soloBarra);
   }, [orden, porHref]);
 
   const estaVisible = useCallback((o: OpcionMenuAdmin) => o.fijo || (elegido[o.href] ?? o.defecto), [elegido]);
