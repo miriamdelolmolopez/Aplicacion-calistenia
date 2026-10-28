@@ -78,6 +78,7 @@ export default function ListaRutinas({
   const [estado, setEstado] = useState("todos");
   const [alumno, setAlumno] = useState("todos");
   const [renombrando, setRenombrando] = useState<string | null>(null);
+  const [cambios, setCambios] = useState<Record<string, string>>({}); // rutina -> carpeta elegida, todavía sin guardar
   const [aviso, setAviso] = useState<Estado>({});
   const [pendiente, empezar] = useTransition();
 
@@ -128,9 +129,9 @@ export default function ListaRutinas({
             </label>
             <select
               id={`mv-${r.id}`}
-              value={r.carpetaId ?? ""}
+              value={cambios[r.id] ?? r.carpetaId ?? ""}
               disabled={pendiente}
-              onChange={(e) => ejecutar(() => moverRutina(r.id, e.target.value || null))}
+              onChange={(e) => setCambios((c) => ({ ...c, [r.id]: e.target.value }))}
               style={{ maxWidth: 220 }}
             >
               <option value="">Inicio</option>
@@ -143,6 +144,39 @@ export default function ListaRutinas({
                   </option>
                 ))}
             </select>
+            {r.id in cambios && cambios[r.id] !== (r.carpetaId ?? "") && (
+              <span style={{ display: "inline-flex", gap: 6, marginLeft: 8 }}>
+                <button
+                  type="button"
+                  className={comunes.volver}
+                  disabled={pendiente}
+                  onClick={() => {
+                    const destino = cambios[r.id] || null;
+                    setCambios((c) => {
+                      const resto = { ...c };
+                      delete resto[r.id];
+                      return resto;
+                    });
+                    ejecutar(() => moverRutina(r.id, destino));
+                  }}
+                >
+                  Guardar
+                </button>
+                <button
+                  type="button"
+                  className={comunes.volver}
+                  onClick={() =>
+                    setCambios((c) => {
+                      const resto = { ...c };
+                      delete resto[r.id];
+                      return resto;
+                    })
+                  }
+                >
+                  Cancelar
+                </button>
+              </span>
+            )}
           </div>
         )}
       </div>

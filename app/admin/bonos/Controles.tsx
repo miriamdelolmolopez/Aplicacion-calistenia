@@ -161,12 +161,25 @@ export function FormularioRegistrar({
 
 export function BotonPagado({ pagoId }: { pagoId: string }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(marcarPagado, {});
+  const [confirmando, setConfirmando] = useState(false);
   return (
     <form action={accion} className={styles.formularioInterno}>
       <input type="hidden" name="pagoId" value={pagoId} />
-      <button className={styles.boton} type="submit" disabled={pendiente}>
-        {pendiente ? "Guardando…" : "Marcar como pagado"}
-      </button>
+      {confirmando ? (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <span>¿Marcar este pago como cobrado?</span>
+          <button className={styles.boton} type="submit" disabled={pendiente}>
+            {pendiente ? "Guardando…" : "Guardar: ya está cobrado"}
+          </button>
+          <button className={`${styles.boton} ${styles.botonSecundario}`} type="button" onClick={() => setConfirmando(false)}>
+            Cancelar
+          </button>
+        </div>
+      ) : (
+        <button className={styles.boton} type="button" onClick={() => setConfirmando(true)}>
+          Marcar como pagado
+        </button>
+      )}
       <Mensajes estado={estado} />
     </form>
   );

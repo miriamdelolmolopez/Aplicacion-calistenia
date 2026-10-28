@@ -26,7 +26,7 @@ export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; ti
         + Añadir clase
       </button>
       {abierto && (
-        <div className={estilos.capa} onClick={() => setAbierto(false)}>
+        <div className={estilos.capa}>
           <div className={estilos.modal} role="dialog" aria-modal="true" aria-label="Añadir clase" onClick={(e) => e.stopPropagation()}>
             <h2>Añadir clase</h2>
             <form ref={ref} onSubmit={alEnviar} className={styles.formularioInterno}>
@@ -63,7 +63,7 @@ export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; ti
                 {pendiente ? "Añadiendo…" : "Añadir clase"}
               </button>
               <button type="button" className={estilos.cerrar} onClick={() => setAbierto(false)}>
-                Cerrar
+                Cancelar
               </button>
               {estado.error && (
                 <p className={styles.error} role="alert">

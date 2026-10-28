@@ -441,7 +441,9 @@ function TarjetaItem({
           type="button"
           className={`${styles.boton} ${styles.botonSecundario}`}
           disabled={ocupado}
-          onClick={() => ejecutar(() => quitarItem(rutinaId, item.id))}
+          onClick={() => {
+            if (window.confirm("¿Quitar este ejercicio de la rutina?")) ejecutar(() => quitarItem(rutinaId, item.id));
+          }}
         >
           Quitar
         </button>
@@ -601,7 +603,9 @@ function TarjetaSesion({
               type="button"
               className={styles.boton}
               disabled={pendiente}
-              onClick={() => ejecutar(() => quitarSesion(rutinaId, sesion.id))}
+              onClick={() => {
+                if (window.confirm("¿Quitar esta sesión con todos sus ejercicios?")) ejecutar(() => quitarSesion(rutinaId, sesion.id));
+              }}
             >
               Sí, quitar la sesión
             </button>

@@ -133,7 +133,13 @@ export function QuitarClase({ id, texto }: { id: string; texto: string }) {
 export function QuitarCompacto({ id, texto }: { id: string; texto: string }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(quitarClase, {});
   return (
-    <form action={accion} style={{ display: "inline" }}>
+    <form
+      action={accion}
+      style={{ display: "inline" }}
+      onSubmit={(e) => {
+        if (!window.confirm(`¿Quitar «${texto}» de la plantilla?`)) e.preventDefault();
+      }}
+    >
       <input type="hidden" name="id" value={id} />
       <button type="submit" className={estiloCuadricula.quitar} disabled={pendiente} aria-label={`Quitar ${texto}`} title="Quitar de la plantilla">
         ×

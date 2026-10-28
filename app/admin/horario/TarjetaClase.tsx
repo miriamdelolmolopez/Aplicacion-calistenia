@@ -36,7 +36,7 @@ function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
   }, [estado, cerrar]);
 
   return (
-    <div className={estilos.capa} onClick={cerrar}>
+    <div className={estilos.capa}>
       <div className={estilos.modal} role="dialog" aria-modal="true" aria-label={`Editar ${c.nombre}`} onClick={(e) => e.stopPropagation()}>
         <h2>Editar {c.nombre}</h2>
         <form ref={ref} onSubmit={alEnviar} className={styles.formularioInterno}>
@@ -73,7 +73,7 @@ function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
             {pendiente ? "Guardando…" : "Guardar"}
           </button>
           <button type="button" className={estilos.cerrar} onClick={cerrar}>
-            Cerrar
+            Cancelar
           </button>
           {estado.error && (
             <p className={styles.error} role="alert">
