@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import PanelFiltros from "../../PanelFiltros";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
@@ -27,12 +27,18 @@ function FormularioCarpeta({ carpeta, padre, alTerminar }: { carpeta?: FilaCarpe
   const router = useRouter();
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(carpeta ? renombrarCarpeta : crearCarpeta, {});
 
+  // alTerminar cambia en cada refresco de la lista; se guarda aparte para que el temporizador no se reinicie y el panel se cierre.
+  const terminar = useRef(alTerminar);
+  useEffect(() => {
+    terminar.current = alTerminar;
+  });
+
   useEffect(() => {
     if (!estado.mensaje) return;
     router.refresh();
-    const t = setTimeout(alTerminar, 700);
+    const t = setTimeout(() => terminar.current(), 700);
     return () => clearTimeout(t);
-  }, [estado, alTerminar, router]);
+  }, [estado, router]);
 
   return (
     <form action={accion} className={styles.tarjeta}>
