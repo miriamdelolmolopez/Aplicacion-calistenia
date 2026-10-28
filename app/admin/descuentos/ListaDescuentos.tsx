@@ -84,7 +84,9 @@ export default function ListaDescuentos({ descuentos }: { descuentos: FilaDescue
         </p>
       )}
 
-      {visibles.length === 0 && <p className={comunes.sinResultados}>No hay descuentos con ese filtro.</p>}
+      {visibles.length === 0 && (
+        <p className={comunes.sinResultados}>{descuentos.length === 0 ? "Todavía no has creado ningún descuento." : "No hay descuentos con ese filtro."}</p>
+      )}
       {visibles.map((d) => (
         <div key={d.id} className={comunes.fila}>
           <div>
