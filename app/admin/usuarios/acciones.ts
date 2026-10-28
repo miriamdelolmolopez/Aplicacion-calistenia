@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { enviarCorreo } from "@/lib/email";
 import { correoInvitacion } from "@/lib/plantillas-email";
-import { instanteMadrid } from "@/lib/fechas";
+import { instanteMadrid, sumarDias } from "@/lib/fechas";
 import { formaActiva } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
@@ -44,7 +44,8 @@ async function fijarInicioBono(admin: ReturnType<typeof createAdminClient>, bono
   if (!base) return;
   const { data: bonos } = await admin.from("bonos").select("id, validez_dias").eq("user_id", base.user_id).eq("tipo_bono_id", base.tipo_bono_id).eq("creado_en", base.creado_en);
   for (const b of bonos ?? []) {
-    const caduca = new Date(desde.getTime() + (b.validez_dias as number) * 86_400_000);
+    // Se cuenta por días de calendario (en hora de Madrid), para que el cambio de hora no la mueva un día.
+    const caduca = instanteMadrid(sumarDias(fecha, b.validez_dias as number), "00:00") ?? desde;
     await admin.from("bonos").update({ activo_desde: desde.toISOString(), caduca_en: caduca.toISOString() }).eq("id", b.id);
   }
   await admin.rpc("refrescar_bonos", { p_user: base.user_id });
