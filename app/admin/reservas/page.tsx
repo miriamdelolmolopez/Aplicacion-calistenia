@@ -79,9 +79,14 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Reservas</h1>
-        <Link href="/admin/horario" className={styles.enlaceBarra}>
-          Horario
-        </Link>
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <Link href="/admin/horario" className={styles.enlaceBarra}>
+            Horario
+          </Link>
+          <Link href="/admin" className={styles.enlaceBarra}>
+            ← Volver
+          </Link>
+        </div>
       </header>
 
       <TiraSemana dia={dia} hoy={hoy} ruta="/admin/reservas" />
