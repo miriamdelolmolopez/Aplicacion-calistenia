@@ -94,6 +94,7 @@ export async function ajustarBono(_previo: Estado, formData: FormData): Promise<
   if (fallo) return error(fallo.message);
 
   revalidatePath("/admin/bonos");
+  revalidatePath("/admin/usuarios", "layout");
   return { mensaje: "Ajuste guardado." };
 }
 
@@ -108,7 +109,8 @@ export async function anularBono(_previo: Estado, formData: FormData): Promise<E
   if (fallo) return error(fallo.message);
 
   revalidatePath("/admin/bonos");
-  return { mensaje: "Bono anulado." };
+  revalidatePath("/admin/usuarios", "layout");
+  return { mensaje: "Tarifa quitada: el bono queda anulado." };
 }
 
 export async function cambiarPrecio(_previo: Estado, formData: FormData): Promise<Estado> {

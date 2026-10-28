@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { avisarMinimos } from "@/lib/avisos";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { bonoPorCaducar, felicitarCumpleanos, mensajeTrasPrueba, recordatorioPrueba } from "@/lib/automatizaciones";
 
 // Lo llama una vez al día el planificador de Vercel (ver vercel.json), que envía
@@ -9,6 +10,9 @@ export async function GET(request: Request) {
   if (!secreto || request.headers.get("authorization") !== `Bearer ${secreto}`) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+
+  // Se ponen al día los bonos que han caducado o se han agotado.
+  await createAdminClient().rpc("refrescar_bonos");
 
   const [minimos, bonos, recordatorios, tras, cumples] = await Promise.all([
     avisarMinimos(),

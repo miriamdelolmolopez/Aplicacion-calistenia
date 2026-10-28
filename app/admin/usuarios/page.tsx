@@ -23,6 +23,9 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
     ? await createAdminClient().storage.from("avatares").createSignedUrls(rutas, 3600)
     : { data: [] };
 
+  // Antes de mostrar las tarifas se pone al día lo que ya ha caducado o se ha agotado.
+  await createAdminClient().rpc("refrescar_bonos");
+
   // Tarifa (bono) activa de cada persona, para filtrar y mostrar.
   const { data: bonosActivos } = await createAdminClient()
     .from("bonos")

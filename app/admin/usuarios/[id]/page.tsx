@@ -15,6 +15,7 @@ import AvancesSesion from "./AvancesSesion";
 import EliminarUsuario from "./EliminarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
+import { EditorBono } from "../../bonos/Controles";
 import { ClasesHechas, InicioBono } from "./ClasesHechas";
 import Notas from "./Notas";
 
@@ -72,6 +73,9 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
     .eq("id", id)
     .maybeSingle();
   if (!p || p.rol === "admin") notFound();
+
+  // Se pone al día lo que haya caducado o se haya agotado antes de leer sus bonos.
+  await admin.rpc("refrescar_bonos", { p_user: id });
 
   const [{ data: usuarioAuth }, { data: asistenciaDatos }, { data: bonosDatos }, { data: nota }] = await Promise.all([
     admin.auth.admin.getUserById(id),
@@ -318,10 +322,13 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
                   <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
                 </div>
                 {(b.estado === "activo" || b.estado === "en_cola") && (
-                  <details>
-                    <summary className={styles.ayuda}>Cambiar fecha de inicio</summary>
-                    <InicioBono userId={p.id} bonoId={b.id} />
-                  </details>
+                  <>
+                    <details>
+                      <summary className={styles.ayuda}>Cambiar fecha de inicio</summary>
+                      <InicioBono userId={p.id} bonoId={b.id} />
+                    </details>
+                    <EditorBono bonoId={b.id} anulado={false} />
+                  </>
                 )}
               </li>
             );
@@ -341,6 +348,14 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
       <section className={styles.tarjeta}>
         <h2>Textos legales que aceptó ({aceptaciones.length})</h2>
         {aceptaciones.length === 0 && <p className={styles.ayuda}>Todavía no ha aceptado ningún texto legal.</p>}
+        {aceptaciones.length > 0 && (
+          <>
+            <a href={`/admin/usuarios/${p.id}/aceptaciones`} download className={styles.boton}>
+              Descargar PDF de lo último que aceptó
+            </a>
+            <p className={styles.ayuda}>Incluye la última versión que aceptó de cada documento, con su texto completo y el día y la hora.</p>
+          </>
+        )}
         {aceptaciones.map((a) => {
           const texto = textoLegal.get(`${a.tipo}|${a.version}`);
           const cuando = new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(a.aceptado_en));

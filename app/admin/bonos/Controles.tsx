@@ -199,7 +199,7 @@ export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boole
 
   return (
     <details className={styles.detalles}>
-      <summary>Ajustar o anular</summary>
+      <summary>Ajustar o quitar esta tarifa</summary>
       <form action={accionAjuste} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <p className={styles.ayuda}>
@@ -226,7 +226,7 @@ export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boole
       <form action={accionAnular} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <div className={styles.campo}>
-          <label htmlFor={`an-${bonoId}`}>Motivo de la anulación (opcional)</label>
+          <label htmlFor={`an-${bonoId}`}>Motivo (opcional)</label>
           <input id={`an-${bonoId}`} name="nota" maxLength={200} />
         </div>
         <button
@@ -234,7 +234,7 @@ export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boole
           type="submit"
           disabled={pendienteAnular}
         >
-          Anular este bono
+          Quitar esta tarifa (anular el bono)
         </button>
         <Mensajes estado={estadoAnular} />
       </form>
