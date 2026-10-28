@@ -2,10 +2,10 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
-import { FormularioAjustes, NuevoTipo } from "./Controles";
+import { FormularioAjustes } from "./Controles";
 import ListaTipos from "./ListaTipos";
 
-export const metadata = { title: "Clases presenciales · Administración" };
+export const metadata = { title: "Tipos de clase · Administración" };
 
 type Tipo = {
   id: string;
@@ -43,8 +43,8 @@ export default async function AdminClases() {
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
-        <h1>Clases presenciales</h1>
-        <Link href="/admin" className={styles.enlaceBarra}>
+        <h1>Tipos de clase</h1>
+        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </header>
@@ -76,7 +76,6 @@ export default async function AdminClases() {
           tipos={tipos}
           fotos={Object.fromEntries(tipos.map((t) => [t.id, <BotonFoto key={t.id} destino="tipo_clase" id={t.id} actual={t.foto_url} />]))}
         />
-        <NuevoTipo />
       </section>
     </main>
   );

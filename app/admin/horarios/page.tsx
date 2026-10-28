@@ -80,7 +80,7 @@ export default async function Horarios() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Plantillas presenciales</h1>
-        <Link href="/admin" className={styles.enlaceBarra}>
+        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </header>

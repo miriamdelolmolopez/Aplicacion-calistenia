@@ -175,8 +175,8 @@
 
 .rejilla {
   display: grid;
-  grid-template-columns: 52px repeat(7, minmax(112px, 1fr));
-  min-width: 840px;
+  grid-template-columns: 50px repeat(7, minmax(122px, 1fr));
+  min-width: 910px;
 }
 
 .cabHora,
@@ -368,4 +368,36 @@
 .irSemana {
   font-weight: 700;
   color: var(--oliva-oscuro);
+}
+
+/* Que nada se salga de su casilla ni se corte con las líneas */
+.celda {
+  min-width: 0;
+  padding: 8px 5px;
+}
+
+.tarjetaClase {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 6px 10px;
+}
+
+.nombreClase {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.cifras {
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  max-width: 100%;
+}
+
+.cifras span {
+  white-space: nowrap;
+}
+
+.acciones button {
+  width: 32px;
 }

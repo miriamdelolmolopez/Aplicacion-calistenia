@@ -21,7 +21,7 @@
 }
 
 .resumen strong {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 1.7rem;
   color: var(--ui-title);
 }

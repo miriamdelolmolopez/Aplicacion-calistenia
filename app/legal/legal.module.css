@@ -25,13 +25,13 @@
 }
 
 .tarjeta h1 {
-  font-family: var(--font-titulares, "Cormorant Garamond", serif);
+  font-family: var(--font-titulos), system-ui, sans-serif;
   font-size: 1.9rem;
   margin: 0 0 6px;
 }
 
 .tarjeta h2 {
-  font-family: var(--font-titulares, "Cormorant Garamond", serif);
+  font-family: var(--font-titulos), system-ui, sans-serif;
   font-size: 1.35rem;
   margin: 26px 0 6px;
 }

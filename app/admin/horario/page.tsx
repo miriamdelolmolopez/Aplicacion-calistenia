@@ -96,8 +96,8 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Horarios presenciales</h1>
-        <Link href="/admin/horarios" className={styles.enlaceBarra}>
-          Plantillas
+        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
+          ← Volver
         </Link>
       </header>
 

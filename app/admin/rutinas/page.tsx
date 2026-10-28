@@ -87,7 +87,7 @@ export default async function Rutinas() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Rutinas</h1>
-        <Link href="/admin" className={styles.enlaceBarra}>
+        <Link href="/admin/online" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </header>

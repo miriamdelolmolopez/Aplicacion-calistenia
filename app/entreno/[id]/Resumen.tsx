@@ -85,9 +85,10 @@ async function crearImagen(opciones: {
 
   c.fillStyle = "#f3f4f5";
   c.textBaseline = "alphabetic";
-  c.font = "600 64px Montserrat, Arial, sans-serif";
+  const letra = getComputedStyle(document.body).fontFamily || "Arial, sans-serif";
+  c.font = `600 64px ${letra}`;
   c.fillText(opciones.sesion.slice(0, 26), 60, ALTO - 360);
-  c.font = "500 44px Montserrat, Arial, sans-serif";
+  c.font = `500 44px ${letra}`;
   c.fillText(opciones.tiempo, 60, ALTO - 285);
   c.fillText(opciones.series, 60, ALTO - 225);
 

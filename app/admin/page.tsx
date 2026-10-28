@@ -1,50 +1,46 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { fondoFoto, type FotoNombre } from "@/lib/fotos";
 import { marcarBorradoAtendido } from "./acciones";
 import styles from "./admin.module.css";
+import { Cuadricula, type Azulejo } from "./Hub";
 
 export const metadata = { title: "Administración · Miriam del Olmo" };
 
-type Azulejo = { href: string; titulo: string; foto: FotoNombre };
-
 // Cada grupo es un título con sus fotos debajo. Las fotos son las de ejemplo de la app.
-const GRUPOS: { titulo: string; azulejos: Azulejo[] }[] = [
+const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
   {
-    titulo: "Personas y clases",
     azulejos: [
       { href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" },
-      { href: "/admin/clases", titulo: "Clases presenciales", foto: "pino" },
-      { href: "/admin/horario", titulo: "Horarios presenciales", foto: "inicio" },
-      { href: "/admin/horarios", titulo: "Plantillas presenciales", foto: "calistenia" },
+      { href: "/admin/presenciales", titulo: "Clases presenciales", foto: "pino" },
+      { href: "/admin/online", titulo: "Entrenamientos online", foto: "online" },
     ],
   },
   {
-    titulo: "Dinero",
+    titulo: "Cursos",
     azulejos: [
-      { href: "/admin/bonos", titulo: "Bonos y pagos", foto: "personal" },
-      { href: "/admin/tarifas", titulo: "Bonos y clases sueltas", foto: "calistenia" },
+      { href: "/admin/academia", titulo: "Cursos", foto: "pino" },
+      { titulo: "Retos por semanas", foto: "progreso", proximamente: true },
+      { titulo: "Membresía", foto: "personal", proximamente: true },
+    ],
+  },
+  {
+    titulo: "Economía",
+    azulejos: [
+      { href: "/admin/bonos", titulo: "Pagos", foto: "personal" },
+      { href: "/admin/tarifas", titulo: "Tarifas", foto: "calistenia" },
       { href: "/admin/descuentos", titulo: "Descuentos", foto: "progreso" },
       { href: "/admin/formas-pago", titulo: "Formas de pago", foto: "personal" },
-      { href: "/admin/exportar", titulo: "Descargar datos (CSV)", foto: "inicio" },
     ],
   },
   {
-    titulo: "Entrenamiento online",
+    titulo: "Resumen y contenido",
     azulejos: [
-      { href: "/admin/ejercicios", titulo: "Ejercicios", foto: "calistenia" },
-      { href: "/admin/rutinas", titulo: "Rutinas", foto: "online" },
-    ],
-  },
-  {
-    titulo: "Contenido y resumen",
-    azulejos: [
-      { href: "/admin/academia", titulo: "Academia", foto: "pino" },
-      { href: "/admin/aprende", titulo: "Aprende", foto: "calistenia" },
-      { href: "/admin/contenido", titulo: "Fotos y frases", foto: "inicio" },
-      { href: "/admin/legal", titulo: "Textos legales", foto: "personal" },
       { href: "/admin/informes", titulo: "Informes", foto: "progreso" },
+      { href: "/admin/legal", titulo: "Textos legales", foto: "personal" },
       { href: "/admin/automatizaciones", titulo: "Automatizaciones", foto: "online" },
+      { href: "/admin/contenido", titulo: "Fotos y frases", foto: "inicio" },
+      { href: "/admin/aprende", titulo: "Aprende", foto: "calistenia" },
+      { href: "/admin/exportar", titulo: "Descargar datos (CSV)", foto: "inicio" },
     ],
   },
 ];
@@ -104,16 +100,10 @@ export default async function Administracion() {
         </section>
       )}
 
-      {GRUPOS.map((g) => (
-        <section key={g.titulo} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h2 className={styles.grupoTitulo}>{g.titulo}</h2>
-          <div className={styles.cuadricula}>
-            {g.azulejos.map((a) => (
-              <Link key={a.href} href={a.href} className={styles.azulejo} style={{ backgroundImage: fondoFoto(a.foto) }}>
-                <span>{a.titulo}</span>
-              </Link>
-            ))}
-          </div>
+      {GRUPOS.map((g, i) => (
+        <section key={g.titulo ?? i} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {g.titulo && <h2 className={styles.grupoTitulo}>{g.titulo}</h2>}
+          <Cuadricula azulejos={g.azulejos} />
         </section>
       ))}
     </main>

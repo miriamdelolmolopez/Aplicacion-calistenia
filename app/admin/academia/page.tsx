@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import { FormularioCurso } from "./Controles";
 
-export const metadata = { title: "Academia · Administración" };
+export const metadata = { title: "Cursos · Administración" };
 
 export default async function AdministrarAcademia() {
   await requireAdmin();
@@ -18,7 +18,7 @@ export default async function AdministrarAcademia() {
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
-        <h1>Academia</h1>
+        <h1>Cursos</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>

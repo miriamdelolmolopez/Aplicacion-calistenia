@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { colorDeTipo, PALETA_CLASES } from "@/lib/colores";
@@ -253,11 +253,15 @@ export function FormularioTipo({
   );
 }
 
-export function NuevoTipo() {
+export function NuevoTipo({ alTerminar }: { alTerminar?: () => void } = {}) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(crearTipo, {});
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar) return;
+    const t = setTimeout(alTerminar, 700);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar]);
   return (
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
-      <strong>Nuevo tipo de clase</strong>
       <div className={styles.campo}>
         <label htmlFor="nt-nombre">Nombre</label>
         <input id="nt-nombre" name="nombre" maxLength={60} required />
