@@ -78,7 +78,8 @@ export default function ListaRutinas({
   const [estado, setEstado] = useState("todos");
   const [alumno, setAlumno] = useState("todos");
   const [renombrando, setRenombrando] = useState<string | null>(null);
-  const [cambios, setCambios] = useState<Record<string, string>>({}); // rutina -> carpeta elegida, todavía sin guardar
+  const [arrastrando, setArrastrando] = useState<string | null>(null); // rutina que se está arrastrando
+  const [sobre, setSobre] = useState<string | null>(null); // carpeta (o «raiz») sobre la que está
   const [aviso, setAviso] = useState<Estado>({});
   const [pendiente, empezar] = useTransition();
 
@@ -113,8 +114,46 @@ export default function ListaRutinas({
   const alumnosConRutina = [...new Set(rutinas.map((r) => r.alumno))].sort((a, b) => a.localeCompare(b, "es"));
   const abierta = carpetas.find((c) => c.id === renombrando);
 
+  // Arrastrar una rutina y soltarla en una carpeta (o en «Rutinas» para sacarla). Mover no pide confirmación.
+  const puedeArrastrar = hayCarpetas && carpetas.length > 0;
+  const soltarEn = (destino: string | null) => {
+    const id = arrastrando;
+    setArrastrando(null);
+    setSobre(null);
+    const rutina = rutinas.find((x) => x.id === id);
+    if (id && rutina && rutina.carpetaId !== destino) ejecutar(() => moverRutina(id, destino));
+  };
+  const zona = (clave: string, destino: string | null) => ({
+    onDragOver: (e: React.DragEvent) => {
+      if (!arrastrando) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      setSobre(clave);
+    },
+    onDragLeave: () => setSobre((s) => (s === clave ? null : s)),
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      soltarEn(destino);
+    },
+  });
+  const resaltado = (clave: string): React.CSSProperties => (sobre === clave ? { outline: "2px dashed var(--acento)", background: "rgba(10, 168, 192, 0.08)" } : {});
+
   const fila = (r: FilaRutina) => (
-    <div key={r.id} className={comunes.fila} style={{ alignItems: "flex-start", flexWrap: "wrap" }}>
+    <div
+      key={r.id}
+      className={comunes.fila}
+      style={{ alignItems: "flex-start", flexWrap: "wrap", opacity: arrastrando === r.id ? 0.45 : 1, cursor: puedeArrastrar ? "grab" : undefined }}
+      draggable={puedeArrastrar}
+      onDragStart={(e) => {
+        e.dataTransfer.setData("text/plain", r.id);
+        e.dataTransfer.effectAllowed = "move";
+        setArrastrando(r.id);
+      }}
+      onDragEnd={() => {
+        setArrastrando(null);
+        setSobre(null);
+      }}
+    >
       <div>
         <strong>{r.nombre}</strong>
         <div className={styles.ayuda}>
@@ -129,9 +168,9 @@ export default function ListaRutinas({
             </label>
             <select
               id={`mv-${r.id}`}
-              value={cambios[r.id] ?? r.carpetaId ?? ""}
+              value={r.carpetaId ?? ""}
               disabled={pendiente}
-              onChange={(e) => setCambios((c) => ({ ...c, [r.id]: e.target.value }))}
+              onChange={(e) => ejecutar(() => moverRutina(r.id, e.target.value || null))}
               style={{ maxWidth: 220 }}
             >
               <option value="">Inicio</option>
@@ -144,39 +183,6 @@ export default function ListaRutinas({
                   </option>
                 ))}
             </select>
-            {r.id in cambios && cambios[r.id] !== (r.carpetaId ?? "") && (
-              <span style={{ display: "inline-flex", gap: 6, marginLeft: 8 }}>
-                <button
-                  type="button"
-                  className={comunes.volver}
-                  disabled={pendiente}
-                  onClick={() => {
-                    const destino = cambios[r.id] || null;
-                    setCambios((c) => {
-                      const resto = { ...c };
-                      delete resto[r.id];
-                      return resto;
-                    });
-                    ejecutar(() => moverRutina(r.id, destino));
-                  }}
-                >
-                  Guardar
-                </button>
-                <button
-                  type="button"
-                  className={comunes.volver}
-                  onClick={() =>
-                    setCambios((c) => {
-                      const resto = { ...c };
-                      delete resto[r.id];
-                      return resto;
-                    })
-                  }
-                >
-                  Cancelar
-                </button>
-              </span>
-            )}
           </div>
         )}
       </div>
@@ -228,15 +234,17 @@ export default function ListaRutinas({
         </div>
       </PanelFiltros>
 
+      {puedeArrastrar && <p className={styles.ayuda}>Arrastra una rutina y suéltala sobre una carpeta para moverla (o sobre «Rutinas» para sacarla).</p>}
+
       {modoDrive && !buscando && (
         <nav aria-label="Carpetas" className={styles.ayuda} style={{ margin: "6px 0 12px", display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <button type="button" className={comunes.volver} onClick={() => setActual(null)}>
+          <button type="button" className={comunes.volver} style={resaltado("raiz")} onClick={() => setActual(null)} {...zona("raiz", null)}>
             Rutinas
           </button>
           {migas.map((c) => (
             <span key={c.id} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
               ›
-              <button type="button" className={comunes.volver} onClick={() => setActual(c.id)}>
+              <button type="button" className={comunes.volver} style={resaltado(c.id)} onClick={() => setActual(c.id)} {...zona(c.id, c.id)}>
                 {c.nombre}
               </button>
             </span>
@@ -258,7 +266,7 @@ export default function ListaRutinas({
       {modoDrive &&
         !buscando &&
         hijas.map((c) => (
-          <div key={c.id} className={comunes.fila}>
+          <div key={c.id} className={comunes.fila} style={resaltado(c.id)} {...zona(c.id, c.id)}>
             <button type="button" onClick={() => setActual(c.id)} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
               <span aria-hidden="true" style={{ fontSize: 22 }}>
                 📁
