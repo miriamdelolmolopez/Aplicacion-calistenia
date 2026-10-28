@@ -6,6 +6,7 @@ import styles from "../admin.module.css";
 import { colorDeTipo } from "@/lib/colores";
 import { duplicarTipo, eliminarTipo } from "./acciones";
 import { FormularioTipo } from "./Controles";
+import estilosLista from "./listaTipos.module.css";
 
 type Tipo = Parameters<typeof FormularioTipo>[0]["tipo"];
 
@@ -55,24 +56,24 @@ export default function ListaTipos({ tipos, fotos }: { tipos: Tipo[]; fotos: Rec
                   </div>
                 </div>
               </div>
-              <div className={styles.accionesItem}>
-                <button type="button" className={styles.botonSecundario} aria-expanded={abierto} onClick={() => setEditando(abierto ? null : t.id)}>
+              <div className={estilosLista.acciones}>
+                <button type="button" aria-expanded={abierto} onClick={() => setEditando(abierto ? null : t.id)}>
                   {abierto ? "Cerrar" : "Editar"}
                 </button>
-                <button type="button" className={styles.botonSecundario} disabled={pendiente} onClick={() => ejecutar(() => duplicarTipo(t.id))}>
+                <button type="button" disabled={pendiente} onClick={() => ejecutar(() => duplicarTipo(t.id))}>
                   Duplicar
                 </button>
                 {confirmando === t.id ? (
                   <>
-                    <button type="button" className={styles.boton} disabled={pendiente} onClick={() => ejecutar(() => eliminarTipo(t.id))}>
+                    <button type="button" className={estilosLista.confirmar} disabled={pendiente} onClick={() => ejecutar(() => eliminarTipo(t.id))}>
                       Sí, eliminar
                     </button>
-                    <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(null)}>
+                    <button type="button" onClick={() => setConfirmando(null)}>
                       No
                     </button>
                   </>
                 ) : (
-                  <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(t.id)}>
+                  <button type="button" className={estilosLista.peligro} onClick={() => setConfirmando(t.id)}>
                     Eliminar
                   </button>
                 )}

@@ -1,0 +1,37 @@
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.acciones button {
+  padding: 9px 18px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--carbon);
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid rgba(23, 24, 26, 0.14);
+  border-radius: 9999px;
+}
+
+.acciones button:hover:not(:disabled) {
+  border-color: var(--acento);
+}
+
+.acciones button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.acciones .peligro {
+  color: #d6453d;
+}
+
+.acciones .confirmar {
+  color: #ffffff;
+  background: #d6453d;
+  border-color: #d6453d;
+}
