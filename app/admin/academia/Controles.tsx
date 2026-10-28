@@ -108,17 +108,17 @@ export function FormularioCurso({ curso, categorias, alTerminar }: { curso?: Cur
         <input id={`valoracion-${p}`} name="valoracion" inputMode="decimal" defaultValue={curso?.valoracion === null || curso?.valoracion === undefined ? "" : String(curso.valoracion)} />
       </div>
 
-      <button className={styles.boton} type="submit" disabled={pendiente}>
-        {pendiente ? "Guardando…" : curso ? "Guardar cambios" : "Crear curso"}
-      </button>
-      <Mensajes estado={estado} />
-
       {curso && (
         <>
           <strong>Foto del curso</strong>
           <BotonFoto destino="curso" id={curso.id} actual={curso.foto_url} />
         </>
       )}
+
+      <button className={styles.boton} type="submit" disabled={pendiente}>
+        {pendiente ? "Guardando…" : curso ? "Guardar cambios" : "Crear curso"}
+      </button>
+      <Mensajes estado={estado} />
     </form>
   );
 }
