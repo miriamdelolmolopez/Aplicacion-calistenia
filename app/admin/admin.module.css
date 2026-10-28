@@ -799,3 +799,8 @@
   font-weight: 600;
   opacity: 0.9;
 }
+
+/* Tema oscuro: la cabecera lleva foto y texto encima; se vuelve a poner como era para que la foto no salga en negativo. */
+:global(html[data-tema="oscuro"]) .barra {
+  filter: contrast(1.136) hue-rotate(180deg) invert(1);
+}

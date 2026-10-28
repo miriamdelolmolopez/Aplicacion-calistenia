@@ -309,3 +309,8 @@
 :global(body):has(.fondoEntrar) {
   background: transparent;
 }
+
+/* Tema oscuro: la foto de fondo se ve con sus colores de siempre, no en negativo. */
+:global(html[data-tema="oscuro"]) .fondoEntrar {
+  filter: contrast(1.136) hue-rotate(180deg) invert(1);
+}

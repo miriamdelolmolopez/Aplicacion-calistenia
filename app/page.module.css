@@ -141,3 +141,13 @@
 :global(body):has(.fondo) {
   background: transparent;
 }
+
+/* Tema oscuro: la foto de fondo se ve con sus colores de siempre, no en negativo. */
+:global(html[data-tema="oscuro"]) .fondo {
+  filter: contrast(1.136) hue-rotate(180deg) invert(1);
+}
+
+/* Tema oscuro: el logo es oscuro, así que se deja invertido para que se vea claro sobre el fondo. */
+:global(html[data-tema="oscuro"]) .logo {
+  filter: none !important;
+}
