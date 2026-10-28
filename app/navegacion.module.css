@@ -131,21 +131,12 @@ button.pestana:active:not(:disabled) {
   pointer-events: none;
   background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
   background-size: 250% 100%;
-  animation: destelloMetal 4.5s ease-in-out infinite;
+  background-position: 130% 0;
 }
 
-@keyframes destelloMetal {
-  0%,
-  55% {
-    background-position: 130% 0;
-  }
-  100% {
-    background-position: -130% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .activa .icono::after {
-    animation: none;
-  }
+/* El destello solo pasa al pulsar o pasar por encima, no todo el rato */
+.activa:hover .icono::after,
+.activa:active .icono::after {
+  background-position: -130% 0;
+  transition: background-position 0.8s ease;
 }
