@@ -8,7 +8,6 @@ import { PERIODOS, rangoDe, type Periodo } from "@/lib/periodos";
 import styles from "../admin.module.css";
 import { BarrasHorizontales, BarrasMensuales, nombreMes } from "../estadisticas/Graficos";
 import estilos from "../estadisticas/estadisticas.module.css";
-import GraficoElegible, { type Opcion } from "./GraficoElegible";
 import { BarrasApiladas, BarrasColores, Cambio, COLOR_SERVICIO, LineaMensual, PALETA, Rosca, TarjetaCifra } from "./GraficosPagos";
 import g from "./informes.module.css";
 
@@ -107,60 +106,6 @@ export default async function Informes({
     </Link>
   );
 
-  const opciones: Opcion[] =
-    i && atletas
-      ? [
-          {
-            id: "servicio",
-            titulo: "Alumnas por tipo de servicio",
-            nota: "Una alumna con varios servicios cuenta en cada uno.",
-            formato: "n",
-            tipo: "barras",
-            filas: [
-              { texto: "Clases grupales", valor: i.por_servicio.grupal },
-              { texto: "Individuales", valor: i.por_servicio.individual },
-              { texto: "Online", valor: i.por_servicio.online },
-              { texto: "Sin servicio asignado", valor: i.por_servicio.sin_servicio },
-            ],
-          },
-          { id: "edad", titulo: "Alumnas por edad", formato: "n", tipo: "barras", filas: EDADES.map(([k, texto]) => ({ texto, valor: i.por_edad[k] ?? 0 })) },
-          {
-            id: "sexo",
-            titulo: "Alumnas por sexo",
-            formato: "n",
-            tipo: "barras",
-            filas: [
-              { texto: "Mujeres", valor: i.por_sexo.mujer },
-              { texto: "Hombres", valor: i.por_sexo.hombre },
-              { texto: "Otro", valor: i.por_sexo.otro },
-              { texto: "Sin indicar", valor: i.por_sexo.sin_dato },
-            ],
-          },
-          {
-            id: "ocupacion",
-            titulo: "Ocupación de cada clase de la semana",
-            nota: "Porcentaje medio de plazas ocupadas en las clases del periodo que ya han pasado, clase por clase y día por día.",
-            formato: "pct",
-            tipo: "barras",
-            filas: atletas.ocupacion,
-          },
-          {
-            id: "nuevos",
-            titulo: "Nuevas alumnas por mes",
-            formato: "n",
-            tipo: "mensual",
-            meses: i.altas_mensuales.map((a) => ({ mes: a.mes, total: a.altas })),
-          },
-          {
-            id: "tarifas",
-            titulo: "Tarifas más contratadas",
-            formato: "veces",
-            tipo: "barras",
-            filas: i.tarifas.map((t) => ({ texto: t.nombre, valor: t.contratadas, detalle: `${SERVICIOS[t.servicio] ?? t.servicio} · cobrado: ${euros(t.ingresos)}` })),
-          },
-        ]
-      : [];
-
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
@@ -209,48 +154,38 @@ export default async function Informes({
       {vista === "atletas" && i && atletas && (
         <>
           <section className={styles.tarjeta}>
-            <h2>Atletas activas</h2>
-            <div className={estilos.cifras}>
-              <div className={estilos.cifra}>
-                <strong>{i.por_servicio.grupal}</strong>
-                <small>grupales</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{i.por_servicio.individual}</strong>
-                <small>individuales</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{i.por_servicio.online}</strong>
-                <small>online</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{i.personas.invitadas}</strong>
-                <small>invitadas</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{atletas.pruebas}</strong>
-                <small>han probado una clase en el periodo</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{atletas.nuevos.length}</strong>
-                <small>nuevas en el periodo</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{atletas.perdidas.length}</strong>
-                <small>perdidas (no renovaron)</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{atletas.totalAusencias}</strong>
-                <small>ausencias (no se presentaron)</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{atletas.retencion ? `${Math.round((atletas.retencion.siguen / atletas.retencion.base) * 100)} %` : "—"}</strong>
-                <small>
-                  {atletas.retencion
-                    ? `retención: ${atletas.retencion.siguen} de ${atletas.retencion.base} siguen`
-                    : "retención: sin alumnas al empezar el periodo"}
-                </small>
-              </div>
+            <h2>Atletas</h2>
+            <div className={g.tarjetas}>
+              <TarjetaCifra
+                titulo="Activas"
+                valor={String(i.personas.activas)}
+                color="#0aa8c0"
+                notas={<span>{i.personas.alumnas} alumnas · {i.personas.invitadas} invitadas</span>}
+              />
+              <TarjetaCifra
+                titulo="Nuevas en el periodo"
+                valor={String(atletas.nuevos.length)}
+                color="#2fb57a"
+                notas={<span>{atletas.pruebas} han probado una clase</span>}
+              />
+              <TarjetaCifra
+                titulo="Perdidas"
+                valor={String(atletas.perdidas.length)}
+                color="#ef5f8b"
+                notas={<span>No renovaron su bono</span>}
+              />
+              <TarjetaCifra
+                titulo="Retención"
+                valor={atletas.retencion ? `${Math.round((atletas.retencion.siguen / atletas.retencion.base) * 100)} %` : "—"}
+                color="#6d5efc"
+                notas={<span>{atletas.retencion ? `${atletas.retencion.siguen} de ${atletas.retencion.base} siguen` : "Sin alumnas al empezar el periodo"}</span>}
+              />
+              <TarjetaCifra
+                titulo="Ausencias"
+                valor={String(atletas.totalAusencias)}
+                color="#f5a524"
+                notas={<span>No se presentaron a su clase</span>}
+              />
             </div>
             <p className={styles.ayuda}>
               «Activa» = con un bono o plan en vigor. «Perdida» = su último bono terminó en el periodo y no tiene otro. «Retención» = de las
@@ -267,7 +202,72 @@ export default async function Informes({
 
           <section className={styles.tarjeta}>
             <h2>Gráficos</h2>
-            <GraficoElegible opciones={opciones} />
+            <div className={g.rejilla2}>
+              <div className={g.bloque}>
+                <h3>Alumnas por tipo de servicio</h3>
+                <p className={g.vacio}>Una alumna con varios servicios cuenta en cada uno.</p>
+                <Rosca
+                  formato={String}
+                  total={i.por_servicio.grupal + i.por_servicio.individual + i.por_servicio.online}
+                  centro={String(i.por_servicio.grupal + i.por_servicio.individual + i.por_servicio.online)}
+                  subtitulo="servicios"
+                  filas={[
+                    { texto: "Clases grupales", valor: i.por_servicio.grupal, color: COLOR_SERVICIO.grupal },
+                    { texto: "Individuales", valor: i.por_servicio.individual, color: COLOR_SERVICIO.individual },
+                    { texto: "Online", valor: i.por_servicio.online, color: COLOR_SERVICIO.online },
+                    { texto: "Sin servicio asignado", valor: i.por_servicio.sin_servicio, color: COLOR_SERVICIO.otros },
+                  ]}
+                />
+              </div>
+              <div className={g.bloque}>
+                <h3>Alumnas por sexo</h3>
+                <Rosca
+                  formato={String}
+                  total={i.por_sexo.mujer + i.por_sexo.hombre + i.por_sexo.otro + i.por_sexo.sin_dato}
+                  centro={String(i.por_sexo.mujer + i.por_sexo.hombre + i.por_sexo.otro + i.por_sexo.sin_dato)}
+                  subtitulo="personas"
+                  filas={[
+                    { texto: "Mujeres", valor: i.por_sexo.mujer, color: PALETA[3] },
+                    { texto: "Hombres", valor: i.por_sexo.hombre, color: PALETA[0] },
+                    { texto: "Otro", valor: i.por_sexo.otro, color: PALETA[1] },
+                    { texto: "Sin indicar", valor: i.por_sexo.sin_dato, color: PALETA[5] },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className={g.bloque}>
+              <h3>Alumnas por edad</h3>
+              <BarrasColores formato={String} filas={EDADES.map(([k, texto], n) => ({ texto, valor: i.por_edad[k] ?? 0, color: PALETA[n % PALETA.length] }))} />
+            </div>
+
+            <div className={g.bloque}>
+              <h3>Nuevas alumnas por mes</h3>
+              <LineaMensual formato={String} entero datos={i.altas_mensuales.map((m) => ({ mes: m.mes, total: m.altas }))} />
+            </div>
+
+            <div className={g.rejilla2}>
+              <div className={g.bloque}>
+                <h3>Ocupación de cada clase</h3>
+                <p className={g.vacio}>Porcentaje medio de plazas ocupadas en las clases del periodo que ya han pasado.</p>
+                {atletas.ocupacion.length === 0 ? (
+                  <p className={g.vacio}>Sin clases en este periodo.</p>
+                ) : (
+                  <BarrasColores porcentaje={false} formato={(n) => `${n} %`} filas={atletas.ocupacion.map((f, n) => ({ texto: f.texto, valor: f.valor, color: PALETA[n % PALETA.length] }))} />
+                )}
+              </div>
+              <div className={g.bloque}>
+                <h3>Tarifas más contratadas</h3>
+                {i.tarifas.length === 0 ? (
+                  <p className={g.vacio}>Todavía no hay datos.</p>
+                ) : (
+                  <BarrasColores
+                    formato={(n) => `${n} ${n === 1 ? "vez" : "veces"}`}
+                    filas={i.tarifas.map((t, n) => ({ texto: t.nombre, valor: t.contratadas, color: PALETA[n % PALETA.length] }))}
+                  />
+                )}
+              </div>
+            </div>
           </section>
 
           <section className={styles.tarjeta}>

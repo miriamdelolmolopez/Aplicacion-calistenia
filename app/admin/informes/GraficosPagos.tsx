@@ -53,7 +53,19 @@ export function Cambio({ actual, antes, etiqueta }: { actual: number; antes: num
 }
 
 // Rosca con el total en el centro y la leyenda al lado.
-export function Rosca({ filas, total }: { filas: { texto: string; valor: number; color: string }[]; total: number }) {
+export function Rosca({
+  filas,
+  total,
+  formato = euros,
+  centro,
+  subtitulo = "total",
+}: {
+  filas: { texto: string; valor: number; color: string }[];
+  total: number;
+  formato?: (n: number) => string;
+  centro?: string;
+  subtitulo?: string;
+}) {
   const R = 44;
   const C = 2 * Math.PI * R;
   const suma = filas.reduce((s, f) => s + f.valor, 0) || 1;
@@ -81,15 +93,15 @@ export function Rosca({ filas, total }: { filas: { texto: string; valor: number;
                 strokeDashoffset={desfase}
                 transform="rotate(-90 60 60)"
               >
-                <title>{`${f.texto}: ${euros(f.valor)} (${Math.round((f.valor / suma) * 100)} %)`}</title>
+                <title>{`${f.texto}: ${formato(f.valor)} (${Math.round((f.valor / suma) * 100)} %)`}</title>
               </circle>
             );
           })}
         <text x="60" y="58" textAnchor="middle" className={estilos.roscaTotal}>
-          {corto(total)}
+          {centro ?? corto(total)}
         </text>
         <text x="60" y="73" textAnchor="middle" className={estilos.roscaSub}>
-          total
+          {subtitulo}
         </text>
       </svg>
       <ul className={estilos.leyenda}>
@@ -97,7 +109,7 @@ export function Rosca({ filas, total }: { filas: { texto: string; valor: number;
           <li key={f.texto}>
             <i style={{ background: f.color }} />
             <span>{f.texto}</span>
-            <strong>{euros(f.valor)}</strong>
+            <strong>{formato(f.valor)}</strong>
             <small>{Math.round((f.valor / suma) * 100)} %</small>
           </li>
         ))}
@@ -114,7 +126,7 @@ const ARR = 14;
 const ABA = 28;
 
 // Líneas y cuadrícula de fondo comunes a los gráficos por mes.
-function Cuadricula({ maximo }: { maximo: number }) {
+function Cuadricula({ maximo, etiqueta = corto }: { maximo: number; etiqueta?: (n: number) => string }) {
   const lineas = [0, 1, 2, 3, 4];
   return (
     <>
@@ -124,7 +136,7 @@ function Cuadricula({ maximo }: { maximo: number }) {
           <g key={n}>
             <line x1={IZQ} x2={W - DER} y1={y} y2={y} className={estilos.rejilla} />
             <text x={IZQ - 8} y={y + 4} textAnchor="end" className={estilos.eje}>
-              {corto(maximo * (1 - n / 4))}
+              {etiqueta(maximo * (1 - n / 4))}
             </text>
           </g>
         );
@@ -134,8 +146,17 @@ function Cuadricula({ maximo }: { maximo: number }) {
 }
 
 // Línea de ingresos mes a mes, con el mismo mes del año anterior punteado.
-export function LineaMensual({ datos }: { datos: { mes: string; total: number; anterior: number }[] }) {
-  const maximo = techo(Math.max(...datos.flatMap((d) => [d.total, d.anterior]), 1));
+export function LineaMensual({
+  datos,
+  formato = euros,
+  entero = false,
+}: {
+  datos: { mes: string; total: number; anterior?: number }[];
+  formato?: (n: number) => string;
+  entero?: boolean; // recuentos: la escala siempre en números enteros
+}) {
+  const maximo = techo(Math.max(...datos.flatMap((d) => [d.total, d.anterior ?? 0]), entero ? 4 : 1));
+  const hayAnterior = datos.some((d) => d.anterior !== undefined);
   const anchoUtil = W - IZQ - DER;
   const altoUtil = H - ARR - ABA;
   const x = (i: number) => IZQ + (datos.length > 1 ? (anchoUtil * i) / (datos.length - 1) : anchoUtil / 2);
@@ -143,21 +164,21 @@ export function LineaMensual({ datos }: { datos: { mes: string; total: number; a
   const linea = (f: (d: (typeof datos)[number]) => number) => datos.map((d, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(f(d)).toFixed(1)}`).join(" ");
   const area = `${linea((d) => d.total)} L${x(datos.length - 1).toFixed(1)} ${ARR + altoUtil} L${x(0).toFixed(1)} ${ARR + altoUtil} Z`;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Ingresos por mes" className={estilos.grafico}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Evolución mes a mes" className={estilos.grafico}>
       <defs>
         <linearGradient id="areaIngresos" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#0aa8c0" stopOpacity="0.38" />
           <stop offset="100%" stopColor="#0aa8c0" stopOpacity="0.02" />
         </linearGradient>
       </defs>
-      <Cuadricula maximo={maximo} />
-      <path d={linea((d) => d.anterior)} className={estilos.lineaAnterior} />
+      <Cuadricula maximo={maximo} etiqueta={entero ? (n) => String(Math.round(n)) : undefined} />
+      {hayAnterior && <path d={linea((d) => d.anterior ?? 0)} className={estilos.lineaAnterior} />}
       <path d={area} fill="url(#areaIngresos)" />
       <path d={linea((d) => d.total)} className={estilos.lineaActual} />
       {datos.map((d, i) => (
         <g key={d.mes}>
           <circle cx={x(i)} cy={y(d.total)} r="4.5" className={estilos.punto}>
-            <title>{`${nombreMes(d.mes)}: ${euros(d.total)} (año anterior: ${euros(d.anterior)})`}</title>
+            <title>{`${nombreMes(d.mes)}: ${formato(d.total)}${d.anterior !== undefined ? ` (año anterior: ${formato(d.anterior)})` : ""}`}</title>
           </circle>
           <text x={x(i)} y={H - 8} textAnchor="middle" className={estilos.eje}>
             {nombreMes(d.mes).slice(0, 3)}
@@ -222,7 +243,7 @@ export function BarrasApiladas({
 }
 
 // Barras horizontales de colores (una por fila), con el importe y el porcentaje.
-export function BarrasColores({ filas }: { filas: { texto: string; valor: number; color: string }[] }) {
+export function BarrasColores({ filas, formato = euros, porcentaje = true }: { filas: { texto: string; valor: number; color: string }[]; formato?: (n: number) => string; porcentaje?: boolean }) {
   const maximo = Math.max(1, ...filas.map((f) => f.valor));
   const suma = filas.reduce((s, f) => s + f.valor, 0) || 1;
   return (
@@ -232,7 +253,13 @@ export function BarrasColores({ filas }: { filas: { texto: string; valor: number
           <div>
             <span>{f.texto}</span>
             <strong>
-              {euros(f.valor)} <small>{Math.round((f.valor / suma) * 100)} %</small>
+              {formato(f.valor)}
+              {porcentaje && (
+                <>
+                  {" "}
+                  <small>{Math.round((f.valor / suma) * 100)} %</small>
+                </>
+              )}
             </strong>
           </div>
           <div className={estilos.pistaColor}>
