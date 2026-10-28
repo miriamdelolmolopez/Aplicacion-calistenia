@@ -116,10 +116,10 @@ export default function ResumenAdminTarjetas() {
 
   return (
     <section className={estilos.resumen} aria-label="Resumen del negocio">
-      <div className={estilos.resumenCuadricula}>{principales.map(pinta)}</div>
+      <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{principales.map(pinta)}</div>
 
       <h2 className={estilos.resumenSeccion}>Alertas</h2>
-      <div className={estilos.resumenCuadricula}>{alertas.map(pinta)}</div>
+      <div className={`${estilos.resumenCuadricula} ${estilos.resumenAlertas}`}>{alertas.map(pinta)}</div>
 
       {abierta && (
         <div className={estilos.resumenDetalle}>

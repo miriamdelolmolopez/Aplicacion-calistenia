@@ -450,3 +450,17 @@
   margin: 22px 0 10px;
   font-size: 1rem;
 }
+
+/* Tarjetas del resumen: siempre de dos en dos; Ingresos ocupa todo el ancho */
+.resumenPrincipal,
+.resumenAlertas {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.resumenPrincipal > :first-child {
+  grid-column: 1 / -1;
+}
+
+.comparacion {
+  flex-wrap: wrap;
+}
