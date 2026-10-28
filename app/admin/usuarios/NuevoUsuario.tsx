@@ -99,6 +99,11 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
                     </label>
                   </fieldset>
                   <div className={styles.campo}>
+                    <label htmlFor="nu-inicio">¿Ya lo tenía empezado? Fecha en que empezó (opcional)</label>
+                    <input id="nu-inicio" name="inicio" type="date" max={new Date().toISOString().slice(0, 10)} />
+                    <span className={styles.ayuda}>Si la dejas vacía, empieza a contar hoy. Después podrás marcar en su ficha las clases que ya hizo.</span>
+                  </div>
+                  <div className={styles.campo}>
                     <label htmlFor="nu-metodo">Cómo paga</label>
                     <select id="nu-metodo" name="metodo" defaultValue={formas.find((f) => f.clave === "bizum")?.clave ?? formas[0]?.clave}>
                       {formas.map((f) => (

@@ -15,6 +15,7 @@ import AvancesSesion from "./AvancesSesion";
 import EliminarUsuario from "./EliminarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
+import { ClasesHechas, InicioBono } from "./ClasesHechas";
 import Notas from "./Notas";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
@@ -91,6 +92,8 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
     .order("creado_en", { ascending: false })
     .limit(50);
   const intentos = (intentosDatos ?? []) as Intento[];
+  const { data: tiposClaseDatos } = await admin.from("tipos_clase").select("id, nombre").eq("activo", true).order("nombre");
+  const tiposClase = (tiposClaseDatos ?? []) as { id: string; nombre: string }[];
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
 
@@ -299,6 +302,12 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
                   </div>
                   <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
                 </div>
+                {(b.estado === "activo" || b.estado === "en_cola") && (
+                  <details>
+                    <summary className={styles.ayuda}>Cambiar fecha de inicio</summary>
+                    <InicioBono userId={p.id} bonoId={b.id} />
+                  </details>
+                )}
               </li>
             );
           })}
@@ -306,6 +315,12 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
         <Link href="/admin/bonos" className={`${styles.boton} ${styles.botonSecundario}`}>
           Registrar o cambiar bonos
         </Link>
+        {presencial && (
+          <details>
+            <summary className={styles.ayuda}>Clases que ya hizo antes de entrar en la app</summary>
+            <ClasesHechas userId={p.id} tipos={tiposClase} />
+          </details>
+        )}
       </section>
 
       {online && (
