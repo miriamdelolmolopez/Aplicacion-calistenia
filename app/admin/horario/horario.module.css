@@ -175,8 +175,8 @@
 
 .rejilla {
   display: grid;
-  grid-template-columns: 58px repeat(7, minmax(150px, 1fr));
-  min-width: 1110px;
+  grid-template-columns: 52px repeat(7, minmax(112px, 1fr));
+  min-width: 840px;
 }
 
 .cabHora,
@@ -363,4 +363,9 @@
   cursor: pointer;
   background: none;
   border: 0;
+}
+
+.irSemana {
+  font-weight: 700;
+  color: var(--oliva-oscuro);
 }

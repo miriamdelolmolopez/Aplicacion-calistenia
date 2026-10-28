@@ -115,7 +115,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
       </div>
       {lunes !== lunesDe(hoy) && (
         <p style={{ margin: "0 0 12px" }}>
-          <Link href="/admin/horario" className={styles.enlaceBarra}>
+          <Link href="/admin/horario" className={estilos.irSemana}>
             Ir a esta semana
           </Link>
         </p>
