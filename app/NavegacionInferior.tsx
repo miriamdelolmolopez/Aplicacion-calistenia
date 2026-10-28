@@ -9,6 +9,7 @@ import MenuLateral from "./MenuLateral";
 import estilos from "./navegacion.module.css";
 import { textos } from "./textos";
 import { useIdioma } from "./useIdioma";
+import { useMenuAdmin } from "./useMenuAdmin";
 import { RUTAS, seccionesDe, useMiPerfil, type MiPerfil } from "./useMiPerfil";
 
 type Pestana = { href: string; icono: NombreIcono; texto: string };
@@ -17,15 +18,10 @@ type Pestana = { href: string; icono: NombreIcono; texto: string };
 // ni en la vista de imprimir.
 const CON_BARRA = ["/inicio", "/clases", "/rutina", "/progreso", "/perfil", "/ajustes", "/pagos", "/saber-mas", "/aprende", "/ayuda", "/academia", "/admin"];
 
-function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"]): Pestana[] {
+function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"], elegidasAdmin: Pestana[]): Pestana[] {
   if (perfil.rol === "admin") {
-    return [
-      { href: RUTAS.inicio, icono: "inicio", texto: t.navInicio },
-      { href: "/admin", icono: "admin", texto: "Panel" },
-      { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },
-      { href: "/admin/reservas", icono: "reservas", texto: "Reservas" },
-      { href: RUTAS.perfil, icono: "perfil", texto: t.perfilTitulo },
-    ];
+    // La administradora elige qué opciones salen y en qué orden (Ajustes); Inicio va siempre en el centro.
+    return [{ href: RUTAS.inicio, icono: "inicio", texto: t.navInicio }, ...elegidasAdmin];
   }
   const ver = seccionesDe(perfil);
   const lista: Pestana[] = [{ href: RUTAS.inicio, icono: "inicio", texto: t.navInicio }];
@@ -43,6 +39,7 @@ export default function NavegacionInferior() {
   const ruta = usePathname();
   const visible = CON_BARRA.some((p) => ruta === p || ruta.startsWith(p + "/")) && !ruta.endsWith("/imprimir");
   const perfil = useMiPerfil(ruta);
+  const { barra: barraAdmin } = useMenuAdmin();
   const [menu, setMenu] = useState(false);
   const cerrar = useCallback(() => setMenu(false), []);
 
@@ -57,7 +54,11 @@ export default function NavegacionInferior() {
   if (!mostrar || !conSesion) return null;
   const perfilActual = conSesion;
 
-  const pestanas = pestanasDe(perfilActual, t);
+  const pestanas = pestanasDe(
+    perfilActual,
+    t,
+    barraAdmin.map((o) => ({ href: o.href, icono: o.icono, texto: o.texto })),
+  );
 
   // Inicio va en el centro de la barra; el resto se reparte a los lados (con «Más» a la derecha).
   const inicio = pestanas.find((p) => p.href === RUTAS.inicio);

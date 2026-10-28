@@ -9,9 +9,8 @@ import { pedirBorradoCuenta } from "../perfil/acciones";
 import estilos from "../perfil/perfil.module.css";
 import { textos } from "../textos";
 import { IDIOMAS, type Idioma } from "../textos";
-import { OPCIONES_MENU_ADMIN } from "../opcionesMenuAdmin";
 import { useIdioma } from "../useIdioma";
-import { useMenuAdmin } from "../useMenuAdmin";
+import { MAX_BARRA, useMenuAdmin } from "../useMenuAdmin";
 import { useMiPerfil } from "../useMiPerfil";
 import { versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
@@ -123,21 +122,70 @@ export default function Ajustes() {
       </section>
 
       {typeof mi === "object" && mi !== null && mi.rolReal === "admin" && (
-        <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-          <h2>Barra lateral</h2>
-          <p className={styles.ayuda}>
-            Elige qué opciones ves en tu barra lateral. Se guarda en este dispositivo: si usas otro, hay que elegirlo ahí también.
-          </p>
-          {OPCIONES_MENU_ADMIN.map((o) => (
-            <label key={o.href} className={estilos.interruptor}>
-              <input type="checkbox" checked={menu.estaVisible(o)} disabled={o.fijo} onChange={(e) => menu.poner(o.href, e.target.checked)} />
-              <span>
-                {o.texto}
-                {o.fijo && " (siempre visible)"}
-              </span>
-            </label>
-          ))}
-        </section>
+        <>
+          <section className={`${styles.tarjeta} ${estilos.seccion}`}>
+            <h2>Barra lateral</h2>
+            <p className={styles.ayuda}>
+              Marca lo que quieres ver y cámbialo de orden con las flechas. Se guarda en este dispositivo: si usas otro, hay que elegirlo ahí también.
+            </p>
+            {menu.ordenadas.map((o, i) => (
+              <div key={o.href} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <label className={estilos.interruptor} style={{ flex: 1 }}>
+                  <input type="checkbox" checked={menu.estaVisible(o)} disabled={o.fijo} onChange={(e) => menu.poner(o.href, e.target.checked)} />
+                  <span>
+                    {o.texto}
+                    {o.fijo && " (siempre visible)"}
+                  </span>
+                </label>
+                <button type="button" className={styles.botonSecundario} aria-label={`Subir ${o.texto}`} disabled={i === 0} onClick={() => menu.mover(o.href, -1)}>
+                  ↑
+                </button>
+                <button type="button" className={styles.botonSecundario} aria-label={`Bajar ${o.texto}`} disabled={i === menu.ordenadas.length - 1} onClick={() => menu.mover(o.href, 1)}>
+                  ↓
+                </button>
+              </div>
+            ))}
+          </section>
+
+          <section className={`${styles.tarjeta} ${estilos.seccion}`}>
+            <h2>Barra de abajo</h2>
+            <p className={styles.ayuda}>
+              Elige hasta {MAX_BARRA} opciones y su orden. Inicio va siempre en el centro y «Más» a la derecha.
+            </p>
+            {menu.barra.map((o, i) => (
+              <div key={o.href} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <strong style={{ flex: 1 }}>{o.texto}</strong>
+                <button type="button" className={styles.botonSecundario} aria-label={`Subir ${o.texto} en la barra`} disabled={i === 0} onClick={() => menu.moverEnBarra(o.href, -1)}>
+                  ↑
+                </button>
+                <button type="button" className={styles.botonSecundario} aria-label={`Bajar ${o.texto} en la barra`} disabled={i === menu.barra.length - 1} onClick={() => menu.moverEnBarra(o.href, 1)}>
+                  ↓
+                </button>
+                <button type="button" className={styles.botonSecundario} aria-label={`Quitar ${o.texto} de la barra`} onClick={() => menu.quitarDeBarra(o.href)}>
+                  Quitar
+                </button>
+              </div>
+            ))}
+            {menu.barra.length < MAX_BARRA && (
+              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span className={styles.ayuda}>Añadir:</span>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) menu.ponerEnBarra(e.target.value);
+                  }}
+                >
+                  <option value="">Elige una opción…</option>
+                  {menu.disponiblesBarra.map((o) => (
+                    <option key={o.href} value={o.href}>
+                      {o.texto}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </section>
+        </>
       )}
 
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>
