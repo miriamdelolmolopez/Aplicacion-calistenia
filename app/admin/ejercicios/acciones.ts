@@ -245,3 +245,79 @@ export async function borrarMaterial(id: string): Promise<{ ok: boolean; error?:
   revalidatePath("/admin/ejercicios");
   return { ok: true };
 }
+
+// Copia un ejercicio con sus músculos y su material (queda activo: cámbiale el nombre y lo que haga falta).
+export async function duplicarEjercicio(id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { error: "Ejercicio no válido." };
+  const admin = createAdminClient();
+
+  const { data: o } = await admin
+    .from("ejercicios")
+    .select("nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!o) return { error: "No se ha encontrado el ejercicio." };
+
+  const { data: existentes } = await admin.from("ejercicios").select("nombre");
+  const nombres = new Set((existentes ?? []).map((e) => e.nombre));
+  let nombre = `${o.nombre} (copia)`;
+  for (let n = 2; nombres.has(nombre); n++) nombre = `${o.nombre} (copia ${n})`;
+
+  const { data: nuevo, error } = await admin
+    .from("ejercicios")
+    .insert({ nombre, nombre_en: o.nombre_en, categoria: o.categoria, tipo: o.tipo, descripcion: o.descripcion, descripcion_en: o.descripcion_en, video_url: o.video_url })
+    .select("id")
+    .single();
+  if (error || !nuevo) return { error: "No se ha podido duplicar el ejercicio." };
+
+  const musculos = (o.ejercicio_musculos ?? []) as { musculo: string; rol: string }[];
+  const materiales = ((o.ejercicio_materiales ?? []) as { material_id: string }[]).map((m) => m.material_id);
+  const { error: falloRelaciones } = await admin.rpc("guardar_relaciones_ejercicio", { p_ejercicio: nuevo.id, p_musculos: musculos, p_materiales: materiales });
+  if (falloRelaciones) {
+    await admin.from("ejercicios").delete().eq("id", nuevo.id);
+    return { error: "No se han podido copiar los músculos y el material." };
+  }
+
+  revalidatePath("/admin/ejercicios");
+  return { mensaje: `Creado «${nombre}».` };
+}
+
+// Elimina un ejercicio. Si ya está en alguna rutina no se puede: hay que archivarlo.
+export async function eliminarEjercicio(id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { error: "Ejercicio no válido." };
+  const { error } = await createAdminClient().from("ejercicios").delete().eq("id", id);
+  if (error) {
+    return {
+      error:
+        error.code === "23503"
+          ? "No se puede eliminar porque está en alguna rutina. Edítalo y desmarca «Activo» para archivarlo."
+          : "No se ha podido eliminar el ejercicio.",
+    };
+  }
+  revalidatePath("/admin/ejercicios");
+  return { mensaje: "Ejercicio eliminado." };
+}
+
+// Copia un material.
+export async function duplicarMaterial(id: string): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { error: "Material no válido." };
+  const admin = createAdminClient();
+  const { data: o } = await admin.from("materiales").select("nombre, nombre_en").eq("id", id).maybeSingle();
+  if (!o) return { error: "No se ha encontrado el material." };
+  const { data: existentes } = await admin.from("materiales").select("nombre");
+  const nombres = new Set((existentes ?? []).map((e) => String(e.nombre).toLowerCase()));
+  let nombre = `${o.nombre} (copia)`;
+  for (let n = 2; nombres.has(nombre.toLowerCase()); n++) nombre = `${o.nombre} (copia ${n})`;
+  const { error } = await admin.from("materiales").insert({ nombre, nombre_en: o.nombre_en, orden: 100 });
+  if (error) return { error: "No se ha podido duplicar." };
+  revalidatePath("/admin/ejercicios");
+  return { mensaje: `Creado «${nombre}».` };
+}
+
+export async function eliminarMaterial(id: string): Promise<Estado> {
+  const r = await borrarMaterial(id);
+  return r.ok ? { mensaje: "Material eliminado." } : { error: r.error ?? "No se ha podido eliminar." };
+}

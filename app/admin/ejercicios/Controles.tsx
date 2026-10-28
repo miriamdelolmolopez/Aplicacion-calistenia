@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import MapaCorporal from "../../MapaCorporal";
 import MultiDesplegable from "../MultiDesplegable";
 import type { Estado } from "../acciones";
@@ -51,15 +51,23 @@ function Mensajes({ estado }: { estado: Estado }) {
 export function FormularioEjercicio({
   ejercicio,
   materiales,
+  alTerminar,
 }: {
   ejercicio?: EjercicioForm;
   materiales: Material[];
+  alTerminar?: () => void;
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(
     ejercicio ? editarEjercicio : crearEjercicio,
     {},
   );
   const p = ejercicio?.id ?? "nuevo";
+
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar || ejercicio) return;
+    const t = setTimeout(alTerminar, 900);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar, ejercicio]);
 
   // Músculos elegidos como principales y como secundarios (uno no puede estar en los dos).
   const [principales, setPrincipales] = useState<string[]>(
@@ -76,12 +84,8 @@ export function FormularioEjercicio({
   const opcionesMusculo = MUSCULOS.map((m) => ({ valor: m.valor, etiqueta: m.es }));
 
   return (
-    <form action={accion} className={ejercicio ? styles.formularioInterno : styles.tarjeta}>
-      {ejercicio ? (
-        <input type="hidden" name="id" value={ejercicio.id} />
-      ) : (
-        <h2>Nuevo ejercicio</h2>
-      )}
+    <form action={accion} className={styles.tarjeta}>
+      {ejercicio && <input type="hidden" name="id" value={ejercicio.id} />}
 
       <div className={styles.campo}>
         <label htmlFor={`nombre-${p}`}>Nombre</label>

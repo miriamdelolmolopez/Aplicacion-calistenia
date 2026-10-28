@@ -5,11 +5,13 @@ import VideoEjercicio from "../../VideoEjercicio";
 import BotonFoto from "../fotos/BotonFoto";
 import VideoRapido from "./VideoRapido";
 import styles from "../admin.module.css";
+import AccionesEjercicio from "./AccionesEjercicio";
 import { FormularioEjercicio, type EjercicioForm, type Material } from "./Controles";
+import NuevoEjercicio from "./NuevoEjercicio";
 import FiltrosEjercicios from "./FiltrosEjercicios";
 import GestionMaterial, { type MaterialFila } from "./GestionMaterial";
 
-export const metadata = { title: "Ejercicios · Administración" };
+export const metadata = { title: "Biblioteca · Administración" };
 
 type Fila = Omit<EjercicioForm, "musculos" | "materiales"> & {
   ejercicio_musculos: { musculo: string; rol: string }[];
@@ -17,7 +19,7 @@ type Fila = Omit<EjercicioForm, "musculos" | "materiales"> & {
   foto_url: string | null;
 };
 
-type Vista = "biblioteca" | "crear" | "material";
+type Vista = "biblioteca" | "material";
 
 export default async function Ejercicios({
   searchParams,
@@ -34,7 +36,7 @@ export default async function Ejercicios({
 }) {
   const { supabase } = await requireAdmin();
   const { vista: vistaPedida, cat, archivados, q, musculo, material, tipo } = await searchParams;
-  const vista: Vista = vistaPedida === "crear" || vistaPedida === "material" ? vistaPedida : "biblioteca";
+  const vista: Vista = vistaPedida === "material" ? "material" : "biblioteca";
   const verArchivados = archivados === "1";
 
   const { data } = await supabase
@@ -111,26 +113,26 @@ export default async function Ejercicios({
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
-        <h1>Ejercicios</h1>
+        <h1>Biblioteca</h1>
         <Link href="/admin/online" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </header>
 
       <div className={styles.chips}>
-        {pestana("biblioteca", `Biblioteca (${todos.filter((e) => e.activo).length})`)}
-        {pestana("crear", "Crear ejercicio")}
+        {pestana("biblioteca", `Ejercicios (${todos.filter((e) => e.activo).length})`)}
         {pestana("material", `Material (${filasMaterial.length})`)}
       </div>
-
-      {vista === "crear" && <FormularioEjercicio materiales={materiales} />}
 
       {vista === "material" && <GestionMaterial materiales={filasMaterial} />}
 
       {vista === "biblioteca" && (
         <>
           <section className={styles.tarjeta}>
-            <h2>Tu biblioteca</h2>
+            <div style={{ marginBottom: 14 }}>
+              <NuevoEjercicio materiales={materiales} />
+            </div>
+            <h2>Tus ejercicios</h2>
             <p className={styles.ayuda}>
               Solo la ves tú. Más adelante, cada alumno verá los ejercicios de su rutina. Te faltan {sinVideo} vídeos
               y {sinExplicacion} explicaciones por completar. Los músculos y el material de los ejercicios de partida
@@ -175,7 +177,7 @@ export default async function Ejercicios({
                 return (
                   <li key={e.id} className={styles.persona}>
                     <div className={styles.personaCabecera}>
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <strong>{e.nombre}</strong>
                         {e.nombre_en && <div className={styles.ayuda}>{e.nombre_en}</div>}
                         <div className={styles.servicios}>
@@ -200,14 +202,19 @@ export default async function Ejercicios({
                           </div>
                         )}
                       </div>
+                      <AccionesEjercicio
+                        id={e.id}
+                        nombre={e.nombre}
+                        editor={
+                          <>
+                            <BotonFoto destino="ejercicio" id={e.id} actual={fotos.get(e.id) ?? null} />
+                            <VideoEjercicio url={e.video_url} titulo={e.nombre} />
+                            <FormularioEjercicio ejercicio={e} materiales={materiales} />
+                          </>
+                        }
+                      />
                     </div>
                     <VideoRapido id={e.id} nombre={e.nombre} actual={e.video_url} />
-                    <details className={styles.detalles}>
-                      <summary>Editar</summary>
-                      <BotonFoto destino="ejercicio" id={e.id} actual={fotos.get(e.id) ?? null} />
-                      <VideoEjercicio url={e.video_url} titulo={e.nombre} />
-                      <FormularioEjercicio ejercicio={e} materiales={materiales} />
-                    </details>
                   </li>
                 );
               })}

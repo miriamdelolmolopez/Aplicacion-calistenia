@@ -9,7 +9,7 @@ export default async function Online() {
     <Hub
       titulo="Entrenamientos online 1:1"
       azulejos={[
-        { href: "/admin/ejercicios", titulo: "Ejercicios", foto: "calistenia" },
+        { href: "/admin/ejercicios", titulo: "Biblioteca", foto: "calistenia" },
         { href: "/admin/rutinas", titulo: "Rutinas", foto: "online" },
       ]}
     />
