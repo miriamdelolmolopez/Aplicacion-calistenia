@@ -16,12 +16,6 @@ export default function BotonGoogle() {
   async function entrar() {
     setError(false);
     setCargando(true);
-    try {
-      localStorage.removeItem("recordarSesion");
-      sessionStorage.setItem("visitaActiva", "1");
-    } catch {
-      // Sin almacenamiento: no pasa nada.
-    }
     const { error: fallo } = await createClient().auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${location.origin}/auth/confirmar?next=/inicio` },

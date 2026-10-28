@@ -19,7 +19,6 @@ function Formulario() {
 
   const [correo, setCorreo] = useState("");
   const [clave, setClave] = useState("");
-  const [recordar, setRecordar] = useState(true);
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
@@ -37,13 +36,6 @@ function Formulario() {
     setCargando(false);
 
     if (fallo) return setError(t.errorCredenciales);
-    try {
-      if (recordar) localStorage.removeItem("recordarSesion");
-      else localStorage.setItem("recordarSesion", "no");
-      sessionStorage.setItem("visitaActiva", "1");
-    } catch {
-      // Sin almacenamiento: la sesión se queda como siempre.
-    }
     router.push("/inicio");
   }
 
@@ -82,10 +74,6 @@ function Formulario() {
             onChange={(e) => setClave(e.target.value)}
           />
         </div>
-        <label className={styles.casilla}>
-          <input type="checkbox" checked={recordar} onChange={(e) => setRecordar(e.target.checked)} />
-          <span>{idioma === "en" ? "Keep me signed in on this device" : "Mantener la sesión iniciada en este dispositivo"}</span>
-        </label>
         {error && (
           <p className={styles.error} role="alert">
             {error}
