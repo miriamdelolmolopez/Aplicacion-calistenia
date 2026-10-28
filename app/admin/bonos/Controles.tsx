@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { euros } from "@/lib/formato";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
@@ -34,13 +34,24 @@ export function FormularioRegistrar({
   tipos,
   descuentos,
   formas,
+  hoy,
+  ahora,
+  alTerminar,
 }: {
+  hoy: string;
+  ahora: string;
+  alTerminar?: () => void;
   formas: { clave: string; nombre: string }[];
   alumnos: { id: string; texto: string }[];
   tipos: { id: string; texto: string; precio: number }[];
   descuentos: { id: string; texto: string; tipo: string; valor: number }[];
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(registrarBono, {});
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar) return;
+    const t = setTimeout(alTerminar, 900);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar]);
   const [tipoElegido, setTipoElegido] = useState("");
   const [descuentoElegido, setDescuentoElegido] = useState("");
 
@@ -55,7 +66,6 @@ export function FormularioRegistrar({
       : 0;
   return (
     <form action={accion} className={styles.tarjeta}>
-      <h2>Registrar un bono</h2>
       {alumnos.length === 0 ? (
         <p className={styles.ayuda}>
           Todavía no hay alumnos. Da de alta uno en Administración o cambia a alumno a un
@@ -64,7 +74,7 @@ export function FormularioRegistrar({
       ) : (
         <>
           <div className={styles.campo}>
-            <label htmlFor="persona">Alumno</label>
+            <label htmlFor="persona">Alumna</label>
             <select id="persona" name="persona" required defaultValue="">
               <option value="" disabled>
                 Elige una persona…
@@ -77,10 +87,10 @@ export function FormularioRegistrar({
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor="tipo">Bono</label>
+            <label htmlFor="tipo">Tarifa</label>
             <select id="tipo" name="tipo" required value={tipoElegido} onChange={(e) => setTipoElegido(e.target.value)}>
               <option value="" disabled>
-                Elige un bono…
+                Elige una tarifa…
               </option>
               {tipos.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -127,11 +137,20 @@ export function FormularioRegistrar({
             Ya me ha pagado
           </label>
           <div className={styles.campo}>
+            <label htmlFor="fecha">Día del pago</label>
+            <input id="fecha" name="fecha" type="date" defaultValue={hoy} max={hoy} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="hora">Hora del pago</label>
+            <input id="hora" name="hora" type="time" defaultValue={ahora} />
+          </div>
+          <p className={styles.ayuda}>El día y la hora solo se usan si marcas que ya ha pagado.</p>
+          <div className={styles.campo}>
             <label htmlFor="nota">Nota (opcional)</label>
             <input id="nota" name="nota" maxLength={200} />
           </div>
           <button className={styles.boton} type="submit" disabled={pendiente}>
-            {pendiente ? "Guardando…" : "Registrar bono"}
+            {pendiente ? "Guardando…" : "Registrar pago"}
           </button>
         </>
       )}

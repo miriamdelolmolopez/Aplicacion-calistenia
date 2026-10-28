@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
+import { instanteMadrid } from "@/lib/fechas";
 import { aCentimos } from "@/lib/formato";
 import { formaActiva } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -27,11 +28,18 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
   const metodo = String(formData.get("metodo") ?? "");
   const pagado = formData.get("pagado") === "on";
   const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
-  if (!persona || !tipo) return { error: "Elige la persona y el bono." };
+  if (!persona || !tipo) return { error: "Elige la persona y la tarifa." };
   if (!(await formaActiva(metodo))) return { error: "Elige cómo paga." };
   const descuento = String(formData.get("descuento") ?? "");
+  // Fecha y hora del cobro (en hora de Madrid). Si no se pone nada, es ahora mismo.
+  const fecha = String(formData.get("fecha") ?? "").trim();
+  const hora = String(formData.get("hora") ?? "").trim();
+  const cobradoEn = fecha && hora ? instanteMadrid(fecha, hora) : null;
+  if (pagado && fecha && hora && !cobradoEn) return { error: "La fecha o la hora del pago no son válidas." };
+  if (cobradoEn && cobradoEn.getTime() > Date.now() + 60_000) return { error: "La fecha del pago no puede ser futura." };
 
-  const { error: fallo } = await createAdminClient().rpc("crear_bono", {
+  const admin = createAdminClient();
+  const { data: bonoId, error: fallo } = await admin.rpc("crear_bono", {
     p_user: persona,
     p_tipo: tipo,
     p_metodo: metodo,
@@ -42,11 +50,14 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
   });
   if (fallo) return error(fallo.message);
 
+  // La base de datos pone la fecha de hoy; si has indicado otra, se corrige en el pago de ese bono.
+  if (pagado && cobradoEn && bonoId) {
+    await admin.from("pagos").update({ pagado_en: cobradoEn.toISOString() }).eq("bono_id", bonoId);
+  }
+
   revalidatePath("/admin/bonos");
   return {
-    mensaje: pagado
-      ? "Bono registrado y cobrado."
-      : "Bono registrado. El pago queda pendiente de cobrar.",
+    mensaje: pagado ? "Pago registrado y cobrado." : "Pago registrado. Queda pendiente de cobrar.",
   };
 }
 

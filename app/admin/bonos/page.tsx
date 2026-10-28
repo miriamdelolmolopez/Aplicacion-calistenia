@@ -1,31 +1,18 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { fechaCorta } from "@/lib/fechas";
+import { claveDia, fechaCorta, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { formasActivas, nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
-import { BotonPagado, EditorBono, FormularioPrecio, FormularioRegistrar } from "./Controles";
+import { BotonPagado } from "./Controles";
+import HistorialPagos, { type FilaPago } from "./HistorialPagos";
+import ListaPrecios from "./ListaPrecios";
+import RegistrarPago from "./RegistrarPago";
 
-export const metadata = { title: "Bonos y pagos · Administración" };
+export const metadata = { title: "Pagos · Administración" };
 
-const ESTADOS: Record<string, string> = {
-  activo: "Activo",
-  en_cola: "En espera",
-  agotado: "Agotado",
-  caducado: "Caducado",
-  anulado: "Anulado",
-};
-
-type Tipo = { id: string; nombre: string; precio_centimos: number; activo: boolean };
-type Pago = {
-  id: string;
-  estado: string;
-  metodo: string;
-  importe_centimos: number;
-  descuento_centimos: number;
-  descuentos: { nombre: string } | null;
-};
+type Tipo = { id: string; nombre: string; servicio: string; precio_centimos: number; iva_porcentaje: number; activo: boolean };
 type DescuentoLista = {
   id: string;
   nombre: string;
@@ -35,24 +22,7 @@ type DescuentoLista = {
   usos_max: number | null;
   pagos: { estado: string }[];
 };
-type Bono = {
-  id: string;
-  servicio: string;
-  estado: string;
-  clases_total: number;
-  clases_restantes: number;
-  caduca_en: string | null;
-  creado_en: string;
-  tipos_bono: { nombre: string } | null;
-  pagos: Pago[];
-};
-type Alumno = {
-  id: string;
-  nombre: string | null;
-  apellidos: string | null;
-  email: string | null;
-  bonos: Bono[];
-};
+type Alumno = { id: string; nombre: string | null; apellidos: string | null; email: string | null };
 type PagoPendiente = {
   id: string;
   importe_centimos: number;
@@ -76,7 +46,7 @@ export default async function AdminBonos() {
 
   const { data: tiposDatos } = await supabase
     .from("tipos_bono")
-    .select("id, nombre, precio_centimos, activo")
+    .select("id, nombre, servicio, precio_centimos, iva_porcentaje, activo")
     .order("orden");
   const tipos = (tiposDatos ?? []) as Tipo[];
 
@@ -111,21 +81,61 @@ export default async function AdminBonos() {
 
   const { data: alumnosDatos } = await supabase
     .from("profiles")
-    .select(
-      "id, nombre, apellidos, email, bonos(id, servicio, estado, clases_total, clases_restantes, caduca_en, creado_en, tipos_bono(nombre), pagos(id, estado, metodo, importe_centimos, descuento_centimos, descuentos(nombre)))",
-    )
+    .select("id, nombre, apellidos, email")
     .eq("rol", "alumno")
     .order("nombre");
-  const alumnos = (alumnosDatos ?? []) as unknown as Alumno[];
+  const alumnos = (alumnosDatos ?? []) as Alumno[];
+
+  // Historial: todos los pagos, del más reciente al más antiguo.
+  const { data: historialDatos } = await supabase
+    .from("pagos")
+    .select("id, importe_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, persona_nombre, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))")
+    .order("creado_en", { ascending: false })
+    .limit(1000);
+  const historial: FilaPago[] = ((historialDatos ?? []) as unknown as (PagoPendiente & {
+    estado: string;
+    pagado_en: string | null;
+    persona_nombre: string | null;
+  })[])
+    .map((h) => ({
+      id: h.id,
+      persona: h.profiles ? nombreDe(h.profiles) : h.persona_nombre || "(persona borrada)",
+      tarifa: h.bonos?.tipos_bono?.nombre ?? "Pago suelto",
+      importe: h.importe_centimos,
+      descuento: h.descuento_centimos,
+      metodo: h.metodo,
+      metodoNombre: METODOS[h.metodo] ?? h.metodo,
+      estado: h.estado,
+      fecha: h.pagado_en ?? h.creado_en,
+    }))
+    .sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+  const ahoraIso = new Date().toISOString();
 
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
-        <h1>Bonos y pagos</h1>
+        <h1>Pagos</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </header>
+
+      <div style={{ marginBottom: 14 }}>
+        <RegistrarPago
+          formas={formas}
+          hoy={claveDia(ahoraIso)}
+          ahora={textoHora(ahoraIso)}
+          alumnos={alumnos.map((a) => ({
+            id: a.id,
+            texto: `${nombreDe(a)}${a.email && a.nombre ? " · " + a.email : ""}`,
+          }))}
+          tipos={tipos
+            .filter((t) => t.activo)
+            .map((t) => ({ id: t.id, texto: `${t.nombre} · ${euros(t.precio_centimos)}`, precio: t.precio_centimos }))}
+          descuentos={descuentos}
+        />
+      </div>
 
       <section className={styles.tarjeta}>
         <h2>Pagos pendientes ({pendientes.length})</h2>
@@ -137,8 +147,7 @@ export default async function AdminBonos() {
                 <div>
                   <strong>{p.profiles ? nombreDe(p.profiles) : "(persona borrada)"}</strong>
                   <div className={styles.ayuda}>
-                    {p.bonos?.tipos_bono?.nombre ?? "Bono"} · {METODOS[p.metodo] ?? p.metodo} ·{" "}
-                    {fechaCorta(p.creado_en)}
+                    {p.bonos?.tipos_bono?.nombre ?? "Pago"} · {METODOS[p.metodo] ?? p.metodo} · {fechaCorta(p.creado_en)}
                   </div>
                 </div>
                 <span className={styles.etiqueta}>
@@ -152,82 +161,24 @@ export default async function AdminBonos() {
         </ul>
       </section>
 
-      <FormularioRegistrar
-        formas={formas}
-        alumnos={alumnos.map((a) => ({
-          id: a.id,
-          texto: `${nombreDe(a)}${a.email && a.nombre ? " · " + a.email : ""}`,
-        }))}
-        tipos={tipos
-          .filter((t) => t.activo)
-          .map((t) => ({ id: t.id, texto: `${t.nombre} · ${euros(t.precio_centimos)}`, precio: t.precio_centimos }))}
-        descuentos={descuentos}
-      />
-
       <section className={styles.tarjeta}>
-        <h2>Bonos de cada alumno</h2>
-        {alumnos.length === 0 && <p className={styles.ayuda}>Todavía no hay alumnos.</p>}
-        <ul className={styles.lista}>
-          {alumnos.map((a) => {
-            const bonos = [...a.bonos].sort((x, y) => y.creado_en.localeCompare(x.creado_en));
-            return (
-              <li key={a.id} className={styles.persona}>
-                <strong>{nombreDe(a)}</strong>
-                {bonos.length === 0 && <p className={styles.ayuda}>Sin bonos.</p>}
-                {bonos.map((b) => {
-                  const pago = b.pagos[0];
-                  return (
-                    <div key={b.id} className={styles.bonoFila}>
-                      <div className={styles.personaCabecera}>
-                        <div>
-                          <strong>{b.tipos_bono?.nombre}</strong>
-                          <div className={styles.ayuda}>
-                            {b.servicio === "online"
-                              ? "Plan online"
-                              : `${b.clases_restantes} de ${b.clases_total} clases`}
-                            {b.caduca_en && ` · caduca ${fechaCorta(b.caduca_en)}`}
-                          </div>
-                          {pago && (
-                            <div className={styles.ayuda}>
-                              {euros(pago.importe_centimos)}
-                              {pago.descuento_centimos > 0 &&
-                                ` (descuento «${pago.descuentos?.nombre ?? "borrado"}» −${euros(pago.descuento_centimos)})`}{" "}
-                              · {METODOS[pago.metodo] ?? pago.metodo} ·{" "}
-                              {pago.estado === "pagado"
-                                ? "cobrado"
-                                : pago.estado === "pendiente"
-                                  ? "PENDIENTE DE COBRO"
-                                  : "anulado"}
-                            </div>
-                          )}
-                        </div>
-                        <span className={styles.etiquetaSuave}>{ESTADOS[b.estado] ?? b.estado}</span>
-                      </div>
-                      <EditorBono bonoId={b.id} anulado={b.estado === "anulado"} />
-                    </div>
-                  );
-                })}
-              </li>
-            );
-          })}
-        </ul>
+        <h2>Historial de pagos</h2>
+        <HistorialPagos pagos={historial} />
       </section>
 
       <section className={styles.tarjeta}>
-        <h2>Precios del catálogo</h2>
-        <p className={styles.ayuda}>
-          Precios con IVA incluido. Cambiarlos no afecta a los bonos ya registrados.
-        </p>
-        {tipos.map((t) => (
-          <FormularioPrecio
-            key={t.id}
-            tipo={{
-              id: t.id,
-              nombre: t.nombre,
-              precio: (t.precio_centimos / 100).toFixed(2).replace(".", ","),
-            }}
-          />
-        ))}
+        <h2>Precios</h2>
+        <p className={styles.ayuda}>Precios con IVA incluido. Se ve también la base imponible y el IVA de cada tarifa.</p>
+        <ListaPrecios
+          tarifas={tipos.map((t) => ({
+            id: t.id,
+            nombre: t.nombre,
+            servicio: t.servicio,
+            precio_centimos: t.precio_centimos,
+            iva: t.iva_porcentaje,
+            activo: t.activo,
+          }))}
+        />
       </section>
     </main>
   );
