@@ -28,9 +28,6 @@
   font: inherit;
   font-size: 0.68rem;
   font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   color: var(--secundario);
   text-decoration: none;
   background: transparent;
