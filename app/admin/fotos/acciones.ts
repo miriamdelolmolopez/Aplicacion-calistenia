@@ -6,21 +6,26 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export type ResultadoFoto = { ok: boolean; url?: string | null; error?: string };
 
-export type Destino = "tipo_clase" | "rutina" | "ejercicio" | "curso" | "glosario" | "historia" | "portada" | "inicio";
+export type Destino = "tipo_clase" | "rutina" | "ejercicio" | "curso" | "glosario" | "historia" | "portada" | "inicio" | "card";
 
 const TIPOS: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX = 1024 * 1024; // 1 MB (el navegador ya la reduce a unos 150 KB)
 const TABLAS = { tipo_clase: "tipos_clase", rutina: "rutinas", ejercicio: "ejercicios", curso: "cursos", glosario: "glosario", historia: "historia" } as const;
 const MARCA = "/object/public/fotos/";
 
+// Las fotos de tarjetas se guardan como «card:<nombre de la tarjeta>».
+function claveApp(destino: Destino, id: string): string {
+  return destino === "card" ? `card:${id}` : destino;
+}
+
 function esDestino(valor: string): valor is Destino {
-  return ["tipo_clase", "rutina", "ejercicio", "curso", "glosario", "historia", "portada", "inicio"].includes(valor);
+  return ["tipo_clase", "rutina", "ejercicio", "curso", "glosario", "historia", "portada", "inicio", "card"].includes(valor);
 }
 
 async function urlActual(destino: Destino, id: string): Promise<string | null> {
   const admin = createAdminClient();
-  if (destino === "portada" || destino === "inicio") {
-    const { data } = await admin.from("fotos_app").select("url").eq("clave", destino).maybeSingle();
+  if (destino === "portada" || destino === "inicio" || destino === "card") {
+    const { data } = await admin.from("fotos_app").select("url").eq("clave", claveApp(destino, id)).maybeSingle();
     return data?.url ?? null;
   }
   const { data } = await admin.from(TABLAS[destino]).select("foto_url").eq("id", id).maybeSingle();
@@ -29,9 +34,10 @@ async function urlActual(destino: Destino, id: string): Promise<string | null> {
 
 async function guardarUrl(destino: Destino, id: string, url: string | null): Promise<boolean> {
   const admin = createAdminClient();
-  if (destino === "portada" || destino === "inicio") {
-    if (url === null) return !(await admin.from("fotos_app").delete().eq("clave", destino)).error;
-    return !(await admin.from("fotos_app").upsert({ clave: destino, url })).error;
+  if (destino === "portada" || destino === "inicio" || destino === "card") {
+    const clave = claveApp(destino, id);
+    if (url === null) return !(await admin.from("fotos_app").delete().eq("clave", clave)).error;
+    return !(await admin.from("fotos_app").upsert({ clave, url })).error;
   }
   return !(await admin.from(TABLAS[destino]).update({ foto_url: url }).eq("id", id)).error;
 }
@@ -63,7 +69,8 @@ export async function cambiarFotoApp(formData: FormData): Promise<ResultadoFoto>
   }
 
   const admin = createAdminClient();
-  const ruta = `${destino}/${id || "app"}-${Date.now()}.${TIPOS[archivo.type]}`;
+  const nombreRuta = (id || "app").normalize("NFD").replace(/[^a-zA-Z0-9]+/g, "-").slice(0, 60);
+  const ruta = `${destino}/${nombreRuta}-${Date.now()}.${TIPOS[archivo.type]}`;
   const { error } = await admin.storage
     .from("fotos")
     .upload(ruta, Buffer.from(await archivo.arrayBuffer()), { contentType: archivo.type, cacheControl: "31536000" });

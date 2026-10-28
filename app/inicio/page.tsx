@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
+import CamaraCard from "../CamaraCard";
+import { useFotoCard } from "../useFotosCards";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import { obtenerFotos } from "../perfil/acciones";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
@@ -115,6 +117,7 @@ export default function Inicio() {
   const perfil = useMiPerfil();
   const [extra, setExtra] = useState<Extra | null>(null);
   const [propiaInicio, setPropiaInicio] = useState<string | null>(null);
+  const fotoBannerInicio = useFotoCard("inicio:banner");
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const [fotosListas, setFotosListas] = useState(false);
   const [azar, setAzar] = useState<{ foto: FotoNombre; frase: number } | null>(null);
@@ -207,9 +210,10 @@ export default function Inicio() {
           </span>
           <div
             className={clay.bannerFoto}
-            style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", propiaInicio, !fotosListas) }}
+            style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", fotoBannerInicio ?? propiaInicio, !fotosListas) }}
             aria-hidden="true"
           />
+          <CamaraCard clave="inicio:banner" />
         </section>
       </div>
 

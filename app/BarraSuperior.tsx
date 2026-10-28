@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 import styles from "./formularios.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
+import { useMiPerfil } from "./useMiPerfil";
 
 // Barra de arriba: a la izquierda un enlace (volver o entrar) y a la derecha el idioma.
 export default function BarraSuperior({
@@ -14,6 +15,8 @@ export default function BarraSuperior({
 }) {
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
+  const perfil = useMiPerfil();
+  const conSesion = typeof perfil === "object" && perfil !== null;
   // Si se llegó desde el Perfil (?desde=perfil), «volver» lleva de nuevo al Perfil.
   const desde = useSyncExternalStore(
     () => () => {},
@@ -35,6 +38,7 @@ export default function BarraSuperior({
   return (
     <header className={styles.barra}>
       {enlace}
+      {!conSesion && (
       <label className={styles.idioma}>
         <span className={styles.oculto}>{t.idioma}</span>
         <select
@@ -48,6 +52,7 @@ export default function BarraSuperior({
           ))}
         </select>
       </label>
+      )}
     </header>
   );
 }

@@ -170,3 +170,18 @@ time,
   --ui-sombra-card-hover: 0 14px 34px -4px rgba(28, 28, 30, 0.09), 0 6px 16px -2px rgba(28, 28, 30, 0.04);
   --ui-sombra-boton: 0 8px 22px -3px rgba(10, 168, 192, 0.35);
 }
+
+/* Tema oscuro: se invierten los colores de toda la pantalla y las fotos se vuelven a poner como eran. */
+html[data-tema="oscuro"] {
+  filter: invert(1) hue-rotate(180deg) contrast(0.88);
+  background: #ffffff;
+}
+
+html[data-tema="oscuro"] img,
+html[data-tema="oscuro"] video,
+html[data-tema="oscuro"] canvas,
+html[data-tema="oscuro"] picture,
+html[data-tema="oscuro"] iframe,
+html[data-tema="oscuro"] [style*="background-image"] {
+  filter: contrast(1.136) hue-rotate(180deg) invert(1);
+}

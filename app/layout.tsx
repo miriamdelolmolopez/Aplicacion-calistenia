@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import MenuUsuario from "./MenuUsuario";
 import NavegacionInferior from "./NavegacionInferior";
 import SesionRecordada from "./SesionRecordada";
+import { SCRIPT_TEMA } from "./useTema";
 import "./globals.css";
 
 // Una sola familia para títulos y texto (Outfit) y Plus Jakarta Sans para el diseño nuevo.
@@ -30,10 +32,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${letra.variable} ${jakarta.variable}`}>
+    <html lang="es" className={`${letra.variable} ${jakarta.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body>
         {children}
         <NavegacionInferior />
+        <MenuUsuario />
         <SesionRecordada />
       </body>
     </html>

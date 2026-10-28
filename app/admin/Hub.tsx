@@ -1,27 +1,39 @@
+"use client";
+
 import Link from "next/link";
+import CamaraCard from "../CamaraCard";
+import { useFotoCard } from "../useFotosCards";
 import { fondoFoto, type FotoNombre } from "@/lib/fotos";
 import styles from "./admin.module.css";
 
 export type Azulejo = { href?: string; titulo: string; foto: FotoNombre; proximamente?: boolean };
 
+function Tarjeta({ a }: { a: Azulejo }) {
+  const clave = `azulejo:${a.titulo}`;
+  const fondo = fondoFoto(a.foto, useFotoCard(clave));
+  return a.href && !a.proximamente ? (
+    <Link href={a.href} className={styles.azulejo} style={{ backgroundImage: fondo }}>
+      <span>{a.titulo}</span>
+      <CamaraCard clave={clave} />
+    </Link>
+  ) : (
+    <div className={`${styles.azulejo} ${styles.azulejoApagado}`} style={{ backgroundImage: fondo }} aria-disabled="true">
+      <span>
+        {a.titulo}
+        <small>Próximamente</small>
+      </span>
+      <CamaraCard clave={clave} />
+    </div>
+  );
+}
+
 // Cuadrícula de opciones con foto. Las que aún no llevan a ningún sitio salen apagadas con «Próximamente».
 export function Cuadricula({ azulejos }: { azulejos: Azulejo[] }) {
   return (
     <div className={styles.cuadricula}>
-      {azulejos.map((a) =>
-        a.href && !a.proximamente ? (
-          <Link key={a.titulo} href={a.href} className={styles.azulejo} style={{ backgroundImage: fondoFoto(a.foto) }}>
-            <span>{a.titulo}</span>
-          </Link>
-        ) : (
-          <div key={a.titulo} className={`${styles.azulejo} ${styles.azulejoApagado}`} style={{ backgroundImage: fondoFoto(a.foto) }} aria-disabled="true">
-            <span>
-              {a.titulo}
-              <small>Próximamente</small>
-            </span>
-          </div>
-        ),
-      )}
+      {azulejos.map((a) => (
+        <Tarjeta key={a.titulo} a={a} />
+      ))}
     </div>
   );
 }

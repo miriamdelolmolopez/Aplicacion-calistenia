@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
+import CamaraCard from "../CamaraCard";
+import { useFotosCards } from "../useFotosCards";
 import { obtenerMisBonos } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
 import { obtenerFotos, obtenerProfe } from "../perfil/acciones";
@@ -158,6 +160,7 @@ export default function Clases() {
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
+  const fotosCards = useFotosCards();
   const [fotosListas, setFotosListas] = useState(false);
   const [verNombres, setVerNombres] = useState<string | null>(null);
   const [descripciones, setDescripciones] = useState<Record<string, { es: string | null; en: string | null }>>({});
@@ -447,9 +450,10 @@ export default function Clases() {
                 id={`clase-${c.id}`}
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
-                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosTipos[c.tipo], !fotosListas) }}>
+                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosCards[`clase:${c.tipo}`] ?? fotosTipos[c.tipo], !fotosListas) }}>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
+                  <CamaraCard clave={`clase:${c.tipo}`} />
                 </div>
                 <div className={estilos.profe}>
                   <Avatar nombre={profe?.nombre ?? "Miriam"} url={profe?.foto} tamano={28} />

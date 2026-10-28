@@ -1,0 +1,47 @@
+.camara {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  gap: 6px;
+}
+
+.boton {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  color: #1a1a1a;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.boton:focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.error {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  z-index: 3;
+  max-width: 200px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  color: #b3261e;
+  background: #ffffff;
+  border-radius: 10px;
+}
