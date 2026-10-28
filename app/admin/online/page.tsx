@@ -1,13 +1,13 @@
 import { requireAdmin } from "@/lib/admin";
 import Hub from "../Hub";
 
-export const metadata = { title: "Entrenamientos online · Administración" };
+export const metadata = { title: "Entrenamientos online 1:1 · Administración" };
 
 export default async function Online() {
   await requireAdmin();
   return (
     <Hub
-      titulo="Entrenamientos online"
+      titulo="Entrenamientos online 1:1"
       azulejos={[
         { href: "/admin/ejercicios", titulo: "Ejercicios", foto: "calistenia" },
         { href: "/admin/rutinas", titulo: "Rutinas", foto: "online" },

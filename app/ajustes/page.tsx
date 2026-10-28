@@ -9,7 +9,10 @@ import { pedirBorradoCuenta } from "../perfil/acciones";
 import estilos from "../perfil/perfil.module.css";
 import { textos } from "../textos";
 import { IDIOMAS, type Idioma } from "../textos";
+import { OPCIONES_MENU_ADMIN } from "../opcionesMenuAdmin";
 import { useIdioma } from "../useIdioma";
+import { useMenuAdmin } from "../useMenuAdmin";
+import { useMiPerfil } from "../useMiPerfil";
 import { versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
@@ -52,6 +55,8 @@ async function cargar(): Promise<Preferencias | null> {
 export default function Ajustes() {
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
+  const mi = useMiPerfil();
+  const menu = useMenuAdmin();
   const [pref, setPref] = useState<Preferencias | null>(null);
   const [confirmando, setConfirmando] = useState(false);
   const [error, setError] = useState(false);
@@ -116,6 +121,27 @@ export default function Ajustes() {
           ))}
         </select>
       </section>
+
+      {typeof mi === "object" && mi !== null && mi.rolReal === "admin" && (
+        <section className={`${styles.tarjeta} ${estilos.seccion}`}>
+          <h2>Barra lateral</h2>
+          <p className={styles.ayuda}>
+            Elige qué opciones ves en tu barra lateral. Se guarda en este dispositivo: si usas otro, hay que elegirlo ahí también.
+          </p>
+          {OPCIONES_MENU_ADMIN.map((o) => (
+            <label key={o.href} className={estilos.interruptor}>
+              <input type="checkbox" checked={menu.estaVisible(o)} disabled={o.fijo} onChange={(e) => menu.poner(o.href, e.target.checked)} />
+              <span>
+                {o.texto}
+                {o.fijo && " (siempre visible)"}
+              </span>
+            </label>
+          ))}
+          <button type="button" className={styles.botonSecundario} onClick={menu.restablecer}>
+            Volver a lo de siempre
+          </button>
+        </section>
+      )}
 
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>
         <h2>{t.avisosTitulo}</h2>

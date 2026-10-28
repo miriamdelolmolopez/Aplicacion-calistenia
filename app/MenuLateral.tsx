@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Icono, { type NombreIcono } from "./Icono";
+import Icono from "./Icono";
 import estilos from "./menu.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
+import { useMenuAdmin } from "./useMenuAdmin";
 import { RUTAS, seccionesDe, type MiPerfil, type Seccion, olvidarVistaAlumna } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,20 +27,6 @@ export const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   admin: "panelAdmin",
 };
 
-// Opciones del menú de la administradora (en el orden en que se ven).
-export const MENU_ADMIN: { href: string; icono: NombreIcono; texto: string }[] = [
-  { href: "/inicio", icono: "inicio", texto: "Inicio" },
-  { href: "/admin", icono: "admin", texto: "Panel" },
-  { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios" },
-  { href: "/clases", icono: "reservar", texto: "Reservar clases" },
-  { href: "/admin/presenciales", icono: "historial", texto: "Clases presenciales" },
-  { href: "/admin/online", icono: "rutina", texto: "Entrenamientos online" },
-  { href: "/admin/academia", icono: "academia", texto: "Cursos" },
-  { href: "/admin/informes", icono: "metricas", texto: "Informes" },
-  { href: "/admin/aprende", icono: "aprende", texto: "Aprende" },
-  { href: "/perfil", icono: "perfil", texto: "Perfil" },
-];
-
 // Panel lateral con todas las opciones de cada persona. Lo abre el botón «Más»
 // de la barra de abajo (NavegacionInferior).
 export default function MenuLateral({
@@ -54,6 +41,7 @@ export default function MenuLateral({
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const router = useRouter();
+  const { visibles: visiblesAdmin } = useMenuAdmin();
   const esAdmin = perfil.rol === "admin";
 
   useEffect(() => {
@@ -88,7 +76,7 @@ export default function MenuLateral({
 
         <ul className={estilos.lista}>
           {esAdmin &&
-            MENU_ADMIN.map((o) => (
+            visiblesAdmin.map((o) => (
               <li key={o.href}>
                 <Link href={o.href} className={estilos.enlace} onClick={onCerrar}>
                   <Icono nombre={o.icono} />

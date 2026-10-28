@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Icono, { type NombreIcono } from "./Icono";
-import { CLAVE_TEXTO, MENU_ADMIN } from "./MenuLateral";
+import { CLAVE_TEXTO } from "./MenuLateral";
+import { useMenuAdmin } from "./useMenuAdmin";
 import estilos from "./escritorio.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
@@ -20,9 +21,10 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
   const ruta = usePathname();
   const router = useRouter();
   const esAdmin = perfil.rol === "admin";
+  const { visibles: visiblesAdmin } = useMenuAdmin();
 
   const opciones: Opcion[] = esAdmin
-    ? MENU_ADMIN
+    ? visiblesAdmin
     : seccionesDe(perfil)
         .filter((s) => s !== "ajustes")
         .map((s) => ({ href: RUTAS[s], icono: s as NombreIcono, texto: t[CLAVE_TEXTO[s]] }));
