@@ -295,3 +295,45 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
   revalidatePath("/admin/horarios");
   return { mensaje: "Tipo de clase creado. Ya puedes añadirlo a una plantilla de horario." };
 }
+
+// Copia un tipo de clase (con todos sus ajustes) para no empezar de cero.
+export async function duplicarTipo(tipoId: string): Promise<Estado> {
+  await requireAdmin();
+  const admin = createAdminClient();
+
+  const { data: origen } = await admin
+    .from("tipos_clase")
+    .select("nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, color, color_texto, lista_espera, reserva_dias_max, cancelacion_horas, creditos, descripcion, descripcion_en")
+    .eq("id", tipoId)
+    .maybeSingle();
+  if (!origen) return { error: "No se ha encontrado esa clase." };
+
+  const { data: existentes } = await admin.from("tipos_clase").select("nombre, orden");
+  const nombres = new Set((existentes ?? []).map((e) => e.nombre));
+  let nombre = `${origen.nombre} (copia)`;
+  for (let n = 2; nombres.has(nombre); n++) nombre = `${origen.nombre} (copia ${n})`;
+  const orden = Math.max(0, ...(existentes ?? []).map((e) => Number(e.orden) || 0)) + 10;
+
+  const { error } = await admin.from("tipos_clase").insert({ ...origen, nombre, orden });
+  if (error) return { error: "No se ha podido duplicar." };
+
+  revalidatePath("/admin/clases");
+  return { mensaje: `Creada «${nombre}». Cámbiale lo que haga falta.` };
+}
+
+// Elimina un tipo de clase. Si ya tiene clases publicadas o está en una plantilla, no se puede: se desactiva.
+export async function eliminarTipo(tipoId: string): Promise<Estado> {
+  await requireAdmin();
+  const { error } = await createAdminClient().from("tipos_clase").delete().eq("id", tipoId);
+  if (error) {
+    return {
+      error:
+        error.code === "23503"
+          ? "No se puede eliminar porque ya tiene clases publicadas o está en una plantilla. Edítala y desmarca «Activo» para que no se creen más."
+          : "No se ha podido eliminar.",
+    };
+  }
+  revalidatePath("/admin/clases");
+  revalidatePath("/admin/horarios");
+  return { mensaje: "Clase eliminada." };
+}
