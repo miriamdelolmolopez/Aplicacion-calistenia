@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { nombresFormas } from "@/lib/formasPago";
 import { filasAtletas } from "@/lib/informes";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -41,14 +42,80 @@ function aCsv(columnas: string[], filas: string[][]): string {
   return "﻿" + [columnas, ...filas].map((f) => f.map(celda).join(";")).join("\r\n");
 }
 
-const TITULOS_TODO: [string, string][] = [
-  ["alumnos", "ALUMNOS"],
-  ["atletas", "ATLETAS"],
-  ["pagos", "PAGOS"],
-  ["bonos", "BONOS"],
-  ["reservas", "HISTORIAL DE CLASES"],
-  ["aceptaciones", "ACEPTACIONES LEGALES"],
-];
+// Una sola tabla con todo: cada persona es una fila (datos, bono actual, pagos, clases y aceptaciones legales).
+async function todoPorPersona(): Promise<string> {
+  const [perfiles, servicios, bonos, pagos, reservas, consentimientos] = await Promise.all([
+    leerTodo("profiles"),
+    leerTodo("perfil_servicios"),
+    leerTodo("bonos", "*, tipos_bono(nombre)"),
+    leerTodo("pagos", "user_id, importe_centimos, estado, metodo, pagado_en, creado_en"),
+    leerTodo("reservas", "user_id, estado, asistencia, sesiones_clase(empieza_en)"),
+    leerTodo("consentimientos"),
+  ]);
+  const formas = await nombresFormas().catch(() => ({}) as Record<string, string>);
+  const dia = (v: unknown) => (v ? new Date(String(v)).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" }) : "");
+  const sexoTexto: Record<string, string> = { mujer: "Mujer", hombre: "Hombre", otro: "Otro" };
+  const de = <T extends Fila>(lista: T[], id: unknown) => lista.filter((x) => String(x.user_id) === String(id));
+  const ms = (v: unknown) => (v ? new Date(String(v)).getTime() : 0);
+
+  const columnas = [
+    "Nombre", "Apellidos", "Correo", "Teléfono", "DNI", "Fecha de nacimiento", "Sexo", "Tipo", "Alta", "Servicios", "Contacto de emergencia", "Teléfono de emergencia",
+    "Bono actual", "Clases restantes", "Bono activo desde", "Bono caduca",
+    "Nº de pagos", "Total pagado (€)", "Pendiente de cobro (€)", "Último pago", "Método del último pago",
+    "Clases reservadas", "Clases a las que asistió", "Clases canceladas", "No se presentó", "Última clase",
+    "Aceptaciones legales",
+  ];
+
+  const filas = perfiles
+    .filter((p) => p.rol !== "admin")
+    .sort((x, y) => `${x.nombre ?? ""} ${x.apellidos ?? ""}`.localeCompare(`${y.nombre ?? ""} ${y.apellidos ?? ""}`, "es"))
+    .map((p) => {
+      const activos = de(bonos, p.id).filter((b) => b.estado === "activo");
+      const misPagos = de(pagos, p.id);
+      const cobrados = misPagos.filter((x) => x.estado === "pagado");
+      const pendientes = misPagos.filter((x) => x.estado === "pendiente");
+      const ultimo = [...cobrados].sort((x, y) => ms(y.pagado_en ?? y.creado_en) - ms(x.pagado_en ?? x.creado_en))[0];
+      const misReservas = de(reservas, p.id);
+      const empieza = (r: Fila) => (r.sesiones_clase as { empieza_en?: string } | null)?.empieza_en;
+      const ultimaClase = misReservas
+        .filter((r) => r.estado === "reservada" && r.asistencia !== "no_asistio" && empieza(r) && ms(empieza(r)) <= Date.now())
+        .map((r) => ms(empieza(r)))
+        .sort((x, y) => y - x)[0];
+      const suma = (lista: Fila[]) => lista.reduce((n, x) => n + Number(x.importe_centimos ?? 0), 0);
+      const aceptadas = de(consentimientos, p.id).map((c) => `${c.tipo ?? ""} v${c.version ?? ""} (${dia(c.aceptado_en)})`);
+      const hasta = activos.map((b) => String(b.caduca_en ?? "")).filter(Boolean).sort().pop();
+      return [
+        String(p.nombre ?? ""),
+        String(p.apellidos ?? ""),
+        String(p.email ?? ""),
+        String(p.telefono ?? ""),
+        String(p.dni ?? ""),
+        dia(p.fecha_nacimiento),
+        p.sexo ? (sexoTexto[String(p.sexo)] ?? String(p.sexo)) : "",
+        p.rol === "invitado" ? "Invitada" : "Alumna",
+        dia(p.creado_en),
+        de(servicios, p.id).map((s) => s.servicio).join(" + "),
+        String(p.contacto_emergencia_nombre ?? ""),
+        String(p.contacto_emergencia_telefono ?? ""),
+        activos.map((b) => (b.tipos_bono as { nombre?: string } | null)?.nombre ?? "").filter(Boolean).join(" + "),
+        activos.map((b) => (b.servicio === "online" ? "online" : `${b.clases_restantes} de ${b.clases_total}`)).join(" + "),
+        dia(activos.map((b) => String(b.activo_desde ?? "")).filter(Boolean).sort()[0]),
+        dia(hasta),
+        String(cobrados.length),
+        dinero(suma(cobrados)),
+        dinero(suma(pendientes)),
+        dia(ultimo?.pagado_en ?? ultimo?.creado_en),
+        ultimo ? (formas[String(ultimo.metodo)] ?? String(ultimo.metodo ?? "")) : "",
+        String(misReservas.filter((r) => r.estado === "reservada").length),
+        String(misReservas.filter((r) => r.asistencia === "asistio").length),
+        String(misReservas.filter((r) => r.estado === "cancelada").length),
+        String(misReservas.filter((r) => r.asistencia === "no_asistio").length),
+        ultimaClase ? dia(new Date(ultimaClase).toISOString()) : "",
+        aceptadas.join(" · "),
+      ];
+    });
+  return aCsv(columnas, filas);
+}
 
 async function construir(tipo: string): Promise<{ nombre: string; csv: string } | null> {
   if (tipo === "atletas") {
@@ -170,15 +237,11 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ tipo
   const { tipo } = await contexto.params;
   const hoy = new Date().toISOString().slice(0, 10);
 
-  // Todo junto en un solo CSV: un bloque detrás de otro, cada uno con su título y sus columnas.
+  // Todo junto en una sola tabla: una fila por persona, con una única fila de títulos.
   if (tipo === "todo") {
-    const bloques: string[] = [];
-    for (const [t, titulo] of TITULOS_TODO) {
-      const parte = await construir(t).catch(() => null);
-      if (parte) bloques.push(`${celda(titulo)}\r\n${parte.csv.replace(/^\uFEFF/, "")}`);
-    }
-    if (bloques.length === 0) return new NextResponse("No se han podido preparar los datos", { status: 500 });
-    return new NextResponse("\uFEFF" + bloques.join("\r\n\r\n"), {
+    const csv = await todoPorPersona().catch(() => null);
+    if (!csv) return new NextResponse("No se han podido preparar los datos", { status: 500 });
+    return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="caliscoach-todo-${hoy}.csv"`,

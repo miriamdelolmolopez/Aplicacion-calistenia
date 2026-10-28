@@ -29,9 +29,9 @@ export default async function Exportar() {
       <section className={styles.tarjeta}>
         <div style={{ marginBottom: 14 }}>
           <a href="/admin/exportar/todo" download className={styles.boton}>
-            Descargar todo junto (un solo CSV)
+            Descargar todo junto (una tabla)
           </a>
-          <p className={styles.ayuda}>Un solo archivo con todo: alumnos, atletas, pagos, bonos, historial de clases y aceptaciones. Cada bloque va uno detrás de otro, con su título y sus propias columnas.</p>
+          <p className={styles.ayuda}>Una sola tabla con una fila por persona y una única fila de títulos, lista para filtrar en Excel: datos personales, bono actual, pagos, clases y aceptaciones legales. El detalle de cada pago o clase está en los botones de abajo.</p>
         </div>
         {ARCHIVOS.map((a) => (
           <div key={a.tipo} style={{ marginBottom: 14 }}>

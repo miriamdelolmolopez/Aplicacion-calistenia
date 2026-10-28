@@ -97,6 +97,21 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
 
+  // Textos legales que esta persona aceptó, con el texto exacto de la versión que firmó.
+  const [{ data: aceptacionesDatos }, { data: textosLegalesDatos }] = await Promise.all([
+    admin.from("consentimientos").select("tipo, version, aceptado_en, concedido").eq("user_id", id).order("aceptado_en", { ascending: false }),
+    admin.from("textos_legales").select("documento, version, contenido"),
+  ]);
+  const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string; concedido: boolean | null }[];
+  const textoLegal = new Map(((textosLegalesDatos ?? []) as { documento: string; version: string; contenido: string }[]).map((t) => [`${t.documento}|${t.version}`, t.contenido]));
+  const TITULO_ACEPTACION: Record<string, string> = {
+    terminos: "Términos y condiciones",
+    privacidad: "Política de privacidad",
+    imagen: "Uso de la imagen (fotos y vídeos)",
+    "aviso-legal": "Aviso legal",
+    cookies: "Política de cookies",
+  };
+
   const ahora = new Date().toISOString();
   const { data: proximasDatos } = await supabase
     .from("reservas")
@@ -321,6 +336,28 @@ export default async function FichaUsuario({ params }: { params: Promise<{ id: s
             <ClasesHechas userId={p.id} tipos={tiposClase} />
           </details>
         )}
+      </section>
+
+      <section className={styles.tarjeta}>
+        <h2>Textos legales que aceptó ({aceptaciones.length})</h2>
+        {aceptaciones.length === 0 && <p className={styles.ayuda}>Todavía no ha aceptado ningún texto legal.</p>}
+        {aceptaciones.map((a) => {
+          const texto = textoLegal.get(`${a.tipo}|${a.version}`);
+          const cuando = new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(a.aceptado_en));
+          return (
+            <details key={`${a.tipo}-${a.version}-${a.aceptado_en}`} className={styles.detalles}>
+              <summary>
+                {TITULO_ACEPTACION[a.tipo] ?? a.tipo} · versión {a.version}
+                {a.tipo === "imagen" && a.concedido === false ? " · NO lo autorizó" : ""} · {cuando}
+              </summary>
+              {texto ? (
+                <pre style={{ whiteSpace: "pre-wrap", fontSize: "0.8rem" }}>{texto}</pre>
+              ) : (
+                <p className={styles.ayuda}>No se ha guardado el texto de esta versión, solo que la aceptó el {cuando}.</p>
+              )}
+            </details>
+          );
+        })}
       </section>
 
       {online && (
