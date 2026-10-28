@@ -28,7 +28,6 @@ export function useMenuAdmin(): {
   visibles: OpcionMenuAdmin[];
   estaVisible: (o: OpcionMenuAdmin) => boolean;
   poner: (href: string, visible: boolean) => void;
-  restablecer: () => void;
 } {
   const crudo = useSyncExternalStore(suscribir, leer, () => "");
   const elegido = useMemo<Record<string, boolean>>(() => {
@@ -55,6 +54,5 @@ export function useMenuAdmin(): {
     visibles,
     estaVisible,
     poner: (href, visible) => guardar({ ...elegido, [href]: visible }),
-    restablecer: () => guardar({}),
   };
 }

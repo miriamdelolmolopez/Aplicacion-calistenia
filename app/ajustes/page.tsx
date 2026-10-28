@@ -137,9 +137,6 @@ export default function Ajustes() {
               </span>
             </label>
           ))}
-          <button type="button" className={styles.botonSecundario} onClick={menu.restablecer}>
-            Volver a lo de siempre
-          </button>
         </section>
       )}
 
