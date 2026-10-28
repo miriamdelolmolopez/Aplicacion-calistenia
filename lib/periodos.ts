@@ -1,7 +1,9 @@
 // Periodos de tiempo para los informes (fechas AAAA-MM-DD, en hora de Madrid).
-export type Periodo = "mes" | "mes_anterior" | "trimestre" | "ano" | "ano_anterior" | "personalizado";
+export type Periodo = "ultimos_7" | "ultimos_30" | "mes" | "mes_anterior" | "trimestre" | "ano" | "ano_anterior" | "personalizado";
 
 export const PERIODOS: { id: Periodo; texto: string }[] = [
+  { id: "ultimos_7", texto: "Últimos 7 días" },
+  { id: "ultimos_30", texto: "Últimos 30 días" },
   { id: "mes", texto: "Este mes" },
   { id: "mes_anterior", texto: "Mes anterior" },
   { id: "trimestre", texto: "Últimos 3 meses" },
@@ -24,6 +26,12 @@ export function rangoDe(
   const m = Number(hoy.slice(5, 7));
 
   switch (periodo) {
+    case "ultimos_7":
+    case "ultimos_30": {
+      const dias = periodo === "ultimos_7" ? 6 : 29;
+      const d = new Date(Date.UTC(a, m - 1, Number(hoy.slice(8, 10)) - dias));
+      return { desde: fecha(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()), hasta: hoy };
+    }
     case "mes_anterior": {
       const ma = m === 1 ? 12 : m - 1;
       const aa = m === 1 ? a - 1 : a;

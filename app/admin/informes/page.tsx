@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import PanelFiltros from "../../PanelFiltros";
 import { nombresFormas } from "@/lib/formasPago";
 import { claveDia, fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
@@ -10,6 +9,8 @@ import styles from "../admin.module.css";
 import { BarrasHorizontales, BarrasMensuales, nombreMes } from "../estadisticas/Graficos";
 import estilos from "../estadisticas/estadisticas.module.css";
 import GraficoElegible, { type Opcion } from "./GraficoElegible";
+import { BarrasApiladas, BarrasColores, Cambio, COLOR_SERVICIO, LineaMensual, PALETA, Rosca, TarjetaCifra } from "./GraficosPagos";
+import g from "./informes.module.css";
 
 export const metadata = { title: "Informes · Administración" };
 
@@ -177,30 +178,30 @@ export default async function Informes({
 
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>Periodo mostrado: {sufijo}</p>
-        <PanelFiltros activos={periodo !== "mes" ? 1 : 0}>
-        <div className={estilos.periodos}>
-          {PERIODOS.filter((x) => x.id !== "personalizado").map((x) => (
-            <Link key={x.id} href={base(`&periodo=${x.id}`)} className={`${estilos.periodo} ${periodo === x.id ? estilos.periodoActivo : ""}`}>
-              {x.texto}
-            </Link>
-          ))}
+        <div className={g.filtros}>
+          <div className={estilos.periodos}>
+            {PERIODOS.filter((x) => x.id !== "personalizado").map((x) => (
+              <Link key={x.id} href={base(`&periodo=${x.id}`)} className={`${estilos.periodo} ${periodo === x.id ? estilos.periodoActivo : ""}`}>
+                {x.texto}
+              </Link>
+            ))}
+          </div>
+          <form method="get" className={g.fechasFila}>
+            <input type="hidden" name="vista" value={vista} />
+            <input type="hidden" name="periodo" value="personalizado" />
+            <div className={styles.campo}>
+              <label htmlFor="desde">Desde</label>
+              <input id="desde" name="desde" type="date" defaultValue={rango.desde} />
+            </div>
+            <div className={styles.campo}>
+              <label htmlFor="hasta">Hasta</label>
+              <input id="hasta" name="hasta" type="date" defaultValue={rango.hasta} />
+            </div>
+            <button type="submit" className={`${styles.boton} ${styles.botonSecundario}`}>
+              Ver ese periodo
+            </button>
+          </form>
         </div>
-        <form method="get" className={estilos.fechas}>
-          <input type="hidden" name="vista" value={vista} />
-          <input type="hidden" name="periodo" value="personalizado" />
-          <div className={styles.campo}>
-            <label htmlFor="desde">Desde</label>
-            <input id="desde" name="desde" type="date" defaultValue={rango.desde} />
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor="hasta">Hasta</label>
-            <input id="hasta" name="hasta" type="date" defaultValue={rango.hasta} />
-          </div>
-          <button type="submit" className={`${styles.boton} ${styles.botonSecundario}`}>
-            Ver ese periodo
-          </button>
-        </form>
-        </PanelFiltros>
       </section>
 
       {vista !== "cumpleanos" && (!i || !atletas) && <p className={styles.error}>No se han podido calcular los informes.</p>}
@@ -291,36 +292,82 @@ export default async function Informes({
         <>
           <section className={styles.tarjeta}>
             <h2>Ingresos</h2>
-            <div className={estilos.cifras}>
-              <div className={estilos.cifra}>
-                <strong>{euros(i.ingresos.total_periodo)}</strong>
-                <small>cobrado en el periodo ({i.ingresos.pagos_periodo} pagos)</small>
-                <Variacion actual={i.ingresos.total_periodo} antes={i.ingresos.total_periodo_anterior} etiqueta="vs periodo anterior" />
-                <Variacion actual={i.ingresos.total_periodo} antes={i.ingresos.total_mismo_periodo_ano_anterior} etiqueta="vs mismo periodo del año pasado" />
+            <div className={g.tarjetas}>
+              <TarjetaCifra
+                titulo="Cobrado en el periodo"
+                valor={euros(i.ingresos.total_periodo)}
+                color="#0aa8c0"
+                notas={
+                  <>
+                    <span>{i.ingresos.pagos_periodo} pagos</span>
+                    <Cambio actual={i.ingresos.total_periodo} antes={i.ingresos.total_periodo_anterior} etiqueta="vs periodo anterior" />
+                    <Cambio actual={i.ingresos.total_periodo} antes={i.ingresos.total_mismo_periodo_ano_anterior} etiqueta="vs el año pasado" />
+                  </>
+                }
+              />
+              <TarjetaCifra
+                titulo="Pendiente de cobro"
+                valor={euros(i.ingresos.pendiente_cobro)}
+                color="#f5a524"
+                notas={<span>Descuentos concedidos: {euros(i.ingresos.descuentos_periodo)}</span>}
+              />
+              <TarjetaCifra
+                titulo="Este año"
+                valor={euros(i.ingresos.anual.este_ano)}
+                color="#6d5efc"
+                notas={<Cambio actual={i.ingresos.anual.este_ano} antes={i.ingresos.anual.ano_anterior} etiqueta="vs el año pasado (completo)" />}
+              />
+              <TarjetaCifra
+                titulo="Pago medio"
+                valor={euros(i.ingresos.pagos_periodo > 0 ? Math.round(i.ingresos.total_periodo / i.ingresos.pagos_periodo) : 0)}
+                color="#2fb57a"
+                notas={<span>Importe medio de cada pago cobrado</span>}
+              />
+            </div>
+
+            <div className={g.bloque}>
+              <h3>Ingresos mes a mes</h3>
+              <p className={g.vacio}>Línea de color: los últimos 12 meses. Línea gris punteada: el mismo mes del año anterior.</p>
+              <LineaMensual datos={i.ingresos.mensual.map((m) => ({ mes: m.mes, total: m.total, anterior: m.ano_anterior }))} />
+            </div>
+
+            <div className={g.rejilla2}>
+              <div className={g.bloque}>
+                <h3>Por tipo de servicio</h3>
+                {i.ingresos.por_servicio.length === 0 ? (
+                  <p className={g.vacio}>No hay cobros en este periodo.</p>
+                ) : (
+                  <Rosca
+                    total={i.ingresos.total_periodo}
+                    filas={i.ingresos.por_servicio.map((m) => ({ texto: SERVICIOS[m.servicio] ?? m.servicio, valor: m.total, color: COLOR_SERVICIO[m.servicio] ?? COLOR_SERVICIO.otros }))}
+                  />
+                )}
               </div>
-              <div className={estilos.cifra}>
-                <strong>{euros(i.ingresos.pendiente_cobro)}</strong>
-                <small>pendiente de cobro</small>
-                <small>Descuentos concedidos: {euros(i.ingresos.descuentos_periodo)}</small>
-              </div>
-              <div className={estilos.cifra}>
-                <strong>{euros(i.ingresos.anual.este_ano)}</strong>
-                <small>este año</small>
-                <Variacion actual={i.ingresos.anual.este_ano} antes={i.ingresos.anual.ano_anterior} etiqueta="vs el año pasado (completo)" />
+              <div className={g.bloque}>
+                <h3>Por método de pago</h3>
+                {i.ingresos.por_metodo.length === 0 ? (
+                  <p className={g.vacio}>No hay cobros en este periodo.</p>
+                ) : (
+                  <BarrasColores filas={i.ingresos.por_metodo.map((m, n) => ({ texto: METODOS[m.metodo] ?? m.metodo, valor: m.total, color: PALETA[n % PALETA.length] }))} />
+                )}
               </div>
             </div>
 
-            <h3 style={{ margin: "8px 0 0" }}>Ingresos por tipo de servicio (periodo)</h3>
-            {i.ingresos.por_servicio.length === 0 ? (
-              <p className={styles.ayuda}>No hay cobros en este periodo.</p>
-            ) : (
-              <BarrasHorizontales formato={euros} filas={i.ingresos.por_servicio.map((m) => ({ texto: SERVICIOS[m.servicio] ?? m.servicio, valor: m.total }))} />
-            )}
+            <div className={g.bloque}>
+              <h3>Por mes y tipo de servicio</h3>
+              <BarrasApiladas
+                datos={meses.map((m) => ({ mes: m.mes, valores: { grupal: m.grupal, individual: m.individual, online: m.online, otros: m.otros } }))}
+                series={[
+                  { id: "grupal", texto: "Grupales", color: COLOR_SERVICIO.grupal },
+                  { id: "individual", texto: "Individuales", color: COLOR_SERVICIO.individual },
+                  { id: "online", texto: "Online", color: COLOR_SERVICIO.online },
+                  { id: "otros", texto: "Otros", color: COLOR_SERVICIO.otros },
+                ]}
+              />
+            </div>
 
-            <h3 style={{ margin: "8px 0 0" }}>Ingresos por mes (últimos 12 meses)</h3>
-            <BarrasMensuales formato={euros} datos={i.ingresos.mensual.map((m) => ({ mes: m.mes, total: m.total, anterior: m.ano_anterior }))} />
-
-            <h3 style={{ margin: "8px 0 0" }}>Por mes y tipo de servicio</h3>
+            <details>
+              <summary className={styles.ayuda}>Ver la tabla con los importes de cada mes</summary>
             <div style={{ overflowX: "auto" }}>
               <table className={estilos.tabla}>
                 <thead>
@@ -349,13 +396,7 @@ export default async function Informes({
                 </tbody>
               </table>
             </div>
-
-            <h3 style={{ margin: "8px 0 0" }}>Por método de pago (periodo)</h3>
-            {i.ingresos.por_metodo.length === 0 ? (
-              <p className={styles.ayuda}>No hay cobros en este periodo.</p>
-            ) : (
-              <BarrasHorizontales formato={euros} filas={i.ingresos.por_metodo.map((m) => ({ texto: METODOS[m.metodo] ?? m.metodo, valor: m.total }))} />
-            )}
+            </details>
           </section>
 
           <section className={styles.tarjeta}>

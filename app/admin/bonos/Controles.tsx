@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { euros } from "@/lib/formato";
 import type { Estado } from "../acciones";
@@ -99,6 +100,11 @@ export function FormularioRegistrar({
               ))}
             </select>
           </div>
+          {descuentos.length === 0 && (
+            <p className={styles.ayuda}>
+              No hay descuentos disponibles. Puedes crearlos en <Link href="/admin/descuentos">Descuentos</Link> y luego elegirlos aquí.
+            </p>
+          )}
           {descuentos.length > 0 && (
             <div className={styles.campo}>
               <label htmlFor="descuento">Descuento (opcional)</label>

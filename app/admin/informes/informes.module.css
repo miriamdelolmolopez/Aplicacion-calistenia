@@ -1,0 +1,273 @@
+/* Filtros de fecha siempre a la vista */
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fechasFila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.fechasFila > div {
+  flex: 1 1 140px;
+}
+
+/* Tarjetas de resumen con color */
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.tarjetaCifra {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 16px 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color) 16%, var(--blanco)), var(--blanco) 70%);
+  border: 1px solid color-mix(in srgb, var(--color) 28%, transparent);
+  border-radius: 24px;
+  box-shadow: var(--sombra);
+}
+
+.tarjetaCifra::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: var(--color);
+}
+
+.tarjetaTitulo {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color) 70%, var(--carbon));
+}
+
+.tarjetaCifra strong {
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  color: var(--ui-title);
+}
+
+.tarjetaNotas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.sube,
+.baja,
+.neutro {
+  font-weight: 600;
+}
+
+.sube {
+  color: #1f8f5a;
+}
+
+.baja {
+  color: #d1495b;
+}
+
+.neutro {
+  color: var(--secundario);
+  font-weight: 500;
+}
+
+.sube small,
+.baja small {
+  font-weight: 500;
+  color: var(--secundario);
+}
+
+/* Bloques de gráfico */
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 24px;
+  box-shadow: var(--sombra);
+}
+
+.bloque h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.rejilla2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.grafico {
+  width: 100%;
+  height: auto;
+}
+
+.rejilla {
+  stroke: var(--linea);
+  stroke-width: 1;
+}
+
+.eje {
+  font-size: 11px;
+  fill: var(--secundario);
+}
+
+.lineaActual {
+  fill: none;
+  stroke: #0aa8c0;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lineaAnterior {
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+.punto {
+  fill: #ffffff;
+  stroke: #0aa8c0;
+  stroke-width: 2.5;
+}
+
+.punto:hover {
+  fill: #0aa8c0;
+}
+
+/* Rosca */
+.rosca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.roscaSvg {
+  flex: 0 0 150px;
+  width: 150px;
+  height: 150px;
+}
+
+.roscaTotal {
+  font-size: 15px;
+  font-weight: 700;
+  fill: var(--carbon);
+}
+
+.roscaSub {
+  font-size: 8px;
+  fill: var(--secundario);
+}
+
+.leyenda {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.leyenda li {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.leyenda i,
+.leyendaFila i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.leyenda small {
+  min-width: 34px;
+  text-align: right;
+  color: var(--secundario);
+}
+
+.leyendaFila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.leyendaFila li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Barras horizontales de colores */
+.barrasColores {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barrasColores li > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.barrasColores small {
+  color: var(--secundario);
+  font-weight: 500;
+}
+
+.pistaColor {
+  height: 10px;
+  margin-top: 4px;
+  background: var(--relleno);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.pistaColor > div {
+  height: 100%;
+  min-width: 3px;
+  border-radius: 999px;
+}
+
+.vacio {
+  margin: 0;
+  color: var(--secundario);
+  font-size: 0.9rem;
+}
