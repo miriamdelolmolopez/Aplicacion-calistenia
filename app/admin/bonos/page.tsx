@@ -7,7 +7,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import { BotonPagado } from "./Controles";
 import HistorialPagos, { type FilaPago } from "./HistorialPagos";
-import ListaPrecios from "./ListaPrecios";
 import RegistrarPago from "./RegistrarPago";
 
 export const metadata = { title: "Pagos · Administración" };
@@ -164,21 +163,6 @@ export default async function AdminBonos() {
       <section className={styles.tarjeta}>
         <h2>Historial de pagos</h2>
         <HistorialPagos pagos={historial} />
-      </section>
-
-      <section className={styles.tarjeta}>
-        <h2>Precios</h2>
-        <p className={styles.ayuda}>Precios con IVA incluido. Se ve también la base imponible y el IVA de cada tarifa.</p>
-        <ListaPrecios
-          tarifas={tipos.map((t) => ({
-            id: t.id,
-            nombre: t.nombre,
-            servicio: t.servicio,
-            precio_centimos: t.precio_centimos,
-            iva: t.iva_porcentaje,
-            activo: t.activo,
-          }))}
-        />
       </section>
     </main>
   );

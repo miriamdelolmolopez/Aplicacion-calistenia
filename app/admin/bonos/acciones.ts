@@ -26,7 +26,7 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
   const persona = String(formData.get("persona") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
   const metodo = String(formData.get("metodo") ?? "");
-  const pagado = formData.get("pagado") === "on";
+  const pagado = true; // al registrar un pago, ya está cobrado
   const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
   if (!persona || !tipo) return { error: "Elige la persona y la tarifa." };
   if (!(await formaActiva(metodo))) return { error: "Elige cómo paga." };
@@ -57,7 +57,7 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
 
   revalidatePath("/admin/bonos");
   return {
-    mensaje: pagado ? "Pago registrado y cobrado." : "Pago registrado. Queda pendiente de cobrar.",
+    mensaje: "Pago registrado y cobrado.",
   };
 }
 

@@ -132,10 +132,6 @@ export function FormularioRegistrar({
               ))}
             </select>
           </div>
-          <label className={styles.casilla}>
-            <input type="checkbox" name="pagado" />
-            Ya me ha pagado
-          </label>
           <div className={styles.campo}>
             <label htmlFor="fecha">Día del pago</label>
             <input id="fecha" name="fecha" type="date" defaultValue={hoy} max={hoy} />
@@ -144,7 +140,6 @@ export function FormularioRegistrar({
             <label htmlFor="hora">Hora del pago</label>
             <input id="hora" name="hora" type="time" defaultValue={ahora} />
           </div>
-          <p className={styles.ayuda}>El día y la hora solo se usan si marcas que ya ha pagado.</p>
           <div className={styles.campo}>
             <label htmlFor="nota">Nota (opcional)</label>
             <input id="nota" name="nota" maxLength={200} />
