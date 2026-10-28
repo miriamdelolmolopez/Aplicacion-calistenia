@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import comunes from "../comunes/comunes.module.css";
+import PanelCompleto from "../comunes/PanelCompleto";
 import EnlaceCopiable from "../EnlaceCopiable";
 import { useEnvio } from "../useEnvio";
 import { crearUsuario } from "./acciones";
@@ -29,18 +31,16 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
   const { ref, alEnviar } = useEnvio(accion, estado, true);
 
   return (
-    <section className={styles.tarjeta}>
-      <button
-        type="button"
-        className={styles.boton}
-        aria-expanded={abierto}
-        onClick={() => setAbierto((a) => !a)}
-      >
-        {abierto ? "Cerrar" : "+ Nuevo usuario"}
-      </button>
+    <>
+      <div style={{ marginBottom: 14 }}>
+        <button type="button" className={comunes.nuevo} onClick={() => setAbierto(true)}>
+          <b aria-hidden="true">+</b> Nuevo usuario
+        </button>
+      </div>
 
       {abierto && (
-        <form ref={ref} onSubmit={alEnviar} className={styles.formularioInterno}>
+        <PanelCompleto titulo="Nuevo usuario" cerrar={() => setAbierto(false)}>
+        <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
           <div className={styles.campo}>
             <label htmlFor="nu-correo">Correo</label>
             <input id="nu-correo" name="correo" type="email" required />
@@ -128,7 +128,8 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
             </div>
           )}
         </form>
+        </PanelCompleto>
       )}
-    </section>
+    </>
   );
 }

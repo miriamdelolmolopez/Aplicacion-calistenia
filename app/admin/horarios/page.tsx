@@ -3,11 +3,12 @@ import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, lunesDe, sumarDias, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
-import { Aplicar, AnadirClase, Borrar, Duplicar, NuevaPlantilla, QuitarCompacto, Renombrar } from "./Controles";
+import { Aplicar, AnadirClase, QuitarCompacto, Renombrar } from "./Controles";
 import estiloCuadricula from "./cuadricula.module.css";
+import ListaPlantillas, { type ResumenPlantilla } from "./ListaPlantillas";
 import ResumenMes, { type ClaseDia } from "./ResumenMes";
 
-export const metadata = { title: "Plantillas de clases · Administración" };
+export const metadata = { title: "Plantillas presenciales · Administración" };
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
@@ -76,26 +77,11 @@ export default async function Horarios() {
     (clasesPorDia[d] ??= []).push({ hora: textoHora(c.empieza_en), nombre, color: colorDeTipo(c.tipos_clase?.color, nombre) });
   }
 
-  return (
-    <main className={styles.pagina}>
-      <header className={styles.barra}>
-        <h1>Plantillas presenciales</h1>
-        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
-          ← Volver
-        </Link>
-      </header>
-
-      {plantillas.map((p) => {
+  const contenidos: Record<string, React.ReactNode> = {};
+  for (const p of plantillas) {
         const items = [...p.plantilla_clases].sort((a, b) => a.hora.localeCompare(b.hora));
-        return (
-          <details key={p.id} className={styles.tarjeta}>
-            <summary className={styles.resumenPlantilla}>
-              <strong>{p.nombre}</strong>
-              <span>
-                {usadaAhora === p.id && <span className={styles.etiqueta}>Usada ahora</span>}
-                <small className={styles.ayuda}> {items.length} {items.length === 1 ? "clase" : "clases"} por semana</small>
-              </span>
-            </summary>
+        contenidos[p.id] = (
+          <>
 
             {items.length > 0 && (
               <div className={estiloCuadricula.desliza}>
@@ -152,23 +138,39 @@ export default async function Horarios() {
             <details className={styles.detalles}>
               <summary>Nombre y más opciones</summary>
               <Renombrar id={p.id} nombre={p.nombre} />
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                <Duplicar id={p.id} />
-                <Link href={`/admin/horarios/${p.id}/imprimir`} className={`${styles.boton} ${styles.botonSecundario}`}>
-                  Imprimir / PDF
-                </Link>
-                {usadaAhora !== p.id && <Borrar id={p.id} nombre={p.nombre} />}
-              </div>
+              <Link href={`/admin/horarios/${p.id}/imprimir`} className={`${styles.boton} ${styles.botonSecundario}`}>
+                Imprimir / PDF
+              </Link>
             </details>
-          </details>
+          </>
         );
-      })}
+  }
+
+
+  const resumen: ResumenPlantilla[] = plantillas.map((pl) => ({
+    id: pl.id,
+    nombre: pl.nombre,
+    clases: pl.plantilla_clases.length,
+    usada: usadaAhora === pl.id,
+    principal: pl.principal,
+    puedeBorrar: usadaAhora !== pl.id,
+  }));
+
+  return (
+    <main className={styles.pagina}>
+      <header className={styles.barra}>
+        <h1>Plantillas presenciales</h1>
+        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
+          ← Volver
+        </Link>
+      </header>
+
+      <ListaPlantillas plantillas={resumen} contenidos={contenidos} />
 
       <section className={styles.tarjeta}>
         <ResumenMes hoy={hoy} clases={clasesPorDia} />
       </section>
 
-      <NuevaPlantilla />
     </main>
   );
 }

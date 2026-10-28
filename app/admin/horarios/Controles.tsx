@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import estiloCuadricula from "./cuadricula.module.css";
@@ -34,11 +34,15 @@ function Mensajes({ estado }: { estado: Estado }) {
   );
 }
 
-export function NuevaPlantilla() {
+export function NuevaPlantilla({ alTerminar }: { alTerminar?: () => void } = {}) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(crearPlantilla, {});
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar) return;
+    const t = setTimeout(alTerminar, 800);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar]);
   return (
     <form action={accion} className={styles.tarjeta}>
-      <h2>Nueva plantilla</h2>
       <div className={styles.campo}>
         <label htmlFor="np-nombre">Nombre (por ejemplo «Verano»)</label>
         <input id="np-nombre" name="nombre" maxLength={60} required />
