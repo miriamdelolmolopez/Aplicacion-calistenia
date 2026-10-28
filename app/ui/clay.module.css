@@ -595,3 +595,12 @@
     animation: none;
   }
 }
+
+/* Tema oscuro: el texto del banner va sobre la foto, así que se vuelve a poner como era junto con ella. */
+:global(html[data-tema="oscuro"]) .banner {
+  filter: contrast(1.136) hue-rotate(180deg) invert(1);
+}
+
+:global(html[data-tema="oscuro"]) .bannerFoto {
+  filter: none !important;
+}

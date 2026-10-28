@@ -213,7 +213,7 @@ export default function Inicio() {
             style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", fotoBannerInicio ?? propiaInicio, !fotosListas) }}
             aria-hidden="true"
           />
-          <CamaraCard clave="inicio:banner" />
+          <CamaraCard clave="inicio:banner" abajo />
         </section>
       </div>
 

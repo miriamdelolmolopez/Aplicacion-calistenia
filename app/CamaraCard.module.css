@@ -45,3 +45,8 @@
   background: #ffffff;
   border-radius: 10px;
 }
+
+.abajo {
+  top: auto;
+  bottom: 10px;
+}
