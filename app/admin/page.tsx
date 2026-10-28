@@ -4,7 +4,7 @@ import { marcarBorradoAtendido } from "./acciones";
 import styles from "./admin.module.css";
 import { Cuadricula, type Azulejo } from "./Hub";
 
-export const metadata = { title: "Administración · Miriam del Olmo" };
+export const metadata = { title: "Administración · CalisCoach" };
 
 // Cada grupo es un título con sus fotos debajo. Las fotos son las de ejemplo de la app.
 const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [

@@ -58,9 +58,11 @@
 }
 
 .logo {
-  width: 120px;
+  width: 132px;
   height: auto;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  border-radius: 28px;
+  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.55);
 }
 
 .centro h1 {
@@ -147,7 +149,3 @@
   filter: contrast(1.136) hue-rotate(180deg) invert(1);
 }
 
-/* Tema oscuro: el logo es oscuro, así que se deja invertido para que se vea claro sobre el fondo. */
-:global(html[data-tema="oscuro"]) .logo {
-  filter: none !important;
-}

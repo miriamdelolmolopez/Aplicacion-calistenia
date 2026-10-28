@@ -10,7 +10,7 @@ export function crearIcs(c: { id: string; titulo: string; inicioIso: string; dur
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Miriam del Olmo//Clases//ES",
+    "PRODID:-//CalisCoach//Clases//ES",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${c.id}@miriamdelolmo`,

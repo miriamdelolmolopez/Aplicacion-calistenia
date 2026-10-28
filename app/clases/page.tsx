@@ -253,7 +253,7 @@ export default function Clases() {
     setMenu(null);
     descargarIcs({
       id: c.id,
-      titulo: `${c.tipo} · Miriam del Olmo`,
+      titulo: `${c.tipo} · CalisCoach`,
       inicioIso: c.empieza_en,
       duracionMin: c.duracion_min || 60,
     });

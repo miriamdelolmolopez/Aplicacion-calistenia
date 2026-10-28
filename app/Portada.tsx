@@ -27,8 +27,8 @@ export default function Portada() {
       </header>
 
       <section className={styles.centro}>
-        <Image src="/logos/logo_carbon.png" alt="" width={240} height={213} priority className={styles.logo} />
-        <h1>Miriam del Olmo</h1>
+        <Image src="/logos/caliscoach.png" alt="" width={256} height={256} priority className={styles.logo} />
+        <h1>CalisCoach</h1>
         <p className={styles.lema}>{t.lema}</p>
       </section>
 

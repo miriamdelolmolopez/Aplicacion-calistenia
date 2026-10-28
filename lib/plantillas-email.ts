@@ -60,7 +60,7 @@ function marco(opts: {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4EFE6;padding:24px 12px;"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:28px;">
 <tr><td>
-<p style="margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#5A5E3B;">Miriam del Olmo</p>
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#5A5E3B;">CalisCoach</p>
 <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:600;">${opts.titulo}</h1>
 ${parrafosHtml}${botonHtml}
 <p style="margin:22px 0 0;font-size:13px;color:#5A5E3B;">${pie}</p>
@@ -202,16 +202,16 @@ export function correoInvitacion(p: { para: string; alumno: boolean; ruta: strin
     titulo,
     parrafos: p.alumno
       ? [
-          "Miriam del Olmo te ha dado de alta en su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
+          "Miriam del Olmo te ha dado de alta en CalisCoach, su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
           "Pulsa el botón para elegir tu contraseña y entrar. Si no esperabas este correo, puedes ignorarlo.",
         ]
       : [
-          "Miriam del Olmo te invita a su app de calistenia y pino. Crea tu cuenta para empezar.",
+          "Miriam del Olmo te invita a CalisCoach, su app de calistenia y pino. Crea tu cuenta para empezar.",
           "Pulsa el botón para crear tu cuenta. Si no esperabas este correo, puedes ignorarlo.",
         ],
     boton: { texto: p.alumno ? "Elegir mi contraseña" : "Crear mi cuenta", ruta: p.ruta },
   });
-  return { para: p.para, asunto: p.alumno ? "Te damos la bienvenida · Miriam del Olmo" : "Te invito a mi app · Miriam del Olmo", ...m };
+  return { para: p.para, asunto: p.alumno ? "Te damos la bienvenida · CalisCoach" : "Te invito a CalisCoach", ...m };
 }
 
 // Correo de una automatización: el texto lo escribe Miriam. Se pueden usar {nombre}, {fecha}, {clase},

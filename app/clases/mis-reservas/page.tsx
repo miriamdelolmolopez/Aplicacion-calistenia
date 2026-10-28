@@ -153,7 +153,7 @@ export default function MisReservas() {
 
   const evento = (r: Reserva) => ({
     id: r.sesionId,
-    titulo: `${r.tipo} · Miriam del Olmo`,
+    titulo: `${r.tipo} · CalisCoach`,
     inicioIso: r.empieza_en,
     duracionMin: r.duracion_min || 60,
     descripcion: `${t.recuerdaLlegar} ${t.traeAgua}`,

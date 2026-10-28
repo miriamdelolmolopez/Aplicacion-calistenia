@@ -6,8 +6,8 @@ import "server-only";
 //
 // Variables (.env.local):
 //   RESEND_API_KEY   clave de Resend (obligatoria para enviar)
-//   EMAIL_FROM       por ejemplo "Miriam del Olmo <avisos@miriamdelolmo.com>"
-//                    (mientras el dominio no esté verificado: "Miriam del Olmo <onboarding@resend.dev>")
+//   EMAIL_FROM       por ejemplo "CalisCoach <avisos@miriamdelolmo.com>"
+//                    (mientras el dominio no esté verificado: "CalisCoach <onboarding@resend.dev>")
 //   EMAIL_REPLY_TO   dónde llegan las respuestas (el Gmail de Miriam)
 
 export type Correo = {
@@ -29,7 +29,7 @@ export async function enviarCorreo(correo: Correo): Promise<boolean> {
       method: "POST",
       headers: { Authorization: `Bearer ${clave}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM ?? "Miriam del Olmo <onboarding@resend.dev>",
+        from: process.env.EMAIL_FROM ?? "CalisCoach <onboarding@resend.dev>",
         to: [correo.para],
         reply_to: process.env.EMAIL_REPLY_TO || undefined,
         subject: correo.asunto,

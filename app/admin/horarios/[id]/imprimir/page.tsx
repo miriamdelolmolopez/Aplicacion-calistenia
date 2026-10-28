@@ -45,7 +45,7 @@ export default async function ImprimirHorario({ params }: { params: Promise<{ id
         <BotonImprimir />
       </div>
       <div className="hoja">
-        <h1>Miriam del Olmo · {data.nombre}</h1>
+        <h1>CalisCoach · {data.nombre}</h1>
         <p>Horario semanal</p>
         <table>
           <thead>

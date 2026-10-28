@@ -29,7 +29,7 @@ export default function ReservaConfirmada({
   const fin = new Date(new Date(clase.empieza_en).getTime() + duracion * 60000).toISOString();
   const evento = {
     id: clase.id,
-    titulo: `${clase.tipo} · Miriam del Olmo`,
+    titulo: `${clase.tipo} · CalisCoach`,
     inicioIso: clase.empieza_en,
     duracionMin: duracion,
     descripcion: `${t.recuerdaLlegar} ${t.traeAgua}`,

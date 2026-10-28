@@ -64,9 +64,9 @@ export default function MenuLateral({
     <div className={estilos.capa} onClick={onCerrar}>
       <nav className={estilos.panel} aria-label={t.menuAbrir} onClick={(e) => e.stopPropagation()}>
         <div className={estilos.cabecera}>
-          <Image src="/logos/logo_olive.png" alt="" width={48} height={43} />
+          <Image src="/logos/caliscoach.png" alt="CalisCoach" width={48} height={48} style={{ borderRadius: 11 }} />
           <div>
-            <strong>{perfil.nombre || "Miriam del Olmo"}</strong>
+            <strong>{perfil.nombre || "CalisCoach"}</strong>
             <span>{t[`rol_${perfil.rol}` as ClaveTexto]}</span>
           </div>
           <button type="button" className={estilos.cerrar} aria-label={t.menuCerrar} onClick={onCerrar}>

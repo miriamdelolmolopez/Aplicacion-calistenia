@@ -44,9 +44,9 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
   return (
     <aside className={estilos.menu} aria-label={t.menuAbrir}>
       <div className={estilos.cabecera}>
-        <Image src="/logos/logo_olive.png" alt="" width={44} height={39} />
+        <Image src="/logos/caliscoach.png" alt="CalisCoach" width={44} height={44} style={{ borderRadius: 10 }} />
         <div>
-          <strong>{perfil.nombre || "Miriam del Olmo"}</strong>
+          <strong>{perfil.nombre || "CalisCoach"}</strong>
           <span>{t[`rol_${perfil.rol}` as ClaveTexto]}</span>
         </div>
       </div>

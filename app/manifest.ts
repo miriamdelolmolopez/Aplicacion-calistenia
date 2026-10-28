@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Miriam del Olmo",
-    short_name: "Miriam del Olmo",
+    name: "CalisCoach",
+    short_name: "CalisCoach",
     description: "Calistenia y pino · Fuengirola",
     start_url: "/",
     display: "standalone",

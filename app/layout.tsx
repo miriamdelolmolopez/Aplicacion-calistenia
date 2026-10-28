@@ -20,9 +20,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Miriam del Olmo",
+  title: "CalisCoach",
   description: "Calistenia y pino · Fuengirola",
-  appleWebApp: { capable: true, title: "Miriam del Olmo" },
+  appleWebApp: { capable: true, title: "CalisCoach" },
 };
 
 export const viewport: Viewport = {
