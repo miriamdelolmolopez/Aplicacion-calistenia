@@ -175,8 +175,8 @@
 
 .rejilla {
   display: grid;
-  grid-template-columns: 50px repeat(7, minmax(122px, 1fr));
-  min-width: 910px;
+  grid-template-columns: 48px repeat(7, minmax(126px, 1fr));
+  min-width: 930px;
 }
 
 .cabHora,
@@ -400,4 +400,20 @@
 
 .acciones button {
   width: 32px;
+}
+
+/* El nombre baja de línea por palabras, nunca por la mitad de una palabra */
+.nombreClase {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  font-size: 0.78rem;
+}
+
+.celda {
+  padding: 8px 4px;
+}
+
+.tarjetaClase {
+  padding: 8px 4px 10px;
 }

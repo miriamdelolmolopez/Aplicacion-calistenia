@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
-import { FormularioAjustes } from "./Controles";
 import ListaTipos from "./ListaTipos";
 
 export const metadata = { title: "Tipos de clase · Administración" };
@@ -37,9 +36,6 @@ export default async function AdminClases() {
     .order("nombre");
   const tipos = (tiposDatos ?? []) as Tipo[];
 
-  const { data: ajustesDatos } = await supabase.from("ajustes").select("clave, valor");
-  const ajuste = (clave: string) => ajustesDatos?.find((a) => a.clave === clave)?.valor;
-
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
@@ -48,21 +44,6 @@ export default async function AdminClases() {
           ← Volver
         </Link>
       </header>
-
-      <section className={styles.tarjeta}>
-        <h2>Publicar clases</h2>
-        <p className={styles.ayuda}>
-          Las clases no se crean solas. Prepara tu horario en <Link href="/admin/horarios">Plantillas presenciales</Link> y allí
-          eliges desde qué día hasta qué día publicarlas.
-        </p>
-      </section>
-
-      <FormularioAjustes
-        horas={Number(ajuste("cancelacion_horas") ?? 2)}
-        horasIndividual={Number(ajuste("cancelacion_horas_individual") ?? 12)}
-        dias={Number(ajuste("reserva_dias_max") ?? 14)}
-        ver={ajuste("ver_apuntados") !== "false"}
-      />
 
       <section className={styles.tarjeta}>
         <h2>Tipos de clase</h2>

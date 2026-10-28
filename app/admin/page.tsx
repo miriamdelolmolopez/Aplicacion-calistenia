@@ -9,15 +9,14 @@ export const metadata = { title: "Administración · Miriam del Olmo" };
 // Cada grupo es un título con sus fotos debajo. Las fotos son las de ejemplo de la app.
 const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
   {
-    azulejos: [
-      { href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" },
-      { href: "/admin/presenciales", titulo: "Clases presenciales", foto: "pino" },
-      { href: "/admin/online", titulo: "Entrenamientos online", foto: "online" },
-    ],
+    azulejos: [{ href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" }],
   },
   {
-    titulo: "Cursos",
+    titulo: "Servicios",
     azulejos: [
+      { href: "/admin/presenciales", titulo: "Clases presenciales", foto: "pino" },
+      { href: "/admin/online", titulo: "Entrenamientos online", foto: "online" },
+      { titulo: "Online 1:1", foto: "personal", proximamente: true },
       { href: "/admin/academia", titulo: "Cursos", foto: "pino" },
       { titulo: "Retos por semanas", foto: "progreso", proximamente: true },
       { titulo: "Membresía", foto: "personal", proximamente: true },
