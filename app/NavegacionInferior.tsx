@@ -77,7 +77,7 @@ export default function NavegacionInferior() {
       <span className={estilos.icono}>
         <Icono nombre={p.icono} tamano={22} />
       </span>
-      {p.texto}
+      <span className={estilos.texto}>{p.texto}</span>
     </Link>
   );
 
@@ -90,7 +90,7 @@ export default function NavegacionInferior() {
             <span className={estilos.icono}>
               <Icono nombre="mas" tamano={22} />
             </span>
-            {t.tabMas}
+            <span className={estilos.texto}>{t.tabMas}</span>
           </button>
       </nav>
       <MenuLateral perfil={perfilActual} abierto={menu} onCerrar={cerrar} />

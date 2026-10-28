@@ -142,3 +142,11 @@ button.pestana:active:not(:disabled) {
   background-position: -130% 0;
   transition: background-position 0.8s ease;
 }
+
+/* El nombre de la pestaña se acorta con «…» si no cabe */
+.texto {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
