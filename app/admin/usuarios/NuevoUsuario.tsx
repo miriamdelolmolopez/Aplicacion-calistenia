@@ -21,8 +21,8 @@ function euros(centimos: number): string {
 }
 
 // Panel «+ Nuevo»: invitar a una persona o dar de alta a una alumna con su bono.
-export default function NuevoUsuario({ tarifas, formas }: { tarifas: TarifaOpcion[]; formas: { clave: string; nombre: string }[] }) {
-  const [abierto, setAbierto] = useState(false);
+export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }: { tarifas: TarifaOpcion[]; formas: { clave: string; nombre: string }[]; abiertoInicial?: boolean }) {
+  const [abierto, setAbierto] = useState(abiertoInicial);
   const [tipo, setTipo] = useState<"invitado" | "alumno">("alumno");
   const [tarifa, setTarifa] = useState("");
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(crearUsuario, {});

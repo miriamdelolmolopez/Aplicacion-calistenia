@@ -10,7 +10,8 @@ export const metadata = { title: "Usuarios · Administración" };
 
 type Fila = Omit<Usuario, "foto" | "tarifas"> & { foto_path: string | null };
 
-export default async function Usuarios() {
+export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string }> }) {
+  const { nuevo } = await searchParams;
   const { supabase } = await requireAdmin();
 
   const { data } = await supabase.rpc("resumen_usuarios");
@@ -55,7 +56,7 @@ export default async function Usuarios() {
           ← Volver
         </Link>
       </header>
-      <NuevoUsuario tarifas={tarifas} formas={await formasActivas()} />
+      <NuevoUsuario tarifas={tarifas} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
       <ListaUsuarios usuarios={usuarios} />
     </main>
   );

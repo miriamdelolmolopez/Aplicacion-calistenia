@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import estilos from "./inicio.module.css";
 import { obtenerResumenAdmin, type PersonaResumen, type ResumenAdmin } from "./accionesAdmin";
 
-type Clave = "ingresos" | "diferencia" | "activos" | "caducan" | "nuevos" | "nuevosAnterior" | "renovar" | "pendientes";
+type Clave = "ingresos" | "activos" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos";
 
 function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + " €";
@@ -25,6 +25,23 @@ function Lista({ personas, vacio }: { personas: PersonaResumen[]; vacio: string 
   );
 }
 
+// Comparación pequeña con el mes anterior: flecha verde si sube, roja si baja (al revés cuando subir es malo).
+function Comparacion({ actual, anterior, texto, subirEsBueno = true }: { actual: number; anterior: number; texto: string; subirEsBueno?: boolean }) {
+  const sube = actual > anterior;
+  const baja = actual < anterior;
+  const bueno = sube ? subirEsBueno : !subirEsBueno;
+  return (
+    <span className={estilos.comparacion}>
+      Mes anterior: {texto}
+      {(sube || baja) && (
+        <b className={bueno ? estilos.sube : estilos.baja} aria-label={sube ? "más que el mes anterior" : "menos que el mes anterior"}>
+          {sube ? "▲" : "▼"}
+        </b>
+      )}
+    </span>
+  );
+}
+
 // Cuadros de resumen del Inicio de la administradora. Cada uno se pulsa para ver el detalle.
 export default function ResumenAdminTarjetas() {
   const [datos, setDatos] = useState<ResumenAdmin | null>(null);
@@ -40,33 +57,29 @@ export default function ResumenAdminTarjetas() {
   if (error) return <p className={estilos.resumenVacio}>No se ha podido cargar el resumen.</p>;
   if (!datos) return <p className={estilos.resumenVacio}>Cargando resumen…</p>;
 
-  const dif = datos.diferenciaPct;
-  const subida = dif !== null && dif >= 0;
-  const difNuevos = datos.diferenciaNuevosPct;
-  const subidaNuevos = difNuevos !== null && difNuevos >= 0;
-
-  const tarjetas: { clave: Clave; titulo: string; valor: string; pie: string; tono?: "bien" | "mal" }[] = [
-    { clave: "ingresos", titulo: "Ingresos del mes", valor: euros(datos.ingresosMes), pie: "Pagos cobrados este mes" },
+  type Tarjeta = { clave: Clave; titulo: string; valor: string; pie: React.ReactNode; tono?: "mal" };
+  const principales: Tarjeta[] = [
     {
-      clave: "diferencia",
-      titulo: "Ingresos mes anterior",
-      valor: euros(datos.ingresosMesAnterior),
-      pie: dif === null ? "Sin comparación (el mes anterior no hubo)" : `Este mes: ${subida ? "▲ +" : "▼ "}${dif}% frente al anterior`,
-      tono: dif === null ? undefined : subida ? "bien" : "mal",
+      clave: "ingresos",
+      titulo: "Ingresos del mes",
+      valor: euros(datos.ingresosMes),
+      pie: <Comparacion actual={datos.ingresosMes} anterior={datos.ingresosMesAnterior} texto={euros(datos.ingresosMesAnterior)} />,
     },
-    { clave: "activos", titulo: "Alumnos activos", valor: String(datos.activos.total), pie: "Con un bono activo" },
+    {
+      clave: "activos",
+      titulo: "Alumnos activos",
+      valor: String(datos.activos.total),
+      pie: <Comparacion actual={datos.activos.total} anterior={datos.activosMesAnterior} texto={String(datos.activosMesAnterior)} />,
+    },
+    {
+      clave: "nuevos",
+      titulo: "Nuevos del mes",
+      valor: String(datos.nuevos.length),
+      pie: <Comparacion actual={datos.nuevos.length} anterior={datos.nuevosMesAnterior.length} texto={String(datos.nuevosMesAnterior.length)} />,
+    },
+  ];
+  const alertas: Tarjeta[] = [
     { clave: "caducan", titulo: "Caducan pronto", valor: String(datos.caducanPronto.length), pie: "En los próximos 7 días" },
-    { clave: "nuevos", titulo: "Nuevos del mes", valor: String(datos.nuevos.length), pie: "Han empezado este mes" },
-    {
-      clave: "nuevosAnterior",
-      titulo: "Nuevos: mes anterior",
-      valor: String(datos.nuevosMesAnterior.length),
-      pie:
-        difNuevos === null
-          ? "Sin comparación (el mes anterior no hubo)"
-          : `Este mes: ${subidaNuevos ? "▲ +" : "▼ "}${difNuevos}% frente al anterior`,
-      tono: difNuevos === null ? undefined : subidaNuevos ? "bien" : "mal",
-    },
     { clave: "renovar", titulo: "Bonos por renovar", valor: String(datos.porRenovar.length), pie: "Bono agotado, sin otro activo" },
     {
       clave: "pendientes",
@@ -75,27 +88,38 @@ export default function ResumenAdminTarjetas() {
       pie: `${datos.pendientes.personas.length} ${datos.pendientes.personas.length === 1 ? "persona debe" : "personas deben"} pagar`,
       tono: datos.pendientes.total > 0 ? "mal" : undefined,
     },
+    {
+      clave: "perdidos",
+      titulo: "Alumnos perdidos este mes",
+      valor: String(datos.perdidos.length),
+      pie: <Comparacion actual={datos.perdidos.length} anterior={datos.perdidosMesAnterior.length} texto={String(datos.perdidosMesAnterior.length)} subirEsBueno={false} />,
+      tono: datos.perdidos.length > 0 ? "mal" : undefined,
+    },
   ];
+
+  const pinta = (t: Tarjeta) => (
+    <button
+      key={t.clave}
+      type="button"
+      className={`${estilos.resumenTarjeta} ${abierta === t.clave ? estilos.resumenActiva : ""}`}
+      aria-expanded={abierta === t.clave}
+      onClick={() => setAbierta(abierta === t.clave ? null : t.clave)}
+    >
+      <span className={estilos.resumenTitulo}>{t.titulo}</span>
+      <strong className={`${estilos.resumenValor} ${t.tono === "mal" ? estilos.mal : ""}`}>{t.valor}</strong>
+      <span className={estilos.resumenPie}>{t.pie}</span>
+    </button>
+  );
+
+  const dif = datos.diferenciaPct;
+  const difNuevos = datos.diferenciaNuevosPct;
 
   return (
     <section className={estilos.resumen} aria-label="Resumen del negocio">
-      <div className={estilos.resumenCuadricula}>
-        {tarjetas.map((t) => (
-          <button
-            key={t.clave}
-            type="button"
-            className={`${estilos.resumenTarjeta} ${abierta === t.clave ? estilos.resumenActiva : ""}`}
-            aria-expanded={abierta === t.clave}
-            onClick={() => setAbierta(abierta === t.clave ? null : t.clave)}
-          >
-            <span className={estilos.resumenTitulo}>{t.titulo}</span>
-            <strong className={`${estilos.resumenValor} ${t.tono === "bien" ? estilos.bien : t.tono === "mal" ? estilos.mal : ""}`}>
-              {t.valor}
-            </strong>
-            <span className={estilos.resumenPie}>{t.pie}</span>
-          </button>
-        ))}
-      </div>
+      <div className={estilos.resumenCuadricula}>{principales.map(pinta)}</div>
+
+      <h2 className={estilos.resumenSeccion}>Alertas</h2>
+      <div className={estilos.resumenCuadricula}>{alertas.map(pinta)}</div>
 
       {abierta && (
         <div className={estilos.resumenDetalle}>
@@ -103,20 +127,8 @@ export default function ResumenAdminTarjetas() {
             <>
               <h3>Ingresos del mes</h3>
               <p>
-                {euros(datos.ingresosMes)} cobrados este mes. Mes anterior: {euros(datos.ingresosMesAnterior)}.
-              </p>
-              <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
-            </>
-          )}
-          {abierta === "diferencia" && (
-            <>
-              <h3>Ingresos del mes anterior</h3>
-              <p>
-                {dif === null
-                  ? "El mes anterior no hubo ingresos, así que no hay porcentaje que comparar."
-                  : subida
-                    ? `Estás facturando un ${dif}% más que el mes pasado (${euros(datos.ingresosMes)} frente a ${euros(datos.ingresosMesAnterior)}).`
-                    : `Estás facturando un ${Math.abs(dif)}% menos que el mes pasado (${euros(datos.ingresosMes)} frente a ${euros(datos.ingresosMesAnterior)}). El mes aún no ha terminado.`}
+                {euros(datos.ingresosMes)} cobrados este mes. Mes anterior: {euros(datos.ingresosMesAnterior)}
+                {dif === null ? "." : ` (${dif >= 0 ? "+" : ""}${dif}%).`}
               </p>
               <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
             </>
@@ -124,7 +136,9 @@ export default function ResumenAdminTarjetas() {
           {abierta === "activos" && (
             <>
               <h3>Alumnos activos por tipo</h3>
-              <p className={estilos.resumenVacio}>Una persona con varios servicios aparece en cada uno.</p>
+              <p className={estilos.resumenVacio}>
+                Al acabar el mes anterior había {datos.activosMesAnterior}. Una persona con varios servicios aparece en cada uno.
+              </p>
               <h4>Grupales ({datos.activos.grupal})</h4>
               <Lista personas={datos.activosPorServicio.grupal} vacio="Nadie con bono grupal activo." />
               <h4>Individuales ({datos.activos.individual})</h4>
@@ -134,27 +148,21 @@ export default function ResumenAdminTarjetas() {
               <Link href="/admin/usuarios">Ver todos los usuarios →</Link>
             </>
           )}
+          {abierta === "nuevos" && (
+            <>
+              <h3>Nuevos del mes</h3>
+              <p>
+                {difNuevos === null
+                  ? `Mes anterior: ${datos.nuevosMesAnterior.length}.`
+                  : `Este mes ${datos.nuevos.length} frente a ${datos.nuevosMesAnterior.length} el mes anterior (${difNuevos >= 0 ? "+" : ""}${difNuevos}%).`}
+              </p>
+              <Lista personas={datos.nuevos} vacio="Todavía nadie ha empezado este mes." />
+            </>
+          )}
           {abierta === "caducan" && (
             <>
               <h3>Caducan pronto</h3>
               <Lista personas={datos.caducanPronto} vacio="Ningún bono caduca en los próximos 7 días." />
-            </>
-          )}
-          {abierta === "nuevos" && (
-            <>
-              <h3>Nuevos del mes</h3>
-              <Lista personas={datos.nuevos} vacio="Todavía nadie ha empezado este mes." />
-            </>
-          )}
-          {abierta === "nuevosAnterior" && (
-            <>
-              <h3>Nuevos del mes anterior</h3>
-              <p>
-                {difNuevos === null
-                  ? "El mes anterior no empezó nadie, así que no hay porcentaje que comparar."
-                  : `Este mes han empezado ${datos.nuevos.length} frente a ${datos.nuevosMesAnterior.length} el mes anterior (${subidaNuevos ? "+" : ""}${difNuevos}%).`}
-              </p>
-              <Lista personas={datos.nuevosMesAnterior} vacio="Nadie empezó el mes anterior." />
             </>
           )}
           {abierta === "renovar" && (
@@ -169,6 +177,18 @@ export default function ResumenAdminTarjetas() {
               <h3>Pagos pendientes</h3>
               <Lista personas={datos.pendientes.personas} vacio="No hay pagos pendientes." />
               <Link href="/admin/bonos">Ir a Bonos y pagos →</Link>
+            </>
+          )}
+          {abierta === "perdidos" && (
+            <>
+              <h3>Alumnos perdidos este mes</h3>
+              <p className={estilos.resumenVacio}>
+                Personas cuyo bono terminó este mes (se agotó o caducó) y no tienen otro activo ni en espera. El mes anterior fueron{" "}
+                {datos.perdidosMesAnterior.length}. Es aproximado: se calcula con el historial de los bonos.
+              </p>
+              <Lista personas={datos.perdidos} vacio="Nadie ha dejado de venir este mes." />
+              <h4>Mes anterior ({datos.perdidosMesAnterior.length})</h4>
+              <Lista personas={datos.perdidosMesAnterior} vacio="Nadie el mes anterior." />
             </>
           )}
         </div>

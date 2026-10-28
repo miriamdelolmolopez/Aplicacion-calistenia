@@ -216,15 +216,28 @@ export default function Inicio() {
       <div className={estilos.contenido}>
         {esAdmin && <ResumenAdminTarjetas />}
 
-        <div className={estilos.accesos}>
-          {accesos.map((a) => (
-            <Link key={a.href} href={a.href} className={estilos.acceso}>
-              <Icono nombre={a.icono} tamano={26} />
-              <strong>{t[a.texto]}</strong>
-              {a.extra && <span>{t[a.extra]}</span>}
+        {esAdmin && (
+          <div className={estilos.accesos}>
+            <Link href="/admin/usuarios?nuevo=1" className={estilos.acceso}>
+              <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
+                +
+              </span>
+              <strong>Añadir alumno</strong>
             </Link>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {!esAdmin && (
+          <div className={estilos.accesos}>
+            {accesos.map((a) => (
+              <Link key={a.href} href={a.href} className={estilos.acceso}>
+                <Icono nombre={a.icono} tamano={26} />
+                <strong>{t[a.texto]}</strong>
+                {a.extra && <span>{t[a.extra]}</span>}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {extra.cumples.length > 0 && (
           <div className={clay.consejoEnvoltura}>

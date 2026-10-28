@@ -426,3 +426,27 @@
   gap: 8px;
   min-width: 0;
 }
+
+/* Resumen de administración: comparación con el mes anterior y sección de alertas */
+.comparacion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--secundario);
+}
+
+.sube {
+  font-size: 0.8rem;
+  color: #1f9d63;
+}
+
+.baja {
+  font-size: 0.8rem;
+  color: #d6453d;
+}
+
+.resumenSeccion {
+  margin: 22px 0 10px;
+  font-size: 1rem;
+}
