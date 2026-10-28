@@ -159,7 +159,7 @@ export default async function Ejercicios({
               ))}
             </div>
             {archivadosTotal > 0 && (
-              <Link href={enlace(cat ?? null, !verArchivados)} className={styles.enlaceBarra}>
+              <Link href={enlace(cat ?? null, !verArchivados)} className={styles.enlaceTexto}>
                 {verArchivados ? "Ocultar archivados" : `Ver archivados (${archivadosTotal})`}
               </Link>
             )}

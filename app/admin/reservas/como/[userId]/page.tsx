@@ -92,7 +92,7 @@ export default async function ReservarComo({
         <div>
           <strong>{nombre}</strong>
           <div>Tarifa: {tarifas.length > 0 ? tarifas.join(" + ") : "sin bono activo"}</div>
-          <Link href={`/admin/usuarios/${userId}`} className={styles.enlaceBarra}>
+          <Link href={`/admin/usuarios/${userId}`} className={styles.enlaceTexto}>
             Ver su perfil
           </Link>
         </div>

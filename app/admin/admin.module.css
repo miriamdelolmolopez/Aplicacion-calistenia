@@ -33,6 +33,15 @@
   color: var(--blanco);
 }
 
+/* Enlace de texto sobre el fondo normal (no sobre la cabecera oscura) */
+.enlaceTexto {
+  color: var(--acento-oscuro);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+
 .enlaceBarra {
   display: inline-flex;
   align-items: center;

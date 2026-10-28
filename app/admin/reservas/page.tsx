@@ -90,7 +90,7 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
         {dia !== hoy && (
           <>
             {" · "}
-            <Link href="/admin/reservas" className={styles.enlaceBarra}>
+            <Link href="/admin/reservas" className={styles.enlaceTexto}>
               Ir a hoy
             </Link>
           </>
