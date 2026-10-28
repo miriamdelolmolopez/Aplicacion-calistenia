@@ -63,7 +63,7 @@ async function crearImagen(opciones: {
   lienzo.height = ALTO;
   const c = lienzo.getContext("2d")!;
 
-  c.fillStyle = "#17181a";
+  c.fillStyle = "#1a1a1a";
   c.fillRect(0, 0, ANCHO, ALTO);
 
   if (opciones.foto) {

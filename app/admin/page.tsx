@@ -28,6 +28,7 @@ const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
       { href: "/admin/tarifas", titulo: "Tarifas", foto: "calistenia" },
       { href: "/admin/descuentos", titulo: "Descuentos", foto: "progreso" },
       { href: "/admin/formas-pago", titulo: "Formas de pago", foto: "personal" },
+      { titulo: "Contabilidad", foto: "progreso", proximamente: true },
     ],
   },
   {

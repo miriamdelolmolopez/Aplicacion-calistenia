@@ -73,9 +73,16 @@ export default function ResumenAdminTarjetas() {
     },
     {
       clave: "nuevos",
-      titulo: "Nuevos del mes",
+      titulo: "Alumnos nuevos del mes",
       valor: String(datos.nuevos.length),
       pie: <Comparacion actual={datos.nuevos.length} anterior={datos.nuevosMesAnterior.length} texto={String(datos.nuevosMesAnterior.length)} />,
+    },
+    {
+      clave: "perdidos",
+      titulo: "Alumnos perdidos este mes",
+      valor: String(datos.perdidos.length),
+      pie: <Comparacion actual={datos.perdidos.length} anterior={datos.perdidosMesAnterior.length} texto={String(datos.perdidosMesAnterior.length)} subirEsBueno={false} />,
+      tono: datos.perdidos.length > 0 ? "mal" : undefined,
     },
   ];
   const alertas: Tarjeta[] = [
@@ -87,13 +94,6 @@ export default function ResumenAdminTarjetas() {
       valor: euros(datos.pendientes.total),
       pie: `${datos.pendientes.personas.length} ${datos.pendientes.personas.length === 1 ? "persona debe" : "personas deben"} pagar`,
       tono: datos.pendientes.total > 0 ? "mal" : undefined,
-    },
-    {
-      clave: "perdidos",
-      titulo: "Alumnos perdidos este mes",
-      valor: String(datos.perdidos.length),
-      pie: <Comparacion actual={datos.perdidos.length} anterior={datos.perdidosMesAnterior.length} texto={String(datos.perdidosMesAnterior.length)} subirEsBueno={false} />,
-      tono: datos.perdidos.length > 0 ? "mal" : undefined,
     },
   ];
 

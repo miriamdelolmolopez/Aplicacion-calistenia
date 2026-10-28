@@ -22,6 +22,6 @@
 }
 
 .vista :global(.rbh) polygon {
-  stroke: #17181a;
+  stroke: #1a1a1a;
   stroke-width: 0.4;
 }

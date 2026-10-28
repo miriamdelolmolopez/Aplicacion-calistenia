@@ -584,7 +584,7 @@ function Grafica({
         return (
           <g key={f}>
             <line x1={izq} x2={W - der} y1={y(v)} y2={y(v)} stroke="#e4e1dc" />
-            <text x={izq - 4} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#6e6e73">
+            <text x={izq - 4} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#6c757d">
               {Math.round(v * 10) / 10}
             </text>
           </g>
@@ -604,11 +604,11 @@ function Grafica({
           <title>{`${fechaCorta(p.fecha, idioma)}: ${p.valor} ${unidad}`}</title>
         </circle>
       ))}
-      <text x={izq} y={H - 8} fontSize="10" fill="#6e6e73">
+      <text x={izq} y={H - 8} fontSize="10" fill="#6c757d">
         {fechaCorta(puntos[0].fecha, idioma)}
       </text>
       {puntos.length > 1 && (
-        <text x={W - der} y={H - 8} fontSize="10" textAnchor="end" fill="#6e6e73">
+        <text x={W - der} y={H - 8} fontSize="10" textAnchor="end" fill="#6c757d">
           {fechaCorta(puntos[puntos.length - 1].fecha, idioma)}
         </text>
       )}

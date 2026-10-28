@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   font-family: var(--font-cuerpo), system-ui, sans-serif;
-  color: #17181a;
+  color: #1a1a1a;
 }
 
 .tarjeta {
@@ -227,7 +227,7 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #17181a;
+  color: #1a1a1a;
   background: #fff;
   border: 1px solid #e4e1dc;
   border-radius: 999px;
@@ -253,7 +253,7 @@
   padding: 0 16px;
   font: inherit;
   font-weight: 600;
-  color: #17181a;
+  color: #1a1a1a;
   background: #fff;
   border: 1px solid #e4e1dc;
   border-radius: 14px;
