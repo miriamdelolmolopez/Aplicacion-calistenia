@@ -50,3 +50,38 @@ export async function guardarFormaPago(_previo: Estado, formData: FormData): Pro
   refrescar();
   return { mensaje: clave ? "Guardado." : "Forma de pago creada." };
 }
+
+// Copia una forma de pago (por ejemplo para crear «Tarjeta» a partir de «Bizum»).
+export async function duplicarForma(clave: string): Promise<Estado> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { data: origen } = await admin.from("formas_pago").select("clave, nombre, orden, activa").eq("clave", clave).maybeSingle();
+  if (!origen) return { error: "No se ha encontrado esa forma de pago." };
+
+  const { data: existentes } = await admin.from("formas_pago").select("clave, nombre, orden");
+  const claves = new Set((existentes ?? []).map((e) => e.clave as string));
+  const nombres = new Set((existentes ?? []).map((e) => e.nombre as string));
+  let nombre = `${origen.nombre} (copia)`;
+  for (let n = 2; nombres.has(nombre); n++) nombre = `${origen.nombre} (copia ${n})`;
+  let nueva = `${origen.clave}_copia`.slice(0, 30);
+  for (let i = 2; claves.has(nueva); i++) nueva = `${origen.clave}_copia${i}`.slice(0, 30);
+  const orden = Math.max(0, ...(existentes ?? []).map((e) => Number(e.orden) || 0)) + 1;
+
+  const { error } = await admin.from("formas_pago").insert({ clave: nueva, nombre, orden, activa: origen.activa });
+  if (error) return { error: "No se ha podido duplicar." };
+  refrescar();
+  return { mensaje: `Creada «${nombre}». Cámbiale el nombre.` };
+}
+
+// Solo se puede eliminar si nunca se ha usado en un pago; si se usó, se desactiva para conservar los pagos antiguos.
+export async function eliminarForma(clave: string): Promise<Estado> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { count } = await admin.from("pagos").select("id", { count: "exact", head: true }).eq("metodo", clave);
+  if ((count ?? 0) > 0) return { error: "Ya se ha usado en algún pago, así que no se puede eliminar. Edítala y desmarca «Activa»." };
+
+  const { error } = await admin.from("formas_pago").delete().eq("clave", clave);
+  if (error) return { error: "No se ha podido eliminar." };
+  refrescar();
+  return { mensaje: "Forma de pago eliminada." };
+}

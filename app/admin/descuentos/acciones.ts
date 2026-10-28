@@ -11,14 +11,17 @@ function refrescar() {
   revalidatePath("/admin/bonos");
 }
 
-export async function crearDescuento(_previo: Estado, formData: FormData): Promise<Estado> {
+// Crea un descuento nuevo o, si viene con «id», cambia uno existente. Los pagos ya hechos no cambian.
+export async function guardarDescuento(_previo: Estado, formData: FormData): Promise<Estado> {
   await requireAdmin();
 
+  const id = String(formData.get("id") ?? "").trim();
   const nombre = String(formData.get("nombre") ?? "").trim().replace(/\s+/g, " ");
   const tipo = String(formData.get("tipo") ?? "");
   const valorTexto = String(formData.get("valor") ?? "");
   const caducaTexto = String(formData.get("caduca_en") ?? "").trim();
   const usosTexto = String(formData.get("usos_max") ?? "").trim();
+  const activo = formData.get("activo") === "on";
 
   if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
   if (tipo !== "porcentaje" && tipo !== "euros") return { error: "Elige si es en % o en euros." };
@@ -40,43 +43,44 @@ export async function crearDescuento(_previo: Estado, formData: FormData): Promi
     return { error: "El máximo de usos tiene que ser un número entero mayor que 0 (o déjalo vacío)." };
   }
 
-  const { error } = await createAdminClient().from("descuentos").insert({
-    nombre,
-    tipo,
-    valor,
-    caduca_en: caducaTexto === "" ? null : caducaTexto,
-    usos_max: usos,
-  });
+  const datos = { nombre, tipo, valor, caduca_en: caducaTexto === "" ? null : caducaTexto, usos_max: usos, activo };
+  const admin = createAdminClient();
+  const { error } = id ? await admin.from("descuentos").update(datos).eq("id", id) : await admin.from("descuentos").insert(datos);
   if (error) {
-    return { error: error.code === "23505" ? "Ya hay un descuento con ese nombre." : "No se ha podido crear." };
+    return { error: error.code === "23505" ? "Ya hay un descuento con ese nombre." : "No se ha podido guardar." };
   }
   refrescar();
-  return { mensaje: "Descuento creado. Ya puedes elegirlo al registrar un bono." };
+  return { mensaje: id ? "Guardado." : "Descuento creado. Ya puedes elegirlo al registrar un pago." };
 }
 
-export async function cambiarActivo(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
-  const activar = formData.get("activar") === "si";
-  const { error } = await createAdminClient()
-    .from("descuentos")
-    .update({ activo: activar })
-    .eq("id", String(formData.get("id") ?? ""));
-  if (error) return { error: "No se ha podido cambiar." };
-  refrescar();
-  return { mensaje: activar ? "Descuento activado." : "Descuento desactivado." };
-}
-
-// Solo se puede borrar si nunca se ha usado; si se usó, se desactiva (para no perder el rastro de los pagos).
-export async function borrarDescuento(_previo: Estado, formData: FormData): Promise<Estado> {
+// Copia un descuento para no empezar de cero.
+export async function duplicarDescuento(id: string): Promise<Estado> {
   await requireAdmin();
   const admin = createAdminClient();
-  const id = String(formData.get("id") ?? "");
+  const { data: origen } = await admin.from("descuentos").select("nombre, tipo, valor, caduca_en, usos_max, activo").eq("id", id).maybeSingle();
+  if (!origen) return { error: "No se ha encontrado ese descuento." };
+
+  const { data: existentes } = await admin.from("descuentos").select("nombre");
+  const nombres = new Set((existentes ?? []).map((e) => e.nombre));
+  let nombre = `${origen.nombre} (copia)`;
+  for (let n = 2; nombres.has(nombre); n++) nombre = `${origen.nombre} (copia ${n})`;
+
+  const { error } = await admin.from("descuentos").insert({ ...origen, nombre });
+  if (error) return { error: "No se ha podido duplicar." };
+  refrescar();
+  return { mensaje: `Creado «${nombre}». Cámbiale lo que haga falta.` };
+}
+
+// Solo se puede eliminar si nunca se ha usado; si se usó, se desactiva (para no perder el rastro de los pagos).
+export async function eliminarDescuento(id: string): Promise<Estado> {
+  await requireAdmin();
+  const admin = createAdminClient();
 
   const { count } = await admin.from("pagos").select("id", { count: "exact", head: true }).eq("descuento_id", id);
-  if ((count ?? 0) > 0) return { error: "Ya se ha usado en algún pago, así que no se puede borrar. Desactívalo." };
+  if ((count ?? 0) > 0) return { error: "Ya se ha usado en algún pago, así que no se puede eliminar. Edítalo y desmarca «Activo»." };
 
   const { error } = await admin.from("descuentos").delete().eq("id", id);
-  if (error) return { error: "No se ha podido borrar." };
+  if (error) return { error: "No se ha podido eliminar." };
   refrescar();
-  return { mensaje: "Descuento borrado." };
+  return { mensaje: "Descuento eliminado." };
 }

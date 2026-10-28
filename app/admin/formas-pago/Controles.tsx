@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { useEnvio } from "../useEnvio";
@@ -9,14 +9,20 @@ import { guardarFormaPago } from "./acciones";
 export type Forma = { clave: string; nombre: string; activa: boolean; orden: number };
 
 // Crear (sin forma) o editar (con forma) una forma de pago.
-export function FormularioForma({ forma }: { forma?: Forma }) {
+export function FormularioForma({ forma, alTerminar }: { forma?: Forma; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarFormaPago, {});
   const { ref, alEnviar } = useEnvio(accion, estado, !forma);
   const p = forma?.clave ?? "nueva";
 
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar) return;
+    const t = setTimeout(alTerminar, 800);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar]);
+
   return (
-    <form ref={ref} onSubmit={alEnviar} className={forma ? styles.formularioInterno : styles.tarjeta}>
-      {forma ? <input type="hidden" name="clave" value={forma.clave} /> : <h2>Nueva forma de pago</h2>}
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
+      {forma && <input type="hidden" name="clave" value={forma.clave} />}
       <div className={styles.campo}>
         <label htmlFor={`fp-n-${p}`}>Nombre</label>
         <input id={`fp-n-${p}`} name="nombre" required maxLength={40} defaultValue={forma?.nombre ?? ""} />
