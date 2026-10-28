@@ -33,6 +33,13 @@ export async function proxy(request: NextRequest) {
   const ruta = request.nextUrl.pathname;
   const esPrivada = PRIVADAS.some((p) => ruta === p || ruta.startsWith(p + "/"));
 
+  if (user && ["/", "/entrar", "/registro"].includes(ruta) && !request.nextUrl.searchParams.has("error")) {
+    const inicio = request.nextUrl.clone();
+    inicio.pathname = "/inicio";
+    inicio.search = "";
+    return NextResponse.redirect(inicio);
+  }
+
   if (!user && esPrivada) {
     const destino = request.nextUrl.clone();
     destino.pathname = "/entrar";

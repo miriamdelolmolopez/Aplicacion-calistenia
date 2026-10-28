@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import BarraSuperior from "../BarraSuperior";
+import BotonGoogle from "../BotonGoogle";
 import styles from "../formularios.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
@@ -93,6 +94,7 @@ function Formulario() {
         <button className={styles.boton} type="submit" disabled={cargando}>
           {cargando ? t.cargando : t.entrarBoton}
         </button>
+        <BotonGoogle />
       </form>
 
       <div className={styles.enlaces}>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import BarraSuperior from "../BarraSuperior";
+import BotonGoogle from "../BotonGoogle";
 import styles from "../formularios.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
@@ -105,6 +106,7 @@ export default function Registro() {
           <button className={styles.boton} type="submit" disabled={cargando}>
             {cargando ? t.cargando : t.registroBoton}
           </button>
+          <BotonGoogle />
         </form>
       )}
 
