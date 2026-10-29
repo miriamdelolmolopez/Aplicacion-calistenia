@@ -18,7 +18,8 @@ import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas"
 import EliminarUsuario from "./EliminarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
-import { ClasesHechas, InicioBono } from "./ClasesHechas";
+import { ClasesHechas } from "./ClasesHechas";
+import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
@@ -55,6 +56,7 @@ type Bono = {
   id: string;
   servicio: string;
   estado: string;
+  tipo_bono_id: string;
   clases_total: number;
   clases_restantes: number;
   activo_desde: string | null;
@@ -122,7 +124,7 @@ export default async function FichaUsuario({
     supabase
       .from("bonos")
       .select(
-        "id, servicio, estado, clases_total, clases_restantes, activo_desde, caduca_en, creado_en, tipos_bono(nombre), pagos(importe_centimos, estado, metodo, descuento_centimos)",
+        "id, servicio, estado, tipo_bono_id, clases_total, clases_restantes, activo_desde, caduca_en, creado_en, tipos_bono(nombre), pagos(importe_centimos, estado, metodo, descuento_centimos)",
       )
       .eq("user_id", id)
       .order("creado_en", { ascending: false }),
@@ -213,6 +215,43 @@ export default async function FichaUsuario({
     const { data: firmada } = await admin.storage.from("avatares").createSignedUrl(p.foto_path, 3600);
     foto = firmada?.signedUrl ?? null;
   }
+
+  // Datos para los asistentes de «Cambiar tarifa y fechas» y «Quitar tarifa».
+  const { data: tarifasDatos } = await admin.from("tipos_bono").select("id, nombre, servicio, clases, validez_dias").eq("activo", true).order("servicio").order("orden");
+  const tarifasOpciones: TarifaOpcion[] = ((tarifasDatos ?? []) as { id: string; nombre: string; servicio: string; clases: number; validez_dias: number }[]).map((t) => ({
+    id: t.id,
+    nombre: t.nombre,
+    servicio: t.servicio,
+    clases: t.clases,
+    validez: t.validez_dias,
+  }));
+  const { data: futurasDatos } = await admin
+    .from("reservas")
+    .select("bono_id, sesiones_clase!inner(empieza_en)")
+    .eq("user_id", id)
+    .eq("estado", "reservada")
+    .gt("sesiones_clase.empieza_en", ahora);
+  const futurasPorBono = new Map<string, number>();
+  for (const r of (futurasDatos ?? []) as { bono_id: string | null }[]) {
+    if (r.bono_id) futurasPorBono.set(r.bono_id, (futurasPorBono.get(r.bono_id) ?? 0) + 1);
+  }
+  const paraAsistente = (b: Bono): BonoAsistente => ({
+    id: b.id,
+    nombre: b.tipos_bono?.nombre ?? "Tarifa",
+    tipoId: b.tipo_bono_id,
+    servicio: b.servicio,
+    estado: b.estado,
+    clasesTotal: b.clases_total,
+    clasesRestantes: b.clases_restantes,
+    validez: tarifasOpciones.find((t) => t.id === b.tipo_bono_id)?.validez ?? 30,
+    desde: b.activo_desde ? claveDia(b.activo_desde) : null,
+    hasta: b.caduca_en ? claveDia(b.caduca_en) : null,
+    combo: bonos.some((o) => o.id !== b.id && o.tipo_bono_id === b.tipo_bono_id && o.creado_en === b.creado_en),
+    cobrado: b.pagos.filter((x) => x.estado === "pagado").reduce((n, x) => n + x.importe_centimos, 0),
+    pendiente: b.pagos.filter((x) => x.estado === "pendiente").reduce((n, x) => n + x.importe_centimos, 0),
+    reservasFuturas: futurasPorBono.get(b.id) ?? 0,
+    enEspera: bonos.filter((o) => o.id !== b.id && o.estado === "en_cola" && o.servicio === b.servicio).length,
+  });
 
   const maxMes = Math.max(1, ...asistencia.por_mes.map((m) => m.clases));
 
@@ -590,11 +629,8 @@ export default async function FichaUsuario({
                     </div>
                     {(b.estado === "activo" || b.estado === "en_cola") && (
                       <>
-                        <details>
-                          <summary className={styles.ayuda}>Cambiar fecha de inicio</summary>
-                          <InicioBono userId={p.id} bonoId={b.id} />
-                        </details>
-                        <EditorBono bonoId={b.id} anulado={false} />
+                        <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
+                        <EditorBono bonoId={b.id} anulado={false} sinAnular />
                       </>
                     )}
                   </li>

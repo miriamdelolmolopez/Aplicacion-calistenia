@@ -1,0 +1,103 @@
+.botonesBono {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pasos {
+  display: flex;
+  gap: 6px;
+}
+
+.pasos i {
+  width: 10px;
+  height: 10px;
+  background: var(--relleno);
+  border-radius: 50%;
+}
+
+.pasos i.pasoActivo {
+  background: var(--acento);
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--relleno);
+  border: 2px solid transparent;
+  border-radius: 16px;
+}
+
+.opcion input {
+  margin-top: 4px;
+  accent-color: var(--acento);
+}
+
+.opcion span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.opcion small {
+  color: var(--secundario);
+}
+
+.opcionMarcada {
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 8%, var(--blanco));
+}
+
+.opcionApagada {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--relleno);
+  border-left: 4px solid var(--acento);
+  border-radius: 10px 16px 16px 10px;
+}
+
+.resumen h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.resumen > div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.resumen span {
+  color: var(--secundario);
+}
+
+@media (max-width: 520px) {
+  .resumen > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

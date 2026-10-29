@@ -188,3 +188,131 @@ export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; er
   revalidatePath("/admin/personas");
   return { ok: true };
 }
+
+// ---- Cambiar tarifa y fechas / quitar tarifa -------------------------------------------------
+const UUID = /^[0-9a-f-]{36}$/i;
+const FECHA = /^\d{4}-\d{2}-\d{2}$/;
+
+function refrescarPantallas(userId: string) {
+  revalidatePath(`/admin/usuarios/${userId}`);
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/bonos");
+  revalidatePath("/admin/reservas");
+}
+
+// Cambia la tarifa y/o las fechas de un bono. Las clases ya usadas se respetan.
+export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData): Promise<Estado> {
+  const { user } = await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const bonoId = String(formData.get("bonoId") ?? "");
+  const tipo = String(formData.get("tipo") ?? "");
+  const modo = String(formData.get("modo") ?? "ninguna"); // ninguna | inicio | fin | ambas
+  const inicio = String(formData.get("inicio") ?? "").trim();
+  const fin = String(formData.get("fin") ?? "").trim();
+  const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
+  if (!UUID.test(userId) || !UUID.test(bonoId)) return { error: "No se ha podido identificar el bono." };
+  if (tipo && !UUID.test(tipo)) return { error: "La tarifa no es válida." };
+
+  const admin = createAdminClient();
+  const { data: bono } = await admin.from("bonos").select("id, user_id, tipo_bono_id, validez_dias").eq("id", bonoId).maybeSingle();
+  if (!bono || bono.user_id !== userId) return { error: "No se ha encontrado ese bono." };
+
+  let validez = bono.validez_dias as number;
+  if (tipo && tipo !== bono.tipo_bono_id) {
+    const { data: t } = await admin.from("tipos_bono").select("validez_dias").eq("id", tipo).maybeSingle();
+    if (!t) return { error: "No se ha encontrado esa tarifa." };
+    validez = t.validez_dias as number;
+  }
+
+  let desde: Date | null = null;
+  let hasta: Date | null = null;
+  if (modo === "inicio" || modo === "ambas") {
+    if (!FECHA.test(inicio)) return { error: "Elige la fecha de inicio." };
+    desde = instanteMadrid(inicio, "00:00");
+  }
+  if (modo === "fin" || modo === "ambas") {
+    if (!FECHA.test(fin)) return { error: "Elige la fecha de fin." };
+    hasta = instanteMadrid(fin, "00:00");
+  }
+  if (modo === "inicio" && desde) hasta = instanteMadrid(sumarDias(inicio, validez), "00:00");
+  if (modo === "fin" && hasta) desde = instanteMadrid(sumarDias(fin, -validez), "00:00");
+  if (modo !== "ninguna" && (!desde || !hasta)) return { error: "Las fechas no son válidas." };
+  if (desde && hasta && hasta.getTime() <= desde.getTime()) return { error: "La fecha de fin tiene que ser posterior a la de inicio." };
+
+  const { error } = await admin.rpc("cambiar_bono", {
+    p_bono: bonoId,
+    p_tipo: tipo || null,
+    p_desde: desde ? desde.toISOString() : null,
+    p_hasta: hasta ? hasta.toISOString() : null,
+    p_nota: nota,
+    p_admin: user.id,
+  });
+  if (error) return { error: error.message };
+
+  refrescarPantallas(userId);
+  return { mensaje: "Cambios guardados." };
+}
+
+// Quita una tarifa: el bono, lo que se hace con su pago y con sus clases reservadas, y si se quita el servicio.
+export async function quitarTarifa(_previo: Estado, formData: FormData): Promise<Estado> {
+  const { user } = await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const bonoId = String(formData.get("bonoId") ?? "");
+  const modo = String(formData.get("modo") ?? "ya"); // ya | al_caducar
+  const pago = String(formData.get("pago") ?? "dejar"); // dejar | anular
+  const reservas = String(formData.get("reservas") ?? "cancelar"); // cancelar | dejar
+  const servicio = String(formData.get("servicio") ?? "dejar"); // dejar | quitar
+  const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
+  if (!UUID.test(userId) || !UUID.test(bonoId)) return { error: "No se ha podido identificar el bono." };
+
+  const admin = createAdminClient();
+  const { data: bono } = await admin.from("bonos").select("id, user_id, servicio, estado").eq("id", bonoId).maybeSingle();
+  if (!bono || bono.user_id !== userId) return { error: "No se ha encontrado ese bono." };
+
+  const ya = modo !== "al_caducar";
+  const { error } = await admin.rpc("quitar_tarifa", {
+    p_bono: bonoId,
+    p_ya: ya,
+    p_anular_pago: ya && pago === "anular",
+    p_nota: nota,
+    p_admin: user.id,
+  });
+  if (error) return { error: error.message };
+
+  // Sus clases reservadas desde hoy con este bono (sin devolver la clase).
+  let canceladas = 0;
+  if (ya && reservas === "cancelar") {
+    const { data: futuras } = await admin
+      .from("reservas")
+      .select("id, sesiones_clase!inner(empieza_en)")
+      .eq("user_id", userId)
+      .eq("bono_id", bonoId)
+      .eq("estado", "reservada")
+      .gt("sesiones_clase.empieza_en", new Date().toISOString());
+    for (const r of (futuras ?? []) as { id: string }[]) {
+      const { error: fallo } = await admin.rpc("cancelar_reserva", { p_user: userId, p_reserva: r.id, p_admin: user.id, p_devolver: false });
+      if (!fallo) canceladas++;
+    }
+  }
+
+  // Quitar el servicio solo si ya no le queda ningún bono de ese servicio.
+  let servicioQuitado = false;
+  if (servicio === "quitar") {
+    const { count } = await admin
+      .from("bonos")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("servicio", bono.servicio)
+      .in("estado", ["activo", "en_cola"]);
+    if ((count ?? 0) === 0) {
+      await admin.from("perfil_servicios").delete().eq("user_id", userId).eq("servicio", bono.servicio);
+      servicioQuitado = true;
+    }
+  }
+
+  refrescarPantallas(userId);
+  const partes = [ya ? "Tarifa quitada." : "No se renovará: seguirá hasta que caduque."];
+  if (canceladas > 0) partes.push(`Se han cancelado ${canceladas} ${canceladas === 1 ? "clase reservada" : "clases reservadas"}.`);
+  if (servicio === "quitar") partes.push(servicioQuitado ? "Se le ha quitado el servicio." : "El servicio se mantiene porque aún tiene otra tarifa de ese tipo.");
+  return { mensaje: partes.join(" ") };
+}

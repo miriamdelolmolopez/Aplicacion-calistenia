@@ -186,7 +186,7 @@ export function BotonPagado({ pagoId }: { pagoId: string }) {
   );
 }
 
-export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boolean }) {
+export function EditorBono({ bonoId, anulado, sinAnular = false }: { bonoId: string; anulado: boolean; sinAnular?: boolean }) {
   const [estadoAjuste, accionAjuste, pendienteAjuste] = useActionState<Estado, FormData>(
     ajustarBono,
     {},
@@ -199,7 +199,7 @@ export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boole
 
   return (
     <details className={styles.detalles}>
-      <summary>Ajustar o quitar esta tarifa</summary>
+      <summary>{sinAnular ? "Ajustar clases o días (avanzado)" : "Ajustar o quitar esta tarifa"}</summary>
       <form action={accionAjuste} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <p className={styles.ayuda}>
@@ -223,6 +223,7 @@ export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boole
         </button>
         <Mensajes estado={estadoAjuste} />
       </form>
+      {!sinAnular && (
       <form action={accionAnular} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <div className={styles.campo}>
@@ -238,6 +239,7 @@ export function EditorBono({ bonoId, anulado }: { bonoId: string; anulado: boole
         </button>
         <Mensajes estado={estadoAnular} />
       </form>
+      )}
     </details>
   );
 }
