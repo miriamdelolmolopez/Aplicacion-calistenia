@@ -86,7 +86,7 @@ export default function MenuLateral({
             ))}
           {!esAdmin &&
             seccionesDe(perfil)
-            .filter((s) => s !== "ajustes")
+            .filter((s) => s !== "ajustes" && s !== "ayuda")
             .map((s) => (
               <li key={s}>
                 <Link href={RUTAS[s]} className={estilos.enlace} onClick={onCerrar}>

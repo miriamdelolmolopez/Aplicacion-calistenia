@@ -48,3 +48,72 @@
   justify-content: center;
   text-decoration: none;
 }
+
+/* Carpetas por secciones */
+.carpeta {
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 22px;
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.carpetaCab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--carbon);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.carpetaIcono {
+  flex: 0 0 auto;
+  color: var(--acento);
+}
+
+.carpetaNombre {
+  flex: 1;
+}
+
+.contador {
+  min-width: 26px;
+  padding: 2px 9px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--acento-oscuro);
+  background: color-mix(in srgb, var(--acento) 14%, var(--blanco));
+  border-radius: 999px;
+}
+
+.flecha {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--secundario);
+  transition: transform 0.2s;
+}
+
+.flechaAbierta {
+  transform: rotate(90deg);
+}
+
+.carpetaCuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 14px;
+}
+
+.carpetaCuerpo .pregunta {
+  background: color-mix(in srgb, var(--acento) 5%, var(--blanco));
+  border-radius: 16px;
+}

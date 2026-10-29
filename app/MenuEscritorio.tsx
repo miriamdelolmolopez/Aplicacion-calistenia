@@ -24,9 +24,9 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
   const { visibles: visiblesAdmin } = useMenuAdmin();
 
   const opciones: Opcion[] = esAdmin
-    ? visiblesAdmin
+    ? visiblesAdmin.filter((o) => o.href !== RUTAS.ayuda)
     : seccionesDe(perfil)
-        .filter((s) => s !== "ajustes")
+        .filter((s) => s !== "ajustes" && s !== "ayuda")
         .map((s) => ({ href: RUTAS[s], icono: s as NombreIcono, texto: t[CLAVE_TEXTO[s]] }));
 
   // Solo se marca la opción más específica: «Mis reservas» cuelga de «Reservar clases», pero no deben marcarse las dos.
