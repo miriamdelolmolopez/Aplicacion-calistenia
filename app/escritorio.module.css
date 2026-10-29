@@ -105,6 +105,13 @@
   animation: giroLuz 3.2s linear infinite;
 }
 
+/* La animación va aquí dentro: una definida en globals.css no la encuentra un archivo de módulos */
+@keyframes giroLuz {
+  to {
+    --ang: 360deg;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .activo::before {
     animation: none;

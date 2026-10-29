@@ -64,13 +64,16 @@ export default function NavegacionInferior() {
   const inicio = pestanas.find((p) => p.href === RUTAS.inicio);
   const otras = pestanas.filter((p) => p !== inicio);
 
-  const esActiva = (href: string) =>
+  const coincide = (href: string) =>
     href === "/admin"
       ? ruta === "/admin"
       : ruta === href ||
         ruta.startsWith(href + "/") ||
         // El progreso y el entreno cuelgan de «Entrenamiento» para quien tiene online.
         (href === "/rutina" && (ruta.startsWith("/progreso") || ruta.startsWith("/entreno")));
+  // Solo se marca la pestaña más específica (por ejemplo «Mis reservas» y no también «Reservar clases»).
+  const mejor = pestanas.map((p) => p.href).filter(coincide).sort((a, b) => b.length - a.length)[0];
+  const esActiva = (href: string) => href === mejor;
 
   const pestana = (p: Pestana) => (
     <Link key={p.href} href={p.href} className={`${estilos.pestana} ${esActiva(p.href) ? estilos.activa : ""}`}>

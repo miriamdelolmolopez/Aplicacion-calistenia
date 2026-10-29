@@ -29,11 +29,14 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
         .filter((s) => s !== "ajustes")
         .map((s) => ({ href: RUTAS[s], icono: s as NombreIcono, texto: t[CLAVE_TEXTO[s]] }));
 
-  const activa = (href: string) => {
+  // Solo se marca la opción más específica: «Mis reservas» cuelga de «Reservar clases», pero no deben marcarse las dos.
+  const coincide = (href: string) => {
     if (href === "/admin") return ruta === "/admin";
     if (href === "/inicio") return ruta === "/inicio";
     return ruta === href || ruta.startsWith(href + "/");
   };
+  const mejor = [...opciones.map((o) => o.href), RUTAS.ayuda, RUTAS.ajustes].filter(coincide).sort((a, b) => b.length - a.length)[0];
+  const activa = (href: string) => href === mejor;
 
   async function salir() {
     olvidarVistaAlumna();
