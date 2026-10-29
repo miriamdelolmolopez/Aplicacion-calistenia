@@ -7,6 +7,8 @@ import PanelFiltros from "../../PanelFiltros";
 import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
 import { fechaCorta } from "@/lib/fechas";
+import { euros } from "@/lib/formato";
+import { IconoCalendario, IconoEuro, IconoInfo, IconoLapiz, IconoMarcador, IconoMas } from "./IconosUsuario";
 
 export type Usuario = {
   id: string;
@@ -19,6 +21,9 @@ export type Usuario = {
   ultima_conexion: string | null;
   servicios: string[];
   tarifas: string[]; // bonos activos (nombre)
+  tarifa_desde: string | null; // inicio del periodo actual
+  tarifa_hasta: string | null; // fin del periodo actual
+  pendiente_cobro: number; // céntimos que tiene sin pagar
   clases_restantes: number | null;
   bono_caduca: string | null;
   plan_online_hasta: string | null;
@@ -87,6 +92,27 @@ function resumen(u: Usuario): { texto: string; alerta: boolean } {
   if (u.rol === "invitado") partes.push(u.ultima_clase ? "Ha hecho su clase de prueba" : "Todavía no ha hecho la clase de prueba");
   if (partes.length === 0) partes.push(`Registrada el ${fechaCorta(u.creado_en)}`);
   return { texto: partes.join(" · "), alerta };
+}
+
+// Botones que llevan a cada parte de la ficha.
+function Botones({ u }: { u: Usuario }) {
+  const ficha = (pestana: string) => `/admin/usuarios/${u.id}?pestana=${pestana}`;
+  return (
+    <span className={estilos.iconos}>
+      <Link href={ficha("actual")} className={estilos.icono} aria-label="Calendario y reservas" title="Calendario y reservas">
+        <IconoCalendario />
+      </Link>
+      <Link href={ficha("perfil")} className={estilos.icono} aria-label="Editar" title="Editar">
+        <IconoLapiz />
+      </Link>
+      <Link href={ficha("perfil")} className={estilos.icono} aria-label="Información" title="Información">
+        <IconoInfo />
+      </Link>
+      <Link href={ficha("acciones")} className={estilos.icono} aria-label="Más acciones" title="Más acciones">
+        <IconoMas />
+      </Link>
+    </span>
+  );
 }
 
 export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
@@ -174,6 +200,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
               <th>Última clase</th>
               <th>Última conexión</th>
               <th>Alta</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -201,11 +228,14 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                 <td>{u.ultima_clase ? fechaCorta(u.ultima_clase) : "—"}</td>
                 <td>{u.ultima_conexion ? fechaCorta(u.ultima_conexion) : "—"}</td>
                 <td>{fechaCorta(u.creado_en)}</td>
+                <td>
+                  <Botones u={u} />
+                </td>
               </tr>
             ))}
             {visibles.length === 0 && (
               <tr>
-                <td colSpan={8}>No hay nadie que coincida.</td>
+                <td colSpan={9}>No hay nadie que coincida.</td>
               </tr>
             )}
           </tbody>
@@ -217,27 +247,46 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
           const r = resumen(u);
           return (
             <li key={u.id}>
-              <Link href={`/admin/usuarios/${u.id}`} className={estilos.fila}>
-                <Avatar nombre={nombreDe(u)} url={u.foto} tamano={48} />
-                <div className={estilos.datos}>
-                  <strong>{nombreDe(u)}</strong>
-                  <div className={estilos.etiquetas}>
-                    {u.rol === "invitado" && <span className={styles.etiquetaSuave}>Invitada</span>}
-                    {u.tarifas.map((n) => (
-                      <span key={n} className={styles.etiquetaSuave}>
-                        {n}
-                      </span>
-                    ))}
-                    {u.servicios.map((s) => (
-                      <span key={s} className={styles.etiquetaSuave}>
-                        {NOMBRE_SERVICIO[s] ?? s}
-                      </span>
-                    ))}
-                  </div>
-                  <div className={`${styles.ayuda} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
+              <article className={estilos.tarjetaPersona}>
+                <Link href={`/admin/usuarios/${u.id}`} className={estilos.cabeceraPersona}>
+                  <Avatar nombre={nombreDe(u)} url={u.foto} tamano={52} />
+                  <span>
+                    <strong>{nombreDe(u)}</strong>
+                    <small>{u.email}</small>
+                  </span>
+                </Link>
+                <div className={estilos.creditos}>
+                  <IconoMarcador />
+                  {u.clases_restantes === null && u.plan_online_hasta ? (
+                    <span>Plan online</span>
+                  ) : (
+                    <span>
+                      <b>{u.clases_restantes ?? 0}</b> {u.clases_restantes === 1 ? "crédito" : "créditos"}
+                    </span>
+                  )}
                 </div>
-                <span aria-hidden="true">›</span>
-              </Link>
+                <div className={estilos.tarifaCab}>
+                  <span>TARIFA</span>
+                  <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? "Activa" : "Sin tarifa"}</span>
+                  {u.pendiente_cobro > 0 && <span className={estilos.sinPagar}>Sin pagar · {euros(u.pendiente_cobro)}</span>}
+                </div>
+                <div className={estilos.tarifaCaja}>
+                  <strong>{u.tarifas.join(" + ") || "Sin tarifa activa"}</strong>
+                  {u.tarifa_hasta && (
+                    <span>
+                      {u.tarifa_desde ? `${fechaCorta(u.tarifa_desde)} – ` : "hasta "}
+                      {fechaCorta(u.tarifa_hasta)}
+                    </span>
+                  )}
+                </div>
+                <div className={`${styles.ayuda} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
+                <div className={estilos.pie}>
+                  <Link href="/admin/bonos" className={estilos.botonPagos}>
+                    <IconoEuro /> Pagos
+                  </Link>
+                  <Botones u={u} />
+                </div>
+              </article>
             </li>
           );
         })}

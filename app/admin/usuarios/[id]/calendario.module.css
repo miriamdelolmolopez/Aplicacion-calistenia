@@ -1,0 +1,107 @@
+.calendario {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mes h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.cuadricula {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cabecera {
+  padding: 2px 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--secundario);
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 64px;
+  padding: 4px;
+  color: inherit;
+  text-decoration: none;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+}
+
+.dia:hover {
+  border-color: var(--acento);
+}
+
+.hoy {
+  border: 2px solid var(--acento);
+}
+
+.numero {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.clase {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  padding: 2px 4px;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  color: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.clase b {
+  font-weight: 700;
+}
+
+/* En el móvil solo la hora (con el color del tipo); el nombre sale en pantallas más anchas */
+.clase > span {
+  display: none;
+}
+
+.clase i {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.cancelada {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.falto {
+  outline: 2px solid #d1495b;
+  outline-offset: -2px;
+}
+
+.leyenda {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+@media (min-width: 700px) {
+  .dia {
+    min-height: 84px;
+  }
+
+  .clase {
+    font-size: 0.72rem;
+  }
+
+  .clase > span {
+    display: inline;
+  }
+}
