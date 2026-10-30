@@ -99,6 +99,9 @@ function Botones({ u }: { u: Usuario }) {
   const ficha = (pestana: string) => `/admin/usuarios/${u.id}?pestana=${pestana}`;
   return (
     <span className={estilos.iconos}>
+      <Link href={`/admin/usuarios/${u.id}/pagos`} className={`${estilos.icono} ${estilos.soloTabla}`} aria-label="Pagos" title="Pagos">
+        <IconoEuro />
+      </Link>
       <Link href={ficha("actual")} className={estilos.icono} aria-label="Calendario y reservas" title="Calendario y reservas">
         <IconoCalendario />
       </Link>
@@ -281,7 +284,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                 </div>
                 <div className={`${styles.ayuda} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
                 <div className={estilos.pie}>
-                  <Link href="/admin/bonos" className={estilos.botonPagos}>
+                  <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.botonPagos}>
                     <IconoEuro /> Pagos
                   </Link>
                   <Botones u={u} />

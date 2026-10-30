@@ -590,7 +590,8 @@ export default async function FichaUsuario({
           <section className={styles.tarjeta}>
             <h2>Acciones</h2>
             <nav className={estilos.acciones} aria-label="Acciones">
-              <Link href="/admin/bonos">Marcar un pago</Link>
+              <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>
+              <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
               <Link href={`/admin/reservas/como/${id}`}>Reservar clases como ella</Link>
               <Link href={aFicha("reservas")}>Calendario de reservas</Link>
               <Link href={aFicha("perfil")}>Editar datos y servicios</Link>

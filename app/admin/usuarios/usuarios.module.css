@@ -483,3 +483,8 @@
   font-size: 1.3rem;
   color: var(--secundario);
 }
+
+/* El icono de pagos solo hace falta en la tabla: en la tarjeta ya está el botón € Pagos */
+.pie .soloTabla {
+  display: none;
+}

@@ -51,8 +51,12 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
   if (fallo) return error(fallo.message);
 
   // La base de datos pone la fecha de hoy; si has indicado otra, se corrige en el pago de ese bono.
-  if (pagado && cobradoEn && bonoId) {
-    await admin.from("pagos").update({ pagado_en: cobradoEn.toISOString() }).eq("bono_id", bonoId);
+  if (bonoId) {
+    const periodo = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" }).format(cobradoEn ?? new Date()).slice(0, 7);
+    await admin
+      .from("pagos")
+      .update(pagado && cobradoEn ? { pagado_en: cobradoEn.toISOString(), periodo } : { periodo })
+      .eq("bono_id", bonoId);
   }
 
   revalidatePath("/admin/bonos");
