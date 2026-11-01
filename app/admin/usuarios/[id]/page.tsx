@@ -14,6 +14,7 @@ import styles from "../../admin.module.css";
 import estilos from "../usuarios.module.css";
 import { EditorBono } from "../../bonos/Controles";
 import AvancesSesion from "./AvancesSesion";
+import Logros from "../../../progreso/Logros";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
 import EliminarUsuario from "./EliminarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
@@ -463,13 +464,17 @@ export default async function FichaUsuario({
                 ))}
               </div>
             </section>
-          ) : (
-            !online && (
-              <section className={styles.tarjeta}>
-                <h2>Logros</h2>
-                <p className={styles.ayuda}>Todavía no hay datos de clases ni de entrenos.</p>
-              </section>
-            )
+          ) : null}
+          {presencial && (
+            <section className={styles.tarjeta}>
+              <Logros userId={p.id} admin />
+            </section>
+          )}
+          {!presencial && !online && (
+            <section className={styles.tarjeta}>
+              <h2>Logros</h2>
+              <p className={styles.ayuda}>Todavía no hay datos de clases ni de entrenos.</p>
+            </section>
           )}
           {online && (
             <>

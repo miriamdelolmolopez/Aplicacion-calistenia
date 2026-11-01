@@ -5,6 +5,7 @@ import { borrarObjetivo, crearObjetivo } from "../admin/alumnos/acciones";
 import { borrarEntreno } from "../entreno/acciones";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
+import Logros from "./Logros";
 import PlantaAvatar from "./PlantaAvatar";
 import estilos from "./progreso.module.css";
 import clay from "../ui/clay.module.css";
@@ -380,6 +381,8 @@ export default function Progreso({
           )}
         </section>
       )}
+
+      {verClases && <Logros userId={userId} admin={admin} />}
 
         </>
       )}
