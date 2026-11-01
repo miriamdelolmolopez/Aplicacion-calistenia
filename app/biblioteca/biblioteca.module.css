@@ -166,3 +166,135 @@
   height: 100%;
   border-radius: 99px;
 }
+
+/* Ficha de un ejercicio al estilo de una app de entreno: vídeo grande arriba y la información debajo. */
+.hero {
+  position: relative;
+  width: calc(100% + 40px);
+  max-height: 58dvh;
+  margin: 0 -20px;
+  overflow: hidden;
+  background: #17181a;
+  border-radius: 0 0 28px 28px;
+}
+
+.heroFoto {
+  display: block;
+  width: 100%;
+  max-height: 58dvh;
+  object-fit: contain;
+}
+
+.heroVacio {
+  aspect-ratio: 1 / 1;
+  max-height: 58dvh;
+  background: linear-gradient(160deg, #c9c5bd, #0aa8c0);
+}
+
+.atras {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  font-size: 2rem;
+  line-height: 1;
+  color: #ffffff;
+  text-decoration: none;
+  background: rgba(23, 24, 26, 0.75);
+  border-radius: 50%;
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 18px;
+}
+
+.dificultad {
+  margin: 0;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+  letter-spacing: 0.02em;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.subtitulo {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--secundario);
+}
+
+.pestanasLinea {
+  display: flex;
+  gap: 8px;
+  margin: 10px -20px 4px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pestanasLinea::-webkit-scrollbar {
+  display: none;
+}
+
+.pestanasLinea button {
+  flex: none;
+  min-height: 44px;
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--carbon);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.pestanasLinea .activaLinea {
+  color: var(--acento-oscuro);
+  background: color-mix(in srgb, var(--acento) 16%, transparent);
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 0 24px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.guiones {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guiones li {
+  position: relative;
+  padding-left: 30px;
+}
+
+.guiones li::before {
+  content: "";
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 16px;
+  height: 3px;
+  background: var(--acento);
+  border-radius: 2px;
+}

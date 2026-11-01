@@ -68,11 +68,6 @@ type Bono = {
   pagos: { importe_centimos: number; estado: string; metodo: string; descuento_centimos: number }[];
 };
 
-type Reserva = {
-  id: string;
-  sesiones_clase: { empieza_en: string; estado: string; tipos_clase: { nombre: string } | null };
-};
-
 type ReservaCalendario = {
   id: string;
   estado: string;
@@ -106,57 +101,58 @@ export default async function FichaUsuario({
   const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "actual";
   const { supabase } = await requireAdmin();
   const admin = createAdminClient();
-  const METODOS = await nombresFormas();
+  const ahora = new Date().toISOString();
 
-  const { data: p } = await supabase
-    .from("profiles")
-    .select(
-      "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono, rol, idioma, creado_en, foto_path, sin_correos, perfil_servicios(servicio)",
-    )
-    .eq("id", id)
-    .maybeSingle();
-  if (!p || p.rol === "admin") notFound();
-
-  // Se pone al día lo que haya caducado o se haya agotado antes de leer sus bonos.
-  await admin.rpc("refrescar_bonos", { p_user: id });
-
-  const [{ data: usuarioAuth }, { data: asistenciaDatos }, { data: bonosDatos }, { data: nota }] = await Promise.all([
+  // Todo lo que no depende de otra consulta se pide a la vez.
+  const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: tiposClaseDatos }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
+    nombresFormas(),
+    supabase
+      .from("profiles")
+      .select(
+        "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono, rol, idioma, creado_en, foto_path, sin_correos, perfil_servicios(servicio)",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    // Se pone al día lo que haya caducado o se haya agotado antes de leer sus bonos.
+    admin.rpc("refrescar_bonos", { p_user: id }),
     admin.auth.admin.getUserById(id),
     supabase.rpc("asistencia_usuario", { p_user: id }),
-    supabase
-      .from("bonos")
-      .select(
-        "id, servicio, estado, tipo_bono_id, clases_total, clases_restantes, activo_desde, caduca_en, creado_en, tipos_bono(nombre), pagos(importe_centimos, estado, metodo, descuento_centimos)",
-      )
-      .eq("user_id", id)
-      .order("creado_en", { ascending: false }),
     supabase.from("notas_usuario").select("texto").eq("user_id", id).maybeSingle(),
+    admin.from("tipos_clase").select("id, nombre").eq("activo", true).order("nombre"),
+    // Cuántos textos legales ha aceptado (el listado completo está en su propia pantalla).
+    admin.from("consentimientos").select("tipo, version, aceptado_en").eq("user_id", id).order("aceptado_en", { ascending: false }),
+    supabase.from("intentos_examen").select("id, aciertos, total, creado_en").eq("user_id", id).order("creado_en", { ascending: false }).limit(50),
+    // Todas sus reservas, para el calendario (cada clase con el color de su tipo).
+    admin
+      .from("reservas")
+      .select("id, estado, asistencia, sesiones_clase(empieza_en, estado, tipos_clase(nombre, color))")
+      .eq("user_id", id)
+      .in("estado", ["reservada", "cancelada"])
+      .limit(2000),
+    // Datos para los asistentes de «Cambiar tarifa y fechas» y «Quitar tarifa».
+    admin.from("tipos_bono").select("id, nombre, servicio, clases, validez_dias").eq("activo", true).order("servicio").order("orden"),
+    admin.from("reservas").select("bono_id, sesiones_clase!inner(empieza_en)").eq("user_id", id).eq("estado", "reservada").gt("sesiones_clase.empieza_en", ahora),
   ]);
+  if (!p || p.rol === "admin") notFound();
+
+  // Los bonos se leen cuando ya se han puesto al día.
+  const { data: bonosDatos } = await supabase
+    .from("bonos")
+    .select(
+      "id, servicio, estado, tipo_bono_id, clases_total, clases_restantes, activo_desde, caduca_en, creado_en, tipos_bono(nombre), pagos(importe_centimos, estado, metodo, descuento_centimos)",
+    )
+    .eq("user_id", id)
+    .order("creado_en", { ascending: false });
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
-
-  const { data: tiposClaseDatos } = await admin.from("tipos_clase").select("id, nombre").eq("activo", true).order("nombre");
   const tiposClase = (tiposClaseDatos ?? []) as { id: string; nombre: string }[];
 
-  // Cuántos textos legales ha aceptado (el listado completo está en su propia pantalla).
-  const { data: aceptacionesDatos } = await admin.from("consentimientos").select("tipo, version, aceptado_en").eq("user_id", id).order("aceptado_en", { ascending: false });
+;
+
   const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string }[];
 
-  const { data: intentosDatos } = await supabase
-    .from("intentos_examen")
-    .select("id, aciertos, total, creado_en")
-    .eq("user_id", id)
-    .order("creado_en", { ascending: false })
-    .limit(50);
   const intentos = (intentosDatos ?? []) as Intento[];
 
-  // Todas sus reservas, para el calendario (cada clase con el color de su tipo).
-  const { data: todasDatos } = await admin
-    .from("reservas")
-    .select("id, estado, asistencia, sesiones_clase(empieza_en, estado, tipos_clase(nombre, color))")
-    .eq("user_id", id)
-    .in("estado", ["reservada", "cancelada"])
-    .limit(2000);
   const eventos: EventoCalendario[] = ((todasDatos ?? []) as unknown as ReservaCalendario[])
     .filter((r) => r.sesiones_clase)
     .map((r) => {
@@ -172,18 +168,7 @@ export default async function FichaUsuario({
       };
     });
 
-  const ahora = new Date().toISOString();
   const hoy = claveDia(ahora);
-  const pasadas = (((await supabase
-    .from("reservas")
-    .select("id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre))")
-    .eq("user_id", id)
-    .eq("estado", "reservada")
-    .eq("sesiones_clase.estado", "programada")
-    .lte("sesiones_clase.empieza_en", ahora)).data ?? []) as unknown as Reserva[])
-    .sort((a, b) => b.sesiones_clase.empieza_en.localeCompare(a.sesiones_clase.empieza_en))
-    .slice(0, 20);
-
   const servicios = [
     ...new Set([
       ...(p.perfil_servicios as { servicio: string }[]).map((s) => s.servicio),
@@ -205,8 +190,6 @@ export default async function FichaUsuario({
     foto = firmada?.signedUrl ?? null;
   }
 
-  // Datos para los asistentes de «Cambiar tarifa y fechas» y «Quitar tarifa».
-  const { data: tarifasDatos } = await admin.from("tipos_bono").select("id, nombre, servicio, clases, validez_dias").eq("activo", true).order("servicio").order("orden");
   const tarifasOpciones: TarifaOpcion[] = ((tarifasDatos ?? []) as { id: string; nombre: string; servicio: string; clases: number; validez_dias: number }[]).map((t) => ({
     id: t.id,
     nombre: t.nombre,
@@ -214,12 +197,6 @@ export default async function FichaUsuario({
     clases: t.clases,
     validez: t.validez_dias,
   }));
-  const { data: futurasDatos } = await admin
-    .from("reservas")
-    .select("bono_id, sesiones_clase!inner(empieza_en)")
-    .eq("user_id", id)
-    .eq("estado", "reservada")
-    .gt("sesiones_clase.empieza_en", ahora);
   const futurasPorBono = new Map<string, number>();
   for (const r of (futurasDatos ?? []) as { bono_id: string | null }[]) {
     if (r.bono_id) futurasPorBono.set(r.bono_id, (futurasPorBono.get(r.bono_id) ?? 0) + 1);
@@ -378,21 +355,6 @@ export default async function FichaUsuario({
             <CalendarioReservas meses={[mes]} eventos={eventos} userId={id} hoy={hoy} />
           </section>
 
-          <section className={styles.tarjeta}>
-            <h2>Historial de clases</h2>
-            <details className={styles.detalles}>
-              <summary>Ver las últimas {pasadas.length} clases a las que ha ido</summary>
-              <ul className={styles.lista}>
-                {pasadas.map((r) => (
-                  <li key={r.id}>
-                    {fechaCorta(r.sesiones_clase.empieza_en)} · {textoHora(r.sesiones_clase.empieza_en)} · {r.sesiones_clase.tipos_clase?.nombre}
-                  </li>
-                ))}
-                {pasadas.length === 0 && <li className={styles.ayuda}>Todavía no ha venido a ninguna.</li>}
-              </ul>
-            </details>
-            <p className={styles.ayuda}>«Ha venido» significa que tenía la clase reservada, no la canceló y la clase ya ha pasado.</p>
-          </section>
         </>
       )}
 

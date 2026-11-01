@@ -5,10 +5,12 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
+import { useRegistroAbierto } from "./useRegistroAbierto";
 
 export default function Portada() {
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
+  const registroAbierto = useRegistroAbierto();
   return (
     <main className={styles.portada}>
       <div className={styles.fondo} aria-hidden="true" />
@@ -36,9 +38,11 @@ export default function Portada() {
         <Link href="/entrar" className={styles.boton}>
           {t.soyAlumno}
         </Link>
-        <Link href="/registro" className={`${styles.boton} ${styles.botonSecundario}`}>
-          {t.crearCuentaPrueba}
-        </Link>
+        {registroAbierto && (
+          <Link href="/registro" className={`${styles.boton} ${styles.botonSecundario}`}>
+            {t.crearCuentaPrueba}
+          </Link>
+        )}
       </nav>
     </main>
   );

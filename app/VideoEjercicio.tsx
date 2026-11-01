@@ -1,7 +1,7 @@
 import { analizarVideo } from "@/lib/video";
 
 // Muestra el vídeo de un ejercicio dentro de la app (YouTube, Google Drive o un archivo subido).
-export default function VideoEjercicio({ url, titulo }: { url: string | null; titulo: string }) {
+export default function VideoEjercicio({ url, titulo, proporcion = "16 / 9", redondeo = 12 }: { url: string | null; titulo: string; proporcion?: string; redondeo?: number }) {
   const video = url ? analizarVideo(url) : null;
   if (!video) return null;
 
@@ -10,8 +10,8 @@ export default function VideoEjercicio({ url, titulo }: { url: string | null; ti
       style={{
         position: "relative",
         width: "100%",
-        aspectRatio: "16 / 9",
-        borderRadius: 12,
+        aspectRatio: proporcion,
+        borderRadius: redondeo,
         overflow: "hidden",
         background: "var(--relleno)",
       }}

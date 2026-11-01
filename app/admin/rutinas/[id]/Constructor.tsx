@@ -481,7 +481,7 @@ function TarjetaItem({
           </div>
           {item.nota && <div className={styles.ayuda}>📝 {item.nota}</div>}
         </div>
-        <div style={{ display: "flex", gap: 6, flex: "none", flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", gap: 6, flex: "none", marginLeft: "auto" }}>
           <IconoBoton titulo={abierto ? "Cerrar" : "Editar el ejercicio"} onClick={() => setAbierto((a) => !a)}>
             ✎
           </IconoBoton>
@@ -794,7 +794,7 @@ function TarjetaSesion({
           type="button"
           onClick={() => setAbierta((a) => !a)}
           aria-expanded={abierta}
-          style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2, padding: 0, font: "inherit", textAlign: "left", background: "none", border: 0, cursor: "pointer", color: "inherit" }}
+          style={{ flex: "1 1 150px", minWidth: 0, display: "flex", flexDirection: "column", gap: 2, padding: 0, font: "inherit", textAlign: "left", background: "none", border: 0, cursor: "pointer", color: "inherit" }}
         >
           <h3 className={styles.sesionTitulo}>
             {abierta ? "▾" : "▸"} {sesion.nombre}
@@ -804,7 +804,7 @@ function TarjetaSesion({
             {!abierta && sesion.items.length > 0 && ` · ${sesion.items.slice(0, 3).map((i) => catalogo.get(i.ejercicio_id)?.nombre ?? "?").join(", ")}${sesion.items.length > 3 ? "…" : ""}`}
           </span>
         </button>
-        <div style={{ display: "flex", gap: 6, flex: "none" }}>
+        <div style={{ display: "flex", gap: 6, flex: "none", marginLeft: "auto" }}>
           <IconoBoton titulo="Cambiar el nombre y la nota" onClick={() => { setEditando((v) => !v); setAbierta(true); }}>
             ✎
           </IconoBoton>

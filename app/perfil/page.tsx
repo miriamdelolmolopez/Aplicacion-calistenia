@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import MenuFoto from "../MenuFoto";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
@@ -75,7 +76,6 @@ export default function Perfil() {
   const t = textosPerfil[idioma];
   const mi = useMiPerfil();
   const [datos, setDatos] = useState<Datos | null>(null);
-  const [opciones, setOpciones] = useState(false);
   const [foto, setFoto] = useState<"quieta" | "subiendo">("quieta");
   const [errorFoto, setErrorFoto] = useState(false);
   const [ahora] = useState(() => Date.now());
@@ -98,10 +98,7 @@ export default function Perfil() {
   const presencial = mi.servicios.includes("grupal") || mi.servicios.includes("individual");
   const r = datos.resumen;
 
-  async function elegirFoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0];
-    e.target.value = "";
-    if (!archivo) return;
+  async function elegirFoto(archivo: File) {
     setErrorFoto(false);
     setFoto("subiendo");
     try {
@@ -114,13 +111,11 @@ export default function Perfil() {
     }
     setDatos(await cargar());
     setFoto("quieta");
-    setOpciones(false);
   }
 
   async function sinFoto() {
     await quitarFoto();
     setDatos(await cargar());
-    setOpciones(false);
   }
 
   const nombreServicio = (s: string) =>
@@ -209,31 +204,11 @@ export default function Perfil() {
       <h1 className={estilos.perfilTitulo}>{t.titulo}</h1>
 
       <section className={estilos.cabecera}>
-        <button
-          type="button"
-          className={estilos.fotoBoton}
-          onClick={() => setOpciones((o) => !o)}
-          aria-expanded={opciones}
-          aria-label={t.fotoOpciones}
-        >
-          <Avatar nombre={datos.nombre} url={datos.foto} tamano={116} />
-        </button>
-        {opciones && (
-          <div className={estilos.fotoOpciones} role="group" aria-label={t.fotoOpciones}>
-            <label className={estilos.opcionFoto}>
-              {foto === "subiendo" ? t.fotoSubiendo : datos.foto ? t.fotoCambiar : t.fotoPoner}
-              <input type="file" accept="image/*" hidden disabled={foto === "subiendo"} onChange={elegirFoto} />
-            </label>
-            {datos.foto && (
-              <button type="button" className={estilos.opcionFoto} onClick={sinFoto}>
-                {t.fotoEliminar}
-              </button>
-            )}
-            <button type="button" className={estilos.opcionFoto} onClick={() => setOpciones(false)}>
-              {t.fotoCancelar}
-            </button>
-          </div>
-        )}
+        <MenuFoto url={datos.foto} alElegir={elegirFoto} alQuitar={sinFoto} ocupado={foto === "subiendo"} etiqueta={t.fotoOpciones} idioma={idioma}>
+          <span className={estilos.fotoBoton} style={{ display: "inline-flex" }}>
+            <Avatar nombre={datos.nombre} url={datos.foto} tamano={116} />
+          </span>
+        </MenuFoto>
         {errorFoto && <p className={estilos.errorPerfil}>{t.fotoError}</p>}
         <h2 className={estilos.nombre}>{datos.nombre || datos.email}</h2>
         <p className={estilos.correo}>{datos.email}</p>

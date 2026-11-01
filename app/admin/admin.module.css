@@ -374,12 +374,13 @@
 
 .itemCabecera {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px 10px;
 }
 
 .itemTitulo {
-  flex: 1;
+  flex: 1 1 150px;
   min-width: 0;
   word-break: break-word;
 }

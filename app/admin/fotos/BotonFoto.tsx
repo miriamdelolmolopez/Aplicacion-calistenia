@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import MenuFoto from "../../MenuFoto";
 import { cambiarFotoApp, quitarFotoApp, type Destino } from "./acciones";
 import estilos from "./botonFoto.module.css";
 import { prepararFoto } from "./prepararFoto";
 
-// Miniatura de la foto actual y botones para cambiarla o quitarla.
+// Miniatura de la foto actual: al pulsarla sale el menú de ver, tomar, subir o quitar la foto.
 export default function BotonFoto({
   destino,
   id = "",
@@ -20,10 +21,7 @@ export default function BotonFoto({
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function elegir(e: React.ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0];
-    e.target.value = "";
-    if (!archivo) return;
+  async function elegir(archivo: File) {
     setError(null);
     setTrabajando(true);
     try {
@@ -41,6 +39,7 @@ export default function BotonFoto({
   }
 
   async function quitar() {
+    if (!window.confirm("¿Quitar esta foto?")) return;
     setTrabajando(true);
     const r = await quitarFotoApp(destino, id);
     if (!r.ok) setError(r.error ?? "No se ha podido quitar.");
@@ -50,20 +49,12 @@ export default function BotonFoto({
 
   return (
     <div className={estilos.caja}>
-      <div className={estilos.mini} style={actual ? { backgroundImage: `url(${actual})` } : undefined}>
-        {!actual && <span>Foto de ejemplo</span>}
-      </div>
-      <div className={estilos.botones}>
-        <label className={estilos.boton}>
-          {trabajando ? "Subiendo…" : actual ? "Cambiar foto" : "Poner foto"}
-          <input type="file" accept="image/*" hidden disabled={trabajando} onChange={elegir} />
-        </label>
-        {actual && (
-          <button type="button" className={estilos.boton} disabled={trabajando} onClick={quitar}>
-            Quitar foto
-          </button>
-        )}
-      </div>
+      <MenuFoto url={actual} alElegir={elegir} alQuitar={quitar} ocupado={trabajando} etiqueta="Foto">
+        <span className={estilos.mini} style={actual ? { backgroundImage: `url(${actual})` } : undefined}>
+          {!actual && <span>{trabajando ? "Subiendo…" : "Foto de ejemplo"}</span>}
+          {actual && trabajando && <span style={{ background: "rgba(0,0,0,0.5)", color: "#fff", padding: "2px 8px", borderRadius: 8 }}>Subiendo…</span>}
+        </span>
+      </MenuFoto>
       {error && <p className={estilos.error}>{error}</p>}
     </div>
   );

@@ -8,11 +8,13 @@ import BotonGoogle from "../BotonGoogle";
 import styles from "../formularios.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
+import { useRegistroAbierto } from "../useRegistroAbierto";
 import { emailValido } from "@/lib/validaciones";
 import { createClient } from "@/lib/supabase/client";
 
 function Formulario() {
   const [idioma] = useIdioma();
+  const registroAbierto = useRegistroAbierto();
   const t = textos[idioma];
   const router = useRouter();
   const enlaceMalo = useSearchParams().get("error") === "enlace";
@@ -94,8 +96,12 @@ function Formulario() {
 
       <div className={styles.enlaces}>
         <Link href="/recuperar">{t.olvidaste}</Link>
-        <span aria-hidden="true">{idioma === "en" ? "or" : "o"}</span>
-        <Link href="/registro">{t.crearCuenta}</Link>
+        {registroAbierto && (
+          <>
+            <span aria-hidden="true">{idioma === "en" ? "or" : "o"}</span>
+            <Link href="/registro">{t.crearCuenta}</Link>
+          </>
+        )}
       </div>
     </>
   );

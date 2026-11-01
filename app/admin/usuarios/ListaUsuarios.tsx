@@ -8,7 +8,7 @@ import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
-import { IconoCalendario, IconoEuro, IconoInfo, IconoLapiz, IconoMarcador, IconoMas } from "./IconosUsuario";
+import { IconoEuro, IconoLapiz, IconoMarcador } from "./IconosUsuario";
 
 export type Usuario = {
   id: string;
@@ -96,23 +96,13 @@ function resumen(u: Usuario): { texto: string; alerta: boolean } {
 
 // Botones que llevan a cada parte de la ficha.
 function Botones({ u }: { u: Usuario }) {
-  const ficha = (pestana: string) => `/admin/usuarios/${u.id}?pestana=${pestana}`;
   return (
     <span className={estilos.iconos}>
-      <Link href={`/admin/usuarios/${u.id}/pagos`} className={`${estilos.icono} ${estilos.soloTabla}`} aria-label="Pagos" title="Pagos">
+      <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.icono} aria-label="Pagos" title="Pagos">
         <IconoEuro />
       </Link>
-      <Link href={ficha("actual")} className={estilos.icono} aria-label="Calendario y reservas" title="Calendario y reservas">
-        <IconoCalendario />
-      </Link>
-      <Link href={ficha("perfil")} className={estilos.icono} aria-label="Editar" title="Editar">
+      <Link href={`/admin/usuarios/${u.id}?pestana=perfil`} className={estilos.icono} aria-label="Editar" title="Editar">
         <IconoLapiz />
-      </Link>
-      <Link href={ficha("perfil")} className={estilos.icono} aria-label="Información" title="Información">
-        <IconoInfo />
-      </Link>
-      <Link href={ficha("acciones")} className={estilos.icono} aria-label="Más acciones" title="Más acciones">
-        <IconoMas />
       </Link>
     </span>
   );

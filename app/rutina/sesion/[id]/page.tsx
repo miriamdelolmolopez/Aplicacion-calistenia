@@ -44,7 +44,7 @@ async function cargar(id: string): Promise<Datos | null> {
   const { data } = await supabase
     .from("rutina_sesiones")
     .select(
-      "nombre, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))",
+      "nombre, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))))",
     )
     .eq("id", id)
     .maybeSingle();
