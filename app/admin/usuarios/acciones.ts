@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
+import { invitar } from "@/lib/registro";
 import { enviarCorreo } from "@/lib/email";
 import { correoInvitacion } from "@/lib/plantillas-email";
 import { instanteMadrid, sumarDias } from "@/lib/fechas";
@@ -122,7 +123,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   }
   if (servicios.length === 0) return { error: "Marca al menos un servicio (o elige una tarifa)." };
 
-  const { data, error } = await admin.auth.admin.generateLink({ type: "invite", email: correo });
+  const { data, error } = await invitar(correo);
   if (error || !data.user) return { error: "No se ha podido crear la cuenta. Inténtalo de nuevo." };
 
   const { error: falloRol } = await admin.from("profiles").update({ rol: "alumno" }).eq("id", data.user.id);

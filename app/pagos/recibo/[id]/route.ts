@@ -15,7 +15,9 @@ const MESES = {
 
 // Factura simplificada de un pago cobrado (FS-AAAA-NNN). La alumna solo puede bajar las suyas; Miriam, las de cualquiera.
 // Los datos de la clienta solo salen si el total llega a 400 €.
-export async function GET(_peticion: Request, contexto: { params: Promise<{ id: string }> }) {
+// Si el pago se anuló después de facturarse, esta misma dirección da la factura rectificativa (FSR-AAAA-NNN);
+// con ?tipo=original se descarga la factura original.
+export async function GET(peticion: Request, contexto: { params: Promise<{ id: string }> }) {
   const { id } = await contexto.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new NextResponse("No encontrado", { status: 404 });
 
@@ -30,17 +32,25 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
     .select("id, user_id, bono_id, importe_centimos, importe_original_centimos, descuento_centimos, metodo, estado, pagado_en, creado_en, periodo, nota")
     .eq("id", id)
     .maybeSingle();
-  if (!pago || pago.estado !== "pagado" || !pago.user_id) return new NextResponse("No encontrado", { status: 404 });
+  if (!pago || !["pagado", "anulado"].includes(pago.estado as string) || !pago.user_id) return new NextResponse("No encontrado", { status: 404 });
 
   const admin = createAdminClient();
+  const numero = (f: { anio: number; numero: number }, serie: string) => `${serie}-${f.anio}-${String(f.numero).padStart(3, "0")}`;
   // El número se da al cobrar; si por lo que sea faltara, se da ahora.
-  let { data: factura } = await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).maybeSingle();
-  if (!factura) {
+  let { data: original } = await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).eq("tipo", "normal").maybeSingle();
+  if (!original && pago.estado === "pagado") {
     await admin.rpc("emitir_factura", { p_pago: id });
-    factura = (await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).maybeSingle()).data;
+    original = (await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).eq("tipo", "normal").maybeSingle()).data;
   }
+  if (!original) return new NextResponse("Este pago no llegó a facturarse", { status: 404 });
+  // Pago anulado: se baja la rectificativa (que anula la original), salvo que se pida la original.
+  const rectificativa = pago.estado === "anulado" && new URL(peticion.url).searchParams.get("tipo") !== "original";
+  const factura = rectificativa
+    ? (await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).eq("tipo", "rectificativa").maybeSingle()).data
+    : original;
   if (!factura) return new NextResponse("No se ha podido emitir la factura", { status: 500 });
-  const numeroFactura = `FS-${factura.anio}-${String(factura.numero).padStart(3, "0")}`;
+  const numeroFactura = rectificativa ? numero(factura, "FSR") : numero(factura, "FS");
+  const signo = rectificativa ? -1 : 1;
   const [{ data: perfil }, { data: bono }, formas] = await Promise.all([
     admin.from("profiles").select("nombre, apellidos, dni, email, idioma").eq("id", pago.user_id).maybeSingle(),
     pago.bono_id ? admin.from("bonos").select("tipos_bono(nombre, iva_porcentaje)").eq("id", pago.bono_id).maybeSingle() : Promise.resolve({ data: null }),
@@ -50,14 +60,14 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   const es = idioma === "es";
   const tipo = (bono as { tipos_bono?: { nombre?: string; iva_porcentaje?: number } | null } | null)?.tipos_bono;
   const iva = tipo?.iva_porcentaje ?? 21;
-  const total = pago.importe_centimos as number;
+  const total = (pago.importe_centimos as number) * signo;
   const base = Math.round(total / (1 + iva / 100));
   const euros = (c: number) => new Intl.NumberFormat(es ? "es-ES" : "en-GB", { style: "currency", currency: "EUR" }).format(c / 100);
   const fecha = (iso: string) => new Intl.DateTimeFormat(es ? "es-ES" : "en-GB", { timeZone: "Europe/Madrid", day: "numeric", month: "long", year: "numeric" }).format(new Date(iso));
   const concepto = tipo?.nombre ?? (pago.nota as string | null) ?? (es ? "Pago" : "Payment");
   const cliente = [perfil?.nombre, perfil?.apellidos].filter(Boolean).join(" ") || perfil?.email || "";
   const periodo = pago.periodo as string | null;
-  const conCliente = total >= 40000;
+  const conCliente = Math.abs(total) >= 40000;
 
   const pdf = await PDFDocument.create();
   const normal = await pdf.embedFont(StandardFonts.Helvetica);
@@ -74,7 +84,7 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   const derecha = (t: string, tam = 10, fuente = normal, color = negro) => pagina.drawText(limpiar(t), { x: M + ANCHO - fuente.widthOfTextAtSize(limpiar(t), tam), y, size: tam, font: fuente, color });
   const linea = () => pagina.drawLine({ start: { x: M, y: y + 6 }, end: { x: M + ANCHO, y: y + 6 }, thickness: 0.6, color: rgb(0.85, 0.86, 0.88) });
 
-  texto(es ? "Factura simplificada" : "Simplified invoice", M, 22, negrita, acento);
+  texto(rectificativa ? (es ? "Factura rectificativa" : "Corrective invoice") : (es ? "Factura simplificada" : "Simplified invoice"), M, 22, negrita, acento);
   derecha(`${es ? "Nº" : "No."} ${numeroFactura}`, 12, negrita);
   y -= 34;
   linea();
@@ -100,6 +110,10 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
     y -= 20;
   };
   fila(es ? "Fecha de emisión" : "Issue date", fecha(factura.emitida_en as string));
+  if (rectificativa) {
+    fila(es ? "Rectifica la factura" : "Corrects invoice", `${numero(original, "FS")} (${fecha(original.emitida_en as string)})`, true);
+    fila(es ? "Motivo" : "Reason", es ? "Anulación del pago" : "Payment cancelled");
+  }
   fila(es ? "Descripción" : "Description", concepto, true);
   fila(es ? "Fecha del pago" : "Payment date", fecha((pago.pagado_en as string | null) ?? (pago.creado_en as string)));
   if (periodo && /^\d{4}-\d{2}$/.test(periodo)) fila(es ? "Corresponde a" : "Covers", `${MESES[idioma][Number(periodo.slice(5)) - 1]} ${periodo.slice(0, 4)}`);
@@ -114,18 +128,22 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
     y -= fuerte ? 24 : 18;
   };
   if ((pago.descuento_centimos as number) > 0 && pago.importe_original_centimos !== null) {
-    importe(es ? "Precio" : "Price", euros(pago.importe_original_centimos as number));
-    importe(es ? "Descuento" : "Discount", `-${euros(pago.descuento_centimos as number)}`);
+    importe(es ? "Precio" : "Price", euros((pago.importe_original_centimos as number) * signo));
+    importe(es ? "Descuento" : "Discount", euros(-(pago.descuento_centimos as number) * signo));
   }
   importe(es ? "Precio base (sin IVA)" : "Base price (excl. VAT)", euros(base));
   importe(`IVA ${iva} %`, euros(total - base));
   y -= 2;
-  importe(es ? "Total a pagar" : "Total to pay", euros(total), true);
+  importe(rectificativa ? (es ? "Total a devolver" : "Total to refund") : es ? "Total a pagar" : "Total to pay", euros(total), true);
 
   y -= 24;
   const aviso = es
-    ? "Factura simplificada. IVA incluido en el total."
-    : "Simplified invoice. VAT included in the total.";
+    ? rectificativa
+      ? "Factura rectificativa: anula la factura indicada. Importes en negativo."
+      : "Factura simplificada. IVA incluido en el total."
+    : rectificativa
+      ? "Corrective invoice: cancels the invoice shown. Amounts are negative."
+      : "Simplified invoice. VAT included in the total.";
   texto(aviso, M, 9, normal, gris);
   y -= 13;
   texto(`${TITULAR.email} · ${TITULAR.telefono}`, M, 9, normal, gris);

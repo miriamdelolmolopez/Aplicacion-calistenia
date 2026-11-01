@@ -326,6 +326,16 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
               <FormCobrar userId={userId} pagoId={p.id} formas={formas} hoy={hoy} ahora={ahora} metodoActual={p.metodo} />
             </details>
           )}
+          {p.estado === "anulado" && (
+            <>
+              <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
+                Descargar rectificativa
+              </a>
+              <a href={`/pagos/recibo/${p.id}?tipo=original`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
+                Descargar la original
+              </a>
+            </>
+          )}
           {p.estado === "pagado" && (
             <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
               Descargar factura

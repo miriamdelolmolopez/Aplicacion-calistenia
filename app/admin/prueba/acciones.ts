@@ -38,3 +38,12 @@ export async function nuevoCodigo(): Promise<Estado> {
   const ok = await guardar([{ clave: "prueba_codigo", valor: generarCodigo() }]);
   return ok ? { mensaje: "Código nuevo creado. El link anterior ya no funciona." } : { error: "No se ha podido cambiar el código." };
 }
+
+// Abre o cierra el registro de la app. Cerrado, solo entra quien tú das de alta o quien llega con el link de prueba.
+export async function cambiarRegistro(valor: boolean): Promise<Estado> {
+  await requireAdmin();
+  const ok = await guardar([{ clave: "registro_abierto", valor: valor ? "true" : "false" }]);
+  return ok
+    ? { mensaje: valor ? "Registro abierto: cualquiera puede crear una cuenta." : "Registro cerrado: solo entra quien tú das de alta o llega con el link de prueba." }
+    : { error: "No se ha podido guardar." };
+}

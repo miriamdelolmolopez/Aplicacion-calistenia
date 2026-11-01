@@ -247,7 +247,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
   const admin = createAdminClient();
   const ahora = Date.now();
   const hoy = claveDia(new Date(ahora).toISOString());
-  type Bruto = { userId: string; ref: string; valores: (p: Persona) => Record<string, string>; ruta: string; requiere?: "avisos_reserva" | "avisos_bono" };
+  type Bruto = { userId: string; ref: string; valores: (p: Persona) => Record<string, string>; ruta: string; requiere?: "avisos_reserva" | "avisos_bono" | "avisos_recordatorio" | "avisos_novedades" };
   const brutos: Bruto[] = [];
 
   if (clave === "echamos_menos") {
@@ -279,7 +279,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
         if (t === undefined || futura.has(id)) continue;
         const pasados = Math.floor((ahora - t) / (24 * HORA));
         if (pasados < dias || pasados > 120) continue;
-        brutos.push({ userId: id, ref: refDe("menos", id, claveDia(new Date(t).toISOString())), valores: () => ({ dias: String(pasados) }), ruta: "/clases" });
+        brutos.push({ userId: id, ref: refDe("menos", id, claveDia(new Date(t).toISOString())), valores: () => ({ dias: String(pasados) }), ruta: "/clases", requiere: "avisos_novedades" });
       }
     }
   }
@@ -308,7 +308,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
         ref: r.id,
         valores: (p) => ({ clase: s.tipos_clase?.nombre ?? (p.idioma === "en" ? "your class" : "tu clase"), fecha: fechaHora(s.empieza_en, p.idioma) }),
         ruta: "/clases/mis-reservas",
-        requiere: "avisos_reserva",
+        requiere: "avisos_recordatorio",
       });
     }
   }
@@ -341,6 +341,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
           ref: refDe("aniversario", c.id, String(anio)),
           valores: (p) => ({ tiempo: p.idioma === "en" ? `${n} ${n === 1 ? "year" : "years"}` : `${n} ${n === 1 ? "año" : "años"}` }),
           ruta: "/inicio",
+          requiere: "avisos_novedades",
         });
       }
     }

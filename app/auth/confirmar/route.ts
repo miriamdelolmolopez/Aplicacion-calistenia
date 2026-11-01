@@ -1,6 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { puedeRegistrarse } from "@/lib/registro";
 import { createClient } from "@/lib/supabase/server";
 
 // Páginas a las que puede llevar un enlace de correo (lista cerrada, por seguridad).
@@ -43,6 +44,26 @@ export async function GET(request: NextRequest) {
   }
 
   if (!correcto) return NextResponse.redirect(fallo);
+
+  // Registro cerrado: una cuenta nueva de Google sin el código del link de prueba se borra y no entra.
+  try {
+    const { data } = await supabase.auth.getUser();
+    const u = data.user;
+    if (u && Date.now() - new Date(u.created_at).getTime() < 2 * 60 * 1000 && !(await puedeRegistrarse(searchParams.get("c")))) {
+      const admin = createAdminClient();
+      const { data: perfil } = await admin.from("profiles").select("rol").eq("id", u.id).maybeSingle();
+      if (!perfil || perfil.rol === "invitado") {
+        await supabase.auth.signOut();
+        await admin.auth.admin.deleteUser(u.id);
+        const cerrado = request.nextUrl.clone();
+        cerrado.pathname = "/entrar";
+        cerrado.search = "?error=cerrado";
+        return NextResponse.redirect(cerrado);
+      }
+    }
+  } catch {
+    // Si no se puede comprobar, el acceso sigue igual.
+  }
 
   // Cuenta nueva que llega desde el link de prueba gratuita: se anota (solo si se acaba de crear).
   if (searchParams.get("origen") === "prueba") {

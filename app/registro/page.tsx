@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import BarraSuperior from "../BarraSuperior";
 import BotonGoogle from "../BotonGoogle";
+import Cargando from "../Cargando";
 import styles from "../formularios.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
@@ -22,6 +23,16 @@ export default function Registro() {
   const [error, setError] = useState("");
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
+  // null = comprobando; false = registro cerrado (solo se entra con el código del link de prueba).
+  const [abierto, setAbierto] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const c = new URLSearchParams(location.search).get("c") ?? "";
+    fetch(`/api/registro/estado?c=${encodeURIComponent(c)}`)
+      .then((r) => r.json())
+      .then((d) => setAbierto(d.abierto === true))
+      .catch(() => setAbierto(true));
+  }, []);
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -32,12 +43,13 @@ export default function Registro() {
     setCargando(true);
     // Quien llega desde el link de prueba gratuita queda anotado (para el contador de Administración).
     const origen = new URLSearchParams(location.search).get("origen") === "prueba" ? "prueba" : undefined;
+    const codigo = new URLSearchParams(location.search).get("c") ?? undefined;
     const supabase = createClient();
     const { data, error: fallo } = await supabase.auth.signUp({
       email: correo.trim(),
       password: clave,
       options: {
-        data: { idioma, imagen, legal: true, ...(origen ? { origen } : {}) },
+        data: { idioma, imagen, legal: true, ...(origen ? { origen } : {}), ...(codigo ? { codigo } : {}) },
         emailRedirectTo: `${location.origin}/auth/confirmar?next=/datos`,
       },
     });
@@ -58,7 +70,21 @@ export default function Registro() {
         {enviado && <p>{t.registroEnviadoTexto}</p>}
       </div>
 
-      {!enviado && (
+      {abierto === null && !enviado && <Cargando />}
+      {abierto === false && !enviado && (
+        <section className={styles.tarjeta}>
+          <p>
+            {idioma === "en"
+              ? "Sign-up is closed: this app is only for Miriam’s students. If you would like to train with her, message her on WhatsApp."
+              : "El registro está cerrado: esta app es solo para las alumnas de Miriam. Si quieres entrenar con ella, escríbele por WhatsApp."}
+          </p>
+          <a className={styles.boton} href="https://wa.me/34644184762" target="_blank" rel="noopener noreferrer">
+            WhatsApp
+          </a>
+        </section>
+      )}
+
+      {abierto === true && !enviado && (
         <form className={styles.tarjeta} onSubmit={enviar} noValidate>
           <div className={styles.campo}>
             <label htmlFor="correo">{t.correo}</label>

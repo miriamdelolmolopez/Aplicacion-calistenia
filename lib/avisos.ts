@@ -23,6 +23,8 @@ export type Persona = {
   idioma: Idioma;
   avisos_reserva: boolean;
   avisos_bono: boolean;
+  avisos_recordatorio: boolean;
+  avisos_novedades: boolean;
 };
 
 type Clase = {
@@ -41,7 +43,7 @@ export async function personas(ids: string[]): Promise<Persona[]> {
   if (ids.length === 0) return [];
   const { data } = await createAdminClient()
     .from("profiles")
-    .select("id, email, nombre, idioma, avisos_reserva, avisos_bono")
+    .select("id, email, nombre, idioma, avisos_reserva, avisos_bono, avisos_recordatorio, avisos_novedades")
     .in("id", ids);
   return (data ?? []) as Persona[];
 }

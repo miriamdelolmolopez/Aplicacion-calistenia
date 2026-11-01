@@ -16,10 +16,12 @@ export default function BotonGoogle() {
   async function entrar() {
     setError(false);
     setCargando(true);
-    const desdePrueba = new URLSearchParams(location.search).get("origen") === "prueba";
+    const parametros = new URLSearchParams(location.search);
+    const desdePrueba = parametros.get("origen") === "prueba";
+    const codigo = parametros.get("c");
     const { error: fallo } = await createClient().auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${location.origin}/auth/confirmar?next=/inicio${desdePrueba ? "&origen=prueba" : ""}` },
+      options: { redirectTo: `${location.origin}/auth/confirmar?next=/inicio${desdePrueba ? "&origen=prueba" : ""}${codigo ? `&c=${encodeURIComponent(codigo)}` : ""}` },
     });
     if (fallo) {
       setError(true);

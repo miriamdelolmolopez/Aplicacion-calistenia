@@ -30,7 +30,7 @@ const TEXTOS = {
   },
 };
 
-export default function Prueba({ disponible }: { disponible: boolean }) {
+export default function Prueba({ disponible, codigo }: { disponible: boolean; codigo: string }) {
   const [idioma] = useIdioma();
   const t = TEXTOS[idioma];
 
@@ -54,7 +54,7 @@ export default function Prueba({ disponible }: { disponible: boolean }) {
               </li>
             ))}
           </ol>
-          <Link href="/registro?origen=prueba" className={styles.boton}>
+          <Link href={`/registro?origen=prueba&c=${encodeURIComponent(codigo)}`} className={styles.boton}>
             {t.crear}
           </Link>
           <div className={styles.enlaces}>

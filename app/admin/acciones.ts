@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { requireAdmin } from "@/lib/admin";
+import { invitar } from "@/lib/registro";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
 
@@ -47,10 +48,7 @@ export async function altaAlumno(_previo: Estado, formData: FormData): Promise<E
   if (servicios.length === 0) return { error: "Marca al menos un servicio." };
 
   const admin = createAdminClient();
-  const { data, error } = await admin.auth.admin.generateLink({
-    type: "invite",
-    email: correo,
-  });
+  const { data, error } = await invitar(correo);
 
   if (error || !data.user) {
     const yaExiste = error?.message?.toLowerCase().includes("already");

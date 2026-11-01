@@ -16,6 +16,7 @@ function Formulario() {
   const t = textos[idioma];
   const router = useRouter();
   const enlaceMalo = useSearchParams().get("error") === "enlace";
+  const registroCerrado = useSearchParams().get("error") === "cerrado";
 
   const [correo, setCorreo] = useState("");
   const [clave, setClave] = useState("");
@@ -44,6 +45,12 @@ function Formulario() {
       <div className={styles.cabecera}>
         <h1>{t.entrarTitulo}</h1>
       </div>
+
+      {registroCerrado && (
+        <p className={styles.aviso} role="alert">
+          {idioma === "en" ? "Sign-up is closed: this app is only for Miriam’s students. Message her on WhatsApp." : "El registro está cerrado: esta app es solo para las alumnas de Miriam. Escríbele por WhatsApp."}
+        </p>
+      )}
 
       {enlaceMalo && (
         <p className={styles.aviso} role="alert">

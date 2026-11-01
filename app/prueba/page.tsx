@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 // Link público para quien viene a probar una clase gratis. Solo se ve con el código vigente.
 export default async function PaginaPrueba({ searchParams }: { searchParams: Promise<{ c?: string }> }) {
   const { c } = await searchParams;
-  return <Prueba disponible={await codigoValido(c)} />;
+  return <Prueba disponible={await codigoValido(c)} codigo={c ?? ""} />;
 }
