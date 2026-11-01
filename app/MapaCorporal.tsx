@@ -12,10 +12,13 @@ const COLORES = ["#f1f2f4", "#bcc48f", "#2ff7f1", "#0aa8c0", "#3f4326"];
 export default function MapaCorporal({
   intensidades,
   etiquetas = { frente: "Frente", espalda: "Espalda" },
+  alPulsar,
 }: {
   intensidades: Record<string, number>;
   etiquetas?: { frente: string; espalda: string };
+  alPulsar?: (musculo: string) => void; // al tocar un músculo resaltado (recibe su clave)
 }) {
+  const tocar = alPulsar ? (m: { data: { exercises: string[] } }) => alPulsar(m.data.exercises[0]) : undefined;
   const data = MUSCULOS.filter((m) => (intensidades[m.valor] ?? 0) > 0).map((m) => ({
     name: m.valor,
     muscles: [m.lib as Muscle],
@@ -25,11 +28,11 @@ export default function MapaCorporal({
   return (
     <div className={styles.mapa} role="img" aria-label="Mapa de músculos trabajados">
       <figure className={styles.vista}>
-        <Model type="anterior" data={data} bodyColor="#f4f4f4" highlightedColors={COLORES} />
+        <Model type="anterior" data={data} bodyColor="#f4f4f4" highlightedColors={COLORES} onClick={tocar} />
         <figcaption>{etiquetas.frente}</figcaption>
       </figure>
       <figure className={styles.vista}>
-        <Model type="posterior" data={data} bodyColor="#f4f4f4" highlightedColors={COLORES} />
+        <Model type="posterior" data={data} bodyColor="#f4f4f4" highlightedColors={COLORES} onClick={tocar} />
         <figcaption>{etiquetas.espalda}</figcaption>
       </figure>
     </div>

@@ -16,7 +16,7 @@ type Pestana = { href: string; icono: NombreIcono; texto: string };
 
 // Pantallas donde se ve la barra. En el entreno no (hace falta toda la pantalla)
 // ni en la vista de imprimir.
-const CON_BARRA = ["/inicio", "/clases", "/rutina", "/progreso", "/perfil", "/ajustes", "/pagos", "/saber-mas", "/aprende", "/ayuda", "/academia", "/admin"];
+const CON_BARRA = ["/inicio", "/clases", "/rutina", "/progreso", "/perfil", "/ajustes", "/pagos", "/saber-mas", "/aprende", "/ayuda", "/academia", "/biblioteca", "/admin"];
 
 function pestanasDe(perfil: MiPerfil, t: (typeof textos)["es"], elegidasAdmin: Pestana[]): Pestana[] {
   if (perfil.rol === "admin") {

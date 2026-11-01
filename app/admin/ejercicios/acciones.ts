@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { CATEGORIAS, MUSCULOS, TIPOS } from "@/lib/ejercicios";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DIFICULTADES, TRABAJOS } from "@/lib/trabajoEjercicio";
 import { analizarVideo } from "@/lib/video";
 import type { Estado } from "../acciones";
 
@@ -15,6 +16,8 @@ type Campos = {
   descripcion: string | null;
   descripcion_en: string | null;
   video_url: string | null;
+  dificultad: string | null;
+  trabajo: Record<string, number> | null;
 };
 
 type Relaciones = {
@@ -40,6 +43,16 @@ function leer(
   const descripcion = texto(formData, "descripcion");
   const descripcionEn = texto(formData, "descripcion_en");
   const video = texto(formData, "video_url");
+  const dificultad = texto(formData, "dificultad");
+  if (dificultad && !DIFICULTADES.some((d) => d.valor === dificultad)) return { error: "La dificultad no es válida." };
+  const trabajo: Record<string, number> = {};
+  for (const t of TRABAJOS) {
+    const crudo = texto(formData, `trabajo_${t.clave}`);
+    if (crudo === "") continue;
+    const n = Number(crudo);
+    if (!Number.isInteger(n) || n < 0 || n > 100) return { error: `«${t.es}» debe ser un número de 0 a 100.` };
+    if (n > 0) trabajo[t.clave] = n;
+  }
 
   if (nombre.length < 2 || nombre.length > 80) return { error: "El nombre debe tener entre 2 y 80 letras." };
   if (nombreEn && (nombreEn.length < 2 || nombreEn.length > 80)) {
@@ -83,6 +96,8 @@ function leer(
       descripcion: descripcion || null,
       descripcion_en: descripcionEn || null,
       video_url: enlace,
+      dificultad: dificultad || null,
+      trabajo: Object.keys(trabajo).length > 0 ? trabajo : null,
     },
     relaciones: { musculos, materiales, materialNuevo },
   };

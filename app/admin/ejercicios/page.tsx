@@ -42,7 +42,7 @@ export default async function Ejercicios({
   const { data } = await supabase
     .from("ejercicios")
     .select(
-      "id, nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, foto_url, activo, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)",
+      "id, nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, foto_url, dificultad, trabajo, activo, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)",
     )
     .order("nombre");
   const fotos = new Map(((data ?? []) as unknown as Fila[]).map((e) => [e.id, e.foto_url]));
@@ -55,6 +55,8 @@ export default async function Ejercicios({
     descripcion: e.descripcion,
     descripcion_en: e.descripcion_en,
     video_url: e.video_url,
+    dificultad: e.dificultad,
+    trabajo: e.trabajo,
     activo: e.activo,
     musculos: e.ejercicio_musculos,
     materiales: e.ejercicio_materiales.map((m) => m.material_id),

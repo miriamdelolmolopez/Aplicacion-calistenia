@@ -12,6 +12,7 @@ import {
   intensidadesDeEjercicio,
   type MusculoDeEjercicio,
 } from "@/lib/ejercicios";
+import { DIFICULTADES, TRABAJOS, type Trabajo } from "@/lib/trabajoEjercicio";
 import { useEnvio } from "../useEnvio";
 import { crearEjercicio, crearMaterial, editarEjercicio } from "./acciones";
 
@@ -24,6 +25,8 @@ export type EjercicioForm = {
   descripcion: string | null;
   descripcion_en: string | null;
   video_url: string | null;
+  dificultad?: string | null;
+  trabajo?: Trabajo | null;
   activo: boolean;
   musculos: MusculoDeEjercicio[];
   materiales: string[]; // ids de material
@@ -208,6 +211,31 @@ export function FormularioEjercicio({
           defaultValue={ejercicio?.descripcion_en ?? ""}
         />
       </div>
+
+      <div className={styles.campo}>
+        <label htmlFor={`dificultad-${p}`}>Dificultad</label>
+        <select id={`dificultad-${p}`} name="dificultad" defaultValue={ejercicio?.dificultad ?? ""}>
+          <option value="">Sin indicar</option>
+          {DIFICULTADES.map((d) => (
+            <option key={d.valor} value={d.valor}>
+              {d.es}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <fieldset className={styles.grupo}>
+        <legend>Qué trabaja (de 0 a 100)</legend>
+        <div className={styles.camposItem}>
+          {TRABAJOS.map((t) => (
+            <div key={t.clave} className={styles.campo}>
+              <label htmlFor={`trabajo-${t.clave}-${p}`}>{t.es}</label>
+              <input id={`trabajo-${t.clave}-${p}`} name={`trabajo_${t.clave}`} type="number" min={0} max={100} defaultValue={ejercicio?.trabajo?.[t.clave] ?? ""} />
+            </div>
+          ))}
+        </div>
+        <span className={styles.ayuda}>Sale en la biblioteca de las alumnas como barras. Déjalo vacío si no quieres indicarlo.</span>
+      </fieldset>
 
       <div className={styles.campo}>
         <label htmlFor={`video-${p}`}>Vídeo (enlace de YouTube o de Google Drive)</label>

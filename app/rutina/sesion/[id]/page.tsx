@@ -14,6 +14,8 @@ import { claveDia } from "@/lib/fechas";
 import { numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../../Cargando";
+import ResumenIconos from "../../ResumenIconos";
+import { CATEGORIAS, intensidadesAgregadas } from "@/lib/ejercicios";
 
 type Item = {
   id: string;
@@ -25,7 +27,14 @@ type Item = {
   segundos_max: number | null;
   descanso_seg: number;
   grupo: number | null;
-  ejercicios: { nombre: string; nombre_en: string | null; foto_url: string | null } | null;
+  ejercicios: {
+    nombre: string;
+    nombre_en: string | null;
+    foto_url: string | null;
+    categoria: string;
+    ejercicio_musculos: { musculo: string; rol: string }[];
+    ejercicio_materiales: { materiales: { nombre: string; nombre_en: string | null } | null }[];
+  } | null;
 };
 
 type Datos = { nombre: string; rutina: string; items: Item[]; enCurso: string | null };
@@ -35,7 +44,7 @@ async function cargar(id: string): Promise<Datos | null> {
   const { data } = await supabase
     .from("rutina_sesiones")
     .select(
-      "nombre, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url))",
+      "nombre, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -47,7 +56,7 @@ async function cargar(id: string): Promise<Datos | null> {
   const semana = s.rutinas?.publicada_en ? numeroSemana(claveDia(s.rutinas.publicada_en), claveDia(new Date().toISOString())) : 1;
   const { data: cambiosDatos } = await supabase
     .from("rutina_cambios_semana")
-    .select("item_id, quitado, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(nombre, nombre_en, foto_url)")
+    .select("item_id, quitado, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
     .eq("semana", semana)
     .in("item_id", s.rutina_items.map((i) => i.id));
   const cambios = new Map(((cambiosDatos ?? []) as unknown as Cambio[]).map((c) => [c.item_id, c]));
@@ -73,7 +82,7 @@ async function cargar(id: string): Promise<Datos | null> {
   type Extra = { id: string; series: number; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicios: Item["ejercicios"] };
   const { data: extrasDatos } = await supabase
     .from("rutina_extras_semana")
-    .select("id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(nombre, nombre_en, foto_url)")
+    .select("id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
     .eq("sesion_id", id)
     .eq("semana", semana)
     .order("orden")
@@ -147,6 +156,24 @@ export default function Sesion() {
         {t.minAprox.replace("{n}", String(minutosEstimados(datos.items)))}
       </p>
 
+      {(() => {
+        const materiales = [...new Set(datos.items.flatMap((i) => (i.ejercicios?.ejercicio_materiales ?? []).map((m) => (idioma === "en" && m.materiales?.nombre_en) || m.materiales?.nombre || "").filter(Boolean)))].sort((a, b) => a.localeCompare(b));
+        const tipos = [...new Set(datos.items.map((i) => i.ejercicios?.categoria).filter((c): c is string => !!c))].map((c) => CATEGORIAS.find((x) => x.valor === c)?.[idioma] ?? c);
+        return (
+          <ResumenIconos
+            idioma={idioma}
+            datos={[
+              { icono: "⏱", valor: `~${minutosEstimados(datos.items)} min`, texto: idioma === "en" ? "total time" : "tiempo total" },
+              { icono: "🏋️", valor: String(datos.items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
+              { icono: "🔁", valor: String(datos.items.reduce((n, i) => n + i.series, 0)), texto: idioma === "en" ? "sets" : "series" },
+            ]}
+            tipos={tipos}
+            materiales={materiales}
+            intensidades={intensidadesAgregadas(datos.items.map((i) => ({ series: i.series, musculos: i.ejercicios?.ejercicio_musculos ?? [] })))}
+          />
+        );
+      })()}
+
       <ol className={estilos.lista}>
         {datos.items.map((it, pos) => {
           let etiqueta: string | null = null;
@@ -167,7 +194,7 @@ export default function Sesion() {
                   {nombre}
                 </strong>
                 <span>
-                  {it.series} × {textoObjetivo(it, t.rep) || "—"}
+                  {it.series} × {textoObjetivo(it, t.rep) || "—"} · {idioma === "en" ? "rest" : "descanso"} {it.descanso_seg} s
                 </span>
               </span>
             </li>

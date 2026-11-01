@@ -15,6 +15,8 @@ import { claveDia, fechaCorta } from "@/lib/fechas";
 import { lunesDe, sumarDias } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
+import ResumenIconos from "../ResumenIconos";
+import { CATEGORIAS } from "@/lib/ejercicios";
 
 type Item = {
   id: string;
@@ -26,6 +28,7 @@ type Item = {
   segundos_max: number | null;
   descanso_seg: number;
   ejercicios: {
+    categoria: string;
     ejercicio_musculos: { musculo: string; rol: string }[];
     ejercicio_materiales: { materiales: { nombre: string; nombre_en: string | null } | null }[];
   } | null;
@@ -36,7 +39,7 @@ type Sesion = { id: string; nombre: string; orden: number; rutina_items: Item[] 
 type Datos = {
   userId: string;
   planActivo: boolean;
-  rutina: { nombre: string; semanas: number; publicada: string; sesiones: Sesion[] } | null;
+  rutina: { nombre: string; semanas: number; entrenosSemana: number | null; publicada: string; sesiones: Sesion[] } | null;
   anteriores: { id: string; nombre: string; publicada_en: string | null }[];
   hechos: { sesionId: string | null; dia: string }[];
   dias: number[]; // 1 = lunes … 7 = domingo
@@ -53,7 +56,7 @@ async function obtenerDatos(): Promise<Datos> {
     supabase
       .from("rutinas")
       .select(
-        "id, nombre, estado, semanas, publicada_en, rutina_sesiones(id, nombre, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
+        "id, nombre, estado, semanas, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
       )
       .order("publicada_en", { ascending: false }),
     supabase
@@ -70,6 +73,7 @@ async function obtenerDatos(): Promise<Datos> {
     nombre: string;
     estado: string;
     semanas: number;
+    entrenos_semana: number | null;
     publicada_en: string | null;
     rutina_sesiones: Sesion[];
   };
@@ -83,6 +87,7 @@ async function obtenerDatos(): Promise<Datos> {
       ? {
           nombre: actual.nombre,
           semanas: actual.semanas,
+          entrenosSemana: actual.entrenos_semana,
           publicada: actual.publicada_en ?? new Date().toISOString(),
           sesiones: [...actual.rutina_sesiones]
             .sort((a, b) => a.orden - b.orden)
@@ -169,6 +174,29 @@ export default function VerRutina() {
 
       {!datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}
       {datos.planActivo && !rutina && <p className={styles.aviso}>{t.preparandoRutina}</p>}
+
+      {datos.planActivo && rutina && (() => {
+        const items = rutina.sesiones.flatMap((s) => s.rutina_items);
+        const porSemana = rutina.entrenosSemana ?? rutina.sesiones.length;
+        const idsSesiones = new Set(rutina.sesiones.map((s) => s.id));
+        const hechosRutina = datos.hechos.filter((h) => h.sesionId && idsSesiones.has(h.sesionId)).length;
+        const materiales = [...new Set(items.flatMap((i) => (i.ejercicios?.ejercicio_materiales ?? []).map((m) => (idioma === "en" && m.materiales?.nombre_en) || m.materiales?.nombre || "").filter(Boolean)))].sort((a, b) => a.localeCompare(b));
+        const tipos = [...new Set(items.map((i) => i.ejercicios?.categoria).filter((c): c is string => !!c))].map((c) => CATEGORIAS.find((x) => x.valor === c)?.[idioma] ?? c);
+        return (
+          <ResumenIconos
+            idioma={idioma}
+            datos={[
+              { icono: "📅", valor: String(rutina.semanas), texto: rutina.semanas === 1 ? (idioma === "en" ? "week" : "semana") : idioma === "en" ? "weeks" : "semanas" },
+              { icono: "🔁", valor: String(porSemana), texto: idioma === "en" ? "workouts per week" : "entrenos por semana" },
+              { icono: "🏁", valor: `${hechosRutina}/${porSemana * rutina.semanas}`, texto: idioma === "en" ? "workouts done" : "entrenos hechos" },
+              { icono: "🏋️", valor: String(items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
+            ]}
+            tipos={tipos}
+            materiales={materiales}
+            intensidades={intensidadesAgregadas(items.map((i) => ({ series: i.series, musculos: i.ejercicios?.ejercicio_musculos ?? [] })))}
+          />
+        );
+      })()}
 
       {datos.planActivo && (
         <>

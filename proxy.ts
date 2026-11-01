@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Rutas que solo puede ver quien ha iniciado sesión.
-const PRIVADAS = ["/inicio", "/perfil", "/ajustes", "/pagos", "/cuenta", "/datos", "/crear-contrasena", "/admin", "/clases", "/rutina", "/entreno", "/progreso", "/saber-mas", "/aprende", "/ayuda", "/academia"];
+const PRIVADAS = ["/inicio", "/perfil", "/ajustes", "/pagos", "/cuenta", "/datos", "/crear-contrasena", "/admin", "/clases", "/rutina", "/entreno", "/progreso", "/saber-mas", "/aprende", "/ayuda", "/academia", "/biblioteca"];
 
 export async function proxy(request: NextRequest) {
   let respuesta = NextResponse.next({ request });
