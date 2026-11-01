@@ -200,7 +200,34 @@ export async function crearMaterial(_previo: Estado, formData: FormData): Promis
   return { mensaje: "Material añadido." };
 }
 
-// Guarda solo el enlace del vídeo de un ejercicio (YouTube o Google Drive). Vacío = quitar el vídeo.
+const EXTENSIONES_VIDEO = ["mp4", "webm", "mov"];
+const PREFIJO_VIDEOS = "/storage/v1/object/public/videos/";
+
+// Borra del almacén un vídeo propio que ya no se usa.
+async function borrarVideoPropio(enlace: string | null) {
+  const i = enlace?.indexOf(PREFIJO_VIDEOS) ?? -1;
+  if (!enlace || i < 0) return;
+  await createAdminClient().storage.from("videos").remove([decodeURIComponent(enlace.slice(i + PREFIJO_VIDEOS.length))]);
+}
+
+// Da un permiso temporal para subir un vídeo desde el navegador directamente al almacén.
+export async function prepararSubidaVideo(
+  id: string,
+  extension: string,
+): Promise<{ ok: boolean; error?: string; ruta?: string; token?: string; enlace?: string }> {
+  await requireAdmin();
+  if (!UUID.test(id)) return { ok: false, error: "Ejercicio no válido." };
+  const ext = extension.toLowerCase().replace(/^\./, "");
+  if (!EXTENSIONES_VIDEO.includes(ext)) return { ok: false, error: "El vídeo debe ser MP4, WebM o MOV." };
+
+  const ruta = `ejercicio/${id}-${Date.now()}.${ext}`;
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from("videos").createSignedUploadUrl(ruta);
+  if (error || !data) return { ok: false, error: "No se ha podido preparar la subida." };
+  return { ok: true, ruta, token: data.token, enlace: admin.storage.from("videos").getPublicUrl(ruta).data.publicUrl };
+}
+
+// Guarda solo el enlace del vídeo de un ejercicio (YouTube, Google Drive o un archivo subido). Vacío = quitar el vídeo.
 export async function guardarVideoEjercicio(
   id: string,
   enlace: string,
@@ -216,8 +243,11 @@ export async function guardarVideoEjercicio(
     guardar = analizado.enlace;
   }
 
-  const { error } = await createAdminClient().from("ejercicios").update({ video_url: guardar }).eq("id", id);
+  const admin = createAdminClient();
+  const { data: antes } = await admin.from("ejercicios").select("video_url").eq("id", id).maybeSingle();
+  const { error } = await admin.from("ejercicios").update({ video_url: guardar }).eq("id", id);
   if (error) return { ok: false, error: "No se ha podido guardar el vídeo." };
+  if (antes?.video_url && antes.video_url !== guardar) await borrarVideoPropio(antes.video_url);
 
   revalidatePath("/admin/ejercicios");
   revalidatePath("/rutina");

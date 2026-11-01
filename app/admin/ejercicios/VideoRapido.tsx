@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import VideoEjercicio from "../../VideoEjercicio";
 import styles from "../admin.module.css";
-import { guardarVideoEjercicio } from "./acciones";
+import { createClient } from "@/lib/supabase/client";
+import { guardarVideoEjercicio, prepararSubidaVideo } from "./acciones";
 
 // Poner o cambiar el vídeo de un ejercicio con solo pegar el enlace (YouTube o Google Drive).
 // La alumna lo ve dentro de la app al entrenar.
@@ -14,6 +15,30 @@ export default function VideoRapido({ id, nombre, actual }: { id: string; nombre
   const [mensaje, setMensaje] = useState<{ ok: boolean; texto: string } | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [abierto, setAbierto] = useState(false);
+  const [subiendo, setSubiendo] = useState(false);
+
+  // Sube un vídeo de tu móvil u ordenador (MP4, WebM o MOV, hasta 50 MB) y lo deja puesto.
+  async function subir(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!archivo) return;
+    setMensaje(null);
+    if (archivo.size > 50 * 1024 * 1024) return setMensaje({ ok: false, texto: "El vídeo pesa más de 50 MB. Acórtalo o usa un enlace de YouTube." });
+    const extension = archivo.name.split(".").pop() ?? "";
+    setSubiendo(true);
+    const permiso = await prepararSubidaVideo(id, extension);
+    if (!permiso.ok || !permiso.ruta || !permiso.token || !permiso.enlace) {
+      setSubiendo(false);
+      return setMensaje({ ok: false, texto: permiso.error ?? "No se ha podido subir el vídeo." });
+    }
+    const { error } = await createClient().storage.from("videos").uploadToSignedUrl(permiso.ruta, permiso.token, archivo, { contentType: archivo.type || undefined });
+    if (error) {
+      setSubiendo(false);
+      return setMensaje({ ok: false, texto: "No se ha podido subir el vídeo. Comprueba que es MP4, WebM o MOV y que pesa menos de 50 MB." });
+    }
+    await guardar(permiso.enlace);
+    setSubiendo(false);
+  }
 
   async function guardar(valor: string) {
     setGuardando(true);
@@ -43,10 +68,14 @@ export default function VideoRapido({ id, nombre, actual }: { id: string; nombre
             onChange={(e) => setEnlace(e.target.value)}
           />
           <span className={styles.ayuda}>
-            Vale YouTube (también «no listado») o Google Drive. En Drive, comparte el archivo con «cualquiera con el enlace».
+            Puedes subir un vídeo corto (MP4, WebM o MOV, hasta 50 MB), o pegar un enlace de YouTube («no listado» también vale) o de Google Drive. En Drive, comparte el archivo con «cualquiera con el enlace».
           </span>
           <div className={styles.apuntadoBotones}>
-            <button type="button" className={styles.boton} disabled={guardando || enlace.trim() === ""} onClick={() => guardar(enlace)}>
+            <label className={`${styles.boton} ${styles.botonSecundario}`} style={{ cursor: subiendo ? "default" : "pointer" }}>
+              {subiendo ? "Subiendo vídeo…" : "Subir un vídeo (hasta 50 MB)"}
+              <input type="file" accept="video/mp4,video/webm,video/quicktime" hidden disabled={subiendo || guardando} onChange={subir} />
+            </label>
+            <button type="button" className={styles.boton} disabled={guardando || subiendo || enlace.trim() === ""} onClick={() => guardar(enlace)}>
               {guardando ? "Guardando…" : "Guardar vídeo"}
             </button>
             {actual && (
