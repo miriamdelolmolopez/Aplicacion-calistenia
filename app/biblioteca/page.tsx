@@ -49,7 +49,7 @@ export default function Biblioteca() {
 
   return (
     <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
+      <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <h1 style={{ margin: "12px 0 6px", fontSize: "2rem" }}>{en ? "Exercise library" : "Biblioteca de ejercicios"}</h1>
       <p className={styles.ayuda}>{en ? "The exercises in your routines: watch how they are done." : "Los ejercicios de tus rutinas: mira cómo se hacen."}</p>
 

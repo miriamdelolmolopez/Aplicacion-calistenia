@@ -76,9 +76,8 @@ async function obtenerResumen(): Promise<Resumen> {
   return { planActivo: true, rutina, enCurso: (curso as Resumen["enCurso"]) ?? null };
 }
 
-const OPCIONES: { href: string; icono: NombreIcono; texto: "opcionVerRutina" | "opcionBiblioteca" | "opcionHistorial" | "opcionMetricas" }[] = [
+const OPCIONES: { href: string; icono: NombreIcono; texto: "opcionVerRutina" | "opcionHistorial" | "opcionMetricas" }[] = [
   { href: "/rutina/ver", icono: "rutina", texto: "opcionVerRutina" },
-  { href: "/biblioteca", icono: "aprende", texto: "opcionBiblioteca" },
   { href: "/rutina/historial", icono: "historial", texto: "opcionHistorial" },
   { href: "/progreso/estadisticas", icono: "metricas", texto: "opcionMetricas" },
 ];

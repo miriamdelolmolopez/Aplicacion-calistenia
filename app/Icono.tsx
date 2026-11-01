@@ -72,6 +72,11 @@ const DIBUJOS = {
       <path d="M4 21V5M9 8h6M9 12h6" />
     </>
   ),
+  biblioteca: (
+    <>
+      <path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11" />
+    </>
+  ),
   academia: (
     <>
       <path d="m2 9 10-5 10 5-10 5Z" />
