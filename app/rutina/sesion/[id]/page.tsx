@@ -10,6 +10,8 @@ import { useIdioma } from "../../../useIdioma";
 import estiloRutina from "../../entrenamiento.module.css";
 import estilos from "./sesion.module.css";
 import { minutosEstimados, textoObjetivo } from "@/lib/duracion";
+import { claveDia } from "@/lib/fechas";
+import { numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../../Cargando";
 
@@ -33,17 +35,42 @@ async function cargar(id: string): Promise<Datos | null> {
   const { data } = await supabase
     .from("rutina_sesiones")
     .select(
-      "nombre, rutinas(nombre), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url))",
+      "nombre, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url))",
     )
     .eq("id", id)
     .maybeSingle();
   if (!data) return null;
-  const s = data as unknown as { nombre: string; rutinas: { nombre: string } | null; rutina_items: Item[] };
+  const s = data as unknown as { nombre: string; rutinas: { nombre: string; publicada_en: string | null } | null; rutina_items: Item[] };
+
+  // Si Miriam cambió algún ejercicio para esta semana, se enseña esa versión.
+  type Cambio = { item_id: string; series: number | null; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicio_id: string | null; ejercicios: Item["ejercicios"] };
+  const semana = s.rutinas?.publicada_en ? numeroSemana(claveDia(s.rutinas.publicada_en), claveDia(new Date().toISOString())) : 1;
+  const { data: cambiosDatos } = await supabase
+    .from("rutina_cambios_semana")
+    .select("item_id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(nombre, nombre_en, foto_url)")
+    .eq("semana", semana)
+    .in("item_id", s.rutina_items.map((i) => i.id));
+  const cambios = new Map(((cambiosDatos ?? []) as unknown as Cambio[]).map((c) => [c.item_id, c]));
+  const items = s.rutina_items.map((i) => {
+    const c = cambios.get(i.id);
+    if (!c) return i;
+    const otro = !!c.ejercicio_id;
+    return {
+      ...i,
+      series: c.series ?? i.series,
+      reps_min: otro ? c.reps_min : (c.reps_min ?? i.reps_min),
+      reps_max: otro ? c.reps_max : (c.reps_max ?? i.reps_max),
+      segundos_min: otro ? c.segundos_min : (c.segundos_min ?? i.segundos_min),
+      segundos_max: otro ? c.segundos_max : (c.segundos_max ?? i.segundos_max),
+      descanso_seg: c.descanso_seg ?? i.descanso_seg,
+      ejercicios: otro ? c.ejercicios : i.ejercicios,
+    };
+  });
   const { data: curso } = await supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle();
   return {
     nombre: s.nombre,
     rutina: s.rutinas?.nombre ?? "",
-    items: [...s.rutina_items].sort((a, b) => a.orden - b.orden),
+    items: [...items].sort((a, b) => a.orden - b.orden),
     enCurso: curso?.id ?? null,
   };
 }

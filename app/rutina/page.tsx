@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { descartarEntreno } from "../entreno/acciones";
+import { descartarEntreno, iniciarEntreno } from "../entreno/acciones";
 import BarraSuperior from "../BarraSuperior";
 import styles from "../formularios.module.css";
 import Icono, { type NombreIcono } from "../Icono";
@@ -19,7 +19,7 @@ import Cargando from "../Cargando";
 
 type Resumen = {
   planActivo: boolean;
-  rutina: { nombre: string; fotoUrl: string | null; semana: number; objetivo: number; hechos: number } | null;
+  rutina: { nombre: string; fotoUrl: string | null; semana: number; objetivo: number; hechos: number; siguiente: { id: string; nombre: string } | null } | null;
   enCurso: { id: string; nombre_sesion: string } | null;
 };
 
@@ -36,7 +36,7 @@ async function obtenerResumen(): Promise<Resumen> {
 
   const { data } = await supabase
     .from("rutinas")
-    .select("nombre, foto_url, entrenos_semana, publicada_en, rutina_sesiones(id)")
+    .select("nombre, foto_url, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden)")
     .eq("estado", "publicada")
     .order("publicada_en", { ascending: false })
     .limit(1)
@@ -46,7 +46,7 @@ async function obtenerResumen(): Promise<Resumen> {
     foto_url: string | null;
     entrenos_semana: number | null;
     publicada_en: string | null;
-    rutina_sesiones: { id: string }[];
+    rutina_sesiones: { id: string; nombre: string; orden: number }[];
   } | null;
 
   let rutina: Resumen["rutina"] = null;
@@ -65,6 +65,12 @@ async function obtenerResumen(): Promise<Resumen> {
       semana: r.publicada_en ? numeroSemana(claveDia(r.publicada_en), hoy) : 1,
       objetivo: r.entrenos_semana ?? Math.max(r.rutina_sesiones.length, 1),
       hechos,
+      // La sesión que toca: se van haciendo en el orden de la rutina.
+      siguiente: (() => {
+        const lista = [...r.rutina_sesiones].sort((a, b) => a.orden - b.orden);
+        const s = lista.length > 0 ? lista[hechos % lista.length] : null;
+        return s ? { id: s.id, nombre: s.nombre } : null;
+      })(),
     };
   }
   return { planActivo: true, rutina, enCurso: (curso as Resumen["enCurso"]) ?? null };
@@ -84,6 +90,7 @@ export default function Entrenamiento() {
   const [datos, setDatos] = useState<Resumen | null>(null);
   const [confirmando, setConfirmando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [iniciando, setIniciando] = useState(false);
 
   useEffect(() => {
     obtenerResumen().then(setDatos);
@@ -98,6 +105,15 @@ export default function Entrenamiento() {
       return;
     }
     setDatos(await obtenerResumen());
+  }
+
+  async function iniciar(sesionId: string) {
+    setError(null);
+    setIniciando(true);
+    const res = await iniciarEntreno(sesionId);
+    if (res.ok) return router.push(`/entreno/${res.id}`);
+    setIniciando(false);
+    setError(t.errorGeneral);
   }
 
   const r = datos?.rutina;
@@ -155,6 +171,14 @@ export default function Entrenamiento() {
                 <div className={estilos.barra} role="progressbar" aria-valuenow={porcentaje} aria-valuemin={0} aria-valuemax={100}>
                   <div className={estilos.barraRelleno} style={{ width: `${porcentaje}%` }} />
                 </div>
+                {!datos.enCurso && r.siguiente && (
+                  <>
+                    <button type="button" className={styles.boton} disabled={iniciando} onClick={() => iniciar(r.siguiente!.id)}>
+                      {idioma === "en" ? "Start workout" : "Iniciar entrenamiento"} · {r.siguiente.nombre}
+                    </button>
+                    {error && <p className={styles.error}>{error}</p>}
+                  </>
+                )}
               </div>
             </section>
           ) : (

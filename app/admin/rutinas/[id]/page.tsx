@@ -6,6 +6,7 @@ import styles from "../../admin.module.css";
 import {
   Constructor,
   type CatalogoEjercicio,
+  type CambioSemana,
   type DatosRutina,
   type SesionRutina,
 } from "./Constructor";
@@ -35,6 +36,7 @@ type FilaEjercicio = {
   categoria: string;
   tipo: string;
   activo: boolean;
+  foto_url: string | null;
   ejercicio_musculos: { musculo: string; rol: string }[];
   ejercicio_materiales: { materiales: { nombre: string } | null }[];
 };
@@ -71,10 +73,20 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
         .map((i) => ({ ...i, peso_kg: i.peso_kg === null ? null : Number(i.peso_kg) })),
     }));
 
+  const idsItems = sesiones.flatMap((s) => s.items.map((i) => i.id));
+  const { data: cambiosDatos } = idsItems.length
+    ? await supabase
+        .from("rutina_cambios_semana")
+        .select("id, item_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota")
+        .in("item_id", idsItems)
+        .order("semana")
+    : { data: [] };
+  const cambios: CambioSemana[] = ((cambiosDatos ?? []) as CambioSemana[]).map((c) => ({ ...c, peso_kg: c.peso_kg === null ? null : Number(c.peso_kg) }));
+
   const { data: ejerciciosDatos } = await supabase
     .from("ejercicios")
     .select(
-      "id, nombre, categoria, tipo, activo, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))",
+      "id, nombre, categoria, tipo, activo, foto_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))",
     )
     .order("nombre");
   const catalogo: CatalogoEjercicio[] = ((ejerciciosDatos ?? []) as unknown as FilaEjercicio[]).map(
@@ -84,6 +96,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
       categoria: e.categoria,
       tipo: e.tipo,
       activo: e.activo,
+      foto_url: e.foto_url,
       musculos: e.ejercicio_musculos,
       materiales: e.ejercicio_materiales.map((m) => m.materiales?.nombre ?? "").filter(Boolean),
     }),
@@ -123,7 +136,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
         <p className={styles.ayuda}>La ve la alumna arriba de Mi rutina.</p>
         <BotonFoto destino="rutina" id={r.id} actual={r.foto_url} />
       </section>
-      <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} />
+      <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} cambios={cambios} />
     </main>
   );
 }

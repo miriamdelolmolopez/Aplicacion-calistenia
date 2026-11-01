@@ -45,8 +45,10 @@ import {
   copiarRutina,
   despublicarRutina,
   eliminarRutina,
+  guardarCambioSemana,
   guardarItem,
   publicarRutina,
+  quitarCambioSemana,
   quitarItem,
   quitarSesion,
   renombrarSesion,
@@ -65,6 +67,7 @@ export type CatalogoEjercicio = {
   activo: boolean;
   musculos: { musculo: string; rol: string }[];
   materiales: string[];
+  foto_url?: string | null;
 };
 
 export type ItemRutina = {
@@ -81,6 +84,22 @@ export type ItemRutina = {
   descanso_seg: number;
   nota: string | null;
   grupo: number | null;
+};
+
+export type CambioSemana = {
+  id: string;
+  item_id: string;
+  semana: number;
+  ejercicio_id: string | null;
+  series: number | null;
+  reps_min: number | null;
+  reps_max: number | null;
+  segundos_min: number | null;
+  segundos_max: number | null;
+  peso_kg: number | null;
+  distancia_m: number | null;
+  descanso_seg: number | null;
+  nota: string | null;
 };
 
 export type SesionRutina = {
@@ -294,6 +313,130 @@ function textoObjetivo(item: ItemRutina, campos: readonly Campo[]): string {
   return `${item.series} × ${partes.join(" · ") || "—"}`;
 }
 
+// Cambiar un ejercicio solo en una semana: lo que se deja vacío se queda como en la rutina.
+function CambiosSemana({
+  rutinaId,
+  item,
+  semanas,
+  cambios,
+  opciones,
+  catalogo,
+  avisar,
+}: {
+  rutinaId: string;
+  item: ItemRutina;
+  semanas: number;
+  cambios: CambioSemana[];
+  opciones: CatalogoEjercicio[];
+  catalogo: Map<string, CatalogoEjercicio>;
+  avisar: Avisar;
+}) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarCambioSemana, {});
+  const { pendiente: ocupado, ejecutar } = useEjecutar(avisar);
+  const resumen = (x: CambioSemana) => {
+    const partes: string[] = [];
+    if (x.ejercicio_id) partes.push(catalogo.get(x.ejercicio_id)?.nombre ?? "otro ejercicio");
+    if (x.series !== null) partes.push(`${x.series} series`);
+    if (x.reps_min !== null) partes.push(`${x.reps_min}${x.reps_max ? `-${x.reps_max}` : ""} reps`);
+    if (x.segundos_min !== null) partes.push(`${x.segundos_min}${x.segundos_max ? `-${x.segundos_max}` : ""} s`);
+    if (x.peso_kg !== null) partes.push(`${x.peso_kg} kg`);
+    if (x.distancia_m !== null) partes.push(`${x.distancia_m} m`);
+    if (x.descanso_seg !== null) partes.push(`descanso ${x.descanso_seg} s`);
+    if (x.nota) partes.push("con nota");
+    return partes.join(" · ") || "igual que la rutina";
+  };
+
+  return (
+    <details className={styles.detalles}>
+      <summary>Cambiar solo en una semana{cambios.length > 0 ? ` (${cambios.length})` : ""}</summary>
+      {cambios.length > 0 && (
+        <ul className={styles.lista}>
+          {cambios.map((x) => (
+            <li key={x.id} className={styles.personaCabecera}>
+              <span>
+                <strong>Semana {x.semana}:</strong> {resumen(x)}
+              </span>
+              <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={ocupado} onClick={() => ejecutar(() => quitarCambioSemana(rutinaId, x.id))}>
+                Quitar
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form action={accion} className={styles.formularioInterno}>
+        <input type="hidden" name="item" value={item.id} />
+        <input type="hidden" name="rutina" value={rutinaId} />
+        <p className={styles.ayuda}>Elige la semana y rellena solo lo que cambia: lo que dejes vacío se queda como en la rutina. Si cambias el ejercicio, pon también sus series y repeticiones.</p>
+        <div className={styles.camposItem}>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-semana-${item.id}`}>Semana</label>
+            <select id={`cs-semana-${item.id}`} name="semana" required defaultValue="">
+              <option value="" disabled>
+                Elige…
+              </option>
+              {Array.from({ length: semanas }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Semana {i + 1}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-ej-${item.id}`}>Ejercicio</label>
+            <select id={`cs-ej-${item.id}`} name="ejercicio" defaultValue={item.ejercicio_id}>
+              {opciones.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.id === item.ejercicio_id ? `${e.nombre} (el de la rutina)` : e.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-se-${item.id}`}>Series</label>
+            <input id={`cs-se-${item.id}`} name="series" type="number" min={1} max={20} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-rm-${item.id}`}>Repeticiones</label>
+            <input id={`cs-rm-${item.id}`} name="reps_min" type="number" min={1} max={500} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-rx-${item.id}`}>hasta</label>
+            <input id={`cs-rx-${item.id}`} name="reps_max" type="number" min={1} max={500} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-sm-${item.id}`}>Segundos</label>
+            <input id={`cs-sm-${item.id}`} name="segundos_min" type="number" min={1} max={7200} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-sx-${item.id}`}>hasta</label>
+            <input id={`cs-sx-${item.id}`} name="segundos_max" type="number" min={1} max={7200} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-pe-${item.id}`}>Peso (kg)</label>
+            <input id={`cs-pe-${item.id}`} name="peso_kg" inputMode="decimal" />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-di-${item.id}`}>Distancia (m)</label>
+            <input id={`cs-di-${item.id}`} name="distancia_m" type="number" min={1} max={100000} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`cs-de-${item.id}`}>Descanso (s)</label>
+            <input id={`cs-de-${item.id}`} name="descanso_seg" type="number" min={0} max={900} />
+          </div>
+        </div>
+        <div className={styles.campo}>
+          <label htmlFor={`cs-no-${item.id}`}>Nota para esa semana (opcional)</label>
+          <input id={`cs-no-${item.id}`} name="nota" maxLength={300} />
+        </div>
+        <button className={styles.boton} type="submit" disabled={pendiente}>
+          {pendiente ? "Guardando…" : "Guardar el cambio de esa semana"}
+        </button>
+        <Mensajes estado={estado} />
+      </form>
+    </details>
+  );
+}
+
 function TarjetaItem({
   rutinaId,
   item,
@@ -305,7 +448,15 @@ function TarjetaItem({
   subir,
   bajar,
   avisar,
+  semanas,
+  cambios,
+  opciones,
+  catalogo,
 }: {
+  semanas: number;
+  cambios: CambioSemana[];
+  opciones: CatalogoEjercicio[];
+  catalogo: Map<string, CatalogoEjercicio>;
   rutinaId: string;
   item: ItemRutina;
   ejercicio: CatalogoEjercicio | undefined;
@@ -328,6 +479,10 @@ function TarjetaItem({
     <div className={`${styles.itemCaja} ${enSuper ? styles.itemSuper : ""}`}>
       <div className={styles.itemCabecera}>
         {asa}
+        {ejercicio?.foto_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={ejercicio.foto_url} alt="" style={{ width: 72, height: 72, flex: "none", objectFit: "contain", borderRadius: 12, background: "var(--relleno)" }} />
+        )}
         <div className={styles.itemTitulo}>
           <strong>
             {etiquetaSuper && <span className={styles.etiquetaSuper}>{etiquetaSuper}</span>}
@@ -416,6 +571,8 @@ function TarjetaItem({
         </form>
       </details>
 
+      <CambiosSemana rutinaId={rutinaId} item={item} semanas={semanas} cambios={cambios} opciones={opciones} catalogo={catalogo} avisar={avisar} />
+
       <div className={styles.accionesItem}>
         {puedeUnir && (
           <button
@@ -462,7 +619,11 @@ function TarjetaSesion({
   subir,
   bajar,
   avisar,
+  semanas,
+  cambios,
 }: {
+  semanas: number;
+  cambios: CambioSemana[];
   rutinaId: string;
   sesion: SesionRutina;
   catalogo: Map<string, CatalogoEjercicio>;
@@ -475,6 +636,7 @@ function TarjetaSesion({
   const orden = useOrden(sesion.items, (ids) => reordenarItems(rutinaId, sesion.id, ids), avisar);
   const [elegido, setElegido] = useState("");
   const [confirmando, setConfirmando] = useState(false);
+  const [abierta, setAbierta] = useState(false);
 
   // Letra de cada superserie (A, B…) y posición dentro de ella (A1, A2…).
   const letras = new Map<number, string>();
@@ -500,7 +662,24 @@ function TarjetaSesion({
     <section className={styles.sesionCaja}>
       <div className={styles.itemCabecera}>
         {asa}
-        <h3 className={styles.sesionTitulo}>{sesion.nombre}</h3>
+        <button
+          type="button"
+          onClick={() => setAbierta((a) => !a)}
+          aria-expanded={abierta}
+          style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2, padding: 0, font: "inherit", textAlign: "left", background: "none", border: 0, cursor: "pointer", color: "inherit" }}
+        >
+          <h3 className={styles.sesionTitulo}>
+            {abierta ? "▾" : "▸"} {sesion.nombre}
+          </h3>
+          <span className={styles.ayuda}>
+            {sesion.items.length === 0
+              ? "Sin ejercicios"
+              : `${sesion.items.length} ${sesion.items.length === 1 ? "ejercicio" : "ejercicios"} · ${sesion.items
+                  .slice(0, 3)
+                  .map((i) => catalogo.get(i.ejercicio_id)?.nombre ?? "?")
+                  .join(", ")}${sesion.items.length > 3 ? "…" : ""}`}
+          </span>
+        </button>
         <div className={styles.flechas}>
           <button type="button" aria-label="Subir sesión" disabled={!subir || pendiente} onClick={() => subir?.()}>
             ↑
@@ -511,113 +690,121 @@ function TarjetaSesion({
         </div>
       </div>
 
-      <details className={styles.detalles}>
-        <summary>Nombre y nota de la sesión</summary>
-        <form onSubmit={guardarNombre} className={styles.formularioInterno}>
-          <div className={styles.campo}>
-            <label htmlFor={`sn-${sesion.id}`}>Nombre</label>
-            <input id={`sn-${sesion.id}`} name="nombre" required maxLength={80} defaultValue={sesion.nombre} />
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor={`sno-${sesion.id}`}>Nota (opcional)</label>
-            <input id={`sno-${sesion.id}`} name="nota" maxLength={1000} defaultValue={sesion.nota ?? ""} />
-          </div>
-          <button className={styles.boton} type="submit" disabled={pendiente}>
-            Guardar
-          </button>
-        </form>
-      </details>
+      {abierta && (
+        <>
+          <details className={styles.detalles}>
+            <summary>Nombre y nota de la sesión</summary>
+            <form onSubmit={guardarNombre} className={styles.formularioInterno}>
+              <div className={styles.campo}>
+                <label htmlFor={`sn-${sesion.id}`}>Nombre</label>
+                <input id={`sn-${sesion.id}`} name="nombre" required maxLength={80} defaultValue={sesion.nombre} />
+              </div>
+              <div className={styles.campo}>
+                <label htmlFor={`sno-${sesion.id}`}>Nota (opcional)</label>
+                <input id={`sno-${sesion.id}`} name="nota" maxLength={1000} defaultValue={sesion.nota ?? ""} />
+              </div>
+              <button className={styles.boton} type="submit" disabled={pendiente}>
+                Guardar
+              </button>
+            </form>
+          </details>
 
-      {orden.mostrados.length === 0 && <p className={styles.ayuda}>Esta sesión aún no tiene ejercicios.</p>}
+          {orden.mostrados.length === 0 && <p className={styles.ayuda}>Esta sesión aún no tiene ejercicios.</p>}
 
-      <ListaOrdenable ids={orden.ids} onReordenar={orden.reordenar}>
-        <div className={styles.listaItems}>
-          {orden.mostrados.map((item, pos) => {
-            const previo = orden.mostrados[pos - 1];
-            const siguiente = orden.mostrados[pos + 1];
-            return (
-              <Ordenable key={item.id} id={item.id}>
-                {(asaItem) => (
-                  <TarjetaItem
-                    rutinaId={rutinaId}
-                    item={item}
-                    ejercicio={catalogo.get(item.ejercicio_id)}
-                    etiquetaSuper={etiquetas[pos]}
-                    esUltimoDelGrupo={item.grupo === null || siguiente?.grupo !== item.grupo}
-                    puedeUnir={pos > 0 && !(item.grupo !== null && previo?.grupo === item.grupo)}
-                    asa={asaItem}
-                    subir={pos > 0 ? () => orden.mover(item.id, -1) : null}
-                    bajar={pos < orden.mostrados.length - 1 ? () => orden.mover(item.id, 1) : null}
-                    avisar={avisar}
-                  />
-                )}
-              </Ordenable>
-            );
-          })}
-        </div>
-      </ListaOrdenable>
+          <ListaOrdenable ids={orden.ids} onReordenar={orden.reordenar}>
+            <div className={styles.listaItems}>
+              {orden.mostrados.map((item, pos) => {
+                const previo = orden.mostrados[pos - 1];
+                const siguiente = orden.mostrados[pos + 1];
+                return (
+                  <Ordenable key={item.id} id={item.id}>
+                    {(asaItem) => (
+                      <TarjetaItem
+                        rutinaId={rutinaId}
+                        item={item}
+                        ejercicio={catalogo.get(item.ejercicio_id)}
+                        etiquetaSuper={etiquetas[pos]}
+                        esUltimoDelGrupo={item.grupo === null || siguiente?.grupo !== item.grupo}
+                        puedeUnir={pos > 0 && !(item.grupo !== null && previo?.grupo === item.grupo)}
+                        asa={asaItem}
+                        subir={pos > 0 ? () => orden.mover(item.id, -1) : null}
+                        bajar={pos < orden.mostrados.length - 1 ? () => orden.mover(item.id, 1) : null}
+                        avisar={avisar}
+                        semanas={semanas}
+                        cambios={cambios.filter((x) => x.item_id === item.id)}
+                        opciones={activos}
+                        catalogo={catalogo}
+                      />
+                    )}
+                  </Ordenable>
+                );
+              })}
+            </div>
+          </ListaOrdenable>
 
-      <div className={styles.añadirItem}>
-        <label htmlFor={`add-${sesion.id}`} className={styles.oculto}>
-          Ejercicio que añadir
-        </label>
-        <select id={`add-${sesion.id}`} value={elegido} onChange={(e) => setElegido(e.target.value)}>
-          <option value="">Añadir ejercicio…</option>
-          {CATEGORIAS.map((c) => {
-            const delGrupo = activos.filter((e) => e.categoria === c.valor);
-            if (delGrupo.length === 0) return null;
-            return (
-              <optgroup key={c.valor} label={c.es}>
-                {delGrupo.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.nombre}
-                  </option>
-                ))}
-              </optgroup>
-            );
-          })}
-        </select>
-        <button
-          type="button"
-          className={styles.boton}
-          disabled={!elegido || pendiente}
-          onClick={() => {
-            const id = elegido;
-            setElegido("");
-            ejecutar(() => agregarItem(rutinaId, sesion.id, id));
-          }}
-        >
-          Añadir
-        </button>
-      </div>
-
-      <Resumen items={sesion.items} catalogo={catalogo} titulo="Material y músculos de esta sesión" />
-
-      {confirmando ? (
-        <div className={styles.aviso} role="alert">
-          <p style={{ margin: "0 0 10px" }}>
-            ¿Quitar la sesión «{sesion.nombre}» con sus {sesion.items.length} ejercicios?
-          </p>
-          <div className={styles.accionesItem}>
+          <div className={styles.añadirItem}>
+            <label htmlFor={`add-${sesion.id}`} className={styles.oculto}>
+              Ejercicio que añadir
+            </label>
+            <select id={`add-${sesion.id}`} value={elegido} onChange={(e) => setElegido(e.target.value)}>
+              <option value="">Añadir ejercicio…</option>
+              {CATEGORIAS.map((c) => {
+                const delGrupo = activos.filter((e) => e.categoria === c.valor);
+                if (delGrupo.length === 0) return null;
+                return (
+                  <optgroup key={c.valor} label={c.es}>
+                    {delGrupo.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.nombre}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
+            </select>
             <button
               type="button"
               className={styles.boton}
-              disabled={pendiente}
+              disabled={!elegido || pendiente}
               onClick={() => {
-                if (window.confirm("¿Quitar esta sesión con todos sus ejercicios?")) ejecutar(() => quitarSesion(rutinaId, sesion.id));
+                const id = elegido;
+                setElegido("");
+                ejecutar(() => agregarItem(rutinaId, sesion.id, id));
               }}
             >
-              Sí, quitar la sesión
-            </button>
-            <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmando(false)}>
-              No
+              Añadir
             </button>
           </div>
-        </div>
-      ) : (
-        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmando(true)}>
-          Quitar esta sesión
-        </button>
+
+          <Resumen items={sesion.items} catalogo={catalogo} titulo="Material y músculos de esta sesión" />
+
+          {confirmando ? (
+            <div className={styles.aviso} role="alert">
+              <p style={{ margin: "0 0 10px" }}>
+                ¿Quitar la sesión «{sesion.nombre}» con sus {sesion.items.length} ejercicios?
+              </p>
+              <div className={styles.accionesItem}>
+                <button
+                  type="button"
+                  className={styles.boton}
+                  disabled={pendiente}
+                  onClick={() => {
+                    if (window.confirm("¿Quitar esta sesión con todos sus ejercicios?")) ejecutar(() => quitarSesion(rutinaId, sesion.id));
+                  }}
+                >
+                  Sí, quitar la sesión
+                </button>
+                <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmando(false)}>
+                  No
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmando(true)}>
+              Quitar esta sesión
+            </button>
+          )}
+        </>
       )}
     </section>
   );
@@ -773,11 +960,13 @@ export function Constructor({
   sesiones,
   catalogo: lista,
   alumnos,
+  cambios,
 }: {
   rutina: DatosRutina;
   sesiones: SesionRutina[];
   catalogo: CatalogoEjercicio[];
   alumnos: { id: string; texto: string }[];
+  cambios: CambioSemana[];
 }) {
   const [aviso, setAviso] = useState("");
   const catalogo = new Map(lista.map((e) => [e.id, e]));
@@ -824,6 +1013,8 @@ export function Constructor({
                     subir={pos > 0 ? () => orden.mover(s.id, -1) : null}
                     bajar={pos < orden.mostrados.length - 1 ? () => orden.mover(s.id, 1) : null}
                     avisar={setAviso}
+                    semanas={rutina.semanas}
+                    cambios={cambios}
                   />
                 )}
               </Ordenable>

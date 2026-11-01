@@ -192,6 +192,11 @@ export default async function FichaUsuario({
   ];
   const presencial = servicios.includes("grupal") || servicios.includes("individual") || asistencia.total_clases > 0;
   const online = servicios.includes("online");
+  // Su rutina para el botón «Editar rutina»: la publicada, o si no hay, la última que tenga.
+  const { data: rutinasPersona } = online
+    ? await admin.from("rutinas").select("id, estado, actualizado_en").eq("user_id", id).order("actualizado_en", { ascending: false })
+    : { data: [] };
+  const rutinaDe = ((rutinasPersona ?? []) as { id: string; estado: string }[]).find((r) => r.estado === "publicada") ?? ((rutinasPersona ?? []) as { id: string }[])[0];
   const nombre = [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
 
   let foto: string | null = null;
@@ -534,6 +539,7 @@ export default async function FichaUsuario({
               <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>
               <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
               <Link href={`/admin/reservas/como/${id}`}>Reservar clases como ella</Link>
+              {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
               <Link href={aFicha("reservas")}>Calendario de reservas</Link>
               <Link href={aFicha("perfil")}>Editar datos y servicios</Link>
               <Link href={`/admin/usuarios/${p.id}/textos-legales`}>Textos legales que aceptó</Link>
