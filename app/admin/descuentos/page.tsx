@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
 import ListaDescuentos, { type FilaDescuento } from "./ListaDescuentos";
@@ -46,6 +47,7 @@ export default async function Descuentos() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Descuentos</h1>
+        <VerComoAlumno destino="/pagos" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>

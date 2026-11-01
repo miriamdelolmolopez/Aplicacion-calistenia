@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, lunesDe, sumarDias, textoHora } from "@/lib/fechas";
@@ -160,6 +161,7 @@ export default async function Horarios() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Plantillas presenciales</h1>
+        <VerComoAlumno destino="/clases" />
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>

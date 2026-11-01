@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../admin.module.css";
@@ -19,6 +20,7 @@ export default async function AdministrarPreguntas() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Preguntas del examen</h1>
+        <VerComoAlumno destino="/aprende/examen" />
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
           ← Volver
         </Link>

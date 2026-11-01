@@ -28,7 +28,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { FotoRutina, IconoBoton, ResumenRutina, VentanaMusculos } from "./PiezasEditor";
+import { FotoRutina, IconoBoton, PreviaAlumno, ResumenRutina, VentanaMusculos } from "./PiezasEditor";
 import { minutosEstimados } from "@/lib/duracion";
 import type { Estado } from "../../acciones";
 import styles from "../../admin.module.css";
@@ -1122,6 +1122,7 @@ export function Constructor({
   const orden = useOrden(sesiones, (ids) => reordenarSesiones(rutina.id, ids), setAviso);
   const [nueva, setNueva] = useState("");
   const [anadiendoSesion, setAnadiendoSesion] = useState(false);
+  const [previa, setPrevia] = useState(false);
 
   return (
     <>
@@ -1130,6 +1131,13 @@ export function Constructor({
           {aviso} (toca para cerrar)
         </p>
       )}
+
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setPrevia(true)}>
+          👁 Ver como alumno/a
+        </button>
+      </div>
+      {previa && <PreviaAlumno nombre={rutina.nombre} nota={rutina.nota} sesiones={sesiones} semanas={rutina.semanas} entrenosSemana={rutina.entrenosSemana} catalogo={catalogo} cerrar={() => setPrevia(false)} />}
 
       <CabeceraRutina rutina={rutina} alumnos={alumnos} />
 

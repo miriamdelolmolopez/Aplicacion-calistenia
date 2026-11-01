@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import VerComoAlumno from "../VerComoAlumno";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
@@ -96,6 +97,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Horarios presenciales</h1>
+        <VerComoAlumno destino="/clases" />
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>

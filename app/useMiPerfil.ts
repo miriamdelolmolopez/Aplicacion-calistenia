@@ -30,14 +30,25 @@ function vistaAlumnaActiva(): boolean {
   }
 }
 
-export function cambiarVistaAlumna(activar: boolean) {
+const CLAVE_VOLVER = "vistaAlumnaVolver";
+
+// Activa o apaga la vista de alumno/a. Al activarla se puede elegir la pantalla a la que ir (por defecto Inicio),
+// y al apagarla se vuelve a la pantalla de administración desde la que se salió.
+export function cambiarVistaAlumna(activar: boolean, destino?: string) {
+  let volver: string | null = null;
   try {
-    if (activar) localStorage.setItem(CLAVE_VISTA_ALUMNA, "1");
-    else localStorage.removeItem(CLAVE_VISTA_ALUMNA);
+    if (activar) {
+      localStorage.setItem(CLAVE_VISTA_ALUMNA, "1");
+      sessionStorage.setItem(CLAVE_VOLVER, location.pathname + location.search);
+    } else {
+      localStorage.removeItem(CLAVE_VISTA_ALUMNA);
+      volver = sessionStorage.getItem(CLAVE_VOLVER);
+      sessionStorage.removeItem(CLAVE_VOLVER);
+    }
   } catch {
     // Sin almacenamiento no se puede cambiar de vista.
   }
-  window.location.href = "/inicio";
+  window.location.href = activar ? (destino ?? "/inicio") : volver && volver.startsWith("/admin") ? volver : "/inicio";
 }
 
 export function olvidarVistaAlumna() {

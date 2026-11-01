@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import GaleriaFotos from "../fotos/GaleriaFotos";
 import Frases, { type Frase } from "../frases/Frases";
@@ -20,6 +21,7 @@ export default async function Contenido() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Fotos y frases</h1>
+        <VerComoAlumno destino="/inicio" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>

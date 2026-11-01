@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import MenuUsuario from "./MenuUsuario";
 import NavegacionInferior from "./NavegacionInferior";
+import VistaAlumnaFlotante from "./VistaAlumnaFlotante";
 import { SCRIPT_TEMA } from "./useTema";
 import "./globals.css";
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <NavegacionInferior />
         <MenuUsuario />
+        <VistaAlumnaFlotante />
       </body>
     </html>
   );

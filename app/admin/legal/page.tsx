@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { DOCUMENTOS, DOCUMENTOS_CON_ACEPTACION, TITULO_DOCUMENTO } from "@/lib/legalTexto";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -15,6 +16,7 @@ export default async function TextosLegales() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Textos legales</h1>
+        <VerComoAlumno destino="/legal/terminos" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
@@ -40,6 +41,7 @@ export default async function AdminClases() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Tipos de clase</h1>
+        <VerComoAlumno destino="/clases" />
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>

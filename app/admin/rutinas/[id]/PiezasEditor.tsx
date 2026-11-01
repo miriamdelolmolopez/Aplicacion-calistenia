@@ -6,8 +6,9 @@ import MapaCorporal from "../../../MapaCorporal";
 import styles from "../../admin.module.css";
 import { cambiarFotoApp, quitarFotoApp } from "../../fotos/acciones";
 import { prepararFoto } from "../../fotos/prepararFoto";
-import { intensidadesAgregadas } from "@/lib/ejercicios";
-import { minutosEstimados } from "@/lib/duracion";
+import ResumenIconos from "../../../rutina/ResumenIconos";
+import { minutosEstimados, textoObjetivo as textoObjetivoAlumno } from "@/lib/duracion";
+import { CATEGORIAS, intensidadesAgregadas } from "@/lib/ejercicios";
 import type { CatalogoEjercicio, ItemRutina } from "./Constructor";
 
 // Botón redondo pequeño con un icono (lápiz, papelera, torso…).
@@ -265,5 +266,76 @@ export function ResumenRutina({
         <MapaCorporal intensidades={intensidadesAgregadas(todos.map((i) => ({ series: i.series, musculos: catalogo.get(i.ejercicio_id)?.musculos ?? [] })))} />
       </div>
     </div>
+  );
+}
+
+// Vista previa: cómo ve el/la alumno/a esta rutina (resumen y sesiones con sus ejercicios).
+export function PreviaAlumno({
+  nombre,
+  nota,
+  sesiones,
+  semanas,
+  entrenosSemana,
+  catalogo,
+  cerrar,
+}: {
+  nombre: string;
+  nota: string | null;
+  sesiones: { id: string; nombre: string; nota: string | null; items: ItemRutina[] }[];
+  semanas: number;
+  entrenosSemana: number | null;
+  catalogo: Map<string, CatalogoEjercicio>;
+  cerrar: () => void;
+}) {
+  const todos = sesiones.flatMap((s) => s.items);
+  const materiales = [...new Set(todos.flatMap((i) => catalogo.get(i.ejercicio_id)?.materiales ?? []))].sort((a, b) => a.localeCompare(b));
+  const tipos = [...new Set(todos.map((i) => catalogo.get(i.ejercicio_id)?.categoria).filter((c): c is string => !!c))].map((c) => CATEGORIAS.find((x) => x.valor === c)?.es ?? c);
+  const porSemana = entrenosSemana ?? sesiones.length;
+
+  return (
+    <Ventana titulo={`Así lo ve el/la alumno/a · ${nombre}`} cerrar={cerrar}>
+      {nota && <p style={{ marginTop: 0 }}>📝 {nota}</p>}
+      <ResumenIconos
+        idioma="es"
+        datos={[
+          { icono: "📅", valor: String(semanas), texto: semanas === 1 ? "semana" : "semanas" },
+          { icono: "🔁", valor: String(porSemana), texto: "entrenos por semana" },
+          { icono: "🏋️", valor: String(todos.length), texto: "ejercicios" },
+        ]}
+        tipos={tipos}
+        materiales={materiales}
+        intensidades={intensidadesAgregadas(todos.map((i) => ({ series: i.series, musculos: catalogo.get(i.ejercicio_id)?.musculos ?? [] })))}
+      />
+      {sesiones.map((s) => (
+        <section key={s.id} style={{ marginTop: 14 }}>
+          <h3 style={{ margin: "0 0 4px" }}>{s.nombre}</h3>
+          <p className={styles.ayuda} style={{ margin: "0 0 8px" }}>
+            ~{minutosEstimados(s.items)} min · {s.items.length} {s.items.length === 1 ? "ejercicio" : "ejercicios"}
+            {s.nota ? ` · ${s.nota}` : ""}
+          </p>
+          <ol style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+            {s.items.map((i, n) => {
+              const e = catalogo.get(i.ejercicio_id);
+              return (
+                <li key={i.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: 8, background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 14 }}>
+                  <span style={{ width: 22, textAlign: "center", fontWeight: 700 }}>{n + 1}</span>
+                  <span style={{ flex: "none", width: 56, height: 56, borderRadius: 10, background: e?.foto_url ? `url(${e.foto_url}) center / contain no-repeat var(--relleno)` : "linear-gradient(160deg, #c9c5bd, #0aa8c0)" }} />
+                  <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                    <strong>{e?.nombre ?? "Ejercicio"}</strong>
+                    <small style={{ color: "var(--secundario)" }}>
+                      {i.series} × {textoObjetivoAlumno(i, "rep") || "—"} · descanso {i.descanso_seg} s
+                    </small>
+                    {i.nota && <small>📝 {i.nota}</small>}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      ))}
+      <p className={styles.ayuda} style={{ marginBottom: 0 }}>
+        Esta es la versión base de la rutina; los cambios de una semana concreta se ven solo esa semana.
+      </p>
+    </Ventana>
   );
 }

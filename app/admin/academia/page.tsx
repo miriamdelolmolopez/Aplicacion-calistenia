@@ -1,4 +1,5 @@
 import Link from "next/link";
+import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { COLUMNAS_CURSO, type Curso } from "@/lib/cursos";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +19,7 @@ export default async function AdministrarAcademia() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Cursos</h1>
+        <VerComoAlumno destino="/academia" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
