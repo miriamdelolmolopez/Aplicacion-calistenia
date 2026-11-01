@@ -43,7 +43,7 @@ export default function BotonGoogle() {
       </button>
       {error && (
         <p className={estilos.error} role="alert">
-          {en ? "Google sign-in is not available right now." : "Entrar con Google no está disponible ahora mismo."}
+          {en ? "Google sign-in is not available right now." : "Iniciar sesión con Google no está disponible ahora mismo."}
         </p>
       )}
     </>

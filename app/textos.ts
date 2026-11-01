@@ -9,14 +9,14 @@ export const textos = {
   es: {
     // Inicio
     lema: "Calistenia y pino",
-    soyAlumno: "Entrar",
+    soyAlumno: "Iniciar sesión",
     crearCuentaPrueba: "Crear cuenta",
     soloGrupalesFuengirola: "Incluye una clase de prueba gratis (grupales en Fuengirola)",
     intro: "¿Qué te interesa?",
     online: "Entrenamiento online",
     presencial: "Entrenamiento presencial",
     academia: "Academia",
-    entrar: "Entrar",
+    entrar: "Iniciar sesión",
     idioma: "Idioma",
     pruebaEnlace: "Crear cuenta para la clase de prueba",
     volver: "Volver",
@@ -35,11 +35,11 @@ export const textos = {
     registroEnviado: "Revisa tu correo",
     registroEnviadoTexto:
       "Te hemos enviado un enlace para confirmar tu cuenta. Ábrelo para continuar.",
-    yaTienesCuenta: "¿Ya tienes cuenta? Entrar",
+    yaTienesCuenta: "¿Ya tienes cuenta? Iniciar sesión",
 
     // Entrar
-    entrarTitulo: "Entrar",
-    entrarBoton: "Entrar",
+    entrarTitulo: "Iniciar sesión",
+    entrarBoton: "Iniciar sesión",
     olvidaste: "¿Has olvidado tu contraseña?",
     crearCuenta: "Crear cuenta nueva",
     errorEnlace: "El enlace ha caducado o no es válido. Pide uno nuevo.",
