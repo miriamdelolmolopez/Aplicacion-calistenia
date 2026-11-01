@@ -61,6 +61,9 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
     return { mensaje: "Pago pendiente cobrado." };
   }
 
+  // Si esa persona tiene un precio fijo personalizado para esta tarifa, se usa ese.
+  const { data: personalizado } = await admin.from("precios_personalizados").select("precio_centimos").eq("user_id", userId).eq("tipo_bono_id", tipo).maybeSingle();
+
   const { data: bonoId, error } = await admin.rpc("crear_bono", {
     p_user: userId,
     p_tipo: tipo,
@@ -69,6 +72,7 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
     p_nota: nota,
     p_admin: user.id,
     p_descuento: descuento || null,
+    ...(personalizado ? { p_precio: personalizado.precio_centimos as number } : {}),
   });
   if (error) return { error: error.message };
 
@@ -184,4 +188,32 @@ export async function pagoManual(_previo: Estado, formData: FormData): Promise<E
 
   refrescar(userId);
   return avisos.length > 0 ? { error: `Pago guardado, pero: ${avisos.join(" ")}` } : { mensaje: "Pago guardado." };
+}
+
+// Precio fijo personalizado: el precio de una tarifa para esta persona.
+export async function guardarPrecioPersonalizado(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const tipo = String(formData.get("tipo") ?? "");
+  const precio = aCentimos(String(formData.get("precio") ?? ""));
+  if (!UUID.test(userId) || !UUID.test(tipo)) return { error: "Elige la tarifa." };
+  if (Number.isNaN(precio)) return { error: "El precio no es válido (por ejemplo 70 o 70,50)." };
+
+  const { error } = await createAdminClient()
+    .from("precios_personalizados")
+    .upsert({ user_id: userId, tipo_bono_id: tipo, precio_centimos: precio, actualizado_en: new Date().toISOString() });
+  if (error) return { error: "No se ha podido guardar." };
+  refrescar(userId);
+  return { mensaje: "Precio personalizado guardado." };
+}
+
+export async function quitarPrecioPersonalizado(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const tipo = String(formData.get("tipo") ?? "");
+  if (!UUID.test(userId) || !UUID.test(tipo)) return { error: "No se ha encontrado ese precio." };
+  const { error } = await createAdminClient().from("precios_personalizados").delete().eq("user_id", userId).eq("tipo_bono_id", tipo);
+  if (error) return { error: "No se ha podido quitar." };
+  refrescar(userId);
+  return { mensaje: "Precio personalizado quitado: vuelve a pagar el precio normal." };
 }

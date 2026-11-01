@@ -7,7 +7,7 @@ import { formasActivas, nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../../admin.module.css";
 import estilos from "../../usuarios.module.css";
-import { FormGuiado, FormManual, HistorialPersona, type FilaPagoPersona } from "./FormulariosPago";
+import { FormGuiado, FormManual, HistorialPersona, PreciosPersonalizados, type FilaPagoPersona } from "./FormulariosPago";
 
 export const metadata = { title: "Pagos de la persona · Administración" };
 
@@ -49,7 +49,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
 
   await admin.rpc("refrescar_bonos", { p_user: id });
 
-  const [{ data: tiposDatos }, { data: bonosDatos }, { data: pagosDatos }, { data: descuentosDatos }] = await Promise.all([
+  const [{ data: tiposDatos }, { data: bonosDatos }, { data: pagosDatos }, { data: descuentosDatos }, { data: preciosDatos }] = await Promise.all([
     admin.from("tipos_bono").select("id, nombre, servicio, precio_centimos, iva_porcentaje, clases, validez_dias").eq("activo", true).order("servicio").order("orden"),
     admin.from("bonos").select("id, servicio, estado, clases_restantes, tipo_bono_id, caduca_en, creado_en, tipos_bono(nombre)").eq("user_id", id).order("creado_en", { ascending: false }),
     admin
@@ -58,10 +58,13 @@ export default async function PagosPersona({ params, searchParams }: { params: P
       .eq("user_id", id)
       .order("creado_en", { ascending: false }),
     admin.from("descuentos").select("id, nombre, tipo, valor, caduca_en, usos_max, pagos(estado)").eq("activo", true).order("nombre"),
+    admin.from("precios_personalizados").select("tipo_bono_id, precio_centimos").eq("user_id", id),
   ]);
+  const precios: Record<string, number> = Object.fromEntries(((preciosDatos ?? []) as { tipo_bono_id: string; precio_centimos: number }[]).map((x) => [x.tipo_bono_id, x.precio_centimos]));
   const tipos = (tiposDatos ?? []) as Tipo[];
   const bonos = (bonosDatos ?? []) as unknown as BonoFila[];
   const pagos = (pagosDatos ?? []) as unknown as PagoFila[];
+  const tiposPago = tipos.map((t) => ({ id: t.id, nombre: t.nombre, servicio: t.servicio, precio: t.precio_centimos, iva: t.iva_porcentaje, clases: t.clases, validez: t.validez_dias }));
 
   const ahoraIso = new Date().toISOString();
   const hoy = claveDia(ahoraIso);
@@ -133,7 +136,8 @@ export default async function PagosPersona({ params, searchParams }: { params: P
           ultimoTipoId={bonos[0]?.tipo_bono_id ?? null}
           creditos={creditos}
           pendientes={pendientes}
-          tipos={tipos.map((t) => ({ id: t.id, nombre: t.nombre, servicio: t.servicio, precio: t.precio_centimos, iva: t.iva_porcentaje, clases: t.clases, validez: t.validez_dias }))}
+          precios={precios}
+          tipos={tiposPago}
         />
       )}
 
@@ -151,9 +155,12 @@ export default async function PagosPersona({ params, searchParams }: { params: P
           ahora={ahora}
           formas={formas}
           bonos={bonosOpcion}
-          tipos={tipos.map((t) => ({ id: t.id, nombre: t.nombre, servicio: t.servicio, precio: t.precio_centimos, iva: t.iva_porcentaje, clases: t.clases, validez: t.validez_dias }))}
+          tipos={tiposPago}
+          precios={precios}
         />
       )}
+
+      <PreciosPersonalizados userId={id} tipos={tiposPago} precios={precios} />
     </main>
   );
 }

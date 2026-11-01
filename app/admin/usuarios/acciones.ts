@@ -316,3 +316,40 @@ export async function quitarTarifa(_previo: Estado, formData: FormData): Promise
   if (servicio === "quitar") partes.push(servicioQuitado ? "Se le ha quitado el servicio." : "El servicio se mantiene porque aún tiene otra tarifa de ese tipo.");
   return { mensaje: partes.join(" ") };
 }
+
+// «No enviarle correos»: la app deja de mandarle cualquier correo a esa persona.
+export async function cambiarSinCorreos(userId: string, valor: boolean): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
+  const { error } = await createAdminClient().from("profiles").update({ sin_correos: valor }).eq("id", userId);
+  if (error) return { error: "No se ha podido guardar." };
+  revalidatePath(`/admin/usuarios/${userId}`);
+  return { mensaje: valor ? "A partir de ahora no se le envía ningún correo." : "Vuelve a recibir los correos." };
+}
+
+// Alargar cortesía: se elige hasta qué día y se calculan los días. También reabre una tarifa que acaba de caducar.
+export async function alargarCortesia(_previo: Estado, formData: FormData): Promise<Estado> {
+  const { user } = await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const bonoId = String(formData.get("bonoId") ?? "");
+  const hasta = String(formData.get("hasta") ?? "").trim();
+  const nota = String(formData.get("nota") ?? "").trim().slice(0, 200) || "Cortesía";
+  if (!UUID.test(userId) || !UUID.test(bonoId)) return { error: "No se ha podido identificar el bono." };
+  const objetivo = instanteMadrid(hasta, "23:59");
+  if (!objetivo) return { error: "Elige hasta qué día quieres alargarla." };
+
+  const admin = createAdminClient();
+  const { data: bono } = await admin.from("bonos").select("id, user_id, caduca_en, estado").eq("id", bonoId).maybeSingle();
+  if (!bono || bono.user_id !== userId) return { error: "No se ha encontrado ese bono." };
+  if (!bono.caduca_en) return { error: "Este bono todavía no tiene fecha de caducidad." };
+
+  const dias = Math.floor((objetivo.getTime() - new Date(bono.caduca_en as string).getTime()) / 86_400_000);
+  if (dias < 1) return { error: "Elige un día posterior a la fecha de caducidad actual." };
+  if (dias > 365) return { error: "No se puede alargar más de un año." };
+
+  const { error } = await admin.rpc("ajustar_bono", { p_bono: bonoId, p_clases: 0, p_dias: dias, p_nota: nota, p_admin: user.id });
+  if (error) return { error: error.message };
+
+  refrescarPantallas(userId);
+  return { mensaje: `Alargada ${dias} ${dias === 1 ? "día" : "días"}.` };
+}

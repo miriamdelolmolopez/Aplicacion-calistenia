@@ -121,3 +121,22 @@
   color: #475569;
   background: color-mix(in srgb, #94a3b8 22%, var(--blanco));
 }
+
+.filaPrecio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--relleno);
+  border-radius: 14px;
+}
+
+.filaPrecio span {
+  display: flex;
+  flex-direction: column;
+}
+
+.filaPrecio small {
+  color: var(--secundario);
+}

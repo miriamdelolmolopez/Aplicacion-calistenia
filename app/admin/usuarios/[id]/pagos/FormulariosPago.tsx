@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import type { Estado } from "../../../acciones";
 import styles from "../../../admin.module.css";
 import { euros } from "@/lib/formato";
-import { anularPagoPersona, cobrarPendiente, pagoGuiado, pagoManual } from "./acciones";
+import { anularPagoPersona, cobrarPendiente, guardarPrecioPersonalizado, pagoGuiado, pagoManual, quitarPrecioPersonalizado } from "./acciones";
 import estilos from "./pagosPersona.module.css";
 
 export type FormaOpcion = { clave: string; nombre: string };
@@ -89,6 +89,7 @@ export function FormGuiado({
   ultimoTipoId,
   creditos,
   pendientes,
+  precios,
 }: {
   userId: string;
   hoy: string;
@@ -99,6 +100,7 @@ export function FormGuiado({
   ultimoTipoId: string | null;
   creditos: Record<string, number>;
   pendientes: PendienteOpcion[];
+  precios: Record<string, number>; // precio fijo personalizado por tarifa (céntimos)
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(pagoGuiado, {});
   const [tipoId, setTipoId] = useState(ultimoTipoId && tipos.some((t) => t.id === ultimoTipoId) ? ultimoTipoId : (tipos[0]?.id ?? ""));
@@ -111,7 +113,8 @@ export function FormGuiado({
   const pend = pendientes.find((p) => p.tipoId === tipoId);
   const usaPendiente = !!pend && cobrarPend;
   const d = descuentos.find((x) => x.id === descuentoId);
-  const precio = tipo?.precio ?? 0;
+  const personalizado = tipo ? precios[tipo.id] : undefined;
+  const precio = personalizado ?? tipo?.precio ?? 0;
   const rebaja = tipo && d && !usaPendiente ? (d.tipo === "porcentaje" ? Math.round((precio * d.valor) / 100) : Math.min(d.valor, precio)) : 0;
   const total = usaPendiente && pend ? pend.importe : precio - rebaja;
   const base = tipo ? Math.round(total / (1 + tipo.iva / 100)) : 0;
@@ -130,10 +133,12 @@ export function FormGuiado({
           <select id="pg-tipo" name="tipo" value={tipoId} onChange={(e) => setTipoId(e.target.value)} required>
             {tipos.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.nombre} · {euros(t.precio)}
+                {t.nombre} · {euros(precios[t.id] ?? t.precio)}
+                {precios[t.id] !== undefined ? " (precio personalizado)" : ""}
               </option>
             ))}
           </select>
+          {personalizado !== undefined && !usaPendiente && <span className={styles.ayuda}>Tiene un precio fijo personalizado para esta tarifa: {euros(personalizado)} en vez de {euros(tipo?.precio ?? 0)}.</span>}
         </div>
 
         {pend && (
@@ -334,7 +339,7 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
 }
 
 // ---------------------------------------------------------------------------------------------
-export function FormManual({ userId, hoy, ahora, formas, bonos, tipos }: { userId: string; hoy: string; ahora: string; formas: FormaOpcion[]; bonos: BonoOpcion[]; tipos: TipoPago[] }) {
+export function FormManual({ userId, hoy, ahora, formas, bonos, tipos, precios }: { userId: string; hoy: string; ahora: string; formas: FormaOpcion[]; bonos: BonoOpcion[]; tipos: TipoPago[]; precios: Record<string, number> }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(pagoManual, {});
   const anio = Number(hoy.slice(0, 4));
   const [mes, setMes] = useState(Number(hoy.slice(5, 7)));
@@ -349,7 +354,7 @@ export function FormManual({ userId, hoy, ahora, formas, bonos, tipos }: { userI
     const t = tipos.find((x) => x.id === id);
     if (t) {
       setConcepto(t.nombre);
-      setImporte((t.precio / 100).toFixed(2).replace(".", ","));
+      setImporte(((precios[t.id] ?? t.precio) / 100).toFixed(2).replace(".", ","));
     } else {
       setConcepto("");
       setImporte("");
@@ -447,5 +452,58 @@ export function FormManual({ userId, hoy, ahora, formas, bonos, tipos }: { userI
         {pendiente ? "Guardando…" : "Añadir pago"}
       </button>
     </form>
+  );
+}
+
+// Precio fijo personalizado: lista de lo que tiene esta persona y formulario para añadir uno.
+export function PreciosPersonalizados({ userId, tipos, precios }: { userId: string; tipos: TipoPago[]; precios: Record<string, number> }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarPrecioPersonalizado, {});
+  const [estadoQuitar, accionQuitar, quitando] = useActionState<Estado, FormData>(quitarPrecioPersonalizado, {});
+  const lista = tipos.filter((t) => precios[t.id] !== undefined);
+  return (
+    <details className={styles.detalles}>
+      <summary>Precio fijo personalizado{lista.length > 0 ? ` (${lista.length})` : ""}</summary>
+      <p className={styles.ayuda}>Un precio propio para esta persona en una tarifa. «Nuevo guiado» lo usa solo. El alta de usuarios y el registro general de pagos usan el precio normal.</p>
+      {lista.map((t) => (
+        <form key={t.id} action={accionQuitar} className={estilos.filaPrecio}>
+          <input type="hidden" name="userId" value={userId} />
+          <input type="hidden" name="tipo" value={t.id} />
+          <span>
+            <strong>{t.nombre}</strong>
+            <small>
+              {euros(precios[t.id])} en vez de {euros(t.precio)}
+            </small>
+          </span>
+          <button type="submit" className={`${styles.boton} ${styles.botonSecundario}`} disabled={quitando}>
+            Quitar
+          </button>
+        </form>
+      ))}
+      <Mensajes estado={estadoQuitar} />
+      <form action={accion} className={styles.formularioInterno}>
+        <input type="hidden" name="userId" value={userId} />
+        <div className={styles.campo}>
+          <label htmlFor="pp-tipo">Tarifa</label>
+          <select id="pp-tipo" name="tipo" defaultValue="" required>
+            <option value="" disabled>
+              Elige…
+            </option>
+            {tipos.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.nombre} · {euros(t.precio)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.campo}>
+          <label htmlFor="pp-precio">Su precio (€)</label>
+          <input id="pp-precio" name="precio" inputMode="decimal" required placeholder="70,00" />
+        </div>
+        <button type="submit" className={styles.boton} disabled={pendiente}>
+          {pendiente ? "Guardando…" : "Guardar precio"}
+        </button>
+        <Mensajes estado={estado} />
+      </form>
+    </details>
   );
 }

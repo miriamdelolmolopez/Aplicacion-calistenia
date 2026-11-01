@@ -1,4 +1,5 @@
 import "server-only";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // Envío de correos con Resend (https://resend.com). Nunca lanza errores: si algo falla,
 // se anota en el registro del servidor y la acción que lo pidió (reservar, cancelar…)
@@ -18,6 +19,22 @@ export type Correo = {
 };
 
 export async function enviarCorreo(correo: Correo): Promise<boolean> {
+  // Si Miriam ha marcado «No enviarle correos» a esa persona, no se le manda nada (se da por atendido).
+  try {
+    const { data } = await createAdminClient()
+      .from("profiles")
+      .select("sin_correos")
+      .in("email", [...new Set([correo.para, correo.para.toLowerCase()])])
+      .limit(1)
+      .maybeSingle();
+    if (data?.sin_correos) {
+      console.info("[email] «%s» no se envía: la persona tiene activado «No enviarle correos»", correo.asunto);
+      return true;
+    }
+  } catch {
+    // Si no se puede comprobar, se sigue con el envío normal.
+  }
+
   const clave = process.env.RESEND_API_KEY;
   if (!clave) {
     console.warn("[email] RESEND_API_KEY no configurada: no se envía «%s»", correo.asunto);

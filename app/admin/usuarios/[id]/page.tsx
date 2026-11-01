@@ -16,6 +16,7 @@ import { EditorBono } from "../../bonos/Controles";
 import AvancesSesion from "./AvancesSesion";
 import Logros from "../../../progreso/Logros";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
+import { AlargarCortesia, InterruptorCorreos } from "./CorreosYCortesia";
 import EliminarUsuario from "./EliminarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
@@ -110,7 +111,7 @@ export default async function FichaUsuario({
   const { data: p } = await supabase
     .from("profiles")
     .select(
-      "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono, rol, idioma, creado_en, foto_path, perfil_servicios(servicio)",
+      "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono, rol, idioma, creado_en, foto_path, sin_correos, perfil_servicios(servicio)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -564,6 +565,7 @@ export default async function FichaUsuario({
                       </div>
                       <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
                     </div>
+                    {(b.estado === "activo" || (b.estado === "caducado" && b.clases_restantes > 0)) && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
                     {(b.estado === "activo" || b.estado === "en_cola") && (
                       <>
                         <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
@@ -583,6 +585,11 @@ export default async function FichaUsuario({
                 <ClasesHechas userId={p.id} tipos={tiposClase} />
               </details>
             )}
+          </section>
+
+          <section className={styles.tarjeta}>
+            <h2>Correos</h2>
+            <InterruptorCorreos userId={p.id} inicial={!!(p as { sin_correos?: boolean }).sin_correos} />
           </section>
 
           <section className={styles.tarjeta}>
