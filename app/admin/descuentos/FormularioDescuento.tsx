@@ -35,7 +35,7 @@ export default function FormularioDescuento({ descuento, alTerminar }: { descuen
     <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {descuento && <input type="hidden" name="id" value={descuento.id} />}
       <div className={styles.campo}>
-        <label htmlFor={`d-n-${p}`}>Nombre (por ejemplo «Alumnas de siempre»)</label>
+        <label htmlFor={`d-n-${p}`}>Nombre (por ejemplo «Alumnos/as de siempre»)</label>
         <input id={`d-n-${p}`} name="nombre" maxLength={60} required defaultValue={descuento?.nombre ?? ""} />
       </div>
       <div className={styles.campo}>

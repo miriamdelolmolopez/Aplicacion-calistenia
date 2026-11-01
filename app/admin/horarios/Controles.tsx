@@ -199,7 +199,7 @@ export function Aplicar({ id, hoy }: { id: string; hoy: string }) {
       <strong>Publicar las clases de esta plantilla</strong>
       <p className={styles.ayuda}>
         Elige desde qué día hasta qué día (los dos incluidos). Solo se crean las clases que falten; las que ya
-        existen y sus reservas no se tocan. Las alumnas verán las clases en cuanto las publiques.
+        existen y sus reservas no se tocan. Los/las alumnos/as verán las clases en cuanto las publiques.
       </p>
       <div className={styles.campo}>
         <label htmlFor={`ap-d-${id}`}>Desde el día</label>

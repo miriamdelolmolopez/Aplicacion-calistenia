@@ -29,7 +29,7 @@ export async function crearObjetivo(datos: {
   if (!ejercicio) return { ok: false, mensaje: "No se ha encontrado el ejercicio." };
 
   const { data: persona } = await admin.from("profiles").select("rol").eq("id", datos.userId).maybeSingle();
-  if (!persona || persona.rol === "admin") return { ok: false, mensaje: "No se ha encontrado a la alumna." };
+  if (!persona || persona.rol === "admin") return { ok: false, mensaje: "No se ha encontrado al/a la alumno/a." };
 
   const { error } = await admin.from("objetivos").insert({
     user_id: datos.userId,

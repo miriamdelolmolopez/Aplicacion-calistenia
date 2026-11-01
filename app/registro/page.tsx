@@ -76,7 +76,7 @@ export default function Registro() {
           <p>
             {idioma === "en"
               ? "Sign-up is closed: this app is only for Miriam’s students. If you would like to train with her, message her on WhatsApp."
-              : "El registro está cerrado: esta app es solo para las alumnas de Miriam. Si quieres entrenar con ella, escríbele por WhatsApp."}
+              : "El registro está cerrado: esta app es solo para los/las alumnos/as de Miriam. Si quieres entrenar con ella, escríbele por WhatsApp."}
           </p>
           <a className={styles.boton} href="https://wa.me/34644184762" target="_blank" rel="noopener noreferrer">
             WhatsApp

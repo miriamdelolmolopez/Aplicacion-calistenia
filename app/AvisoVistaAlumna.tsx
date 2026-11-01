@@ -10,7 +10,7 @@ export default function AvisoVistaAlumna({ perfil }: { perfil: MiPerfil }) {
   if (perfil.rolReal !== "admin" || perfil.rol === "admin") return null;
   return (
     <div className={estilos.aviso} role="status">
-      <span>{idioma === "en" ? "You are viewing the app as a student." : "Estás viendo la app como alumna."}</span>
+      <span>{idioma === "en" ? "You are viewing the app as a student." : "Estás viendo la app como alumno/a."}</span>
       <button type="button" className={estilos.volver} onClick={() => cambiarVistaAlumna(false)}>
         {idioma === "en" ? "Back to admin view" : "Volver a vista de administradora"}
       </button>

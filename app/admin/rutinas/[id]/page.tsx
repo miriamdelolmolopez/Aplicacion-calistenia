@@ -133,7 +133,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
       </header>
       <section className={styles.tarjeta}>
         <h2>Foto de la rutina</h2>
-        <p className={styles.ayuda}>La ve la alumna arriba de Mi rutina.</p>
+        <p className={styles.ayuda}>La ve el/la alumno/a arriba de Mi rutina.</p>
         <BotonFoto destino="rutina" id={r.id} actual={r.foto_url} />
       </section>
       <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} cambios={cambios} />

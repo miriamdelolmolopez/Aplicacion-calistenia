@@ -88,7 +88,7 @@ export default function Frases({ frases }: { frases: Frase[] }) {
   return (
     <section className={styles.tarjeta}>
       <h2>Frases de Inicio ({frases.filter((f) => f.activa).length} activas)</h2>
-      <p className={styles.ayuda}>Cada vez que una alumna abre la app, sale una de estas frases al azar sobre la foto de Inicio.</p>
+      <p className={styles.ayuda}>Cada vez que un/a alumno/a abre la app, sale una de estas frases al azar sobre la foto de Inicio.</p>
 
       <div className={comunes.barra}>
         <Nuevo etiqueta="Nueva" titulo="Nueva frase" render={(cerrar) => <FormularioFrase alTerminar={cerrar} />} />

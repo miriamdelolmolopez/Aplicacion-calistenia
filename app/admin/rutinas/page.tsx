@@ -20,7 +20,7 @@ type Fila = {
 };
 
 function nombreDe(p: Persona | null) {
-  if (!p) return "(sin alumna)";
+  if (!p) return "(sin alumno/a)";
   return [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
 }
 
@@ -77,7 +77,7 @@ export default async function Rutinas() {
 
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>
-          Las rutinas de tus alumnos. Las plantillas están en «Plantillas online». Puedes ordenarlas en carpetas y subcarpetas.
+          Las rutinas de tus alumnos/as. Las plantillas están en «Plantillas online». Puedes ordenarlas en carpetas y subcarpetas.
           {!hayCarpetas && " (Para usar carpetas falta ejecutar el archivo 044 en Supabase.)"}
         </p>
         <ListaRutinas

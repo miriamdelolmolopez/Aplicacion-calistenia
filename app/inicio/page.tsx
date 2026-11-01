@@ -238,7 +238,7 @@ export default function Inicio() {
               <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
                 +
               </span>
-              <strong>Añadir alumna</strong>
+              <strong>Añadir alumno/a</strong>
             </Link>
           </div>
         )}

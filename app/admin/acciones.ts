@@ -54,7 +54,7 @@ export async function altaAlumno(_previo: Estado, formData: FormData): Promise<E
     const yaExiste = error?.message?.toLowerCase().includes("already");
     return {
       error: yaExiste
-        ? "Ese correo ya tiene cuenta. Búscala en la lista y cámbiala a alumna."
+        ? "Ese correo ya tiene cuenta. Búscala en la lista y cámbiala a alumno/a."
         : "No se ha podido crear la cuenta. Inténtalo de nuevo.",
     };
   }
@@ -86,7 +86,7 @@ export async function cambiarPersona(_previo: Estado, formData: FormData): Promi
   const servicios = rol === "alumno" ? serviciosDe(formData) : [];
   if (rol !== "alumno" && rol !== "invitado") return { error: "Tipo no válido." };
   if (rol === "alumno" && servicios.length === 0) {
-    return { error: "Una alumna necesita al menos un servicio." };
+    return { error: "Un/a alumno/a necesita al menos un servicio." };
   }
   if (userId === user.id) return { error: "No puedes cambiar tu propia cuenta." };
 

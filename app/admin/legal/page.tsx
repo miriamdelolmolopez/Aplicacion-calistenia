@@ -21,7 +21,7 @@ export default async function TextosLegales() {
       </header>
 
       <p className={styles.ayuda}>
-        Aquí cambias los textos que ven las alumnas. Las erratas y aclaraciones se guardan sin más. Si cambian las condiciones o los datos que
+        Aquí cambias los textos que ven los/las alumnos/as. Las erratas y aclaraciones se guardan sin más. Si cambian las condiciones o los datos que
         recoges, publica una versión nueva de la política de privacidad o de los términos: todas las personas tendrán que aceptarla otra vez.
         Recuerda que tu asesoría debe revisar los cambios importantes.
       </p>

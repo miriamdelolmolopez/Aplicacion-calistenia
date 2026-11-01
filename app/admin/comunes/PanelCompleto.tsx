@@ -9,6 +9,26 @@ export default function PanelCompleto({ titulo, cerrar, children }: { titulo: st
   const [sucio, setSucio] = useState(false);
   const [preguntando, setPreguntando] = useState(false);
   const pregunta = useRef<HTMLDivElement>(null);
+  const contenedor = useRef<HTMLDivElement>(null);
+
+  // Cuando sale el mensaje de «guardado» (un aviso nuevo), lo escrito ya está guardado y no hace falta preguntar al salir.
+  useEffect(() => {
+    const caja = contenedor.current;
+    if (!caja) return;
+    const observador = new MutationObserver((cambios) => {
+      for (const c of cambios) {
+        for (const n of Array.from(c.addedNodes)) {
+          if (n instanceof HTMLElement && (n.matches('[role="status"]') || n.querySelector('[role="status"]'))) {
+            setSucio(false);
+            setPreguntando(false);
+            return;
+          }
+        }
+      }
+    });
+    observador.observe(caja, { childList: true, subtree: true });
+    return () => observador.disconnect();
+  }, []);
 
   // La pregunta sale abajo, junto a Cancelar; si el botón de Volver de arriba la provoca, se baja hasta ella.
   useEffect(() => {
@@ -33,7 +53,7 @@ export default function PanelCompleto({ titulo, cerrar, children }: { titulo: st
 
   return (
     <div className={estilos.capa} role="dialog" aria-modal="true" aria-label={titulo}>
-      <div onInputCapture={() => setSucio(true)} onChangeCapture={() => setSucio(true)}>
+      <div ref={contenedor} onInputCapture={() => setSucio(true)} onChangeCapture={() => setSucio(true)}>
         <div className={estilos.cabeza}>
           <button type="button" className={estilos.volver} onClick={pedirCierre}>
             ← Volver

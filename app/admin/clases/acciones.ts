@@ -132,7 +132,7 @@ export async function apuntarAlumno(_previo: Estado, formData: FormData): Promis
   after(() => avisarReserva(persona, sesionId));
 
   revalidatePath("/admin/clases");
-  return { mensaje: "Alumna apuntada. Se ha descontado una clase de su bono." };
+  return { mensaje: "Alumno/a apuntada. Se ha descontado una clase de su bono." };
 }
 
 // Quita a alguien de una clase, devolviéndole o no la clase.

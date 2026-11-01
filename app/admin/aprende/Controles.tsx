@@ -105,7 +105,7 @@ export function FormularioTermino({ termino, alTerminar }: { termino?: Termino; 
       </Campo>
       <label className={styles.casilla}>
         <input type="checkbox" name="activo" defaultChecked={termino?.activo ?? true} />
-        Visible para las alumnas
+        Visible para los/las alumnos/as
       </label>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         {pendiente ? "Guardando…" : termino ? "Guardar cambios" : "Añadir término"}
@@ -140,7 +140,7 @@ export function FormularioSeccion({ seccion, siguienteOrden, alTerminar }: { sec
       </Campo>
       <label className={styles.casilla}>
         <input type="checkbox" name="activo" defaultChecked={seccion?.activo ?? true} />
-        Visible para las alumnas
+        Visible para los/las alumnos/as
       </label>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         {pendiente ? "Guardando…" : seccion ? "Guardar cambios" : "Añadir apartado"}

@@ -160,7 +160,7 @@ export default async function Informes({
                 titulo="Activas"
                 valor={String(i.personas.activas)}
                 color="#0aa8c0"
-                notas={<span>{i.personas.alumnas} alumnas · {i.personas.invitadas} invitadas</span>}
+                notas={<span>{i.personas.alumnas} alumnos/as · {i.personas.invitadas} invitados/as</span>}
               />
               <TarjetaCifra
                 titulo="Nuevas en el periodo"
@@ -178,7 +178,7 @@ export default async function Informes({
                 titulo="Retención"
                 valor={atletas.retencion ? `${Math.round((atletas.retencion.siguen / atletas.retencion.base) * 100)} %` : "—"}
                 color="#6d5efc"
-                notas={<span>{atletas.retencion ? `${atletas.retencion.siguen} de ${atletas.retencion.base} siguen` : "Sin alumnas al empezar el periodo"}</span>}
+                notas={<span>{atletas.retencion ? `${atletas.retencion.siguen} de ${atletas.retencion.base} siguen` : "Sin alumnos/as al empezar el periodo"}</span>}
               />
               <TarjetaCifra
                 titulo="Ausencias"
@@ -204,8 +204,8 @@ export default async function Informes({
             <h2>Gráficos</h2>
             <div className={g.rejilla2}>
               <div className={g.bloque}>
-                <h3>Alumnas por tipo de servicio</h3>
-                <p className={g.vacio}>Una alumna con varios servicios cuenta en cada uno.</p>
+                <h3>Alumnos/as por tipo de servicio</h3>
+                <p className={g.vacio}>Un/a alumno/a con varios servicios cuenta en cada uno.</p>
                 <Rosca
                   formato={String}
                   total={i.por_servicio.grupal + i.por_servicio.individual + i.por_servicio.online}
@@ -220,7 +220,7 @@ export default async function Informes({
                 />
               </div>
               <div className={g.bloque}>
-                <h3>Alumnas por sexo</h3>
+                <h3>Alumnos/as por sexo</h3>
                 <Rosca
                   formato={String}
                   total={i.por_sexo.mujer + i.por_sexo.hombre + i.por_sexo.otro + i.por_sexo.sin_dato}
@@ -237,12 +237,12 @@ export default async function Informes({
             </div>
 
             <div className={g.bloque}>
-              <h3>Alumnas por edad</h3>
+              <h3>Alumnos/as por edad</h3>
               <BarrasColores formato={String} filas={EDADES.map(([k, texto], n) => ({ texto, valor: i.por_edad[k] ?? 0, color: PALETA[n % PALETA.length] }))} />
             </div>
 
             <div className={g.bloque}>
-              <h3>Nuevas alumnas por mes</h3>
+              <h3>Nuevas alumnos/as por mes</h3>
               <LineaMensual formato={String} entero datos={i.altas_mensuales.map((m) => ({ mes: m.mes, total: m.altas }))} />
             </div>
 
@@ -400,7 +400,7 @@ export default async function Informes({
           </section>
 
           <section className={styles.tarjeta}>
-            <h2>Alumnas perdidas ({atletas.perdidas.length})</h2>
+            <h2>Alumnos/as perdidos/as ({atletas.perdidas.length})</h2>
             <Lista personas={atletas.perdidas} vacio="Nadie ha dejado de renovar en este periodo." />
           </section>
           <section className={styles.tarjeta}>

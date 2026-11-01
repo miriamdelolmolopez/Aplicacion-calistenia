@@ -48,7 +48,7 @@ function Formulario() {
 
       {registroCerrado && (
         <p className={styles.aviso} role="alert">
-          {idioma === "en" ? "Sign-up is closed: this app is only for Miriam’s students. Message her on WhatsApp." : "El registro está cerrado: esta app es solo para las alumnas de Miriam. Escríbele por WhatsApp."}
+          {idioma === "en" ? "Sign-up is closed: this app is only for Miriam’s students. Message her on WhatsApp." : "El registro está cerrado: esta app es solo para los/las alumnos/as de Miriam. Escríbele por WhatsApp."}
         </p>
       )}
 

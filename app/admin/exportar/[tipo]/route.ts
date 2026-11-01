@@ -92,7 +92,7 @@ async function todoPorPersona(): Promise<string> {
         String(p.dni ?? ""),
         dia(p.fecha_nacimiento),
         p.sexo ? (sexoTexto[String(p.sexo)] ?? String(p.sexo)) : "",
-        p.rol === "invitado" ? "Invitada" : "Alumna",
+        p.rol === "invitado" ? "Invitado/a" : "Alumno/a",
         dia(p.creado_en),
         de(servicios, p.id).map((s) => s.servicio).join(" + "),
         String(p.contacto_emergencia_nombre ?? ""),

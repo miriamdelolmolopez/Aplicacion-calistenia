@@ -25,7 +25,7 @@ export default async function AdministrarAprende() {
           ← Volver
         </Link>
       </header>
-      <p className={styles.aviso}>Aquí cambias lo que las alumnas ven en Más → Aprende.</p>
+      <p className={styles.aviso}>Aquí cambias lo que los/las alumnos/as ven en Más → Aprende.</p>
       <section className={styles.tarjeta}>
         {opciones.map((o) => (
           <Link key={o.href} href={o.href} className={styles.boton}>

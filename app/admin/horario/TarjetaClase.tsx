@@ -55,7 +55,7 @@ function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
             <input id={`e-p-${c.id}`} name="plazas" type="number" min={1} max={100} required defaultValue={c.plazas} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`e-i-${c.id}`}>De ellas, plazas para invitadas (clase de prueba)</label>
+            <label htmlFor={`e-i-${c.id}`}>De ellas, plazas para invitados/as (clase de prueba)</label>
             <input id={`e-i-${c.id}`} name="plazas_prueba" type="number" min={0} max={100} defaultValue={c.plazasPrueba} />
           </div>
           <p className={styles.ayuda}>
@@ -151,12 +151,12 @@ export default function TarjetaClase({ c }: { c: DatosClase }) {
         </span>
       </div>
       <div className={estilos.cifras}>
-        <span title="Plazas para alumnas">
-          <IconoUsuario color="#3a3a3c" titulo="Plazas para alumnas" />
+        <span title="Plazas para alumnos/as">
+          <IconoUsuario color="#3a3a3c" titulo="Plazas para alumnos/as" />
           {c.plazas}
         </span>
-        <span title="Plazas para invitadas">
-          <IconoUsuario color="#b5b8bd" titulo="Plazas para invitadas" />
+        <span title="Plazas para invitados/as">
+          <IconoUsuario color="#b5b8bd" titulo="Plazas para invitados/as" />
           {c.plazasPrueba}
         </span>
       </div>

@@ -136,7 +136,7 @@ export function FormularioTipo({
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
       <input type="hidden" name="tipoId" value={tipo.id} />
       <p className={styles.ayuda}>
-        {tipo.servicio === "individual" ? "Entrenamiento individual: lo ven y reservan solo las alumnas individuales." : "Clase grupal."}
+        {tipo.servicio === "individual" ? "Entrenamiento individual: lo ven y reservan solo los/las alumnos/as individuales." : "Clase grupal."}
       </p>
       <div className={styles.campo}>
         <label htmlFor={`no-${tipo.id}`}>Nombre</label>
@@ -163,7 +163,7 @@ export function FormularioTipo({
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="lista_espera" defaultChecked={tipo.lista_espera} />
-        <span>Tiene lista de espera (si está llena, las alumnas pueden apuntarse a la lista)</span>
+        <span>Tiene lista de espera (si está llena, los/las alumnos/as pueden apuntarse a la lista)</span>
       </label>
       <div className={styles.campo}>
         <label htmlFor={`pl-${tipo.id}`}>Plazas</label>
@@ -188,7 +188,7 @@ export function FormularioTipo({
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`pp-${tipo.id}`}>Plazas para invitados (prueba)</label>
+        <label htmlFor={`pp-${tipo.id}`}>Plazas para invitados/as (prueba)</label>
         <input
           id={`pp-${tipo.id}`}
           name="plazas_prueba"
@@ -282,7 +282,7 @@ export function NuevoTipo({ alTerminar }: { alTerminar?: () => void } = {}) {
         <input id="nt-min" name="minimo_alumnos" type="number" min={0} max={100} defaultValue={0} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nt-prueba">Plazas para invitados (prueba)</label>
+        <label htmlFor="nt-prueba">Plazas para invitados/as (prueba)</label>
         <input id="nt-prueba" name="plazas_prueba" type="number" min={0} max={100} defaultValue={2} />
       </div>
       <label className={styles.casilla}>
@@ -372,7 +372,7 @@ function FormularioApuntar({
     <form action={accion} className={styles.formularioInterno}>
       <input type="hidden" name="sesionId" value={sesionId} />
       <div className={styles.campo}>
-        <label htmlFor={`ap-${sesionId}`}>Apuntar a un alumno</label>
+        <label htmlFor={`ap-${sesionId}`}>Apuntar a un/a alumno/a</label>
         <select id={`ap-${sesionId}`} name="persona" defaultValue="">
           <option value="" disabled>
             Elige una persona…
@@ -471,7 +471,7 @@ export function FilaClase({
               />
             </div>
             <div className={styles.campo}>
-              <label htmlFor={`prueba-${clase.id}`}>Plazas para invitados (prueba)</label>
+              <label htmlFor={`prueba-${clase.id}`}>Plazas para invitados/as (prueba)</label>
               <input
                 id={`prueba-${clase.id}`}
                 name="plazas_prueba"

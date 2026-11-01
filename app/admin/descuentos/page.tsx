@@ -54,7 +54,7 @@ export default async function Descuentos() {
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>
           Los descuentos los aplicas tú al registrar un pago (en «Pagos»). El pago guarda el precio original, el descuento y el total, y la
-          alumna lo ve en «Mis pagos». Un descuento que ya se ha usado no se puede eliminar, solo desactivar.
+          alumno/a lo ve en «Mis pagos». Un descuento que ya se ha usado no se puede eliminar, solo desactivar.
         </p>
         <ListaDescuentos descuentos={filas} />
       </section>

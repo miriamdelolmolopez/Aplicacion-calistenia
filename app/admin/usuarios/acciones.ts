@@ -94,7 +94,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   const correo = String(formData.get("correo") ?? "").trim().toLowerCase();
   const tipo = String(formData.get("tipo") ?? "");
   if (!emailValido(correo)) return { error: "El correo no es válido." };
-  if (tipo !== "invitado" && tipo !== "alumno") return { error: "Elige si es invitada o alumna." };
+  if (tipo !== "invitado" && tipo !== "alumno") return { error: "Elige si es invitado/a o alumno/a." };
 
   const admin = createAdminClient();
   const { data: existente } = await admin.from("profiles").select("id").ilike("email", correo).maybeSingle();
@@ -163,7 +163,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   const host = h.get("host") ?? "localhost:3000";
   const protocolo = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   return {
-    mensaje: `Alumna creada (${correo}).${avisoBono} ${enviado ? "Le hemos enviado el correo para elegir su contraseña. Si prefieres, también puedes mandarle este enlace por WhatsApp:" : "No se pudo enviar el correo: mándale este enlace por WhatsApp:"}`,
+    mensaje: `Alumno/a creada (${correo}).${avisoBono} ${enviado ? "Le hemos enviado el correo para elegir su contraseña. Si prefieres, también puedes mandarle este enlace por WhatsApp:" : "No se pudo enviar el correo: mándale este enlace por WhatsApp:"}`,
     enlace: `${protocolo}://${host}${ruta}`,
   };
 }

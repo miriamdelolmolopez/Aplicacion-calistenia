@@ -136,10 +136,10 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
           <IconoArena color="#e8890c" titulo="Preinscripción" /> días de preinscripción
         </span>
         <span>
-          <IconoUsuario color="#3a3a3c" titulo="Alumnas" /> plazas alumnas
+          <IconoUsuario color="#3a3a3c" titulo="Alumnos/as" /> plazas alumnos/as
         </span>
         <span>
-          <IconoUsuario color="#b5b8bd" titulo="Invitadas" /> plazas invitadas
+          <IconoUsuario color="#b5b8bd" titulo="Invitados/as" /> plazas invitados/as
         </span>
       </p>
 

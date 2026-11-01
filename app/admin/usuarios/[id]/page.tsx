@@ -26,7 +26,7 @@ import Notas from "./Notas";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
 
-const ROLES: Record<string, string> = { alumno: "Alumna", invitado: "Invitada" };
+const ROLES: Record<string, string> = { alumno: "Alumno/a", invitado: "Invitado/a" };
 const SERVICIOS: Record<string, string> = { grupal: "Grupal", individual: "Individual", online: "Online" };
 const ESTADOS_BONO: Record<string, string> = {
   activo: "Activo",
@@ -538,7 +538,7 @@ export default async function FichaUsuario({
             <nav className={estilos.acciones} aria-label="Acciones">
               <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>
               <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
-              <Link href={`/admin/reservas/como/${id}`}>Reservar clases como ella</Link>
+              <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>
               {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
               <Link href={aFicha("reservas")}>Calendario de reservas</Link>
               <Link href={aFicha("perfil")}>Editar datos y servicios</Link>

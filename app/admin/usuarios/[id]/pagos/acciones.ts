@@ -217,3 +217,58 @@ export async function quitarPrecioPersonalizado(_previo: Estado, formData: FormD
   refrescar(userId);
   return { mensaje: "Precio personalizado quitado: vuelve a pagar el precio normal." };
 }
+
+// Editar un pago cobrado: día, hora, forma de pago, nota e importe.
+// Si el importe cambia y el pago ya tenía factura, se anula con su rectificativa y se crea otro pago con el importe nuevo (y su factura nueva).
+export async function editarPago(_previo: Estado, formData: FormData): Promise<Estado> {
+  const { user } = await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const pagoId = String(formData.get("pagoId") ?? "");
+  const metodo = String(formData.get("metodo") ?? "");
+  const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
+  const importe = aCentimos(String(formData.get("importe") ?? ""));
+  if (!UUID.test(userId) || !UUID.test(pagoId)) return { error: "No se ha encontrado ese pago." };
+  if (!(await formaActiva(metodo))) return { error: "Elige la forma de pago." };
+  if (!Number.isFinite(importe) || importe <= 0 || importe > 1_000_000) return { error: "El importe no es válido." };
+  const c = cuando(String(formData.get("fecha") ?? "").trim(), String(formData.get("hora") ?? "").trim());
+  if ("error" in c) return { error: c.error };
+
+  const admin = createAdminClient();
+  const { data: p } = await admin.from("pagos").select("id, user_id, bono_id, estado, importe_centimos").eq("id", pagoId).maybeSingle();
+  if (!p || p.user_id !== userId) return { error: "No se ha encontrado ese pago." };
+  if (p.estado !== "pagado") return { error: "Solo se puede editar un pago cobrado." };
+
+  const periodo = mesMadrid(c.instante);
+  const cambiaImporte = importe !== p.importe_centimos;
+  const { data: factura } = await admin.from("facturas").select("id").eq("pago_id", pagoId).eq("tipo", "normal").maybeSingle();
+
+  if (cambiaImporte && factura) {
+    const nuevo = await admin
+      .from("pagos")
+      .insert({ user_id: userId, bono_id: p.bono_id, importe_centimos: importe, metodo, estado: "pagado", pagado_en: c.instante.toISOString(), periodo, nota: nota || "Corrige un pago anterior" })
+      .select("id")
+      .single();
+    if (nuevo.error) return { error: "No se ha podido crear el pago corregido." };
+    const { error } = await admin.rpc("anular_pago", { p_pago: pagoId, p_nota: "Importe corregido", p_admin: user.id });
+    if (error) {
+      await admin.from("pagos").delete().eq("id", nuevo.data.id);
+      return { error: error.message };
+    }
+    refrescar(userId);
+    return { mensaje: "Importe corregido: el pago anterior queda anulado con su factura rectificativa y hay una factura nueva." };
+  }
+
+  const { error } = await admin
+    .from("pagos")
+    .update({
+      pagado_en: c.instante.toISOString(),
+      metodo,
+      periodo,
+      nota: nota || null,
+      ...(cambiaImporte ? { importe_centimos: importe, importe_original_centimos: null, descuento_centimos: 0 } : {}),
+    })
+    .eq("id", pagoId);
+  if (error) return { error: "No se ha podido guardar." };
+  refrescar(userId);
+  return { mensaje: "Pago actualizado." };
+}

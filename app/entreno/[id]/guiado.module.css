@@ -262,14 +262,14 @@
   text-align: center;
 }
 
-/* Descanso: pantalla verde que tapa el ejercicio hasta que acaba el tiempo. */
+/* Descanso: pantalla azul que tapa el ejercicio hasta que acaba el tiempo. */
 .descanso {
   position: fixed;
   inset: 0;
   z-index: 80;
   display: flex;
   flex-direction: column;
-  background: #9bae6b;
+  background: #0a96ab;
   color: var(--blanco);
   animation: aparecer 0.2s ease-out;
 }

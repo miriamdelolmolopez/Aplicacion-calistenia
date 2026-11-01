@@ -82,6 +82,11 @@ export default async function PagosPersona({ params, searchParams }: { params: P
   const pendientes = pagos.filter((x) => x.estado === "pendiente").map((x) => ({ id: x.id, tipoId: x.bonos?.tipo_bono_id ?? null, importe: x.importe_centimos, metodo: x.metodo }));
   const totalPendiente = pendientes.reduce((n, x) => n + x.importe, 0);
 
+  const { data: facturasDatos } = pagos.length
+    ? await admin.from("facturas").select("pago_id").eq("tipo", "normal").in("pago_id", pagos.map((x) => x.id))
+    : { data: [] };
+  const conFactura = new Set(((facturasDatos ?? []) as { pago_id: string }[]).map((f) => f.pago_id));
+
   const filas: FilaPagoPersona[] = pagos.map((x) => {
     const concepto = x.bonos?.tipos_bono?.nombre ?? x.nota ?? "Pago suelto";
     const cuando = x.pagado_en ?? x.creado_en;
@@ -96,6 +101,10 @@ export default async function PagosPersona({ params, searchParams }: { params: P
       fecha: `${fechaCorta(cuando)} ${textoHora(cuando)}`,
       periodo: x.periodo,
       nota: x.bonos?.tipos_bono?.nombre ? x.nota : null,
+      notaCompleta: x.nota,
+      dia: claveDia(cuando),
+      hora: textoHora(cuando),
+      tieneFactura: conFactura.has(x.id),
     };
   });
 

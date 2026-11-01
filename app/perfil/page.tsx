@@ -242,7 +242,7 @@ export default function Perfil() {
       <AvisoVistaAlumna perfil={mi} />
       {esAdmin && (
         <button type="button" className={vistaEstilos.cambiar} onClick={() => cambiarVistaAlumna(true)}>
-          👁️ {idioma === "en" ? "Switch to student view" : "Cambiar a vista de alumna"}
+          👁️ {idioma === "en" ? "Switch to student view" : "Cambiar a vista de alumno/a"}
         </button>
       )}
 

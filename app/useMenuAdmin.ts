@@ -52,11 +52,13 @@ export function useMenuAdmin(): {
   estaVisible: (o: OpcionMenuAdmin) => boolean;
   poner: (href: string, visible: boolean) => void;
   mover: (href: string, direccion: -1 | 1) => void;
+  ordenar: (hrefs: string[]) => void; // nuevo orden de toda la barra lateral (al arrastrar)
   barra: OpcionMenuAdmin[]; // opciones de la barra de abajo, en orden
   disponiblesBarra: OpcionMenuAdmin[];
   ponerEnBarra: (href: string) => void;
   quitarDeBarra: (href: string) => void;
   moverEnBarra: (href: string, direccion: -1 | 1) => void;
+  ordenarBarra: (hrefs: string[]) => void; // nuevo orden de la barra de abajo (al arrastrar)
 } {
   const crudo = useSyncExternalStore(suscribir, () => leer(CLAVE), () => "");
   const crudoOrden = useSyncExternalStore(suscribir, () => leer(CLAVE_ORDEN), () => "");
@@ -96,6 +98,8 @@ export function useMenuAdmin(): {
     estaVisible,
     poner: (href, visible) => guardar(CLAVE, { ...elegido, [href]: visible }),
     mover: (href, direccion) => guardar(CLAVE_ORDEN, mueve(ordenadas.map((o) => o.href), href, direccion)),
+    ordenar: (hrefs) => guardar(CLAVE_ORDEN, hrefs),
+    ordenarBarra: (hrefs) => guardar(CLAVE_BARRA, hrefs),
     barra,
     disponiblesBarra,
     ponerEnBarra: (href) => {

@@ -216,7 +216,7 @@ export default function ListaRutinas({
       </div>
       <PanelFiltros
         activos={(estado !== "todos" ? 1 : 0) + (alumno !== "todos" ? 1 : 0)}
-        buscador={<Buscador valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar rutina o alumna…" />}
+        buscador={<Buscador valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar rutina o alumno/a…" />}
       >
         <div className={styles.campo}>
           <label htmlFor="fr-estado">Estado</label>
@@ -228,7 +228,7 @@ export default function ListaRutinas({
           </select>
         </div>
         <div className={styles.campo}>
-          <label htmlFor="fr-alumno">Alumna</label>
+          <label htmlFor="fr-alumno">Alumno/a</label>
           <select id="fr-alumno" value={alumno} onChange={(e) => setAlumno(e.target.value)}>
             <option value="todos">Todos</option>
             {alumnosConRutina.map((a) => (
@@ -289,7 +289,7 @@ export default function ListaRutinas({
         ))}
 
       {aqui.length === 0 && (!modoDrive || buscando || hijas.length === 0) && (
-        <p className={comunes.sinResultados}>{rutinas.length === 0 ? "Todavía no hay rutinas de alumnas." : "No hay rutinas aquí."}</p>
+        <p className={comunes.sinResultados}>{rutinas.length === 0 ? "Todavía no hay rutinas de alumnos/as." : "No hay rutinas aquí."}</p>
       )}
 
       {modoDrive || buscando

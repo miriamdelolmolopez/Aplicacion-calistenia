@@ -39,7 +39,7 @@ export default async function LinkPrueba() {
         nombre: [p?.nombre, p?.apellidos].filter(Boolean).join(" ") || p?.email || u.email || "(sin nombre)",
         alta: u.created_at,
         reservo: conPrueba.has(u.id),
-        rol: p?.rol ?? "invitado",
+        rol: p?.rol ?? "invitado/a",
       };
     })
     .sort((a, b) => b.alta.localeCompare(a.alta));
@@ -56,7 +56,7 @@ export default async function LinkPrueba() {
       <section className={styles.tarjeta}>
         <h2>Link de clase de prueba gratuita</h2>
         <p className={styles.ayuda}>
-          Compártelo en Instagram o por WhatsApp. Quien lo abre ve una página de «Prueba una clase gratis» y crea su cuenta. Se registra como invitada: solo ve las plazas de
+          Compártelo en Instagram o por WhatsApp. Quien lo abre ve una página de «Prueba una clase gratis» y crea su cuenta. Se registra como invitado/a: solo ve las plazas de
           prueba libres y puede hacer una clase. Con el registro cerrado (en Registro), este link es la única forma de que alguien nuevo cree cuenta.
         </p>
         <ControlesLink link={link} activo={activo} />
@@ -75,7 +75,7 @@ export default async function LinkPrueba() {
                   </Link>
                   <div className={styles.ayuda}>Se registró el {fechaCorta(f.alta)}</div>
                 </div>
-                <span className={styles.etiquetaSuave}>{f.reservo ? "Ya reservó su clase de prueba" : f.rol === "invitado" ? "Aún no ha reservado" : "Ya es alumna"}</span>
+                <span className={styles.etiquetaSuave}>{f.reservo ? "Ya reservó su clase de prueba" : f.rol === "invitado" ? "Aún no ha reservado" : "Ya es alumno/a"}</span>
               </div>
             </li>
           ))}

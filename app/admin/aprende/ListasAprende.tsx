@@ -59,7 +59,7 @@ function Lista({
           <label htmlFor={`la-${tabla}`}>Visibilidad</label>
           <select id={`la-${tabla}`} value={visibilidad} onChange={(e) => setVisibilidad(e.target.value)}>
             <option value="todos">Todos</option>
-            <option value="visibles">Visibles para las alumnas</option>
+            <option value="visibles">Visibles para los/las alumnos/as</option>
             <option value="ocultos">Ocultos</option>
           </select>
         </div>

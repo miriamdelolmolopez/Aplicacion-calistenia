@@ -56,7 +56,7 @@ export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; ti
                 <input id="ag-p" name="plazas" type="number" min={1} max={100} />
               </div>
               <div className={styles.campo}>
-                <label htmlFor="ag-i">Plazas para invitadas (vacío = las del tipo)</label>
+                <label htmlFor="ag-i">Plazas para invitados/as (vacío = las del tipo)</label>
                 <input id="ag-i" name="plazas_prueba" type="number" min={0} max={100} />
               </div>
               <button className={styles.boton} type="submit" disabled={pendiente}>

@@ -561,7 +561,7 @@ function TarjetaItem({
             </div>
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`no-${item.id}`}>Nota para la alumna (opcional)</label>
+            <label htmlFor={`no-${item.id}`}>Nota para el/la alumno/a (opcional)</label>
             <input id={`no-${item.id}`} name="nota" maxLength={300} placeholder="Por ejemplo: con banda de 15 kg" defaultValue={item.nota ?? ""} />
           </div>
           <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -838,7 +838,7 @@ function CabeceraRutina({
         <div>
           <h2 style={{ margin: 0 }}>{rutina.nombre}</h2>
           <div className={styles.ayuda}>
-            {rutina.esPlantilla ? "Plantilla (sin alumna)" : `Alumna: ${rutina.alumno ?? "—"}`}
+            {rutina.esPlantilla ? "Plantilla (sin alumno/a)" : `Alumno/a: ${rutina.alumno ?? "—"}`}
           </div>
         </div>
         <span className={`${styles.estadoChip} ${styles[e.clase]}`}>{e.texto}</span>
@@ -850,10 +850,10 @@ function CabeceraRutina({
             <form action={accionPub} className={styles.formularioInterno}>
               <input type="hidden" name="id" value={rutina.id} />
               <button className={styles.boton} type="submit" disabled={pendientePub}>
-                {pendientePub ? "Publicando…" : rutina.estado === "historial" ? "Volver a publicar" : "Publicar para la alumna"}
+                {pendientePub ? "Publicando…" : rutina.estado === "historial" ? "Volver a publicar" : "Publicar para el/la alumno/a"}
               </button>
               <p className={styles.ayuda}>
-                El alumno la verá al momento (si tiene su plan online activo). La rutina publicada
+                El/la alumno/a la verá al momento (si tiene su plan online activo). La rutina publicada
                 anterior pasa a su historial.
               </p>
               <Mensajes estado={estadoPub} />
@@ -862,10 +862,10 @@ function CabeceraRutina({
             <form action={accionDes} className={styles.formularioInterno}>
               <input type="hidden" name="id" value={rutina.id} />
               <button className={`${styles.boton} ${styles.botonSecundario}`} type="submit" disabled={pendienteDes}>
-                Pasar a borrador (el alumno deja de verla)
+                Pasar a borrador (el/la alumno/a deja de verla)
               </button>
               <p className={styles.ayuda}>
-                Está publicada: los cambios que hagas aquí los ve el alumno al momento.
+                Está publicada: los cambios que hagas aquí los ve el/la alumno/a al momento.
               </p>
               <Mensajes estado={estadoDes} />
             </form>
@@ -882,21 +882,21 @@ function CabeceraRutina({
             <input id="rut-nombre" name="nombre" required maxLength={80} defaultValue={rutina.nombre} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor="rut-nota">Nota para la alumna (opcional)</label>
+            <label htmlFor="rut-nota">Nota para el/la alumno/a (opcional)</label>
             <textarea id="rut-nota" name="nota" rows={3} maxLength={1000} defaultValue={rutina.nota ?? ""} />
           </div>
           <div className={styles.campo}>
             <label htmlFor="rut-semanas">Semanas que dura la rutina</label>
             <input id="rut-semanas" name="semanas" type="number" min={1} max={52} defaultValue={rutina.semanas} />
             <span className={styles.ayuda}>
-              Las sesiones se repiten cada semana. La alumna ve «Semana 1», «Semana 2»… con un check al completar cada sesión.
+              Las sesiones se repiten cada semana. El/la alumno/a ve «Semana 1», «Semana 2»… con un check al completar cada sesión.
             </span>
           </div>
           <div className={styles.campo}>
             <label htmlFor="rut-entrenos">Entrenos por semana (opcional)</label>
             <input id="rut-entrenos" name="entrenos_semana" type="number" min={1} max={14} defaultValue={rutina.entrenosSemana ?? ""} />
             <span className={styles.ayuda}>
-              Si lo dejas vacío cuenta el número de sesiones. Se usará para la racha del alumno.
+              Si lo dejas vacío cuenta el número de sesiones. Se usará para la racha del alumno/a.
             </span>
           </div>
           <button className={styles.boton} type="submit" disabled={pendienteDatos}>
@@ -907,7 +907,7 @@ function CabeceraRutina({
       </details>
 
       <details className={styles.detalles}>
-        <summary>Copiar a otra alumna o guardar como plantilla</summary>
+        <summary>Copiar a otro/a alumno/a o guardar como plantilla</summary>
         <form action={accionCopia} className={styles.formularioInterno}>
           <input type="hidden" name="id" value={rutina.id} />
           <div className={styles.campo}>
@@ -916,7 +916,7 @@ function CabeceraRutina({
               <option value="" disabled>
                 Elige…
               </option>
-              <option value="plantilla">Plantilla (sin alumna)</option>
+              <option value="plantilla">Plantilla (sin alumno/a)</option>
               {alumnos.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.texto}

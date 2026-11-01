@@ -39,7 +39,7 @@ const FILTROS = [
   { id: "grupal", texto: "Grupales" },
   { id: "individual", texto: "Individuales" },
   { id: "online", texto: "Online" },
-  { id: "alumno", texto: "Alumnas" },
+  { id: "alumno", texto: "Alumnos/as" },
   { id: "invitado", texto: "Invitadas" },
   { id: "sin", texto: "Sin servicio" },
 ] as const;
@@ -218,7 +218,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     </span>
                   </Link>
                 </td>
-                <td>{u.rol === "invitado" ? "Invitada" : "Alumna"}</td>
+                <td>{u.rol === "invitado" ? "Invitado/a" : "Alumno/a"}</td>
                 <td>{u.servicios.map((x) => NOMBRE_SERVICIO[x] ?? x).join(", ") || "—"}</td>
                 <td>{u.tarifas.join(" + ") || "—"}</td>
                 <td>

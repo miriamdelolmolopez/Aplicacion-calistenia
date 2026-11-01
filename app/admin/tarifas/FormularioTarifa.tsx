@@ -85,7 +85,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
 
       {servicio === "online" ? (
         <div className={styles.campo}>
-          <label htmlFor={`tf-c-${p}`}>Entrenos incluidos (para el círculo de progreso de la alumna)</label>
+          <label htmlFor={`tf-c-${p}`}>Entrenos incluidos (para el círculo de progreso del/de la alumno/a)</label>
           <input id={`tf-c-${p}`} name="clases" type="number" min={1} max={100} required defaultValue={tarifa && tarifa.servicio === "online" ? tarifa.clases : 12} />
           <span className={styles.ayuda}>Los entrenos que haga desde la app cuentan hasta este número.</span>
         </div>
@@ -182,7 +182,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
       {!otro && (
         <label className={styles.casilla}>
           <input type="checkbox" name="requiere_pago" defaultChecked={tarifa?.requiere_pago ?? false} />
-          <span>Solo se activa cuando se paga (si no, la alumna puede reservar aunque el pago esté pendiente)</span>
+          <span>Solo se activa cuando se paga (si no, el/la alumno/a puede reservar aunque el pago esté pendiente)</span>
         </label>
       )}
 

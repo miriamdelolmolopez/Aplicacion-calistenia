@@ -115,7 +115,7 @@ export async function editarClase(_previo: Estado, formData: FormData): Promise<
   const plazas = entero(texto(formData, "plazas"));
   const prueba = entero(texto(formData, "plazas_prueba")) ?? 0;
   if (plazas === null || !(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
-  if (!(prueba >= 0 && prueba <= plazas)) return { error: "Las plazas de invitadas no pueden ser más que las plazas." };
+  if (!(prueba >= 0 && prueba <= plazas)) return { error: "Las plazas de invitados/as no pueden ser más que las plazas." };
   const horas = entero(texto(formData, "cancelacion_horas"));
   const dias = entero(texto(formData, "reserva_dias_max"));
   if (horas !== null && !(horas >= 0 && horas <= 168)) return { error: "Las horas para cancelar van de 0 a 168 (o déjalo vacío)." };

@@ -16,9 +16,9 @@ export default function FormularioAlta() {
 
   return (
     <form action={accion} className={styles.tarjeta}>
-      <h2>Dar de alta a una alumna</h2>
+      <h2>Dar de alta a un/a alumno/a</h2>
       <div className={styles.campo}>
-        <label htmlFor="correo-alta">Correo de la alumna</label>
+        <label htmlFor="correo-alta">Correo del/de la alumno/a</label>
         <input id="correo-alta" name="correo" type="email" required />
       </div>
       <fieldset className={styles.grupo}>
@@ -36,7 +36,7 @@ export default function FormularioAlta() {
         </p>
       )}
       <button className={styles.boton} type="submit" disabled={pendiente}>
-        {pendiente ? "Creando…" : "Crear alumna y generar enlace"}
+        {pendiente ? "Creando…" : "Crear alumno/a y generar enlace"}
       </button>
       {estado.mensaje && (
         <div role="status">

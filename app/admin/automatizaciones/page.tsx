@@ -15,7 +15,7 @@ const INFO: Record<string, Info & { orden: number }> = {
   prueba_recordatorio: {
     titulo: "Recordatorio de la clase de prueba",
     cuando: "El día antes de la clase de prueba. Cada mañana la app mira las clases de prueba de las próximas 30 horas y avisa; si la clase es muy temprano, el aviso sale el día anterior.",
-    aQuien: "A la persona que ha reservado una clase de prueba (invitada).",
+    aQuien: "A la persona que ha reservado una clase de prueba (invitado/a).",
     queHace: "Le envía un correo con el nombre de la clase y el día y la hora, con un enlace a Clases. Solo se envía una vez por reserva.",
     variables: "{nombre}, {clase}, {fecha}",
     orden: 1,
@@ -31,7 +31,7 @@ const INFO: Record<string, Info & { orden: number }> = {
   bono_caduca: {
     titulo: "Aviso de bono a punto de caducar",
     cuando: "Cada mañana la app mira los bonos activos. Avisa cuando a un bono le quedan los días de antelación que pongas abajo (o menos) para caducar.",
-    aQuien: "A la alumna con ese bono, solo si tiene activados los avisos del bono en sus ajustes.",
+    aQuien: "Al/a la alumno/a con ese bono, solo si tiene activados los avisos del bono en sus ajustes.",
     queHace: "Le envía un correo con el nombre del bono, la fecha en que caduca y las clases que le quedan, con un enlace a su cuenta. Solo se envía una vez por bono.",
     variables: "{nombre}, {bono}, {fecha}, {clases}",
     orden: 3,
@@ -39,7 +39,7 @@ const INFO: Record<string, Info & { orden: number }> = {
   cumple: {
     titulo: "Cumpleaños y regalo",
     cuando: "El día del cumpleaños de cada persona (según la fecha de nacimiento de su perfil), en la revisión de la mañana. Una vez al año.",
-    aQuien: "A alumnas e invitadas que tengan puesta su fecha de nacimiento.",
+    aQuien: "A alumnos/as e invitados/as que tengan puesta su fecha de nacimiento.",
     queHace:
       "Le envía un correo de felicitación. Si tiene un bono de clases presenciales, le suma 1 clase gratis. Si solo tiene plan online, le regala una videollamada de 45 minutos (dudas o entrenamiento en directo) y a ti te llega un aviso para quedar con ella.",
     variables: "{nombre}, {regalo}",

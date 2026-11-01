@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import type { Estado } from "../../../acciones";
 import styles from "../../../admin.module.css";
 import { euros } from "@/lib/formato";
-import { anularPagoPersona, cobrarPendiente, guardarPrecioPersonalizado, pagoGuiado, pagoManual, quitarPrecioPersonalizado } from "./acciones";
+import { anularPagoPersona, editarPago, cobrarPendiente, guardarPrecioPersonalizado, pagoGuiado, pagoManual, quitarPrecioPersonalizado } from "./acciones";
 import estilos from "./pagosPersona.module.css";
 
 export type FormaOpcion = { clave: string; nombre: string };
@@ -23,6 +23,10 @@ export type FilaPagoPersona = {
   fecha: string; // texto ya formateado
   periodo: string | null; // AAAA-MM
   nota: string | null;
+  notaCompleta: string | null;
+  dia: string; // AAAA-MM-DD
+  hora: string; // HH:MM
+  tieneFactura: boolean;
 };
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -272,6 +276,50 @@ function FormCobrar({ userId, pagoId, formas, hoy, ahora, metodoActual }: { user
   );
 }
 
+function FormEditar({ userId, pago, formas, hoy }: { userId: string; pago: FilaPagoPersona; formas: FormaOpcion[]; hoy: string }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(editarPago, {});
+  const id = `ed-${pago.id}`;
+  return (
+    <form action={accion} className={styles.formularioInterno}>
+      <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="pagoId" value={pago.id} />
+      <div className={estilos.dos}>
+        <div className={styles.campo}>
+          <label htmlFor={`${id}-fecha`}>Día del pago</label>
+          <input id={`${id}-fecha`} name="fecha" type="date" defaultValue={pago.dia} max={hoy} />
+        </div>
+        <div className={styles.campo}>
+          <label htmlFor={`${id}-hora`}>Hora</label>
+          <input id={`${id}-hora`} name="hora" type="time" defaultValue={pago.hora} />
+        </div>
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`${id}-importe`}>Importe (€)</label>
+        <input id={`${id}-importe`} name="importe" inputMode="decimal" required defaultValue={(pago.importe / 100).toFixed(2).replace(".", ",")} />
+        {pago.tieneFactura && <span className={styles.ayuda}>Si cambias el importe, este pago se anula con su factura rectificativa y se crea una factura nueva con el importe correcto.</span>}
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`${id}-metodo`}>Forma de pago</label>
+        <select id={`${id}-metodo`} name="metodo" defaultValue={pago.metodo} required>
+          {formas.map((f) => (
+            <option key={f.clave} value={f.clave}>
+              {f.nombre}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`${id}-nota`}>Nota (opcional)</label>
+        <input id={`${id}-nota`} name="nota" maxLength={200} defaultValue={pago.notaCompleta ?? ""} />
+      </div>
+      <button type="submit" className={styles.boton} disabled={pendiente}>
+        {pendiente ? "Guardando…" : "Guardar los cambios"}
+      </button>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
+
 function FormAnular({ userId, pagoId }: { userId: string; pagoId: string }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(anularPagoPersona, {});
   return (
@@ -326,7 +374,7 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
               <FormCobrar userId={userId} pagoId={p.id} formas={formas} hoy={hoy} ahora={ahora} metodoActual={p.metodo} />
             </details>
           )}
-          {p.estado === "anulado" && (
+          {p.estado === "anulado" && p.tieneFactura && (
             <>
               <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
                 Descargar rectificativa
@@ -340,6 +388,12 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
             <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
               Descargar factura
             </a>
+          )}
+          {p.estado === "pagado" && (
+            <details>
+              <summary className={styles.ayuda}>Editar</summary>
+              <FormEditar userId={userId} pago={p} formas={formas} hoy={hoy} />
+            </details>
           )}
           {p.estado === "pagado" && (
             <details>

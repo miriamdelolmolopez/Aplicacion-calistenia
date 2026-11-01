@@ -211,7 +211,7 @@ export async function filasAtletas(): Promise<{ columnas: string[]; filas: strin
         p.telefono ?? "",
         fecha(p.fecha_nacimiento),
         fecha(p.creado_en),
-        p.rol === "invitado" ? "Invitada" : "Alumna",
+        p.rol === "invitado" ? "Invitado/a" : "Alumno/a",
         activos.map((b) => b.tipos_bono?.nombre ?? "").filter(Boolean).join(" + "),
         conDescuento ? "Sí" : "No",
         (gastado / 100).toFixed(2).replace(".", ","),

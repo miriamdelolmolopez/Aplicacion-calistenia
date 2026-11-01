@@ -22,7 +22,7 @@ function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + " €";
 }
 
-// Panel «+ Nuevo»: invitar a una persona o dar de alta a una alumna con su bono.
+// Panel «+ Nuevo»: invitar a una persona o dar de alta a un/a alumno/a con su bono.
 export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }: { tarifas: TarifaOpcion[]; formas: { clave: string; nombre: string }[]; abiertoInicial?: boolean }) {
   const [abierto, setAbierto] = useState(abiertoInicial);
   const [tipo, setTipo] = useState<"invitado" | "alumno">("alumno");
@@ -50,11 +50,11 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
             <legend>Tipo de usuario</legend>
             <label className={styles.casilla}>
               <input type="radio" name="tipo" value="alumno" checked={tipo === "alumno"} onChange={() => setTipo("alumno")} />
-              Alumna (ya entrena contigo)
+              Alumno/a (ya entrena contigo)
             </label>
             <label className={styles.casilla}>
               <input type="radio" name="tipo" value="invitado" checked={tipo === "invitado"} onChange={() => setTipo("invitado")} />
-              Invitada (recibe un correo para crear su cuenta)
+              Invitado/a (recibe un correo para crear su cuenta)
             </label>
           </fieldset>
 
@@ -81,7 +81,7 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
                   ))}
                 </select>
                 <span className={styles.ayuda}>
-                  Con un bono, la alumna ya puede reservar aunque todavía no haya pagado.
+                  Con un bono, el/la alumno/a ya puede reservar aunque todavía no haya pagado.
                 </span>
               </div>
 
@@ -124,7 +124,7 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
             </p>
           )}
           <button className={styles.boton} type="submit" disabled={pendiente}>
-            {pendiente ? "Creando…" : tipo === "alumno" ? "Crear alumna y avisarle" : "Enviar invitación"}
+            {pendiente ? "Creando…" : tipo === "alumno" ? "Crear alumno/a y avisarle" : "Enviar invitación"}
           </button>
           {estado.mensaje && (
             <div role="status">

@@ -134,7 +134,7 @@ export default async function Ejercicios({
             </div>
             <h2>Tus ejercicios</h2>
             <p className={styles.ayuda}>
-              Solo la ves tú. Más adelante, cada alumno verá los ejercicios de su rutina. Te faltan {sinVideo} vídeos
+              Solo la ves tú. Más adelante, cada alumno/a verá los ejercicios de su rutina. Te faltan {sinVideo} vídeos
               y {sinExplicacion} explicaciones por completar. Los músculos y el material de los ejercicios de partida
               son una sugerencia: revísalos.
             </p>
@@ -206,11 +206,11 @@ export default async function Ejercicios({
                         id={e.id}
                         nombre={e.nombre}
                         editor={
-                          <>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                             <BotonFoto destino="ejercicio" id={e.id} actual={fotos.get(e.id) ?? null} />
                             <VideoEjercicio url={e.video_url} titulo={e.nombre} />
                             <FormularioEjercicio ejercicio={e} materiales={materiales} />
-                          </>
+                          </div>
                         }
                       />
                     </div>

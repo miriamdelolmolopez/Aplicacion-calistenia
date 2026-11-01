@@ -69,13 +69,13 @@ export function FormularioRegistrar({
     <form action={accion} className={styles.tarjeta}>
       {alumnos.length === 0 ? (
         <p className={styles.ayuda}>
-          Todavía no hay alumnos. Da de alta uno en Administración o cambia a alumno a un
+          Todavía no hay alumnos/as. Da de alta uno en Administración o cambia a alumno/a a un
           invitado.
         </p>
       ) : (
         <>
           <div className={styles.campo}>
-            <label htmlFor="persona">Alumna</label>
+            <label htmlFor="persona">Alumno/a</label>
             <select id="persona" name="persona" required defaultValue="">
               <option value="" disabled>
                 Elige una persona…
