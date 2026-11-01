@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PestanasFicha from "./PestanasFicha";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
@@ -234,64 +235,7 @@ export default async function FichaUsuario({
   const mes = mesPedido && /^\d{4}-\d{2}$/.test(mesPedido) ? mesPedido : hoy.slice(0, 7);
   const aFicha = (pest: Pestana, extra = "") => `/admin/usuarios/${id}?pestana=${pest}${extra}`;
 
-  return (
-    <main className={styles.pagina}>
-      <header className={styles.barra}>
-        <h1>{nombre}</h1>
-        <Link href="/admin/usuarios" className={styles.enlaceBarra}>
-          ← Volver
-        </Link>
-      </header>
-
-      <section className={styles.tarjeta}>
-        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-          <Avatar nombre={nombre} url={foto} tamano={72} />
-          <div style={{ minWidth: 0 }}>
-            <strong style={{ fontSize: "1.15rem" }}>{nombre}</strong>
-            <div className={estilos.etiquetas} style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "4px 0" }}>
-              <span className={styles.etiquetaSuave}>{ROLES[p.rol] ?? p.rol}</span>
-              {servicios.map((s) => (
-                <span key={s} className={styles.etiquetaSuave}>
-                  {SERVICIOS[s] ?? s}
-                </span>
-              ))}
-              <span className={activos.length > 0 ? estilos.activa : estilos.sinTarifa}>{activos.length > 0 ? "Tarifa activa" : "Sin tarifa"}</span>
-              {sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
-            </div>
-            <div className={styles.ayuda} style={{ overflowWrap: "anywhere" }}>
-              {p.email}
-            </div>
-            {p.telefono && <div className={styles.ayuda}>{p.telefono}</div>}
-          </div>
-        </div>
-        <div className={estilos.contactos}>
-          {p.telefono && (
-            <a href={`https://wa.me/${paraWhatsapp(p.telefono)}`} target="_blank" rel="noopener noreferrer" className={estilos.contacto}>
-              WhatsApp
-            </a>
-          )}
-          {p.email && (
-            <a href={`mailto:${p.email}`} className={estilos.contacto}>
-              Correo
-            </a>
-          )}
-          {p.telefono && (
-            <a href={`tel:${p.telefono.replace(/\s/g, "")}`} className={estilos.contacto}>
-              Llamar
-            </a>
-          )}
-        </div>
-      </section>
-
-      <nav className={estilos.pestanas} aria-label="Secciones de la ficha">
-        {PESTANAS.map((x) => (
-          <Link key={x.id} href={aFicha(x.id)} className={`${estilos.pestana} ${pestana === x.id ? estilos.pestanaActiva : ""}`} aria-current={pestana === x.id ? "page" : undefined}>
-            {x.texto}
-          </Link>
-        ))}
-      </nav>
-
-      {pestana === "actual" && (
+  const panelActual = (
         <>
           <section className={styles.tarjeta}>
             <h2>Tarifa actual</h2>
@@ -335,9 +279,9 @@ export default async function FichaUsuario({
           </section>
 
         </>
-      )}
+  );
 
-      {pestana === "reservas" && (
+  const panelReservas = (
         <>
           <section className={styles.tarjeta}>
             <h2>Reservas</h2>
@@ -356,9 +300,9 @@ export default async function FichaUsuario({
           </section>
 
         </>
-      )}
+  );
 
-      {pestana === "logros" && (
+  const panelLogros = (
         <>
           {presencial ? (
             <section className={styles.tarjeta}>
@@ -416,9 +360,9 @@ export default async function FichaUsuario({
             </>
           )}
         </>
-      )}
+  );
 
-      {pestana === "perfil" && (
+  const panelPerfil = (
         <>
           <section className={styles.tarjeta}>
             <h2>Datos</h2>
@@ -452,9 +396,8 @@ export default async function FichaUsuario({
                 <dd>{p.idioma === "en" ? "Inglés" : "Español"}</dd>
               </div>
             </dl>
-            <details className={styles.detalles}>
-              <summary>Editar: tipo de cuenta, servicios y enlace de acceso</summary>
-              <EditorPersona
+            <h3 style={{ margin: "14px 0 0" }}>Tipo de cuenta, servicios y enlace de acceso</h3>
+            <EditorPersona
                 persona={{
                   id: p.id,
                   email: p.email ?? "",
@@ -462,7 +405,6 @@ export default async function FichaUsuario({
                   servicios: (p.perfil_servicios as { servicio: string }[]).map((s) => s.servicio),
                 }}
               />
-            </details>
           </section>
 
           <Link href={`/admin/usuarios/${p.id}/textos-legales`} className={estilos.tarjetaEnlace}>
@@ -491,9 +433,9 @@ export default async function FichaUsuario({
           </section>
 
         </>
-      )}
+  );
 
-      {pestana === "acciones" && (
+  const panelAcciones = (
         <>
           <section className={styles.tarjeta}>
             <h2>Acciones</h2>
@@ -502,6 +444,7 @@ export default async function FichaUsuario({
               <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
               <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>
               {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
+              {online && rutinaDe && <Link href={`/rutina/ver?como=${p.id}`}>Ver su rutina como alumno/a</Link>}
               <Link href={aFicha("reservas")}>Calendario de reservas</Link>
               <Link href={aFicha("perfil")}>Editar datos y servicios</Link>
               <Link href={`/admin/usuarios/${p.id}/textos-legales`}>Textos legales que aceptó</Link>
@@ -565,7 +508,69 @@ export default async function FichaUsuario({
             <EliminarUsuario userId={p.id} nombre={nombre} />
           </section>
         </>
-      )}
+  );
+
+  return (
+    <main className={styles.pagina}>
+      <header className={styles.barra}>
+        <h1>{nombre}</h1>
+        <Link href="/admin/usuarios" className={styles.enlaceBarra}>
+          ← Volver
+        </Link>
+      </header>
+
+      <section className={styles.tarjeta}>
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <Avatar nombre={nombre} url={foto} tamano={72} />
+          <div style={{ minWidth: 0 }}>
+            <strong style={{ fontSize: "1.15rem" }}>{nombre}</strong>
+            <div className={estilos.etiquetas} style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "4px 0" }}>
+              <span className={styles.etiquetaSuave}>{ROLES[p.rol] ?? p.rol}</span>
+              {servicios.map((s) => (
+                <span key={s} className={styles.etiquetaSuave}>
+                  {SERVICIOS[s] ?? s}
+                </span>
+              ))}
+              <span className={activos.length > 0 ? estilos.activa : estilos.sinTarifa}>{activos.length > 0 ? "Tarifa activa" : "Sin tarifa"}</span>
+              {sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
+            </div>
+            <div className={styles.ayuda} style={{ overflowWrap: "anywhere" }}>
+              {p.email}
+            </div>
+            {p.telefono && <div className={styles.ayuda}>{p.telefono}</div>}
+          </div>
+        </div>
+        <div className={estilos.contactos}>
+          {p.telefono && (
+            <a href={`https://wa.me/${paraWhatsapp(p.telefono)}`} target="_blank" rel="noopener noreferrer" className={estilos.contacto}>
+              WhatsApp
+            </a>
+          )}
+          {p.email && (
+            <a href={`mailto:${p.email}`} className={estilos.contacto}>
+              Correo
+            </a>
+          )}
+          {p.telefono && (
+            <a href={`tel:${p.telefono.replace(/\s/g, "")}`} className={estilos.contacto}>
+              Llamar
+            </a>
+          )}
+        </div>
+      </section>
+
+      <PestanasFicha
+        key={pestana}
+        id={id}
+        inicial={pestana}
+        pestanas={PESTANAS}
+        paneles={{ actual: panelActual, reservas: panelReservas, logros: panelLogros, perfil: panelPerfil, acciones: panelAcciones }}
+      />
+
+
+
+
+
     </main>
   );
 }

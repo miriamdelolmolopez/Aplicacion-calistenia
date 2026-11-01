@@ -15,6 +15,8 @@ import { claveDia, fechaCorta } from "@/lib/fechas";
 import { lunesDe, sumarDias } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
+import AvisoComo from "../AvisoComo";
+import { useComo } from "../useComo";
 import ResumenIconos from "../ResumenIconos";
 import { CATEGORIAS } from "@/lib/ejercicios";
 
@@ -45,11 +47,12 @@ type Datos = {
   dias: number[]; // 1 = lunes … 7 = domingo
 };
 
-async function obtenerDatos(): Promise<Datos> {
+// «como»: Miriam mira la rutina de otra persona tal y como la ve esa persona (las reglas de acceso solo se lo permiten a ella).
+async function obtenerDatos(como: string | null): Promise<Datos> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
-  const userId = auth.user?.id ?? "";
-  const { data: plan } = await supabase.rpc("mi_plan_online");
+  const userId = como ?? auth.user?.id ?? "";
+  const { data: plan } = como ? { data: true } : await supabase.rpc("mi_plan_online");
   if (plan !== true) return { userId, planActivo: false, rutina: null, anteriores: [], hechos: [], dias: [] };
 
   const [{ data: rutinas }, { data: entrenos }, { data: dias }] = await Promise.all([
@@ -58,10 +61,12 @@ async function obtenerDatos(): Promise<Datos> {
       .select(
         "id, nombre, estado, semanas, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
       )
+      .match(como ? { user_id: como } : {})
       .order("publicada_en", { ascending: false }),
     supabase
       .from("entrenos")
       .select("sesion_id, terminado_en")
+      .match(como ? { user_id: como } : {})
       .eq("estado", "terminado")
       .order("terminado_en", { ascending: false })
       .limit(500),
@@ -110,11 +115,12 @@ export default function VerRutina() {
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null>(null);
   const [abierta, setAbierta] = useState<string | null>(null);
+  const como = useComo();
   const hoy = claveDia(new Date().toISOString());
 
   useEffect(() => {
-    obtenerDatos().then(setDatos);
-  }, []);
+    obtenerDatos(como).then(setDatos);
+  }, [como]);
 
   if (datos === null) {
     return (
@@ -170,6 +176,7 @@ export default function VerRutina() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
+      {como && <AvisoComo userId={como} />}
       <h1 className={estiloRutina.titulo}>{rutina?.nombre ?? t.opcionVerRutina}</h1>
 
       {!datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}
@@ -223,7 +230,7 @@ export default function VerRutina() {
                           <span className={estilos.check} aria-label={completada ? t.completadaLabel : undefined}>
                             {completada ? "✓" : ""}
                           </span>
-                          <Link href={`/rutina/sesion/${s.id}`} className={estilos.sesionTexto}>
+                          <Link href={`/rutina/sesion/${s.id}${como ? `?como=${como}` : ""}`} className={estilos.sesionTexto}>
                             <strong>{s.nombre}</strong>
                             <span>
                               {t.minAprox.replace("{n}", String(minutos))} · {t.ejerciciosN.replace("{n}", String(s.rutina_items.length))}

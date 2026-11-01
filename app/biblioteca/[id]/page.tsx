@@ -30,16 +30,13 @@ type Ejercicio = {
   ejercicio_materiales: { materiales: { nombre: string; nombre_en: string | null } | null }[];
 };
 
-type Aparicion = { id: string; rutina: string; sesion: string };
-
-type Pestana = "pasos" | "musculos" | "aparece" | "trabajo" | "material";
+type Pestana = "pasos" | "musculos" | "trabajo" | "material";
 
 export default function FichaEjercicio() {
   const { id } = useParams<{ id: string }>();
   const [idioma] = useIdioma();
   const en = idioma === "en";
   const [e, setE] = useState<Ejercicio | null | undefined>(undefined);
-  const [apariciones, setApariciones] = useState<Aparicion[]>([]);
   const [pestana, setPestana] = useState<Pestana>("pasos");
   const [tocado, setTocado] = useState<string | null>(null);
 
@@ -51,19 +48,6 @@ export default function FichaEjercicio() {
       .eq("id", id)
       .maybeSingle()
       .then(({ data }) => setE((data as unknown as Ejercicio | null) ?? null));
-    // Las sesiones de sus rutinas donde sale este ejercicio.
-    supabase
-      .from("rutina_items")
-      .select("id, rutina_sesiones(id, nombre, rutinas(nombre, estado))")
-      .eq("ejercicio_id", id)
-      .then(({ data }) => {
-        const filas = (data ?? []) as unknown as { id: string; rutina_sesiones: { id: string; nombre: string; rutinas: { nombre: string; estado: string } | null } | null }[];
-        setApariciones(
-          filas
-            .filter((f) => f.rutina_sesiones?.rutinas && f.rutina_sesiones.rutinas.estado !== "borrador")
-            .map((f) => ({ id: f.rutina_sesiones!.id, rutina: f.rutina_sesiones!.rutinas!.nombre, sesion: f.rutina_sesiones!.nombre })),
-        );
-      });
   }, [id]);
 
   if (e === undefined)
@@ -94,7 +78,6 @@ export default function FichaEjercicio() {
   const pestanas: { id: Pestana; texto: string }[] = [
     { id: "pasos", texto: en ? "Steps" : "Pasos" },
     { id: "musculos", texto: en ? "Muscles" : "Músculos" },
-    { id: "aparece", texto: en ? "Appears in" : "Aparece en" },
     { id: "trabajo", texto: en ? "Work" : "Trabajo" },
     { id: "material", texto: en ? "Equipment" : "Material" },
   ];
@@ -170,21 +153,6 @@ export default function FichaEjercicio() {
               </p>
             </>
           )}
-
-          {pestana === "aparece" &&
-            (apariciones.length === 0 ? (
-              <p className={styles.ayuda}>{en ? "It is not in your routines yet." : "Todavía no sale en tus rutinas."}</p>
-            ) : (
-              <ul className={estilos.guiones}>
-                {apariciones.map((a) => (
-                  <li key={a.id}>
-                    <Link href={`/rutina/sesion/${a.id}`} style={{ color: "inherit" }}>
-                      <strong>{a.sesion}</strong> · {a.rutina}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ))}
 
           {pestana === "trabajo" &&
             (trabajo.length === 0 ? (

@@ -95,12 +95,14 @@ function resumen(u: Usuario): { texto: string; alerta: boolean } {
 }
 
 // Botones que llevan a cada parte de la ficha.
-function Botones({ u }: { u: Usuario }) {
+function Botones({ u, conPagos = true }: { u: Usuario; conPagos?: boolean }) {
   return (
     <span className={estilos.iconos}>
-      <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.icono} aria-label="Pagos" title="Pagos">
-        <IconoEuro />
-      </Link>
+      {conPagos && (
+        <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.icono} aria-label="Pagos" title="Pagos">
+          <IconoEuro />
+        </Link>
+      )}
       <Link href={`/admin/usuarios/${u.id}?pestana=perfil`} className={estilos.icono} aria-label="Editar" title="Editar">
         <IconoLapiz />
       </Link>
@@ -277,7 +279,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                   <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.botonPagos}>
                     <IconoEuro /> Pagos
                   </Link>
-                  <Botones u={u} />
+                  <Botones u={u} conPagos={false} />
                 </div>
               </article>
             </li>

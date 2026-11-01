@@ -14,6 +14,8 @@ import { claveDia } from "@/lib/fechas";
 import { numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../../Cargando";
+import AvisoComo from "../../AvisoComo";
+import { useComo } from "../../useComo";
 import ResumenIconos from "../../ResumenIconos";
 import { CATEGORIAS, intensidadesAgregadas } from "@/lib/ejercicios";
 
@@ -108,6 +110,7 @@ export default function Sesion() {
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null | undefined>(undefined);
   const [iniciando, setIniciando] = useState(false);
+  const como = useComo();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -204,8 +207,9 @@ export default function Sesion() {
 
       {error && <p className={styles.error}>{error}</p>}
 
+      {como && <AvisoComo userId={como} />}
       <div className={estilos.pie}>
-        <button type="button" className={styles.boton} disabled={iniciando || datos.items.length === 0} onClick={iniciar}>
+        <button type="button" className={styles.boton} disabled={iniciando || datos.items.length === 0 || !!como} onClick={iniciar}>
           {datos.enCurso ? t.continuarRutina : t.iniciarRutina}
         </button>
       </div>
