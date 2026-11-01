@@ -6,7 +6,7 @@ import { euros } from "@/lib/formato";
 import { cumpleanos, informeAtletas, ingresosPorMesYServicio, type PersonaLinea } from "@/lib/informes";
 import { PERIODOS, rangoDe, type Periodo } from "@/lib/periodos";
 import styles from "../admin.module.css";
-import { BarrasHorizontales, BarrasMensuales, nombreMes } from "../estadisticas/Graficos";
+import { nombreMes } from "../estadisticas/Graficos";
 import estilos from "../estadisticas/estadisticas.module.css";
 import { BarrasApiladas, BarrasColores, Cambio, COLOR_SERVICIO, LineaMensual, PALETA, Rosca, TarjetaCifra } from "./GraficosPagos";
 import g from "./informes.module.css";
@@ -47,17 +47,6 @@ const EDADES: [string, string][] = [
   ["mas_55", "Más de 55"],
   ["sin_dato", "Sin fecha de nacimiento"],
 ];
-
-function Variacion({ actual, antes, etiqueta }: { actual: number; antes: number; etiqueta: string }) {
-  if (antes === 0) return <small>{etiqueta}: sin datos</small>;
-  const pct = Math.round(((actual - antes) / antes) * 100);
-  return (
-    <small className={pct >= 0 ? estilos.sube : estilos.baja}>
-      {pct >= 0 ? "▲ +" : "▼ "}
-      {pct} % {etiqueta}
-    </small>
-  );
-}
 
 function Lista({ personas, vacio }: { personas: PersonaLinea[]; vacio: string }) {
   if (personas.length === 0) return <p className={styles.ayuda}>{vacio}</p>;

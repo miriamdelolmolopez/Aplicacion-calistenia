@@ -69,17 +69,19 @@ export function Rosca({
   const R = 44;
   const C = 2 * Math.PI * R;
   const suma = filas.reduce((s, f) => s + f.valor, 0) || 1;
-  let acumulado = 0;
+  // Cada trozo empieza donde acaba el anterior.
+  const trozos = filas
+    .filter((f) => f.valor > 0)
+    .reduce<{ f: (typeof filas)[number]; largo: number; desfase: number }[]>((lista, f) => {
+      const antes = lista.reduce((n, t) => n + t.largo, 0);
+      return [...lista, { f, largo: (f.valor / suma) * C, desfase: -antes }];
+    }, []);
   return (
     <div className={estilos.rosca}>
       <svg viewBox="0 0 120 120" role="img" aria-label="Reparto" className={estilos.roscaSvg}>
         <circle cx="60" cy="60" r={R} fill="none" stroke="var(--relleno)" strokeWidth="16" />
-        {filas
-          .filter((f) => f.valor > 0)
-          .map((f) => {
-            const largo = (f.valor / suma) * C;
-            const desfase = -acumulado;
-            acumulado += largo;
+        {trozos
+          .map(({ f, largo, desfase }) => {
             return (
               <circle
                 key={f.texto}

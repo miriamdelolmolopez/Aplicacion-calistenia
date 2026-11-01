@@ -68,7 +68,7 @@ export default async function ReservarComo({
     const mia = s.reservas.find((r) => r.user_id === userId && (r.estado === "reservada" || r.estado === "cancelada_tarde"));
     return {
       id: s.id,
-      pasada: new Date(s.empieza_en).getTime() <= Date.now(),
+      pasada: new Date(s.empieza_en).getTime() <= new Date().getTime(),
       hora: textoHora(s.empieza_en),
       nombre: s.tipos_clase?.nombre ?? "",
       color: colorDeTipo(s.tipos_clase?.color, s.tipos_clase?.nombre ?? ""),

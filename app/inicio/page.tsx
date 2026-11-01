@@ -320,11 +320,11 @@ export default function Inicio() {
           const hasta = planOnlineBono.caducaEn ? new Date(planOnlineBono.caducaEn).getTime() : null;
           const duracion = desde !== null && hasta !== null ? hasta - desde : 0;
           const porTiempo = !porEntrenos && duracion > 0;
-          const diasRestantes = hasta !== null ? Math.max(0, Math.ceil((hasta - Date.now()) / 86_400_000)) : 0;
+          const diasRestantes = hasta !== null ? Math.max(0, Math.ceil((hasta - new Date().getTime()) / 86_400_000)) : 0;
           const pct = porEntrenos
             ? Math.round((hechos / total) * 100)
             : porTiempo
-              ? Math.min(100, Math.max(0, Math.round(((Date.now() - (desde as number)) / duracion) * 100)))
+              ? Math.min(100, Math.max(0, Math.round(((new Date().getTime() - (desde as number)) / duracion) * 100)))
               : 0;
           return (
             <section className={clay.tarjetaProgreso}>
