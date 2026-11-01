@@ -17,6 +17,7 @@ import { obtenerFotos, quitarFoto, subirFoto } from "./acciones";
 import { textosPerfil } from "./textosPerfil";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Resumen = { dias_activo: number; reservas_tarifa: number; sesiones_semana: number; objetivo_semana: number };
 
@@ -87,7 +88,7 @@ export default function Perfil() {
     return (
       <main className={estilos.perfilPagina}>
         <BarraSuperior />
-        <p className={estilos.ayudaPerfil}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }

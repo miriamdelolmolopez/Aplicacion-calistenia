@@ -9,6 +9,7 @@ import estilos from "./perfil.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { calcularImc, categoriaImc, edadDe } from "@/lib/imc";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Campo = "peso_kg" | "altura_cm" | "cintura_cm" | "cadera_cm" | "pecho_cm" | "brazo_cm" | "muslo_cm";
 
@@ -66,7 +67,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
     cargar(userId).then(setDatos);
   }, [userId]);
 
-  if (!datos) return <p className={styles.ayuda}>{t.cargando}</p>;
+  if (!datos) return <Cargando />;
   const { filas, nacimiento } = datos;
 
   // Valor más reciente de cada medida (el peso y la altura pueden estar en días distintos).

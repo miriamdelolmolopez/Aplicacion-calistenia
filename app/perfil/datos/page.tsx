@@ -10,6 +10,7 @@ import Medidas from "../Medidas";
 import estilos from "../perfil.module.css";
 import { createClient } from "@/lib/supabase/client";
 import { fechaNacimientoValida, telefonoValido } from "@/lib/validaciones";
+import Cargando from "../../Cargando";
 
 type Datos = {
   id: string;
@@ -78,7 +79,7 @@ export default function MisDatos() {
     return (
       <main className={styles.pagina}>
         <BarraSuperior />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }

@@ -49,7 +49,7 @@ export function TarjetaCurso({
   );
 }
 
-// Panel que se desliza desde abajo con los datos del curso. No cambia de pantalla.
+// Ventana en el centro con los datos del curso. No cambia de pantalla.
 export function DetalleCurso({ curso, idioma, alCerrar }: { curso: Curso; idioma: "es" | "en"; alCerrar: () => void }) {
   const t = textosAcademia[idioma];
 
@@ -86,7 +86,7 @@ export function DetalleCurso({ curso, idioma, alCerrar }: { curso: Curso; idioma
             <p key={i}>{p}</p>
           ))}
         {!descripcion && <p>{t.sinDescripcion}</p>}
-        {curso.enlace ? (
+        {curso.estado === "proximo" ? null : curso.enlace ? (
           <a href={curso.enlace} target="_blank" rel="noopener noreferrer" className={estilos.enlaceCurso}>
             {t.irAlCurso}
           </a>

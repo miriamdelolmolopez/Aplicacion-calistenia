@@ -249,3 +249,51 @@
 .numeros button {
   border-radius: 9999px;
 }
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 38px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 99px;
+  cursor: pointer;
+}
+
+.chipActivo {
+  color: var(--blanco);
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.orden {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.orden select {
+  min-height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}

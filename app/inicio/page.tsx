@@ -25,6 +25,7 @@ import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
 import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Reserva = { empieza_en: string; nombre: string };
 type SesionOnline = { id: string; nombre: string };
@@ -170,7 +171,7 @@ export default function Inicio() {
     return (
       <main className={styles.pagina}>
         <BarraSuperior />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }
@@ -237,7 +238,7 @@ export default function Inicio() {
               <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
                 +
               </span>
-              <strong>Añadir alumno</strong>
+              <strong>Añadir alumna</strong>
             </Link>
           </div>
         )}

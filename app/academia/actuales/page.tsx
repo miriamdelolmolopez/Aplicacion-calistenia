@@ -10,6 +10,7 @@ import { DetalleCurso, TarjetaCurso } from "../TarjetaCurso";
 import { textosAcademia } from "../textosAcademia";
 import { COLUMNAS_CURSO, NIVELES, type Curso } from "@/lib/cursos";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 type Orden = "fecha" | "popularidad" | "valoracion" | "precio_asc" | "precio_desc";
 
@@ -52,7 +53,7 @@ export default function CursosActuales() {
       <BarraSuperior izquierda={{ href: "/academia", texto: "volver" }} />
       <h1 className={estilos.titulo}>{t.actuales}</h1>
 
-      {cursos === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {cursos === null && <Cargando />}
       {cursos !== null && cursos.length === 0 && <p className={styles.aviso}>{t.sinCursos}</p>}
 
       {cursos !== null && cursos.length > 0 && (

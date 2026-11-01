@@ -43,7 +43,7 @@ export default async function PlantillasOnline() {
       </header>
 
       <section className={styles.tarjeta}>
-        <p className={styles.ayuda}>Rutinas modelo sin alumno. Cuando creas una rutina para un alumno puedes empezar desde una de estas plantillas.</p>
+        <p className={styles.ayuda}>Rutinas modelo sin alumna. Cuando creas una rutina para una alumna puedes empezar desde una de estas plantillas.</p>
         <ListaPlantillasOnline plantillas={plantillas} />
       </section>
     </main>

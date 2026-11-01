@@ -406,7 +406,7 @@ function TarjetaItem({
             </div>
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`no-${item.id}`}>Nota para el alumno (opcional)</label>
+            <label htmlFor={`no-${item.id}`}>Nota para la alumna (opcional)</label>
             <input id={`no-${item.id}`} name="nota" maxLength={300} placeholder="Por ejemplo: con banda de 15 kg" defaultValue={item.nota ?? ""} />
           </div>
           <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -651,7 +651,7 @@ function CabeceraRutina({
         <div>
           <h2 style={{ margin: 0 }}>{rutina.nombre}</h2>
           <div className={styles.ayuda}>
-            {rutina.esPlantilla ? "Plantilla (sin alumno)" : `Alumno: ${rutina.alumno ?? "—"}`}
+            {rutina.esPlantilla ? "Plantilla (sin alumna)" : `Alumna: ${rutina.alumno ?? "—"}`}
           </div>
         </div>
         <span className={`${styles.estadoChip} ${styles[e.clase]}`}>{e.texto}</span>
@@ -663,7 +663,7 @@ function CabeceraRutina({
             <form action={accionPub} className={styles.formularioInterno}>
               <input type="hidden" name="id" value={rutina.id} />
               <button className={styles.boton} type="submit" disabled={pendientePub}>
-                {pendientePub ? "Publicando…" : rutina.estado === "historial" ? "Volver a publicar" : "Publicar para el alumno"}
+                {pendientePub ? "Publicando…" : rutina.estado === "historial" ? "Volver a publicar" : "Publicar para la alumna"}
               </button>
               <p className={styles.ayuda}>
                 El alumno la verá al momento (si tiene su plan online activo). La rutina publicada
@@ -695,7 +695,7 @@ function CabeceraRutina({
             <input id="rut-nombre" name="nombre" required maxLength={80} defaultValue={rutina.nombre} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor="rut-nota">Nota para el alumno (opcional)</label>
+            <label htmlFor="rut-nota">Nota para la alumna (opcional)</label>
             <textarea id="rut-nota" name="nota" rows={3} maxLength={1000} defaultValue={rutina.nota ?? ""} />
           </div>
           <div className={styles.campo}>
@@ -720,7 +720,7 @@ function CabeceraRutina({
       </details>
 
       <details className={styles.detalles}>
-        <summary>Copiar a otro alumno o guardar como plantilla</summary>
+        <summary>Copiar a otra alumna o guardar como plantilla</summary>
         <form action={accionCopia} className={styles.formularioInterno}>
           <input type="hidden" name="id" value={rutina.id} />
           <div className={styles.campo}>
@@ -729,7 +729,7 @@ function CabeceraRutina({
               <option value="" disabled>
                 Elige…
               </option>
-              <option value="plantilla">Plantilla (sin alumno)</option>
+              <option value="plantilla">Plantilla (sin alumna)</option>
               {alumnos.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.texto}

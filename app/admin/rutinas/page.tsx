@@ -20,7 +20,7 @@ type Fila = {
 };
 
 function nombreDe(p: Persona | null) {
-  if (!p) return "(sin alumno)";
+  if (!p) return "(sin alumna)";
   return [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
 }
 

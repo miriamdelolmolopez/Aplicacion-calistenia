@@ -37,7 +37,7 @@ export default function Registro() {
       email: correo.trim(),
       password: clave,
       options: {
-        data: { idioma, imagen, ...(origen ? { origen } : {}) },
+        data: { idioma, imagen, legal: true, ...(origen ? { origen } : {}) },
         emailRedirectTo: `${location.origin}/auth/confirmar?next=/datos`,
       },
     });

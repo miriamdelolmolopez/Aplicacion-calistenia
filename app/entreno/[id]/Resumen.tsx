@@ -269,7 +269,7 @@ export default function Resumen({
           <p style={{ margin: 0 }}>
             {planta.siguiente_nivel_en === null
               ? TEXTO_NIVEL[idioma].maximo
-              : `${TEXTO_NIVEL[idioma].faltan}: ${planta.siguiente_nivel_en}/${INICIO_NIVEL[planta.nivel] - INICIO_NIVEL[planta.nivel - 1]}`}
+              : `${TEXTO_NIVEL[idioma].faltan}: ${planta.siguiente_nivel_en}`}
           </p>
           {NIVELES_NUEVOS.includes(planta.total) && (
             <p className={styles.aviso}>

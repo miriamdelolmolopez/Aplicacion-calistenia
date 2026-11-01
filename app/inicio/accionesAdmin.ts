@@ -108,7 +108,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   const diferenciaPct =
     ingresosMesAnterior > 0 ? Math.round(((ingresosMes - ingresosMesAnterior) / ingresosMesAnterior) * 100) : null;
 
-  // Alumnos activos: personas con un bono activo, por tipo de servicio.
+  // Alumnas activas: personas con un bono activo, por tipo de servicio.
   const activosBonos = bonos.filter((b) => b.estado === "activo");
   const porServicio = (servicio: string): PersonaResumen[] => {
     const vistos = new Set<string>();

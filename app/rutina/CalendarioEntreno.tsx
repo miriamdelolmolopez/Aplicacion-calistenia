@@ -8,6 +8,7 @@ import estilos from "./ver/ver.module.css";
 import { claveDia } from "@/lib/fechas";
 import { diaDeLaSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Datos = {
   userId: string;
@@ -67,7 +68,7 @@ export default function CalendarioEntreno() {
     await createClient().from("dias_entreno").upsert({ user_id: datos.userId, dias: nuevos, actualizado_en: new Date().toISOString() });
   }
 
-  if (datos === null) return <p className={styles.aviso}>{t.cargando}</p>;
+  if (datos === null) return <Cargando />;
 
   const hoy = claveDia(new Date().toISOString());
   const mesActual = mes ?? hoy.slice(0, 7);

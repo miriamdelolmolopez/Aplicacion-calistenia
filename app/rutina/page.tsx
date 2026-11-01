@@ -16,6 +16,7 @@ import { claveDia } from "@/lib/fechas";
 import { fondoFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Resumen = {
   planActivo: boolean;
@@ -109,7 +110,7 @@ export default function Entrenamiento() {
       <h1 className={estilos.titulo}>{t.entrenamientoTitulo}</h1>
       <PestanasEntreno activa="rutinas" rutinas={t.tabMisRutinas} progreso={t.tabProgreso} />
 
-      {datos === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {datos === null && <Cargando />}
       {datos && !datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}
 
       {datos?.planActivo && (

@@ -13,6 +13,7 @@ import estilos from "./guiado.module.css";
 import Resumen, { type DatosResumen } from "./Resumen";
 import { TIPOS, type Campo } from "@/lib/ejercicios";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 export type Serie = {
   id: string;
@@ -377,7 +378,7 @@ export default function PantallaEntreno() {
   if (!datos) {
     return (
       <main className={styles.pagina}>
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }

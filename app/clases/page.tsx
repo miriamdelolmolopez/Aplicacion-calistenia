@@ -17,7 +17,6 @@ import estilos from "./clases.module.css";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
-import { descargarIcs } from "@/lib/calendario";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { fondoFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +26,7 @@ import {
   salirListaEspera,
   unirseListaEspera,
 } from "./acciones";
+import Cargando from "../Cargando";
 
 type Clase = {
   id: string;
@@ -167,7 +167,6 @@ export default function Clases() {
   const [saberMas, setSaberMas] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<"todo" | "grupal" | "individual">("todo");
   const [confirmada, setConfirmada] = useState<ClaseConfirmada | null>(null);
-  const [menu, setMenu] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     const d = await obtenerDatos();
@@ -249,16 +248,6 @@ export default function Clases() {
   const unirse = (c: Clase) => ejecutar(c, () => unirseListaEspera(c.id), () => "okEsperaUnido");
   const salir = (c: Clase) => ejecutar(c, () => salirListaEspera(c.id), () => "okEsperaSalido");
 
-  const alCalendario = (c: Clase) => {
-    setMenu(null);
-    descargarIcs({
-      id: c.id,
-      titulo: `${c.tipo} · CalisCoach`,
-      inicioIso: c.empieza_en,
-      duracionMin: c.duracion_min || 60,
-    });
-  };
-
   // ---- Tira de días: semanas de lunes a domingo; solo se pueden elegir los días con plazo de reserva ----
   const hoy = datos?.hoy ?? "";
   const ultimo = datos ? sumarDias(datos.hoy, datos.dias) : "";
@@ -325,7 +314,7 @@ export default function Clases() {
         </div>
       )}
 
-      {datos === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {datos === null && <Cargando />}
 
       {datos && (
         <>
@@ -531,24 +520,6 @@ export default function Clases() {
 
                 {!cancelada && (
                   <div className={estilos.pie}>
-                    <div className={estilos.menuCaja}>
-                      <button
-                        type="button"
-                        className={estilos.puntos}
-                        aria-label={t.masOpciones}
-                        onClick={() => setMenu(menu === c.id ? null : c.id)}
-                      >
-                        ⋮
-                      </button>
-                      {menu === c.id && (
-                        <div className={estilos.menu}>
-                          <button type="button" onClick={() => alCalendario(c)}>
-                            {t.alCalendario}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
                     <div className={estilos.acciones}>
                       {/* Ya tiene reserva */}
                       {c.mi_reserva && confirmando !== c.id && (

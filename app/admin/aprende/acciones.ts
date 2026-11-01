@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
+import { CATEGORIAS_GLOSARIO } from "@/lib/categoriasGlosario";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Estado } from "../acciones";
 
@@ -35,6 +36,7 @@ export async function guardarTermino(_previo: Estado, formData: FormData): Promi
     termino_en: terminoEn || null,
     definicion_es: definicionEs,
     definicion_en: definicionEn || null,
+    categoria: CATEGORIAS_GLOSARIO.some((c) => c.clave === texto(formData, "categoria")) ? texto(formData, "categoria") : "conceptos",
     activo: formData.get("activo") === "on",
   };
   const admin = createAdminClient();
@@ -134,7 +136,7 @@ export async function duplicarContenido(tabla: keyof typeof TABLAS, id: string):
   const admin = createAdminClient();
 
   if (tabla === "glosario") {
-    const { data: o } = await admin.from("glosario").select("termino_es, termino_en, definicion_es, definicion_en").eq("id", id).maybeSingle();
+    const { data: o } = await admin.from("glosario").select("termino_es, termino_en, definicion_es, definicion_en, categoria").eq("id", id).maybeSingle();
     if (!o) return { error: "No se ha encontrado." };
     const { error } = await admin.from("glosario").insert({ ...o, termino_es: `${o.termino_es} (copia)`, activo: false });
     if (error) return { error: "No se ha podido duplicar." };

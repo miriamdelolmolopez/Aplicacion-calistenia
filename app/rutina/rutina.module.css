@@ -44,10 +44,11 @@
 
 .ejFoto {
   flex: none;
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
   background-color: var(--relleno);
-  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: contain;
   background-position: center;
   border-radius: 14px;
 }

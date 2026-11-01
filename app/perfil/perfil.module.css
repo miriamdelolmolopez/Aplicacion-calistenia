@@ -406,7 +406,7 @@
 .lista {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--linea);
+  gap: 10px;
 }
 
 .fila {
@@ -414,10 +414,12 @@
   align-items: center;
   gap: 14px;
   min-height: 56px;
-  padding: 0 4px;
+  padding: 0 16px;
   color: var(--carbon);
   text-decoration: none;
-  border-bottom: 1px solid var(--linea);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 18px;
 }
 
 .filaTexto {

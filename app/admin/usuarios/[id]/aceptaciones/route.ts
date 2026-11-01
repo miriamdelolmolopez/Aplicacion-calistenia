@@ -29,16 +29,16 @@ const nombreArchivo = (s: string) =>
 
 // Sin parámetros: la última versión aceptada de cada documento. Con ?tipo=…&version=…: solo esa aceptación.
 export async function GET(peticion: Request, contexto: { params: Promise<{ id: string }> }) {
-  // Solo la administradora puede descargarlo.
+  // La administradora puede bajar los de cualquiera; cada alumna, solo los suyos.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return new NextResponse("No has iniciado sesión", { status: 401 });
   const { data: quien } = await supabase.from("profiles").select("rol").eq("id", user.id).maybeSingle();
-  if (quien?.rol !== "admin") return new NextResponse("No autorizado", { status: 403 });
 
   const { id } = await contexto.params;
+  if (quien?.rol !== "admin" && user.id !== id) return new NextResponse("No autorizado", { status: 403 });
   const busqueda = new URL(peticion.url).searchParams;
   const tipoPedido = busqueda.get("tipo") ?? "";
   const versionPedida = busqueda.get("version") ?? "";

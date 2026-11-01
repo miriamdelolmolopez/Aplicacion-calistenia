@@ -12,6 +12,7 @@ import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { useMiPerfil } from "../useMiPerfil";
 import Progreso from "./Progreso";
+import Cargando from "../Cargando";
 
 // Pantalla de progreso.
 //  · Con entrenamiento online: cuelga de Entrenamiento (pestaña Progreso) y tiene dos
@@ -54,7 +55,7 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
       )}
 
       {!cargado || sinGraficas ? (
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       ) : (
         <Progreso online={online} presencial={presencial} vista={vista} />
       )}

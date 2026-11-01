@@ -11,6 +11,7 @@ import estiloRutina from "../../entrenamiento.module.css";
 import estilos from "./sesion.module.css";
 import { minutosEstimados, textoObjetivo } from "@/lib/duracion";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../../Cargando";
 
 type Item = {
   id: string;
@@ -76,7 +77,7 @@ export default function Sesion() {
     return (
       <main className={styles.pagina}>
         <BarraSuperior izquierda={{ href: "/rutina/ver", texto: "volver" }} />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }

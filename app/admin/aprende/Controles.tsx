@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { useEnvio } from "../useEnvio";
+import { CATEGORIAS_GLOSARIO } from "@/lib/categoriasGlosario";
 import { guardarPregunta, guardarSeccion, guardarTermino } from "./acciones";
 
 export type Termino = {
@@ -12,6 +13,7 @@ export type Termino = {
   termino_en: string | null;
   definicion_es: string;
   definicion_en: string | null;
+  categoria?: string | null;
   activo: boolean;
 };
 
@@ -80,6 +82,15 @@ export function FormularioTermino({ termino, alTerminar }: { termino?: Termino; 
   return (
     <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {termino && <input type="hidden" name="id" value={termino.id} />}
+      <Campo id={`ca-${p}`} etiqueta="Categoría">
+        <select id={`ca-${p}`} name="categoria" defaultValue={termino?.categoria ?? "conceptos"}>
+          {CATEGORIAS_GLOSARIO.map((c) => (
+            <option key={c.clave} value={c.clave}>
+              {c.es}
+            </option>
+          ))}
+        </select>
+      </Campo>
       <Campo id={`te-${p}`} etiqueta="Término">
         <input id={`te-${p}`} name="termino_es" required maxLength={60} defaultValue={termino?.termino_es ?? ""} />
       </Campo>

@@ -14,6 +14,7 @@ import { MAX_BARRA, useMenuAdmin } from "../useMenuAdmin";
 import { useMiPerfil } from "../useMiPerfil";
 import { versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Preferencias = {
   id: string;
@@ -68,7 +69,7 @@ export default function Ajustes() {
     return (
       <main className={styles.pagina}>
         <BarraSuperior izquierda={{ href: "/perfil", texto: "volver" }} />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }
@@ -243,6 +244,9 @@ export default function Ajustes() {
           {" · "}
           <Link href="/legal/cookies">Cookies</Link>
         </p>
+        <Link href="/ajustes/textos-legales" className={styles.boton}>
+          {idioma === "en" ? "What I have accepted (PDF)" : "Lo que he aceptado (PDF)"}
+        </Link>
       </section>
     </main>
   );

@@ -12,6 +12,7 @@ import clay from "../ui/clay.module.css";
 import { CATEGORIAS, TIPOS } from "@/lib/ejercicios";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Campo = "reps" | "segundos" | "peso_kg" | "distancia_m";
 
@@ -192,7 +193,7 @@ export default function Progreso({
 
   const nombreNivel = (n: number) => t[`planta${n}` as keyof typeof t] as string;
 
-  if (datos === null) return <p className={estilos.aviso}>{t.cargando}</p>;
+  if (datos === null) return <Cargando />;
   if (datos.prog === null) return <p className={estilos.aviso}>{t.planNoActivoProgreso}</p>;
 
   const { prog, entrenos, objetivos } = datos;

@@ -5,6 +5,8 @@ import BarraSuperior from "../BarraSuperior";
 import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
 import { useIdioma } from "../useIdioma";
+import Icono from "../Icono";
+import aprende from "../aprende/aprende.module.css";
 import estilos from "./ayuda.module.css";
 
 type Pregunta = { s: string; p: string; r: string };
@@ -155,12 +157,25 @@ const PREGUNTAS: Record<"es" | "en", Pregunta[]> = {
   ],
 };
 
+// Sin tildes ni mayúsculas. Se busca por el principio de cada palabra (5 letras), así «cancelar» encuentra «cancelo» o «cancelación».
+const limpiar = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const encaja = (q: Pregunta, busqueda: string) => {
+  const texto = ` ${limpiar(`${q.p} ${q.r}`).replace(/[^a-z0-9ñ]+/g, " ")} `;
+  return limpiar(busqueda)
+    .split(/[^a-z0-9ñ]+/)
+    .filter((w) => w.length >= 2)
+    .every((w) => texto.includes(` ${w.slice(0, 5)}`));
+};
+
 export default function Ayuda() {
   const [idioma] = useIdioma();
   const preguntas = PREGUNTAS[idioma];
   // Solo una carpeta y una pregunta abiertas a la vez.
   const [carpeta, setCarpeta] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<string | null>(null);
+  const [busqueda, setBusqueda] = useState("");
+  const buscando = busqueda.trim().length > 0;
+  const resultados = buscando ? preguntas.filter((q) => encaja(q, busqueda)) : [];
 
   return (
     <main className={styles.pagina}>
@@ -169,7 +184,38 @@ export default function Ayuda() {
       <p className={styles.ayuda}>
         {idioma === "en" ? "Frequently asked questions. Tap one to see the answer." : "Preguntas frecuentes. Pulsa una para ver la respuesta."}
       </p>
-      <div className={estilos.lista}>
+      <div className={aprende.buscador}>
+        <Icono nombre="lupa" tamano={22} />
+        <input
+          type="search"
+          value={busqueda}
+          placeholder={idioma === "en" ? "Search help" : "Buscar en la ayuda"}
+          aria-label={idioma === "en" ? "Search help" : "Buscar en la ayuda"}
+          onChange={(e) => {
+            setBusqueda(e.target.value);
+            setAbierta(null);
+          }}
+        />
+      </div>
+      {buscando && (
+        <div className={estilos.lista}>
+          {resultados.length === 0 && <p className={styles.ayuda}>{idioma === "en" ? "Nothing matches your search." : "No hay nada con esa búsqueda."}</p>}
+          {resultados.map((q) => (
+            <details key={q.p} className={estilos.pregunta} open={abierta === q.p}>
+              <summary
+                onClick={(e) => {
+                  e.preventDefault();
+                  setAbierta(abierta === q.p ? null : q.p);
+                }}
+              >
+                {q.p}
+              </summary>
+              <p>{q.r}</p>
+            </details>
+          ))}
+        </div>
+      )}
+      <div className={estilos.lista} hidden={buscando}>
         {SECCIONES.map((sec) => {
           const items = preguntas.filter((q) => q.s === sec.id);
           if (items.length === 0) return null;

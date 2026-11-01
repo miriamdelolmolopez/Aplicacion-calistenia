@@ -48,6 +48,8 @@ export default function Datos() {
   const [terminos, setTerminos] = useState(false);
   const [imagen, setImagen] = useState(false);
   const [yaAceptado, setYaAceptado] = useState(false);
+  // Si se registró con el formulario, ya vio y aceptó los textos legales ahí: no se le piden otra vez.
+  const [desdeRegistro, setDesdeRegistro] = useState(false);
   const [versiones, setVersiones] = useState<Versiones>({ privacidad: VERSION_RESPALDO, terminos: VERSION_RESPALDO });
   const [errores, setErrores] = useState<Partial<Record<Campo, ClaveTexto>>>({});
   const [errorGeneral, setErrorGeneral] = useState<ClaveTexto | "">("");
@@ -71,6 +73,7 @@ export default function Datos() {
 
       // La casilla de imagen marcada al registrarse llega aquí ya puesta.
       if (sesion.user.user_metadata?.imagen === true) setImagen(true);
+      if (sesion.user.user_metadata?.legal === true) setDesdeRegistro(true);
 
       const { data: consentimientos } = await supabase
         .from("consentimientos")
@@ -112,8 +115,8 @@ export default function Datos() {
     if (!fechaNacimientoValida(valores.fecha)) nuevos.fecha = "errorFecha";
     if (!valores.emNombre.trim()) nuevos.emNombre = "errorCampo";
     if (!telefonoValido(valores.emTelefono)) nuevos.emTelefono = "errorTelefono";
-    if (!yaAceptado && !privacidad) nuevos.privacidad = "errorAceptar";
-    if (!yaAceptado && !terminos) nuevos.terminos = "errorAceptar";
+    if (!yaAceptado && !desdeRegistro && !privacidad) nuevos.privacidad = "errorAceptar";
+    if (!yaAceptado && !desdeRegistro && !terminos) nuevos.terminos = "errorAceptar";
     setErrores(nuevos);
     if (Object.keys(nuevos).length > 0) return;
 
@@ -211,7 +214,7 @@ export default function Datos() {
           {campoTexto("emTelefono", "emergenciaTelefono", { tipo: "tel" })}
         </fieldset>
 
-        {listo && !yaAceptado && (
+        {listo && !yaAceptado && !desdeRegistro && (
           <fieldset className={styles.grupo}>
             <label className={styles.casilla}>
               <input

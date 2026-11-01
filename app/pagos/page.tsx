@@ -9,6 +9,7 @@ import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../Cargando";
 
 type Pago = {
   id: string;
@@ -45,7 +46,7 @@ export default function MisPagos() {
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto foto="portada" titulo={t.navPagos} />
 
-      {pagos === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {pagos === null && <Cargando />}
       {pagos?.length === 0 && <p className={styles.aviso}>{t.sinPagos}</p>}
 
       <ul className={estilos.tablaPagos}>

@@ -12,7 +12,7 @@ export default async function AdministrarGlosario() {
   await requireAdmin();
   const { data } = await createAdminClient()
     .from("glosario")
-    .select("id, termino_es, termino_en, definicion_es, definicion_en, activo, foto_url");
+    .select("id, termino_es, termino_en, definicion_es, definicion_en, categoria, activo, foto_url");
   const terminos = ((data ?? []) as (Termino & { foto_url: string | null })[]).sort((a, b) => a.termino_es.localeCompare(b.termino_es, "es"));
 
   return (

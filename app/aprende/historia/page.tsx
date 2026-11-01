@@ -7,6 +7,7 @@ import { useIdioma } from "../../useIdioma";
 import estilos from "../aprende.module.css";
 import { textosAprende } from "../textosAprende";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 type Seccion = { id: string; titulo_es: string; titulo_en: string | null; texto_es: string; texto_en: string | null; foto_url: string | null };
 
@@ -29,7 +30,7 @@ export default function Historia() {
       <BarraSuperior izquierda={{ href: "/aprende", texto: "volver" }} />
       <h1 style={{ margin: "12px 0 14px", fontSize: "2rem" }}>{t.historia}</h1>
 
-      {secciones === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {secciones === null && <Cargando />}
       {secciones !== null && secciones.length === 0 && <p className={styles.aviso}>{t.sinContenido}</p>}
 
       <div className={estilos.lista}>

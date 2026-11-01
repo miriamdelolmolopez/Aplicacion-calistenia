@@ -9,6 +9,7 @@ import { DetalleCurso, TarjetaCurso } from "../TarjetaCurso";
 import { textosAcademia } from "../textosAcademia";
 import { COLUMNAS_CURSO, type Curso } from "@/lib/cursos";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 export default function ProximosCursos() {
   const [idioma] = useIdioma();
@@ -38,7 +39,7 @@ export default function ProximosCursos() {
       <BarraSuperior izquierda={{ href: "/academia", texto: "volver" }} />
       <h1 className={estilos.titulo}>{t.proximos}</h1>
 
-      {cursos === null && <p className={styles.aviso}>{t.cargando}</p>}
+      {cursos === null && <Cargando />}
       {cursos !== null && cursos.length === 0 && <p className={styles.aviso}>{t.sinCursos}</p>}
 
       <ul className={estilos.lista}>

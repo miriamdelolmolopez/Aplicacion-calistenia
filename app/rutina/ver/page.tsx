@@ -14,6 +14,7 @@ import { intensidadesAgregadas } from "@/lib/ejercicios";
 import { claveDia, fechaCorta } from "@/lib/fechas";
 import { lunesDe, sumarDias } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 type Item = {
   id: string;
@@ -114,7 +115,7 @@ export default function VerRutina() {
     return (
       <main className={styles.pagina}>
         <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }

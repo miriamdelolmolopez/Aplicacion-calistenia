@@ -8,7 +8,7 @@ const TEXTO = {
   en: { cerrar: "Close", vacio: "The description of this class will be here soon." },
 };
 
-// Panel que se desliza desde abajo con la descripción de una clase. No cambia de pantalla.
+// Ventana en el centro con la descripción de una clase. No cambia de pantalla.
 export default function SaberMas({
   titulo,
   descripcion,

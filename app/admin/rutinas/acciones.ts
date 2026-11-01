@@ -41,7 +41,7 @@ function refrescar(rutinaId?: string) {
 
 // ---------- Rutinas ----------
 
-// Crea una rutina vacía, una plantilla (sin alumno) o una copia de una plantilla/rutina.
+// Crea una rutina vacía, una plantilla (sin alumna) o una copia de una plantilla/rutina.
 export async function crearRutina(_previo: Estado, formData: FormData): Promise<Estado & { id?: string }> {
   await requireAdmin();
 
@@ -49,7 +49,7 @@ export async function crearRutina(_previo: Estado, formData: FormData): Promise<
   const destino = texto(formData, "alumno"); // "" o "plantilla" = plantilla
   const desde = texto(formData, "desde"); // id de rutina a copiar (opcional)
   if (nombre.length < 2 || nombre.length > 80) return { error: "El nombre debe tener entre 2 y 80 letras." };
-  if (destino !== "plantilla" && !UUID.test(destino)) return { error: "Elige un alumno o «Plantilla»." };
+  if (destino !== "plantilla" && !UUID.test(destino)) return { error: "Elige una alumna o «Plantilla»." };
   if (desde && !UUID.test(desde)) return { error: "Plantilla no válida." };
 
   const admin = createAdminClient();
@@ -123,7 +123,7 @@ export async function publicarRutina(_previo: Estado, formData: FormData): Promi
   if (error) return { error: mensajeDe(error) };
 
   refrescar(id);
-  return { mensaje: "Rutina publicada. El alumno ya la ve (la anterior pasa a su historial)." };
+  return { mensaje: "Rutina publicada. La alumna ya la ve (la anterior pasa a su historial)." };
 }
 
 export async function despublicarRutina(_previo: Estado, formData: FormData): Promise<Estado> {
@@ -135,7 +135,7 @@ export async function despublicarRutina(_previo: Estado, formData: FormData): Pr
   if (error) return { error: mensajeDe(error) };
 
   refrescar(id);
-  return { mensaje: "Rutina vuelta a borrador. El alumno ya no la ve." };
+  return { mensaje: "Rutina vuelta a borrador. La alumna ya no la ve." };
 }
 
 // Copia a otro alumno o la guarda como plantilla (destino «plantilla»).
@@ -146,7 +146,7 @@ export async function copiarRutina(_previo: Estado, formData: FormData): Promise
   const destino = texto(formData, "alumno");
   const nombre = texto(formData, "nombre");
   if (!UUID.test(id)) return { error: "Rutina no válida." };
-  if (destino !== "plantilla" && !UUID.test(destino)) return { error: "Elige un alumno o «Plantilla»." };
+  if (destino !== "plantilla" && !UUID.test(destino)) return { error: "Elige una alumna o «Plantilla»." };
   if (nombre.length > 80) return { error: "El nombre puede tener como máximo 80 letras." };
 
   const { error } = await createAdminClient().rpc("duplicar_rutina", {
@@ -161,7 +161,7 @@ export async function copiarRutina(_previo: Estado, formData: FormData): Promise
     mensaje:
       destino === "plantilla"
         ? "Guardada como plantilla (la encontrarás en la lista de rutinas)."
-        : "Copia creada como borrador para ese alumno (la encontrarás en la lista de rutinas).",
+        : "Copia creada como borrador para esa alumna (la encontrarás en la lista de rutinas).",
   };
 }
 

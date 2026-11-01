@@ -8,6 +8,7 @@ import estilos from "../aprende.module.css";
 import HistorialExamen, { type Intento } from "./HistorialExamen";
 import { textosAprende } from "../textosAprende";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 type Pregunta = {
   id: string;
@@ -119,7 +120,7 @@ export default function Examen() {
       <main className={styles.pagina}>
         <BarraSuperior izquierda={{ href: "/aprende", texto: "volver" }} />
         <h1 style={{ margin: "12px 0 14px", fontSize: "2rem" }}>{t.examen}</h1>
-        {banco === null && <p className={styles.aviso}>{t.cargando}</p>}
+        {banco === null && <Cargando />}
         {banco !== null && total === 0 && <p className={styles.aviso}>{t.sinPreguntas}</p>}
         {total > 0 && (
           <section className={estilos.seccion}>

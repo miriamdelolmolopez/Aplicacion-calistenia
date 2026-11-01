@@ -16,6 +16,7 @@ import { colorDeTipo, nombreCorto } from "@/lib/colores";
 import { claveDia, fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { diaDeLaSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
+import Cargando from "../../Cargando";
 
 type Reserva = {
   id: string;
@@ -106,7 +107,7 @@ export default function MisReservas() {
     return (
       <main className={styles.pagina}>
         <BarraSuperior izquierda={{ href: "/clases", texto: "volver" }} />
-        <p className={styles.aviso}>{t.cargando}</p>
+        <Cargando />
       </main>
     );
   }

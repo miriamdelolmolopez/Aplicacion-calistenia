@@ -35,11 +35,11 @@ export default function EditorPersona({ persona }: { persona: Persona }) {
           <label htmlFor={`rol-${persona.id}`}>Tipo de cuenta</label>
           <select id={`rol-${persona.id}`} name="rol" defaultValue={persona.rol}>
             <option value="alumno">Alumno</option>
-            <option value="invitado">Invitado (clase de prueba)</option>
+            <option value="invitado">Invitada (clase de prueba)</option>
           </select>
         </div>
         <fieldset className={styles.grupo}>
-          <legend>Servicios (solo para alumnos)</legend>
+          <legend>Servicios (solo para alumnas)</legend>
           {SERVICIOS.map((s) => (
             <label key={s.valor} className={styles.casilla}>
               <input

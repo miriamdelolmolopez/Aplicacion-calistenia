@@ -67,19 +67,19 @@ export default function ResumenAdminTarjetas() {
     },
     {
       clave: "activos",
-      titulo: "Alumnos activos",
+      titulo: "Alumnas activas",
       valor: String(datos.activos.total),
       pie: <Comparacion actual={datos.activos.total} anterior={datos.activosMesAnterior} texto={String(datos.activosMesAnterior)} />,
     },
     {
       clave: "nuevos",
-      titulo: "Alumnos nuevos del mes",
+      titulo: "Alumnas nuevas del mes",
       valor: String(datos.nuevos.length),
       pie: <Comparacion actual={datos.nuevos.length} anterior={datos.nuevosMesAnterior.length} texto={String(datos.nuevosMesAnterior.length)} />,
     },
     {
       clave: "perdidos",
-      titulo: "Alumnos perdidos este mes",
+      titulo: "Alumnas perdidas este mes",
       valor: String(datos.perdidos.length),
       pie: <Comparacion actual={datos.perdidos.length} anterior={datos.perdidosMesAnterior.length} texto={String(datos.perdidosMesAnterior.length)} subirEsBueno={false} />,
       tono: datos.perdidos.length > 0 ? "mal" : undefined,
@@ -135,7 +135,7 @@ export default function ResumenAdminTarjetas() {
           )}
           {abierta === "activos" && (
             <>
-              <h3>Alumnos activos por tipo</h3>
+              <h3>Alumnas activas por tipo</h3>
               <p className={estilos.resumenVacio}>
                 Al acabar el mes anterior había {datos.activosMesAnterior}. Una persona con varios servicios aparece en cada uno.
               </p>
@@ -181,7 +181,7 @@ export default function ResumenAdminTarjetas() {
           )}
           {abierta === "perdidos" && (
             <>
-              <h3>Alumnos perdidos este mes</h3>
+              <h3>Alumnas perdidas este mes</h3>
               <p className={estilos.resumenVacio}>
                 Personas cuyo bono terminó este mes (se agotó o caducó) y no tienen otro activo ni en espera. El mes anterior fueron{" "}
                 {datos.perdidosMesAnterior.length}. Es aproximado: se calcula con el historial de los bonos.

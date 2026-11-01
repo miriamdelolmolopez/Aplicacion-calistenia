@@ -20,7 +20,8 @@ const cuando = (iso: string) =>
   new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 
 // Listado de lo que ha aceptado una persona: ordenar, filtrar por texto, buscar y descargar cada uno en PDF.
-export default function ListaTextosLegales({ userId, aceptaciones }: { userId: string; aceptaciones: Aceptacion[] }) {
+export default function ListaTextosLegales({ userId, aceptaciones, propia = false, idioma = "es" }: { userId: string; aceptaciones: Aceptacion[]; propia?: boolean; idioma?: "es" | "en" }) {
+  const en = idioma === "en";
   const [orden, setOrden] = useState<"reciente" | "antiguo">("reciente");
   const [filtro, setFiltro] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
@@ -35,7 +36,7 @@ export default function ListaTextosLegales({ userId, aceptaciones }: { userId: s
   if (aceptaciones.length === 0) {
     return (
       <section className={styles.tarjeta}>
-        <p className={styles.ayuda}>Todavía no ha aceptado ningún texto legal.</p>
+        <p className={styles.ayuda}>{propia ? (en ? "You have not accepted any legal text yet." : "Todavía no has aceptado ningún texto legal.") : "Todavía no ha aceptado ningún texto legal."}</p>
       </section>
     );
   }
@@ -71,7 +72,7 @@ export default function ListaTextosLegales({ userId, aceptaciones }: { userId: s
           {visibles.length} de {aceptaciones.length}
         </p>
         <a href={`/admin/usuarios/${userId}/aceptaciones`} download className={`${styles.boton} ${styles.botonSecundario}`}>
-          Descargar PDF de lo último que aceptó de cada texto
+          {propia ? (en ? "Download a PDF of the latest version of each text" : "Descargar PDF de lo último que has aceptado de cada texto") : "Descargar PDF de lo último que aceptó de cada texto"}
         </a>
       </section>
 
@@ -84,7 +85,7 @@ export default function ListaTextosLegales({ userId, aceptaciones }: { userId: s
               <div className={styles.ayuda}>
                 Versión {a.version} · {cuando(a.aceptadoEn)}
               </div>
-              {a.noAutorizo && <span className={estilos.aviso}>NO lo autorizó</span>}
+              {a.noAutorizo && <span className={estilos.aviso}>{propia ? (en ? "You did NOT authorise it" : "NO lo autorizaste") : "NO lo autorizó"}</span>}
             </div>
             <a
               href={`/admin/usuarios/${userId}/aceptaciones?tipo=${encodeURIComponent(a.tipo)}&version=${encodeURIComponent(a.version)}`}

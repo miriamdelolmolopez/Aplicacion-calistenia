@@ -5,7 +5,7 @@ import styles from "../admin.module.css";
 export const metadata = { title: "Descargar datos · Administración" };
 
 const ARCHIVOS = [
-  { tipo: "alumnos", titulo: "Alumnos", ayuda: "Datos de cada persona y sus servicios." },
+  { tipo: "alumnos", titulo: "Alumnas", ayuda: "Datos de cada persona y sus servicios." },
   { tipo: "pagos", titulo: "Pagos", ayuda: "Todos los pagos con su persona, importe y método." },
   { tipo: "bonos", titulo: "Bonos", ayuda: "Bonos comprados, clases restantes y caducidad." },
   { tipo: "reservas", titulo: "Historial de clases", ayuda: "Todas las reservas, canceladas y de prueba." },
