@@ -6,7 +6,7 @@ import styles from "../admin.module.css";
 import { useEnvio } from "../useEnvio";
 import { guardarAutomatizacion } from "./acciones";
 import estilos from "./automatizaciones.module.css";
-import type { Envios, Info } from "./ListaAutomatizaciones";
+import type { Envios, Info, Previa } from "./ListaAutomatizaciones";
 
 export type Auto = {
   clave: string;
@@ -18,7 +18,7 @@ export type Auto = {
   mensaje_en: string;
 };
 
-export function FormularioAutomatizacion({ auto, info, envios }: { auto: Auto; info: Info; envios: Envios }) {
+export function FormularioAutomatizacion({ auto, info, envios, previa }: { auto: Auto; info: Info; envios: Envios; previa?: Previa }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarAutomatizacion, {});
   const { ref, alEnviar } = useEnvio(accion, estado, false);
   const p = auto.clave;
@@ -35,6 +35,14 @@ export function FormularioAutomatizacion({ auto, info, envios }: { auto: Auto; i
             : `Enviados: ${envios.total}${envios.ultimo ? ` · último: ${envios.ultimo}` : ""}`}
         </span>
       </div>
+      {previa && (
+        <p className={estilos.previa}>
+          {previa.total === 0
+            ? "Hoy no se enviaría a nadie."
+            : `Hoy se enviaría a ${previa.total} ${previa.total === 1 ? "persona" : "personas"}: ${previa.nombres.join(", ")}${previa.total > previa.nombres.length ? "…" : ""}.`}
+          {!auto.activa && " Es una vista previa: no se envía nada hasta que la actives."}
+        </p>
+      )}
       <dl className={estilos.datos}>
         <div>
           <dt>Cuándo actúa</dt>
@@ -54,9 +62,9 @@ export function FormularioAutomatizacion({ auto, info, envios }: { auto: Auto; i
         <span>Activada</span>
       </label>
 
-      {auto.clave === "bono_caduca" && (
+      {(auto.clave === "bono_caduca" || info.diasEtiqueta) && (
         <div className={styles.campo}>
-          <label htmlFor={`a-d-${p}`}>Días de antelación (avisa cuando al bono le quedan estos días o menos)</label>
+          <label htmlFor={`a-d-${p}`}>{info.diasEtiqueta ?? "Días de antelación (avisa cuando al bono le quedan estos días o menos)"}</label>
           <input id={`a-d-${p}`} name="dias" type="number" min={1} max={60} required defaultValue={auto.dias} />
         </div>
       )}

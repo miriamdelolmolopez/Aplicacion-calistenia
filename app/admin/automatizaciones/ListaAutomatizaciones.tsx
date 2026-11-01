@@ -5,11 +5,12 @@ import styles from "../admin.module.css";
 import estilos from "./automatizaciones.module.css";
 import { FormularioAutomatizacion, type Auto } from "./Controles";
 
-export type Info = { titulo: string; cuando: string; aQuien: string; queHace: string; variables: string };
+export type Info = { titulo: string; cuando: string; aQuien: string; queHace: string; variables: string; diasEtiqueta?: string };
+export type Previa = { total: number; nombres: string[] };
 export type Envios = { total: number; ultimo: string | null };
 
 // Lista de automatizaciones con buscador y filtro (activadas / apagadas).
-export default function ListaAutomatizaciones({ autos, info, envios }: { autos: Auto[]; info: Record<string, Info>; envios: Record<string, Envios> }) {
+export default function ListaAutomatizaciones({ autos, info, envios, previas }: { autos: Auto[]; info: Record<string, Info>; envios: Record<string, Envios>; previas: Record<string, Previa> }) {
   const [texto, setTexto] = useState("");
   const [filtro, setFiltro] = useState<"todas" | "activas" | "apagadas">("todas");
 
@@ -41,7 +42,7 @@ export default function ListaAutomatizaciones({ autos, info, envios }: { autos: 
 
       {visibles.length === 0 && <p className={estilos.vacio}>Ninguna automatización coincide con lo que has buscado.</p>}
       {visibles.map((a) => (
-        <FormularioAutomatizacion key={a.clave} auto={a} info={info[a.clave]} envios={envios[a.clave] ?? { total: 0, ultimo: null }} />
+        <FormularioAutomatizacion key={a.clave} auto={a} info={info[a.clave]} envios={envios[a.clave] ?? { total: 0, ultimo: null }} previa={previas[a.clave]} />
       ))}
     </>
   );

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { avisarMinimos } from "@/lib/avisos";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { bonoPorCaducar, felicitarCumpleanos, mensajeTrasPrueba, recordatorioPrueba } from "@/lib/automatizaciones";
+import { aniversarioAlumna, bienvenidaAlumna, bonoAgotado, bonoPorCaducar, echamosMenos, felicitarCumpleanos, mensajeTrasPrueba, recordatorioClase, recordatorioPrueba } from "@/lib/automatizaciones";
 
 // Lo llama una vez al día el planificador de Vercel (ver vercel.json), que envía
 // "Authorization: Bearer <CRON_SECRET>". Sin esa clave no hace nada.
@@ -14,12 +14,17 @@ export async function GET(request: Request) {
   // Se ponen al día los bonos que han caducado o se han agotado.
   await createAdminClient().rpc("refrescar_bonos");
 
-  const [minimos, bonos, recordatorios, tras, cumples] = await Promise.all([
+  const [minimos, bonos, recordatorios, tras, cumples, menos, bienvenidas, recordatoriosClase, agotados, aniversarios] = await Promise.all([
     avisarMinimos(),
     bonoPorCaducar(),
     recordatorioPrueba(),
     mensajeTrasPrueba(),
     felicitarCumpleanos(),
+    echamosMenos(),
+    bienvenidaAlumna(),
+    recordatorioClase(),
+    bonoAgotado(),
+    aniversarioAlumna(),
   ]);
   return NextResponse.json({
     minimoNoAlcanzado: minimos,
@@ -27,5 +32,10 @@ export async function GET(request: Request) {
     recordatoriosPrueba: recordatorios,
     mensajesTrasPrueba: tras,
     cumpleanos: cumples,
+    echamosDeMenos: menos,
+    bienvenidas,
+    recordatoriosClase,
+    bonosAgotados: agotados,
+    aniversarios,
   });
 }

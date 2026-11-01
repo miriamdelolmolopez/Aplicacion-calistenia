@@ -4,7 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import { marcarRegaloHecho } from "./acciones";
 import type { Auto } from "./Controles";
-import ListaAutomatizaciones, { type Envios, type Info } from "./ListaAutomatizaciones";
+import { vistaPrevia } from "@/lib/automatizaciones";
+import { CLAVES_NUEVAS, PLANTILLAS, type ClavePlantilla } from "@/lib/plantillasAutomatizacion";
+import NuevaAutomatizacion from "./NuevaAutomatizacion";
+import ListaAutomatizaciones, { type Envios, type Info, type Previa } from "./ListaAutomatizaciones";
 
 export const metadata = { title: "Automatizaciones · Administración" };
 
@@ -44,6 +47,11 @@ const INFO: Record<string, Info & { orden: number }> = {
   },
 };
 
+// Las plantillas del botón «Nueva» también se enseñan con su información, una vez añadidas.
+for (const pl of PLANTILLAS) {
+  INFO[pl.clave] = { titulo: pl.titulo, cuando: pl.cuando, aQuien: pl.aQuien, queHace: pl.queHace, variables: pl.variables, diasEtiqueta: pl.dias?.etiqueta, orden: pl.orden };
+}
+
 type Regalo = { id: string; creado_en: string; profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null };
 
 export default async function Automatizaciones() {
@@ -72,6 +80,18 @@ export default async function Automatizaciones() {
   const autos = ((data ?? []) as Auto[]).filter((a) => INFO[a.clave]).sort((a, b) => INFO[a.clave].orden - INFO[b.clave].orden);
   const pendientes = (regalos ?? []) as unknown as Regalo[];
 
+  // «A quién le llegaría hoy» de las plantillas nuevas que ya están añadidas.
+  const previas: Record<string, Previa> = {};
+  await Promise.all(
+    autos
+      .filter((a) => (CLAVES_NUEVAS as string[]).includes(a.clave))
+      .map(async (a) => {
+        previas[a.clave] = await vistaPrevia(a.clave as ClavePlantilla);
+      }),
+  );
+  const anadidas = new Set(autos.map((a) => a.clave as string));
+  const disponibles = PLANTILLAS.filter((pl) => !anadidas.has(pl.clave)).map((pl) => ({ clave: pl.clave, titulo: pl.titulo, cuando: pl.cuando, queHace: pl.queHace }));
+
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
@@ -85,6 +105,8 @@ export default async function Automatizaciones() {
         Son correos y regalos que se envían solos. La app los revisa una vez al día, por la mañana (sobre las 7:00 u 8:00, hora de Madrid). Los correos salen en el idioma de cada persona. Cada persona recibe cada correo una sola vez, y las
         cuentas de prueba no reciben nada.
       </p>
+
+      <NuevaAutomatizacion disponibles={disponibles} />
 
       {pendientes.length > 0 && (
         <section className={styles.tarjeta}>
@@ -102,7 +124,7 @@ export default async function Automatizaciones() {
         </section>
       )}
 
-      {autos.length > 0 && <ListaAutomatizaciones autos={autos} info={INFO} envios={envios} />}
+      {autos.length > 0 && <ListaAutomatizaciones autos={autos} info={INFO} envios={envios} previas={previas} />}
       {autos.length === 0 && <p className={styles.ayuda}>Todavía no están creadas. Falta ejecutar el archivo 039 en Supabase.</p>}
     </main>
   );

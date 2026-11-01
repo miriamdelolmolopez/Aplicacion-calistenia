@@ -146,7 +146,7 @@ export function avisarClaseCancelada(sesionId: string, dias: number, enEspera: s
   });
 }
 
-export type TipoAviso = "bono_caduca" | "minimo_clase" | "prueba_recordatorio" | "prueba_despues" | "cumple";
+export type TipoAviso = "bono_caduca" | "minimo_clase" | "prueba_recordatorio" | "prueba_despues" | "cumple" | "echamos_menos" | "bienvenida" | "recordatorio_clase" | "bono_agotado" | "aniversario";
 
 // Apunta que un aviso automático se va a enviar. Devuelve false si ya se envió antes.
 export async function reclamar(tipo: TipoAviso, refId: string, userId: string): Promise<boolean> {

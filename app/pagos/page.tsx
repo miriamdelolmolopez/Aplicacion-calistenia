@@ -70,6 +70,11 @@ export default function MisPagos() {
                   {t[`pagoEstado_${p.estado}` as ClaveTexto]}
                 </span>
               </small>
+              {p.estado === "pagado" && (
+                <a href={`/pagos/recibo/${p.id}`} download style={{ fontSize: "0.8rem", fontWeight: 600, textDecoration: "underline" }}>
+                  {idioma === "en" ? "Download receipt" : "Descargar recibo"}
+                </a>
+              )}
             </div>
           </li>
         ))}

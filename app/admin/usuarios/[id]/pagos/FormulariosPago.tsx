@@ -327,6 +327,11 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
             </details>
           )}
           {p.estado === "pagado" && (
+            <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
+              Descargar recibo
+            </a>
+          )}
+          {p.estado === "pagado" && (
             <details>
               <summary className={styles.ayuda}>Anular</summary>
               <FormAnular userId={userId} pagoId={p.id} />

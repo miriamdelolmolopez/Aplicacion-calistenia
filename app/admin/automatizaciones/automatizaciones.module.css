@@ -70,3 +70,33 @@
   background: color-mix(in srgb, #94a3b8 22%, var(--blanco));
   color: #475569;
 }
+
+.previa {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  background: color-mix(in srgb, #f5a524 14%, var(--blanco));
+  border-left: 4px solid #f5a524;
+  border-radius: 10px 14px 14px 10px;
+}
+
+.plantilla {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--relleno);
+  border-radius: 18px;
+}
+
+.plantilla h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.plantilla p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--secundario);
+}
