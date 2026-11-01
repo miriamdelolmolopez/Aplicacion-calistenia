@@ -178,6 +178,7 @@ export default function Progreso({
   const [ejercicioSel, setEjercicioSel] = useState<string>("");
   const [campoSel, setCampoSel] = useState<Campo | "">("");
   const [borrando, setBorrando] = useState<{ id: string; paso: 1 | 2 } | null>(null);
+  const [verTodosEntrenos, setVerTodosEntrenos] = useState(false);
 
   useEffect(() => {
     cargar(userId, admin).then(setDatos);
@@ -496,7 +497,7 @@ export default function Progreso({
       <section className={estilos.tarjeta}>
         <h2 style={{ margin: 0 }}>{t.misEntrenos}</h2>
         {entrenos.length === 0 && <p className={estilos.ayuda}>{t.sinEntrenos}</p>}
-        {entrenos.map((e) => {
+        {(verTodosEntrenos ? entrenos : entrenos.slice(0, 3)).map((e) => {
           const porEjercicio = new Map<number, SerieP[]>();
           for (const s of e.entreno_series.filter((x) => x.completada)) {
             porEjercicio.set(s.orden_ejercicio, [...(porEjercicio.get(s.orden_ejercicio) ?? []), s]);
@@ -549,7 +550,12 @@ export default function Progreso({
             </details>
           );
         })}
-        {entrenos.length >= LIMITE_ENTRENOS && <p className={estilos.ayuda}>{t.masAntiguos}</p>}
+        {entrenos.length > 3 && (
+          <button type="button" className={estilos.botonMini} onClick={() => setVerTodosEntrenos((v) => !v)}>
+            {verTodosEntrenos ? (idioma === "en" ? "See less" : "Ver menos") : idioma === "en" ? `See more (${entrenos.length - 3})` : `Ver más (${entrenos.length - 3})`}
+          </button>
+        )}
+        {verTodosEntrenos && entrenos.length >= LIMITE_ENTRENOS && <p className={estilos.ayuda}>{t.masAntiguos}</p>}
       </section>
       )}
         </>

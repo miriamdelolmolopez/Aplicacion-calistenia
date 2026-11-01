@@ -27,7 +27,8 @@ const nombreArchivo = (s: string) =>
     .replace(/^-|-$/g, "")
     .toLowerCase() || "persona";
 
-export async function GET(_peticion: Request, contexto: { params: Promise<{ id: string }> }) {
+// Sin parámetros: la última versión aceptada de cada documento. Con ?tipo=…&version=…: solo esa aceptación.
+export async function GET(peticion: Request, contexto: { params: Promise<{ id: string }> }) {
   // Solo la administradora puede descargarlo.
   const supabase = await createClient();
   const {
@@ -38,6 +39,10 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   if (quien?.rol !== "admin") return new NextResponse("No autorizado", { status: 403 });
 
   const { id } = await contexto.params;
+  const busqueda = new URL(peticion.url).searchParams;
+  const tipoPedido = busqueda.get("tipo") ?? "";
+  const versionPedida = busqueda.get("version") ?? "";
+  const soloUna = !!tipoPedido && !!versionPedida;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new NextResponse("No encontrado", { status: 404 });
   const admin = createAdminClient();
   const [{ data: p }, { data: aceptadas }, { data: textos }] = await Promise.all([
@@ -50,9 +55,10 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   // La última versión que aceptó de cada documento.
   const ultimas = new Map<string, { tipo: string; version: string; aceptado_en: string; concedido: boolean | null }>();
   for (const a of (aceptadas ?? []) as { tipo: string; version: string; aceptado_en: string; concedido: boolean | null }[]) {
+    if (soloUna && !(a.tipo === tipoPedido && a.version === versionPedida)) continue;
     if (!ultimas.has(a.tipo)) ultimas.set(a.tipo, a);
   }
-  if (ultimas.size === 0) return new NextResponse("Todavía no ha aceptado ningún texto legal", { status: 404 });
+  if (ultimas.size === 0) return new NextResponse(soloUna ? "No se ha encontrado esa aceptación" : "Todavía no ha aceptado ningún texto legal", { status: 404 });
   const contenidoDe = new Map(((textos ?? []) as { documento: string; version: string; contenido: string }[]).map((t) => [`${t.documento}|${t.version}`, t.contenido]));
 
   const pdf = await PDFDocument.create();
@@ -108,7 +114,7 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   if (p.dni) escribir(`DNI: ${p.dni}`, { tam: 11 });
   if (p.email) escribir(`Correo: ${p.email}`, { tam: 11 });
   escribir(`Documento generado el ${cuando(new Date().toISOString())} (hora de Madrid).`, { tam: 9, color: gris, despues: 14 });
-  escribir("Contiene la última versión que aceptó de cada documento, con el día y la hora de la aceptación:", { tam: 10, despues: 6 });
+  escribir(soloUna ? "Contiene esta aceptación, con el día y la hora en que se hizo:" : "Contiene la última versión que aceptó de cada documento, con el día y la hora de la aceptación:", { tam: 10, despues: 6 });
 
   const tipos = [...ultimas.keys()].sort((a, b) => (ORDEN.indexOf(a) + 100) % 100 - ((ORDEN.indexOf(b) + 100) % 100));
   for (const tipo of tipos) {
@@ -160,7 +166,7 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   return new NextResponse(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="aceptaciones-${nombreArchivo([p.nombre, p.apellidos].filter(Boolean).join(" "))}-${hoy}.pdf"`,
+      "Content-Disposition": `attachment; filename="aceptaciones-${nombreArchivo([p.nombre, p.apellidos].filter(Boolean).join(" "))}${soloUna ? `-${nombreArchivo(tipoPedido)}-${nombreArchivo(versionPedida)}` : ""}-${hoy}.pdf"`,
       "Cache-Control": "no-store",
     },
   });

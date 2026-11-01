@@ -144,7 +144,16 @@ export default async function PagosPersona({ params, searchParams }: { params: P
         </section>
       )}
 
-      {pestana === "manual" && <FormManual userId={id} hoy={hoy} ahora={ahora} formas={formas} bonos={bonosOpcion} />}
+      {pestana === "manual" && (
+        <FormManual
+          userId={id}
+          hoy={hoy}
+          ahora={ahora}
+          formas={formas}
+          bonos={bonosOpcion}
+          tipos={tipos.map((t) => ({ id: t.id, nombre: t.nombre, servicio: t.servicio, precio: t.precio_centimos, iva: t.iva_porcentaje, clases: t.clases, validez: t.validez_dias }))}
+        />
+      )}
     </main>
   );
 }

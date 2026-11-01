@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
-import { claveDia, fechaCorta, textoDia, textoHora } from "@/lib/fechas";
+import { claveDia, fechaCorta, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -137,20 +137,9 @@ export default async function FichaUsuario({
   const { data: tiposClaseDatos } = await admin.from("tipos_clase").select("id, nombre").eq("activo", true).order("nombre");
   const tiposClase = (tiposClaseDatos ?? []) as { id: string; nombre: string }[];
 
-  // Textos legales que esta persona aceptó, con el texto exacto de la versión que firmó.
-  const [{ data: aceptacionesDatos }, { data: textosLegalesDatos }] = await Promise.all([
-    admin.from("consentimientos").select("tipo, version, aceptado_en, concedido").eq("user_id", id).order("aceptado_en", { ascending: false }),
-    admin.from("textos_legales").select("documento, version, contenido"),
-  ]);
-  const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string; concedido: boolean | null }[];
-  const textoLegal = new Map(((textosLegalesDatos ?? []) as { documento: string; version: string; contenido: string }[]).map((t) => [`${t.documento}|${t.version}`, t.contenido]));
-  const TITULO_ACEPTACION: Record<string, string> = {
-    terminos: "Términos y condiciones",
-    privacidad: "Política de privacidad",
-    imagen: "Uso de la imagen (fotos y vídeos)",
-    "aviso-legal": "Aviso legal",
-    cookies: "Política de cookies",
-  };
+  // Cuántos textos legales ha aceptado (el listado completo está en su propia pantalla).
+  const { data: aceptacionesDatos } = await admin.from("consentimientos").select("tipo, version, aceptado_en").eq("user_id", id).order("aceptado_en", { ascending: false });
+  const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string }[];
 
   const { data: intentosDatos } = await supabase
     .from("intentos_examen")
@@ -184,13 +173,6 @@ export default async function FichaUsuario({
 
   const ahora = new Date().toISOString();
   const hoy = claveDia(ahora);
-  const proximas = (((await supabase
-    .from("reservas")
-    .select("id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre))")
-    .eq("user_id", id)
-    .eq("estado", "reservada")
-    .eq("sesiones_clase.estado", "programada")
-    .gt("sesiones_clase.empieza_en", ahora)).data ?? []) as unknown as Reserva[]).sort((a, b) => a.sesiones_clase.empieza_en.localeCompare(b.sesiones_clase.empieza_en));
   const pasadas = (((await supabase
     .from("reservas")
     .select("id, sesiones_clase!inner(empieza_en, estado, tipos_clase(nombre))")
@@ -265,15 +247,6 @@ export default async function FichaUsuario({
     .map((b) => b.caduca_en as string)
     .sort()
     .pop();
-
-  // Meses que enseña el calendario de «Actual»: los del periodo de su tarifa (o este mes y el siguiente).
-  const desdes = activos.map((b) => b.activo_desde).filter((x): x is string => !!x).sort();
-  const hastas = activos.map((b) => b.caduca_en).filter((x): x is string => !!x).sort();
-  const mesIni = desdes[0] ? claveDia(desdes[0]).slice(0, 7) : hoy.slice(0, 7);
-  let mesFin = hastas.length ? claveDia(hastas[hastas.length - 1]).slice(0, 7) : sumarMeses(hoy.slice(0, 7), 1);
-  if (mesFin < mesIni) mesFin = mesIni;
-  const mesesActual: string[] = [];
-  for (let m = mesIni; m <= mesFin && mesesActual.length < 4; m = sumarMeses(m, 1)) mesesActual.push(m);
 
   const mes = mesPedido && /^\d{4}-\d{2}$/.test(mesPedido) ? mesPedido : hoy.slice(0, 7);
   const aFicha = (pest: Pestana, extra = "") => `/admin/usuarios/${id}?pestana=${pest}${extra}`;
@@ -378,12 +351,6 @@ export default async function FichaUsuario({
             </Link>
           </section>
 
-          {(presencial || eventos.length > 0) && (
-            <section className={styles.tarjeta}>
-              <h2>Calendario de su periodo</h2>
-              <CalendarioReservas meses={mesesActual} eventos={eventos} userId={id} hoy={hoy} />
-            </section>
-          )}
         </>
       )}
 
@@ -392,13 +359,13 @@ export default async function FichaUsuario({
           <section className={styles.tarjeta}>
             <h2>Reservas</h2>
             <div className={estilos.mesNavegar}>
-              <Link href={aFicha("reservas", `&mes=${sumarMeses(mes, -1)}`)} aria-label="Mes anterior">
+              <Link href={aFicha("reservas", `&mes=${sumarMeses(mes, -1)}`)} scroll={false} aria-label="Mes anterior">
                 ‹ Anterior
               </Link>
-              <Link href={aFicha("reservas")} className={estilos.hoyEnlace}>
+              <Link href={aFicha("reservas")} scroll={false} className={estilos.hoyEnlace}>
                 Este mes
               </Link>
-              <Link href={aFicha("reservas", `&mes=${sumarMeses(mes, 1)}`)} aria-label="Mes siguiente">
+              <Link href={aFicha("reservas", `&mes=${sumarMeses(mes, 1)}`)} scroll={false} aria-label="Mes siguiente">
                 Siguiente ›
               </Link>
             </div>
@@ -406,17 +373,9 @@ export default async function FichaUsuario({
           </section>
 
           <section className={styles.tarjeta}>
-            <h2>Próximas reservas</h2>
-            {proximas.length === 0 && <p className={styles.ayuda}>No tiene ninguna clase reservada.</p>}
-            <ul className={styles.lista}>
-              {proximas.map((r) => (
-                <li key={r.id}>
-                  {textoDia(r.sesiones_clase.empieza_en)} · {textoHora(r.sesiones_clase.empieza_en)} · {r.sesiones_clase.tipos_clase?.nombre}
-                </li>
-              ))}
-            </ul>
+            <h2>Historial de clases</h2>
             <details className={styles.detalles}>
-              <summary>Historial de clases (últimas {pasadas.length})</summary>
+              <summary>Ver las últimas {pasadas.length} clases a las que ha ido</summary>
               <ul className={styles.lista}>
                 {pasadas.map((r) => (
                   <li key={r.id}>
@@ -538,35 +497,15 @@ export default async function FichaUsuario({
             </details>
           </section>
 
-          <section className={styles.tarjeta}>
-            <h2>Textos legales que aceptó ({aceptaciones.length})</h2>
-            {aceptaciones.length === 0 && <p className={styles.ayuda}>Todavía no ha aceptado ningún texto legal.</p>}
-            {aceptaciones.length > 0 && (
-              <>
-                <a href={`/admin/usuarios/${p.id}/aceptaciones`} download className={styles.boton}>
-                  Descargar PDF de lo último que aceptó
-                </a>
-                <p className={styles.ayuda}>Incluye la última versión que aceptó de cada documento, con su texto completo y el día y la hora.</p>
-              </>
-            )}
-            {aceptaciones.map((a) => {
-              const texto = textoLegal.get(`${a.tipo}|${a.version}`);
-              const cuando = new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(a.aceptado_en));
-              return (
-                <details key={`${a.tipo}-${a.version}-${a.aceptado_en}`} className={styles.detalles}>
-                  <summary>
-                    {TITULO_ACEPTACION[a.tipo] ?? a.tipo} · versión {a.version}
-                    {a.tipo === "imagen" && a.concedido === false ? " · NO lo autorizó" : ""} · {cuando}
-                  </summary>
-                  {texto ? (
-                    <pre style={{ whiteSpace: "pre-wrap", fontSize: "0.8rem" }}>{texto}</pre>
-                  ) : (
-                    <p className={styles.ayuda}>No se ha guardado el texto de esta versión, solo que la aceptó el {cuando}.</p>
-                  )}
-                </details>
-              );
-            })}
-          </section>
+          <Link href={`/admin/usuarios/${p.id}/textos-legales`} className={estilos.tarjetaEnlace}>
+            <span>
+              <strong>Textos legales</strong>
+              <small>
+                {aceptaciones.length === 0 ? "Todavía no ha aceptado ninguno" : `${aceptaciones.length} aceptados · el último, el ${fechaCorta(aceptaciones[0].aceptado_en)}`}
+              </small>
+            </span>
+            <span aria-hidden="true">›</span>
+          </Link>
 
           <section className={styles.tarjeta}>
             <h2>Medidas</h2>
@@ -583,10 +522,6 @@ export default async function FichaUsuario({
             <Notas userId={p.id} texto={nota?.texto ?? ""} />
           </section>
 
-          <section className={styles.tarjeta}>
-            <h2>Eliminar usuario</h2>
-            <EliminarUsuario userId={p.id} nombre={nombre} />
-          </section>
         </>
       )}
 
@@ -600,11 +535,7 @@ export default async function FichaUsuario({
               <Link href={`/admin/reservas/como/${id}`}>Reservar clases como ella</Link>
               <Link href={aFicha("reservas")}>Calendario de reservas</Link>
               <Link href={aFicha("perfil")}>Editar datos y servicios</Link>
-              {aceptaciones.length > 0 && (
-                <a href={`/admin/usuarios/${p.id}/aceptaciones`} download>
-                  Descargar PDF de lo que aceptó
-                </a>
-              )}
+              <Link href={`/admin/usuarios/${p.id}/textos-legales`}>Textos legales que aceptó</Link>
             </nav>
           </section>
 
@@ -652,6 +583,11 @@ export default async function FichaUsuario({
                 <ClasesHechas userId={p.id} tipos={tiposClase} />
               </details>
             )}
+          </section>
+
+          <section className={styles.tarjeta}>
+            <h2>Eliminar usuario</h2>
+            <EliminarUsuario userId={p.id} nombre={nombre} />
           </section>
         </>
       )}

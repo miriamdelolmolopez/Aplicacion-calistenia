@@ -334,11 +334,27 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
 }
 
 // ---------------------------------------------------------------------------------------------
-export function FormManual({ userId, hoy, ahora, formas, bonos }: { userId: string; hoy: string; ahora: string; formas: FormaOpcion[]; bonos: BonoOpcion[] }) {
+export function FormManual({ userId, hoy, ahora, formas, bonos, tipos }: { userId: string; hoy: string; ahora: string; formas: FormaOpcion[]; bonos: BonoOpcion[]; tipos: TipoPago[] }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(pagoManual, {});
   const anio = Number(hoy.slice(0, 4));
   const [mes, setMes] = useState(Number(hoy.slice(5, 7)));
   const [anioElegido, setAnioElegido] = useState(anio);
+  // Qué paga: una tarifa o bono de la lista (rellena el concepto y el importe) u otro concepto libre.
+  const [queId, setQueId] = useState("");
+  const [concepto, setConcepto] = useState("");
+  const [importe, setImporte] = useState("");
+
+  function elegirQue(id: string) {
+    setQueId(id);
+    const t = tipos.find((x) => x.id === id);
+    if (t) {
+      setConcepto(t.nombre);
+      setImporte((t.precio / 100).toFixed(2).replace(".", ","));
+    } else {
+      setConcepto("");
+      setImporte("");
+    }
+  }
 
   return (
     <form action={accion} className={styles.tarjeta}>
@@ -371,13 +387,31 @@ export function FormManual({ userId, hoy, ahora, formas, bonos }: { userId: stri
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor="pm-concepto">Concepto</label>
-        <input id="pm-concepto" name="concepto" required maxLength={120} placeholder="Por ejemplo: clase suelta, material…" />
+        <label htmlFor="pm-que">¿Qué paga?</label>
+        <select id="pm-que" value={queId} onChange={(e) => elegirQue(e.target.value)} required>
+          <option value="" disabled>
+            Elige…
+          </option>
+          {tipos.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.nombre} · {euros(t.precio)}
+            </option>
+          ))}
+          <option value="otro">Otro concepto (lo escribo yo)…</option>
+        </select>
       </div>
+      {queId === "otro" ? (
+        <div className={styles.campo}>
+          <label htmlFor="pm-concepto">Concepto</label>
+          <input id="pm-concepto" name="concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} required maxLength={120} placeholder="Por ejemplo: material, taller…" />
+        </div>
+      ) : (
+        <input type="hidden" name="concepto" value={concepto} />
+      )}
       <div className={estilos.dos}>
         <div className={styles.campo}>
           <label htmlFor="pm-importe">Importe (€)</label>
-          <input id="pm-importe" name="importe" inputMode="decimal" required placeholder="15,00" />
+          <input id="pm-importe" name="importe" inputMode="decimal" required placeholder="15,00" value={importe} onChange={(e) => setImporte(e.target.value)} />
         </div>
         <SelectorForma formas={formas} id="pm" />
       </div>
