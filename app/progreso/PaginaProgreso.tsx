@@ -7,7 +7,6 @@ import BarraSuperior from "../BarraSuperior";
 import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
 import entrenamiento from "../rutina/entrenamiento.module.css";
-import PestanasEntreno from "../rutina/PestanasEntreno";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { useMiPerfil } from "../useMiPerfil";
@@ -15,8 +14,8 @@ import Progreso from "./Progreso";
 import Cargando from "../Cargando";
 
 // Pantalla de progreso.
-//  · Con entrenamiento online: cuelga de Entrenamiento (pestaña Progreso) y tiene dos
-//    sub-pestañas: Evolución (planta, números y objetivos) y Estadísticas (gráficas de ejercicios).
+//  · Con entrenamiento online: pantalla propia con dos pestañas: Evolución (planta, números y objetivos)
+//    y Estadísticas (gráficas de ejercicios).
 //  · Solo con clases: una sola pantalla con su progreso.
 export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadisticas" }) {
   const [idioma] = useIdioma();
@@ -35,12 +34,11 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
 
   return (
     <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: online ? "/rutina" : "/inicio", texto: "volver" }} />
+      <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
+      <CabeceraFoto foto="progreso" titulo={t.progresoTitulo} />
 
-      {online ? (
+      {online && (
         <>
-          <h1 className={entrenamiento.titulo}>{t.entrenamientoTitulo}</h1>
-          <PestanasEntreno activa="progreso" rutinas={t.tabMisRutinas} progreso={t.tabProgreso} />
           <div className={entrenamiento.subpestanas}>
             <Link href="/progreso" className={vista === "evolucion" ? entrenamiento.activa : ""}>
               {t.subEvolucion}
@@ -50,8 +48,6 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
             </Link>
           </div>
         </>
-      ) : (
-        <CabeceraFoto foto="progreso" titulo={t.progresoTitulo} />
       )}
 
       {!cargado || sinGraficas ? (

@@ -20,7 +20,6 @@ export type DatosResumen = {
 
 // Con estos totales de entrenos la planta sube de nivel.
 const NIVELES_NUEVOS = [5, 15, 30, 60, 100];
-const INICIO_NIVEL = [0, 5, 15, 30, 60, 100]; // total con el que empieza cada nivel (1 a 6)
 
 type Planta = { total: number; nivel: number; racha_semanas: number; siguiente_nivel_en: number | null };
 
@@ -133,6 +132,7 @@ export default function Resumen({
   const [foto, setFoto] = useState<string | null>(null);
   const [vista, setVista] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const [aviso, setAviso] = useState("");
   const mapa = useRef<HTMLDivElement>(null);
   const [planta, setPlanta] = useState<Planta | null>(null);
   const [frase, setFrase] = useState<string>("");
@@ -198,13 +198,16 @@ export default function Resumen({
 
   async function compartir() {
     setOcupado(true);
+    setAviso("");
     try {
       const blob = await generar();
       const archivo = new File([blob], "entreno.png", { type: "image/png" });
       if (navigator.canShare?.({ files: [archivo] })) {
-        await navigator.share({ files: [archivo], title: nombreSesion });
+        // El móvil abre su menú: Instagram, WhatsApp, Drive, Mensajes…
+        await navigator.share({ files: [archivo], title: nombreSesion, text: `${nombreSesion} · CalisCoach` });
       } else {
         descargar(blob);
+        setAviso(idioma === "en" ? "This device cannot open the share menu, so the image has been downloaded. You can share it from your gallery." : "Este dispositivo no puede abrir el menú de compartir, así que se ha descargado la imagen. Puedes compartirla desde tu galería.");
       }
     } catch {
       // Si cancela el menú de compartir no es un error.
@@ -305,7 +308,7 @@ export default function Resumen({
         {vista ? <img src={vista} alt="" className={estilos.vistaPrevia} /> : <p className={styles.ayuda}>{t.generandoImagen}</p>}
         <div className={estilos.pie}>
           <button type="button" className={styles.boton} disabled={ocupado} onClick={compartir}>
-            {t.compartir}
+            ↗ {t.compartir}
           </button>
           <button
             type="button"
@@ -316,6 +319,7 @@ export default function Resumen({
             {t.descargarImagen}
           </button>
         </div>
+        {aviso && <p className={styles.aviso}>{aviso}</p>}
       </section>
 
       <button type="button" className={styles.botonSecundario} onClick={alVolver}>

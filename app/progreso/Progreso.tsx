@@ -6,6 +6,7 @@ import { borrarEntreno } from "../entreno/acciones";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import Logros from "./Logros";
+import LogrosOnline from "./LogrosOnline";
 import PlantaAvatar from "./PlantaAvatar";
 import estilos from "./progreso.module.css";
 import clay from "../ui/clay.module.css";
@@ -385,6 +386,7 @@ export default function Progreso({
       )}
 
       {verClases && <Logros userId={userId} admin={admin} />}
+      {verOnline && <LogrosOnline userId={userId} admin={admin} />}
 
         </>
       )}

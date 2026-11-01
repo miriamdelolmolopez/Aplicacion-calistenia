@@ -69,8 +69,8 @@ export default function NavegacionInferior() {
       ? ruta === "/admin"
       : ruta === href ||
         ruta.startsWith(href + "/") ||
-        // El progreso y el entreno cuelgan de «Entrenamiento» para quien tiene online.
-        (href === "/rutina" && (ruta.startsWith("/progreso") || ruta.startsWith("/entreno")));
+        // El entreno en marcha cuelga de «Entrenamiento» para quien tiene online.
+        (href === "/rutina" && ruta.startsWith("/entreno"));
   // Solo se marca la pestaña más específica (por ejemplo «Mis reservas» y no también «Reservar clases»).
   const mejor = pestanas.map((p) => p.href).filter(coincide).sort((a, b) => b.length - a.length)[0];
   const esActiva = (href: string) => href === mejor;

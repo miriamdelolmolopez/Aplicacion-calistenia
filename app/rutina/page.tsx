@@ -11,7 +11,6 @@ import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import estilos from "./entrenamiento.module.css";
 import CalendarioEntreno from "./CalendarioEntreno";
-import PestanasEntreno from "./PestanasEntreno";
 import { claveDia } from "@/lib/fechas";
 import { fondoFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
@@ -108,7 +107,6 @@ export default function Entrenamiento() {
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <h1 className={estilos.titulo}>{t.entrenamientoTitulo}</h1>
-      <PestanasEntreno activa="rutinas" rutinas={t.tabMisRutinas} progreso={t.tabProgreso} />
 
       {datos === null && <Cargando />}
       {datos && !datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}

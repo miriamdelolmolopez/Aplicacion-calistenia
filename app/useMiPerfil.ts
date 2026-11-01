@@ -126,8 +126,8 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
   if (p.rol === "admin" || !soloOnline) lista.push("reservar");
   if (p.rol !== "admin" && !soloOnline) lista.push("reservas");
   if (online && p.rol !== "admin") lista.push("rutina");
-  // Con entrenamiento online el progreso está dentro de «Entrenamiento»; sin él, tiene su propio botón.
-  if (p.rol !== "admin" && !online) lista.push("progreso");
+  // El progreso tiene su propia sección para todas las alumnas (con online incluye las gráficas de ejercicios).
+  if (p.rol !== "admin") lista.push("progreso");
   if (p.rol !== "admin") lista.push("pagos");
   lista.push("academia", "aprende", "ayuda", "perfil", "ajustes");
   if (p.rol === "admin") lista.push("admin");
