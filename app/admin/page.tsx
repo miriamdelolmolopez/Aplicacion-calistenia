@@ -11,7 +11,7 @@ const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
   {
     azulejos: [
       { href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" },
-      { href: "/admin/prueba", titulo: "Link de prueba gratuita", foto: "pino" },
+      { href: "/admin/registro", titulo: "Registro", foto: "pino" },
     ],
   },
   {
@@ -28,6 +28,7 @@ const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
     titulo: "Economía",
     azulejos: [
       { href: "/admin/bonos", titulo: "Pagos", foto: "personal" },
+      { href: "/admin/facturas", titulo: "Facturas", foto: "inicio" },
       { href: "/admin/tarifas", titulo: "Tarifas", foto: "calistenia" },
       { href: "/admin/descuentos", titulo: "Descuentos", foto: "progreso" },
       { href: "/admin/formas-pago", titulo: "Formas de pago", foto: "personal" },

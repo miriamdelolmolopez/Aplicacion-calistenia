@@ -6,8 +6,6 @@ import { estadoLinkPrueba } from "@/lib/pruebaLink";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ControlesLink from "./Controles";
-import ControlRegistro from "./ControlRegistro";
-import { registroAbierto } from "@/lib/registro";
 
 export const metadata = { title: "Link de prueba gratuita · Administración" };
 
@@ -15,7 +13,6 @@ export default async function LinkPrueba() {
   await requireAdmin();
   const admin = createAdminClient();
   const { activo, codigo } = await estadoLinkPrueba();
-  const abierto = await registroAbierto();
 
   // Dirección de la app tal y como la ve quien está mirando (así sirve en local y en producción).
   const h = await headers();
@@ -51,24 +48,16 @@ export default async function LinkPrueba() {
     <main className={styles.pagina}>
       <header className={styles.barra}>
         <h1>Link de prueba</h1>
-        <Link href="/admin" className={styles.enlaceBarra}>
+        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </header>
 
       <section className={styles.tarjeta}>
-        <h2>Registro de la app</h2>
-        <p className={styles.ayuda}>
-          Cerrado (recomendado mientras la app sea solo para tus alumnas): nadie puede crear una cuenta por su cuenta. Entran las personas que das de alta tú y quien llega con el link de prueba. Ábrelo el día que quieras admitir registros libres (por ejemplo, una academia o un curso con membresía).
-        </p>
-        <ControlRegistro abierto={abierto} />
-      </section>
-
-      <section className={styles.tarjeta}>
         <h2>Link de clase de prueba gratuita</h2>
         <p className={styles.ayuda}>
           Compártelo en Instagram o por WhatsApp. Quien lo abre ve una página de «Prueba una clase gratis» y crea su cuenta. Se registra como invitada: solo ve las plazas de
-          prueba libres y puede hacer una clase. Con el registro cerrado, este link es la única forma de que alguien nuevo cree cuenta.
+          prueba libres y puede hacer una clase. Con el registro cerrado (en Registro), este link es la única forma de que alguien nuevo cree cuenta.
         </p>
         <ControlesLink link={link} activo={activo} />
       </section>
