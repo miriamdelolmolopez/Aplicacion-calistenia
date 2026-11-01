@@ -73,7 +73,7 @@ export default function MisPagos() {
               </small>
               {p.estado === "pagado" && (
                 <a href={`/pagos/recibo/${p.id}`} download style={{ fontSize: "0.8rem", fontWeight: 600, textDecoration: "underline" }}>
-                  {idioma === "en" ? "Download receipt" : "Descargar recibo"}
+                  {idioma === "en" ? "Download invoice" : "Descargar factura"}
                 </a>
               )}
             </div>

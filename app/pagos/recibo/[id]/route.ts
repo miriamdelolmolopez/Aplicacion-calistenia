@@ -13,8 +13,8 @@ const MESES = {
   en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
 };
 
-// Recibo de un pago cobrado. La alumna solo puede bajar los suyos; Miriam, los de cualquiera.
-// Es un justificante de pago, no una factura.
+// Factura simplificada de un pago cobrado (FS-AAAA-NNN). La alumna solo puede bajar las suyas; Miriam, las de cualquiera.
+// Los datos de la clienta solo salen si el total llega a 400 €.
 export async function GET(_peticion: Request, contexto: { params: Promise<{ id: string }> }) {
   const { id } = await contexto.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new NextResponse("No encontrado", { status: 404 });
@@ -33,6 +33,14 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   if (!pago || pago.estado !== "pagado" || !pago.user_id) return new NextResponse("No encontrado", { status: 404 });
 
   const admin = createAdminClient();
+  // El número se da al cobrar; si por lo que sea faltara, se da ahora.
+  let { data: factura } = await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).maybeSingle();
+  if (!factura) {
+    await admin.rpc("emitir_factura", { p_pago: id });
+    factura = (await admin.from("facturas").select("anio, numero, emitida_en").eq("pago_id", id).maybeSingle()).data;
+  }
+  if (!factura) return new NextResponse("No se ha podido emitir la factura", { status: 500 });
+  const numeroFactura = `FS-${factura.anio}-${String(factura.numero).padStart(3, "0")}`;
   const [{ data: perfil }, { data: bono }, formas] = await Promise.all([
     admin.from("profiles").select("nombre, apellidos, dni, email, idioma").eq("id", pago.user_id).maybeSingle(),
     pago.bono_id ? admin.from("bonos").select("tipos_bono(nombre, iva_porcentaje)").eq("id", pago.bono_id).maybeSingle() : Promise.resolve({ data: null }),
@@ -49,6 +57,7 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   const concepto = tipo?.nombre ?? (pago.nota as string | null) ?? (es ? "Pago" : "Payment");
   const cliente = [perfil?.nombre, perfil?.apellidos].filter(Boolean).join(" ") || perfil?.email || "";
   const periodo = pago.periodo as string | null;
+  const conCliente = total >= 40000;
 
   const pdf = await PDFDocument.create();
   const normal = await pdf.embedFont(StandardFonts.Helvetica);
@@ -65,23 +74,22 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   const derecha = (t: string, tam = 10, fuente = normal, color = negro) => pagina.drawText(limpiar(t), { x: M + ANCHO - fuente.widthOfTextAtSize(limpiar(t), tam), y, size: tam, font: fuente, color });
   const linea = () => pagina.drawLine({ start: { x: M, y: y + 6 }, end: { x: M + ANCHO, y: y + 6 }, thickness: 0.6, color: rgb(0.85, 0.86, 0.88) });
 
-  texto(es ? "Recibo de pago" : "Payment receipt", M, 22, negrita, acento);
-  derecha(`${es ? "Recibo n.º" : "Receipt no."} ${id.slice(0, 8).toUpperCase()}`, 10, normal, gris);
+  texto(es ? "Factura simplificada" : "Simplified invoice", M, 22, negrita, acento);
+  derecha(`${es ? "Nº" : "No."} ${numeroFactura}`, 12, negrita);
   y -= 34;
   linea();
   y -= 16;
 
-  texto(es ? "Emitido por" : "Issued by", M, 9, negrita, gris);
-  texto(es ? "Recibido de" : "Received from", M + ANCHO / 2, 9, negrita, gris);
+  texto(es ? "Emitida por" : "Issued by", M, 9, negrita, gris);
+  if (conCliente) texto(es ? "Para" : "To", M + ANCHO / 2, 9, negrita, gris);
   y -= 15;
   texto(TITULAR.nombre, M, 10, negrita);
-  texto(cliente, M + ANCHO / 2, 10, negrita);
+  if (conCliente) texto(cliente, M + ANCHO / 2, 10, negrita);
   y -= 14;
   texto(`NIF ${TITULAR.nif}`, M);
-  if (perfil?.dni) texto(`DNI/NIE ${perfil.dni}`, M + ANCHO / 2);
+  if (conCliente && perfil?.dni) texto(`DNI/NIE ${perfil.dni}`, M + ANCHO / 2);
   y -= 14;
-  texto(TITULAR.direccion.length > 52 ? TITULAR.direccion.slice(0, 52) : TITULAR.direccion, M, 9, normal, gris);
-  if (perfil?.email) texto(perfil.email, M + ANCHO / 2, 9, normal, gris);
+  texto(TITULAR.direccion, M, 9, normal, gris);
   y -= 30;
   linea();
   y -= 18;
@@ -91,7 +99,8 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
     texto(valor, M + 170, 10, fuerte ? negrita : normal);
     y -= 20;
   };
-  fila(es ? "Concepto" : "Item", concepto, true);
+  fila(es ? "Fecha de emisión" : "Issue date", fecha(factura.emitida_en as string));
+  fila(es ? "Descripción" : "Description", concepto, true);
   fila(es ? "Fecha del pago" : "Payment date", fecha((pago.pagado_en as string | null) ?? (pago.creado_en as string)));
   if (periodo && /^\d{4}-\d{2}$/.test(periodo)) fila(es ? "Corresponde a" : "Covers", `${MESES[idioma][Number(periodo.slice(5)) - 1]} ${periodo.slice(0, 4)}`);
   fila(es ? "Forma de pago" : "Payment method", (formas as Record<string, string>)[pago.metodo as string] ?? (pago.metodo as string));
@@ -108,15 +117,15 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
     importe(es ? "Precio" : "Price", euros(pago.importe_original_centimos as number));
     importe(es ? "Descuento" : "Discount", `-${euros(pago.descuento_centimos as number)}`);
   }
-  importe(es ? "Base imponible" : "Taxable amount", euros(base));
+  importe(es ? "Precio base (sin IVA)" : "Base price (excl. VAT)", euros(base));
   importe(`IVA ${iva} %`, euros(total - base));
   y -= 2;
-  importe(es ? "Total pagado" : "Total paid", euros(total), true);
+  importe(es ? "Total a pagar" : "Total to pay", euros(total), true);
 
   y -= 24;
   const aviso = es
-    ? "Este documento es un justificante del pago recibido. No es una factura."
-    : "This document is a receipt for the payment received. It is not an invoice.";
+    ? "Factura simplificada. IVA incluido en el total."
+    : "Simplified invoice. VAT included in the total.";
   texto(aviso, M, 9, normal, gris);
   y -= 13;
   texto(`${TITULAR.email} · ${TITULAR.telefono}`, M, 9, normal, gris);
@@ -125,7 +134,7 @@ export async function GET(_peticion: Request, contexto: { params: Promise<{ id: 
   return new NextResponse(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="recibo-${id.slice(0, 8)}.pdf"`,
+      "Content-Disposition": `attachment; filename="${numeroFactura}.pdf"`,
       "Cache-Control": "no-store",
     },
   });
