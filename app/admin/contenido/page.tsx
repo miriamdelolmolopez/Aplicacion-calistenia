@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import BotonFoto from "../fotos/BotonFoto";
+import GaleriaFotos from "../fotos/GaleriaFotos";
 import Frases, { type Frase } from "../frases/Frases";
 import styles from "../admin.module.css";
 
@@ -14,7 +14,7 @@ export default async function Contenido() {
     .from("frases_inicio")
     .select("id, texto_es, texto_en, activa")
     .order("creada_en");
-  const fotoApp = (clave: string) => fotosApp?.find((f) => f.clave === clave)?.url ?? null;
+  const fotosDe = (base: string) => (fotosApp ?? []).filter((f) => f.clave === base || f.clave.startsWith(`${base}:`)).sort((a, b) => a.clave.localeCompare(b.clave));
 
   return (
     <main className={styles.pagina}>
@@ -27,11 +27,11 @@ export default async function Contenido() {
 
       <section className={styles.tarjeta}>
         <h2>Fotos de la app</h2>
-        <p className={styles.ayuda}>Las fotos de cada clase, rutina y ejercicio se cambian en su pantalla.</p>
+        <p className={styles.ayuda}>Las fotos de cada clase, rutina y ejercicio se cambian en su pantalla. En Portada y en el saludo de Inicio puedes poner varias: sale una al azar cada vez.</p>
         <strong>Portada</strong>
-        <BotonFoto destino="portada" actual={fotoApp("portada")} />
+        <GaleriaFotos destino="portada" fotos={fotosDe("portada")} />
         <strong>Saludo de Inicio</strong>
-        <BotonFoto destino="inicio" actual={fotoApp("inicio")} />
+        <GaleriaFotos destino="inicio" fotos={fotosDe("inicio")} />
       </section>
 
       <Frases frases={(frasesDatos ?? []) as Frase[]} />

@@ -98,3 +98,45 @@ export async function quitarFotoApp(destino: string, id: string): Promise<Result
   repasar();
   return { ok: true, url: null };
 }
+
+// ---------- Varias fotos en Portada y Saludo de Inicio ----------
+// La primera sigue guardada como «portada» / «inicio»; las demás como «portada:abc123». Cada visita enseña una al azar.
+
+export async function anadirFotoGaleria(formData: FormData): Promise<ResultadoFoto> {
+  await requireAdmin();
+  const destino = String(formData.get("destino") ?? "");
+  const archivo = formData.get("foto");
+  if (destino !== "portada" && destino !== "inicio") return { ok: false, error: "Destino no válido." };
+  if (!(archivo instanceof File) || !(archivo.type in TIPOS) || archivo.size === 0 || archivo.size > MAX) {
+    return { ok: false, error: "La foto debe ser jpg, png o webp y pesar menos de 1 MB." };
+  }
+
+  const admin = createAdminClient();
+  const ruta = `${destino}/app-${Date.now()}.${TIPOS[archivo.type]}`;
+  const { error } = await admin.storage
+    .from("fotos")
+    .upload(ruta, Buffer.from(await archivo.arrayBuffer()), { contentType: archivo.type, cacheControl: "31536000" });
+  if (error) return { ok: false, error: "No se ha podido subir la foto." };
+  const url = admin.storage.from("fotos").getPublicUrl(ruta).data.publicUrl;
+
+  // La primera foto ocupa el sitio de siempre; las siguientes llevan un sufijo.
+  const { data: existe } = await admin.from("fotos_app").select("clave").eq("clave", destino).maybeSingle();
+  const clave = existe ? `${destino}:${Date.now().toString(36)}` : destino;
+  if ((await admin.from("fotos_app").upsert({ clave, url })).error) {
+    await admin.storage.from("fotos").remove([ruta]);
+    return { ok: false, error: "No se ha podido guardar la foto." };
+  }
+  repasar();
+  return { ok: true, url };
+}
+
+export async function quitarFotoGaleria(clave: string): Promise<ResultadoFoto> {
+  await requireAdmin();
+  if (!/^(portada|inicio)(:[a-z0-9]+)?$/.test(clave)) return { ok: false, error: "Foto no válida." };
+  const admin = createAdminClient();
+  const { data } = await admin.from("fotos_app").select("url").eq("clave", clave).maybeSingle();
+  if ((await admin.from("fotos_app").delete().eq("clave", clave)).error) return { ok: false, error: "No se ha podido quitar." };
+  await borrarArchivo(data?.url ?? null);
+  repasar();
+  return { ok: true, url: null };
+}
