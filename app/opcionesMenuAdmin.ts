@@ -14,6 +14,7 @@ export const OPCIONES_MENU_ADMIN: OpcionMenuAdmin[] = [
   { href: "/inicio", icono: "inicio", texto: "Inicio", fijo: true, defecto: true },
   { href: "/admin", icono: "admin", texto: "Panel", fijo: true, defecto: true },
   { href: "/admin/usuarios", icono: "usuarios", texto: "Usuarios", defecto: true },
+  { href: "/admin/prueba", icono: "usuarios", texto: "Link de prueba", defecto: false },
   { href: "/clases", icono: "reservar", texto: "Reservar clases", defecto: true },
   { href: "/admin/presenciales", icono: "historial", texto: "Clases presenciales", defecto: true },
   { href: "/admin/horario", icono: "historial", texto: "Horarios presenciales", defecto: false },

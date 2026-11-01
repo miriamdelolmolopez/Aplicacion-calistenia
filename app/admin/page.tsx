@@ -9,7 +9,10 @@ export const metadata = { title: "Administración · CalisCoach" };
 // Cada grupo es un título con sus fotos debajo. Las fotos son las de ejemplo de la app.
 const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
   {
-    azulejos: [{ href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" }],
+    azulejos: [
+      { href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" },
+      { href: "/admin/prueba", titulo: "Link de prueba gratuita", foto: "pino" },
+    ],
   },
   {
     titulo: "Servicios",

@@ -1,0 +1,36 @@
+.logo {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 8px;
+  border-radius: 22px;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.5);
+}
+
+.pasos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.pasos li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.4;
+}
+
+.pasos span {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #5fd8e8, #0aa8c0 45%, #087f92);
+  border-radius: 50%;
+}

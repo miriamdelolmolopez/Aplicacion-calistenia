@@ -30,12 +30,14 @@ export default function Registro() {
     if (clave.length < 8) return setError(t.errorContrasenaCorta);
 
     setCargando(true);
+    // Quien llega desde el link de prueba gratuita queda anotado (para el contador de Administración).
+    const origen = new URLSearchParams(location.search).get("origen") === "prueba" ? "prueba" : undefined;
     const supabase = createClient();
     const { data, error: fallo } = await supabase.auth.signUp({
       email: correo.trim(),
       password: clave,
       options: {
-        data: { idioma, imagen },
+        data: { idioma, imagen, ...(origen ? { origen } : {}) },
         emailRedirectTo: `${location.origin}/auth/confirmar?next=/datos`,
       },
     });

@@ -1,5 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 // Páginas a las que puede llevar un enlace de correo (lista cerrada, por seguridad).
@@ -42,6 +43,19 @@ export async function GET(request: NextRequest) {
   }
 
   if (!correcto) return NextResponse.redirect(fallo);
+
+  // Cuenta nueva que llega desde el link de prueba gratuita: se anota (solo si se acaba de crear).
+  if (searchParams.get("origen") === "prueba") {
+    try {
+      const { data } = await supabase.auth.getUser();
+      const u = data.user;
+      if (u && !u.user_metadata?.origen && Date.now() - new Date(u.created_at).getTime() < 15 * 60 * 1000) {
+        await createAdminClient().auth.admin.updateUserById(u.id, { user_metadata: { ...u.user_metadata, origen: "prueba" } });
+      }
+    } catch {
+      // Si no se puede anotar, el acceso sigue igual.
+    }
+  }
 
   const destino = request.nextUrl.clone();
   destino.pathname =
