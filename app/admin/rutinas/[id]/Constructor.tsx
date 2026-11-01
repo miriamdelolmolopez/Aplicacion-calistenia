@@ -22,18 +22,19 @@ import { useRouter } from "next/navigation";
 import {
   useActionState,
   useEffect,
+  useId,
   useState,
   useTransition,
   type FormEvent,
   type ReactNode,
 } from "react";
-import MapaCorporal from "../../../MapaCorporal";
+import { FotoRutina, IconoBoton, ResumenRutina, VentanaMusculos } from "./PiezasEditor";
+import { minutosEstimados } from "@/lib/duracion";
 import type { Estado } from "../../acciones";
 import styles from "../../admin.module.css";
 import {
   CATEGORIAS,
   TIPOS,
-  intensidadesAgregadas,
   nombreCategoria,
   nombreTipo,
   type Campo,
@@ -46,9 +47,11 @@ import {
   despublicarRutina,
   eliminarRutina,
   guardarCambioSemana,
+  guardarExtraSemana,
   guardarItem,
   publicarRutina,
   quitarCambioSemana,
+  quitarExtraSemana,
   quitarItem,
   quitarSesion,
   renombrarSesion,
@@ -100,6 +103,23 @@ export type CambioSemana = {
   distancia_m: number | null;
   descanso_seg: number | null;
   nota: string | null;
+  quitado: boolean;
+};
+
+export type ExtraSemana = {
+  id: string;
+  sesion_id: string;
+  semana: number;
+  ejercicio_id: string;
+  series: number;
+  reps_min: number | null;
+  reps_max: number | null;
+  segundos_min: number | null;
+  segundos_max: number | null;
+  peso_kg: number | null;
+  distancia_m: number | null;
+  descanso_seg: number | null;
+  nota: string | null;
 };
 
 export type SesionRutina = {
@@ -119,6 +139,7 @@ export type DatosRutina = {
   semanas: number;
   esPlantilla: boolean;
   alumno: string | null;
+  fotoUrl: string | null;
 };
 
 type Avisar = (mensaje: string) => void;
@@ -162,6 +183,7 @@ function ListaOrdenable({
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+  const idDnd = useId();
 
   function alSoltar(evento: DragEndEvent) {
     const { active, over } = evento;
@@ -173,7 +195,7 @@ function ListaOrdenable({
   }
 
   return (
-    <DndContext sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
+    <DndContext id={idDnd} sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
@@ -255,49 +277,6 @@ function useEjecutar(avisar: Avisar) {
 
 // ---------- Resumen de material y músculos ----------
 
-function Resumen({
-  items,
-  catalogo,
-  titulo,
-}: {
-  items: ItemRutina[];
-  catalogo: Map<string, CatalogoEjercicio>;
-  titulo: string;
-}) {
-  const materiales = [
-    ...new Set(items.flatMap((i) => catalogo.get(i.ejercicio_id)?.materiales ?? [])),
-  ].sort((a, b) => a.localeCompare(b));
-  const intensidades = intensidadesAgregadas(
-    items.map((i) => ({ series: i.series, musculos: catalogo.get(i.ejercicio_id)?.musculos ?? [] })),
-  );
-
-  if (items.length === 0) return <p className={styles.ayuda}>Añade ejercicios para ver el resumen.</p>;
-
-  return (
-    <details className={styles.detalles}>
-      <summary>{titulo}</summary>
-      <div className={styles.formularioInterno}>
-        <div>
-          <strong>Material necesario</strong>
-          {materiales.length === 0 ? (
-            <p className={styles.ayuda}>Ningún material.</p>
-          ) : (
-            <ul className={styles.lista}>
-              {materiales.map((m) => (
-                <li key={m}>{m}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div>
-          <strong>Músculos trabajados</strong>
-          <MapaCorporal intensidades={intensidades} />
-        </div>
-      </div>
-    </details>
-  );
-}
-
 // ---------- Un ejercicio de la sesión ----------
 
 function textoObjetivo(item: ItemRutina, campos: readonly Campo[]): string {
@@ -334,6 +313,7 @@ function CambiosSemana({
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarCambioSemana, {});
   const { pendiente: ocupado, ejecutar } = useEjecutar(avisar);
   const resumen = (x: CambioSemana) => {
+    if (x.quitado) return "ese ejercicio no se hace";
     const partes: string[] = [];
     if (x.ejercicio_id) partes.push(catalogo.get(x.ejercicio_id)?.nombre ?? "otro ejercicio");
     if (x.series !== null) partes.push(`${x.series} series`);
@@ -366,6 +346,10 @@ function CambiosSemana({
       <form action={accion} className={styles.formularioInterno}>
         <input type="hidden" name="item" value={item.id} />
         <input type="hidden" name="rutina" value={rutinaId} />
+        <label className={styles.casilla}>
+          <input type="checkbox" name="quitar" />
+          Quitar este ejercicio esa semana (no se hace)
+        </label>
         <p className={styles.ayuda}>Elige la semana y rellena solo lo que cambia: lo que dejes vacío se queda como en la rutina. Si cambias el ejercicio, pon también sus series y repeticiones.</p>
         <div className={styles.camposItem}>
           <div className={styles.campo}>
@@ -474,6 +458,8 @@ function TarjetaItem({
   const campos: readonly Campo[] = tipo?.campos ?? [];
 
   const enSuper = item.grupo !== null;
+  const [abierto, setAbierto] = useState(false);
+  const [musculos, setMusculos] = useState(false);
 
   return (
     <div className={`${styles.itemCaja} ${enSuper ? styles.itemSuper : ""}`}>
@@ -483,7 +469,7 @@ function TarjetaItem({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={ejercicio.foto_url} alt="" style={{ width: 72, height: 72, flex: "none", objectFit: "contain", borderRadius: 12, background: "var(--relleno)" }} />
         )}
-        <div className={styles.itemTitulo}>
+        <div className={styles.itemTitulo} onClick={() => setAbierto((a) => !a)} style={{ cursor: "pointer" }}>
           <strong>
             {etiquetaSuper && <span className={styles.etiquetaSuper}>{etiquetaSuper}</span>}
             {ejercicio?.nombre ?? "(ejercicio borrado)"}
@@ -493,6 +479,25 @@ function TarjetaItem({
             {textoObjetivo(item, campos)} · descanso {item.descanso_seg} s
             {!ejercicio?.activo && ejercicio && " · archivado"}
           </div>
+          {item.nota && <div className={styles.ayuda}>📝 {item.nota}</div>}
+        </div>
+        <div style={{ display: "flex", gap: 6, flex: "none", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <IconoBoton titulo={abierto ? "Cerrar" : "Editar el ejercicio"} onClick={() => setAbierto((a) => !a)}>
+            ✎
+          </IconoBoton>
+          <IconoBoton titulo="Ver los músculos" onClick={() => setMusculos(true)}>
+            🧍
+          </IconoBoton>
+          <IconoBoton
+            titulo="Quitar el ejercicio"
+            peligro
+            disabled={ocupado}
+            onClick={() => {
+              if (window.confirm("¿Quitar este ejercicio de la rutina?")) ejecutar(() => quitarItem(rutinaId, item.id));
+            }}
+          >
+            🗑
+          </IconoBoton>
         </div>
         <div className={styles.flechas}>
           <button type="button" aria-label="Subir" disabled={!subir || ocupado} onClick={() => subir?.()}>
@@ -504,8 +509,11 @@ function TarjetaItem({
         </div>
       </div>
 
-      <details className={styles.detalles}>
-        <summary>Series, objetivos y notas</summary>
+      {musculos && <VentanaMusculos titulo={ejercicio?.nombre ?? "Ejercicio"} items={[item]} catalogo={catalogo} cerrar={() => setMusculos(false)} />}
+
+      {abierto && (
+        <>
+
         <form action={accion} className={styles.formularioInterno}>
           <input type="hidden" name="id" value={item.id} />
           <input type="hidden" name="rutina" value={rutinaId} />
@@ -569,7 +577,6 @@ function TarjetaItem({
           </button>
           <Mensajes estado={estado} />
         </form>
-      </details>
 
       <CambiosSemana rutinaId={rutinaId} item={item} semanas={semanas} cambios={cambios} opciones={opciones} catalogo={catalogo} avisar={avisar} />
 
@@ -594,22 +601,136 @@ function TarjetaItem({
             Sacar de la superserie
           </button>
         )}
-        <button
-          type="button"
-          className={`${styles.boton} ${styles.botonSecundario}`}
-          disabled={ocupado}
-          onClick={() => {
-            if (window.confirm("¿Quitar este ejercicio de la rutina?")) ejecutar(() => quitarItem(rutinaId, item.id));
-          }}
-        >
-          Quitar
-        </button>
       </div>
+        </>
+      )}
     </div>
   );
 }
 
 // ---------- Una sesión ----------
+
+// Ejercicios extra que solo hay en una semana concreta de una sesión.
+function ExtrasSemana({
+  rutinaId,
+  sesionId,
+  semanas,
+  extras,
+  opciones,
+  catalogo,
+  avisar,
+}: {
+  rutinaId: string;
+  sesionId: string;
+  semanas: number;
+  extras: ExtraSemana[];
+  opciones: CatalogoEjercicio[];
+  catalogo: Map<string, CatalogoEjercicio>;
+  avisar: Avisar;
+}) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(guardarExtraSemana, {});
+  const { pendiente: ocupado, ejecutar } = useEjecutar(avisar);
+  const objetivo = (x: ExtraSemana) => {
+    const partes = [`${x.series} series`];
+    if (x.reps_min !== null) partes.push(`${x.reps_min}${x.reps_max ? `-${x.reps_max}` : ""} reps`);
+    if (x.segundos_min !== null) partes.push(`${x.segundos_min}${x.segundos_max ? `-${x.segundos_max}` : ""} s`);
+    if (x.distancia_m !== null) partes.push(`${x.distancia_m} m`);
+    return partes.join(" · ");
+  };
+
+  return (
+    <details className={styles.detalles}>
+      <summary>Ejercicio extra solo en una semana{extras.length > 0 ? ` (${extras.length})` : ""}</summary>
+      {extras.length > 0 && (
+        <ul className={styles.lista}>
+          {extras.map((x) => (
+            <li key={x.id} className={styles.personaCabecera}>
+              <span>
+                <strong>Semana {x.semana}:</strong> {catalogo.get(x.ejercicio_id)?.nombre ?? "ejercicio"} · {objetivo(x)}
+              </span>
+              <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={ocupado} onClick={() => ejecutar(() => quitarExtraSemana(rutinaId, x.id))}>
+                Quitar
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form action={accion} className={styles.formularioInterno}>
+        <input type="hidden" name="sesion" value={sesionId} />
+        <input type="hidden" name="rutina" value={rutinaId} />
+        <p className={styles.ayuda}>Añade un ejercicio que solo se hace en una semana concreta (se hace al final de la sesión).</p>
+        <div className={styles.camposItem}>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-semana-${sesionId}`}>Semana</label>
+            <select id={`ex-semana-${sesionId}`} name="semana" required defaultValue="">
+              <option value="" disabled>
+                Elige…
+              </option>
+              {Array.from({ length: semanas }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Semana {i + 1}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-ej-${sesionId}`}>Ejercicio</label>
+            <select id={`ex-ej-${sesionId}`} name="ejercicio" required defaultValue="">
+              <option value="" disabled>
+                Elige…
+              </option>
+              {opciones.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-se-${sesionId}`}>Series</label>
+            <input id={`ex-se-${sesionId}`} name="series" type="number" min={1} max={20} required defaultValue={3} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-rm-${sesionId}`}>Repeticiones</label>
+            <input id={`ex-rm-${sesionId}`} name="reps_min" type="number" min={1} max={500} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-rx-${sesionId}`}>hasta</label>
+            <input id={`ex-rx-${sesionId}`} name="reps_max" type="number" min={1} max={500} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-sm-${sesionId}`}>Segundos</label>
+            <input id={`ex-sm-${sesionId}`} name="segundos_min" type="number" min={1} max={7200} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-sx-${sesionId}`}>hasta</label>
+            <input id={`ex-sx-${sesionId}`} name="segundos_max" type="number" min={1} max={7200} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-pe-${sesionId}`}>Peso (kg)</label>
+            <input id={`ex-pe-${sesionId}`} name="peso_kg" inputMode="decimal" />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-di-${sesionId}`}>Distancia (m)</label>
+            <input id={`ex-di-${sesionId}`} name="distancia_m" type="number" min={1} max={100000} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`ex-de-${sesionId}`}>Descanso (s)</label>
+            <input id={`ex-de-${sesionId}`} name="descanso_seg" type="number" min={0} max={900} defaultValue={60} />
+          </div>
+        </div>
+        <div className={styles.campo}>
+          <label htmlFor={`ex-no-${sesionId}`}>Nota (opcional)</label>
+          <input id={`ex-no-${sesionId}`} name="nota" maxLength={300} />
+        </div>
+        <button className={styles.boton} type="submit" disabled={pendiente}>
+          {pendiente ? "Guardando…" : "Añadir a esa semana"}
+        </button>
+        <Mensajes estado={estado} />
+      </form>
+    </details>
+  );
+}
 
 function TarjetaSesion({
   rutinaId,
@@ -621,9 +742,11 @@ function TarjetaSesion({
   avisar,
   semanas,
   cambios,
+  extras,
 }: {
   semanas: number;
   cambios: CambioSemana[];
+  extras: ExtraSemana[];
   rutinaId: string;
   sesion: SesionRutina;
   catalogo: Map<string, CatalogoEjercicio>;
@@ -635,8 +758,10 @@ function TarjetaSesion({
   const { pendiente, ejecutar } = useEjecutar(avisar);
   const orden = useOrden(sesion.items, (ids) => reordenarItems(rutinaId, sesion.id, ids), avisar);
   const [elegido, setElegido] = useState("");
-  const [confirmando, setConfirmando] = useState(false);
   const [abierta, setAbierta] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [anadiendo, setAnadiendo] = useState(false);
+  const [musculos, setMusculos] = useState(false);
 
   // Letra de cada superserie (A, B…) y posición dentro de ella (A1, A2…).
   const letras = new Map<number, string>();
@@ -651,12 +776,15 @@ function TarjetaSesion({
   function guardarNombre(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const datos = new FormData(e.currentTarget);
-    ejecutar(() =>
-      renombrarSesion(rutinaId, sesion.id, String(datos.get("nombre") ?? ""), String(datos.get("nota") ?? "")),
-    );
+    setEditando(false);
+    ejecutar(() => renombrarSesion(rutinaId, sesion.id, String(datos.get("nombre") ?? ""), String(datos.get("nota") ?? "")));
   }
 
   const activos = [...catalogo.values()].filter((e) => e.activo);
+  const resumen =
+    sesion.items.length === 0
+      ? "Sin ejercicios"
+      : `${sesion.items.length} ${sesion.items.length === 1 ? "ejercicio" : "ejercicios"} · ~${minutosEstimados(sesion.items)} min`;
 
   return (
     <section className={styles.sesionCaja}>
@@ -672,14 +800,28 @@ function TarjetaSesion({
             {abierta ? "▾" : "▸"} {sesion.nombre}
           </h3>
           <span className={styles.ayuda}>
-            {sesion.items.length === 0
-              ? "Sin ejercicios"
-              : `${sesion.items.length} ${sesion.items.length === 1 ? "ejercicio" : "ejercicios"} · ${sesion.items
-                  .slice(0, 3)
-                  .map((i) => catalogo.get(i.ejercicio_id)?.nombre ?? "?")
-                  .join(", ")}${sesion.items.length > 3 ? "…" : ""}`}
+            {resumen}
+            {!abierta && sesion.items.length > 0 && ` · ${sesion.items.slice(0, 3).map((i) => catalogo.get(i.ejercicio_id)?.nombre ?? "?").join(", ")}${sesion.items.length > 3 ? "…" : ""}`}
           </span>
         </button>
+        <div style={{ display: "flex", gap: 6, flex: "none" }}>
+          <IconoBoton titulo="Cambiar el nombre y la nota" onClick={() => { setEditando((v) => !v); setAbierta(true); }}>
+            ✎
+          </IconoBoton>
+          <IconoBoton titulo="Ver los músculos de la sesión" onClick={() => setMusculos(true)}>
+            🧍
+          </IconoBoton>
+          <IconoBoton
+            titulo="Quitar la sesión"
+            peligro
+            disabled={pendiente}
+            onClick={() => {
+              if (window.confirm(`¿Quitar la sesión «${sesion.nombre}» con sus ${sesion.items.length} ejercicios?`)) ejecutar(() => quitarSesion(rutinaId, sesion.id));
+            }}
+          >
+            🗑
+          </IconoBoton>
+        </div>
         <div className={styles.flechas}>
           <button type="button" aria-label="Subir sesión" disabled={!subir || pendiente} onClick={() => subir?.()}>
             ↑
@@ -690,26 +832,78 @@ function TarjetaSesion({
         </div>
       </div>
 
+      {sesion.nota && !editando && <p className={styles.ayuda} style={{ margin: "4px 0 0" }}>📝 {sesion.nota}</p>}
+
+      {editando && (
+        <form onSubmit={guardarNombre} className={styles.formularioInterno}>
+          <div className={styles.campo}>
+            <label htmlFor={`sn-${sesion.id}`}>Nombre</label>
+            <input id={`sn-${sesion.id}`} name="nombre" required maxLength={80} defaultValue={sesion.nombre} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`sno-${sesion.id}`}>Nota (opcional)</label>
+            <input id={`sno-${sesion.id}`} name="nota" maxLength={1000} defaultValue={sesion.nota ?? ""} />
+          </div>
+          <div className={styles.accionesItem}>
+            <button className={styles.boton} type="submit" disabled={pendiente}>
+              Guardar
+            </button>
+            <button className={`${styles.boton} ${styles.botonSecundario}`} type="button" onClick={() => setEditando(false)}>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {musculos && <VentanaMusculos titulo={`Músculos · ${sesion.nombre}`} items={sesion.items} catalogo={catalogo} cerrar={() => setMusculos(false)} />}
+
       {abierta && (
         <>
-          <details className={styles.detalles}>
-            <summary>Nombre y nota de la sesión</summary>
-            <form onSubmit={guardarNombre} className={styles.formularioInterno}>
-              <div className={styles.campo}>
-                <label htmlFor={`sn-${sesion.id}`}>Nombre</label>
-                <input id={`sn-${sesion.id}`} name="nombre" required maxLength={80} defaultValue={sesion.nombre} />
-              </div>
-              <div className={styles.campo}>
-                <label htmlFor={`sno-${sesion.id}`}>Nota (opcional)</label>
-                <input id={`sno-${sesion.id}`} name="nota" maxLength={1000} defaultValue={sesion.nota ?? ""} />
-              </div>
-              <button className={styles.boton} type="submit" disabled={pendiente}>
-                Guardar
-              </button>
-            </form>
-          </details>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, margin: "8px 0" }}>
+            <strong>Ejercicios</strong>
+            <IconoBoton titulo="Añadir un ejercicio" onClick={() => setAnadiendo((v) => !v)}>
+              ＋
+            </IconoBoton>
+          </div>
 
-          {orden.mostrados.length === 0 && <p className={styles.ayuda}>Esta sesión aún no tiene ejercicios.</p>}
+          {anadiendo && (
+            <div className={styles.añadirItem}>
+              <label htmlFor={`add-${sesion.id}`} className={styles.oculto}>
+                Ejercicio que añadir
+              </label>
+              <select id={`add-${sesion.id}`} value={elegido} onChange={(e) => setElegido(e.target.value)}>
+                <option value="">Añadir ejercicio…</option>
+                {CATEGORIAS.map((c) => {
+                  const delGrupo = activos.filter((e) => e.categoria === c.valor);
+                  if (delGrupo.length === 0) return null;
+                  return (
+                    <optgroup key={c.valor} label={c.es}>
+                      {delGrupo.map((e) => (
+                        <option key={e.id} value={e.id}>
+                          {e.nombre}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+              </select>
+              <button
+                type="button"
+                className={styles.boton}
+                disabled={!elegido || pendiente}
+                onClick={() => {
+                  const id = elegido;
+                  setElegido("");
+                  setAnadiendo(false);
+                  ejecutar(() => agregarItem(rutinaId, sesion.id, id));
+                }}
+              >
+                Añadir
+              </button>
+            </div>
+          )}
+
+          {orden.mostrados.length === 0 && <p className={styles.ayuda}>Esta sesión aún no tiene ejercicios. Pulsa ＋ para añadir el primero.</p>}
 
           <ListaOrdenable ids={orden.ids} onReordenar={orden.reordenar}>
             <div className={styles.listaItems}>
@@ -742,68 +936,7 @@ function TarjetaSesion({
             </div>
           </ListaOrdenable>
 
-          <div className={styles.añadirItem}>
-            <label htmlFor={`add-${sesion.id}`} className={styles.oculto}>
-              Ejercicio que añadir
-            </label>
-            <select id={`add-${sesion.id}`} value={elegido} onChange={(e) => setElegido(e.target.value)}>
-              <option value="">Añadir ejercicio…</option>
-              {CATEGORIAS.map((c) => {
-                const delGrupo = activos.filter((e) => e.categoria === c.valor);
-                if (delGrupo.length === 0) return null;
-                return (
-                  <optgroup key={c.valor} label={c.es}>
-                    {delGrupo.map((e) => (
-                      <option key={e.id} value={e.id}>
-                        {e.nombre}
-                      </option>
-                    ))}
-                  </optgroup>
-                );
-              })}
-            </select>
-            <button
-              type="button"
-              className={styles.boton}
-              disabled={!elegido || pendiente}
-              onClick={() => {
-                const id = elegido;
-                setElegido("");
-                ejecutar(() => agregarItem(rutinaId, sesion.id, id));
-              }}
-            >
-              Añadir
-            </button>
-          </div>
-
-          <Resumen items={sesion.items} catalogo={catalogo} titulo="Material y músculos de esta sesión" />
-
-          {confirmando ? (
-            <div className={styles.aviso} role="alert">
-              <p style={{ margin: "0 0 10px" }}>
-                ¿Quitar la sesión «{sesion.nombre}» con sus {sesion.items.length} ejercicios?
-              </p>
-              <div className={styles.accionesItem}>
-                <button
-                  type="button"
-                  className={styles.boton}
-                  disabled={pendiente}
-                  onClick={() => {
-                    if (window.confirm("¿Quitar esta sesión con todos sus ejercicios?")) ejecutar(() => quitarSesion(rutinaId, sesion.id));
-                  }}
-                >
-                  Sí, quitar la sesión
-                </button>
-                <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmando(false)}>
-                  No
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setConfirmando(true)}>
-              Quitar esta sesión
-            </button>
-          )}
+          <ExtrasSemana rutinaId={rutinaId} sesionId={sesion.id} semanas={semanas} extras={extras.filter((x) => x.sesion_id === sesion.id)} opciones={activos} catalogo={catalogo} avisar={avisar} />
         </>
       )}
     </section>
@@ -820,6 +953,8 @@ function CabeceraRutina({
   alumnos: { id: string; texto: string }[];
 }) {
   const router = useRouter();
+  const [nombre, setNombre] = useState(rutina.nombre);
+  const [editandoNombre, setEditandoNombre] = useState(false);
   const [estadoDatos, accionDatos, pendienteDatos] = useActionState<Estado, FormData>(actualizarRutina, {});
   const [estadoPub, accionPub, pendientePub] = useActionState<Estado, FormData>(publicarRutina, {});
   const [estadoDes, accionDes, pendienteDes] = useActionState<Estado, FormData>(despublicarRutina, {});
@@ -834,15 +969,59 @@ function CabeceraRutina({
 
   return (
     <section className={styles.tarjeta}>
-      <div className={styles.personaCabecera}>
-        <div>
-          <h2 style={{ margin: 0 }}>{rutina.nombre}</h2>
-          <div className={styles.ayuda}>
-            {rutina.esPlantilla ? "Plantilla (sin alumno/a)" : `Alumno/a: ${rutina.alumno ?? "—"}`}
+      <form action={accionDatos} className={styles.formularioInterno}>
+        <input type="hidden" name="id" value={rutina.id} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <FotoRutina rutinaId={rutina.id} url={rutina.fotoUrl} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {editandoNombre ? (
+              <input name="nombre" required maxLength={80} value={nombre} onChange={(e) => setNombre(e.target.value)} aria-label="Nombre de la rutina" autoFocus />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <h2 style={{ margin: 0, minWidth: 0, overflowWrap: "anywhere" }}>{nombre}</h2>
+                <input type="hidden" name="nombre" value={nombre} />
+                <IconoBoton titulo="Cambiar el nombre" onClick={() => setEditandoNombre(true)}>
+                  ✎
+                </IconoBoton>
+              </div>
+            )}
+            <div className={styles.ayuda}>{rutina.esPlantilla ? "Plantilla (sin alumno/a)" : `Alumno/a: ${rutina.alumno ?? "—"}`}</div>
+            <span className={`${styles.estadoChip} ${styles[e.clase]}`}>{e.texto}</span>
           </div>
         </div>
-        <span className={`${styles.estadoChip} ${styles[e.clase]}`}>{e.texto}</span>
-      </div>
+        <div className={styles.campo}>
+          <label htmlFor="rut-nota">Nota para el/la alumno/a (opcional)</label>
+          <textarea id="rut-nota" name="nota" rows={3} maxLength={1000} defaultValue={rutina.nota ?? ""} />
+        </div>
+        <div className={styles.camposItem}>
+          <div className={styles.campo}>
+            <label htmlFor="rut-semanas">Semanas que dura la rutina</label>
+            <select id="rut-semanas" name="semanas" defaultValue={rutina.semanas}>
+              {Array.from({ length: 52 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1} {i === 0 ? "semana" : "semanas"}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="rut-entrenos">Entrenos por semana</label>
+            <select id="rut-entrenos" name="entrenos_semana" defaultValue={rutina.entrenosSemana ?? ""}>
+              <option value="">Los de las sesiones</option>
+              {Array.from({ length: 14 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1} por semana
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <span className={styles.ayuda}>Las sesiones se repiten cada semana. El/la alumno/a ve «Semana 1», «Semana 2»… con un check al completar cada sesión.</span>
+        <button className={styles.boton} type="submit" disabled={pendienteDatos}>
+          {pendienteDatos ? "Guardando…" : "Guardar"}
+        </button>
+        <Mensajes estado={estadoDatos} />
+      </form>
 
       {!rutina.esPlantilla && (
         <>
@@ -872,39 +1051,6 @@ function CabeceraRutina({
           )}
         </>
       )}
-
-      <details className={styles.detalles}>
-        <summary>Nombre, nota, semanas y entrenos por semana</summary>
-        <form action={accionDatos} className={styles.formularioInterno}>
-          <input type="hidden" name="id" value={rutina.id} />
-          <div className={styles.campo}>
-            <label htmlFor="rut-nombre">Nombre</label>
-            <input id="rut-nombre" name="nombre" required maxLength={80} defaultValue={rutina.nombre} />
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor="rut-nota">Nota para el/la alumno/a (opcional)</label>
-            <textarea id="rut-nota" name="nota" rows={3} maxLength={1000} defaultValue={rutina.nota ?? ""} />
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor="rut-semanas">Semanas que dura la rutina</label>
-            <input id="rut-semanas" name="semanas" type="number" min={1} max={52} defaultValue={rutina.semanas} />
-            <span className={styles.ayuda}>
-              Las sesiones se repiten cada semana. El/la alumno/a ve «Semana 1», «Semana 2»… con un check al completar cada sesión.
-            </span>
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor="rut-entrenos">Entrenos por semana (opcional)</label>
-            <input id="rut-entrenos" name="entrenos_semana" type="number" min={1} max={14} defaultValue={rutina.entrenosSemana ?? ""} />
-            <span className={styles.ayuda}>
-              Si lo dejas vacío cuenta el número de sesiones. Se usará para la racha del alumno/a.
-            </span>
-          </div>
-          <button className={styles.boton} type="submit" disabled={pendienteDatos}>
-            Guardar
-          </button>
-          <Mensajes estado={estadoDatos} />
-        </form>
-      </details>
 
       <details className={styles.detalles}>
         <summary>Copiar a otro/a alumno/a o guardar como plantilla</summary>
@@ -961,20 +1107,21 @@ export function Constructor({
   catalogo: lista,
   alumnos,
   cambios,
+  extras,
 }: {
   rutina: DatosRutina;
   sesiones: SesionRutina[];
   catalogo: CatalogoEjercicio[];
   alumnos: { id: string; texto: string }[];
   cambios: CambioSemana[];
+  extras: ExtraSemana[];
 }) {
   const [aviso, setAviso] = useState("");
   const catalogo = new Map(lista.map((e) => [e.id, e]));
   const { pendiente, ejecutar } = useEjecutar(setAviso);
   const orden = useOrden(sesiones, (ids) => reordenarSesiones(rutina.id, ids), setAviso);
   const [nueva, setNueva] = useState("");
-
-  const todos = sesiones.flatMap((s) => s.items);
+  const [anadiendoSesion, setAnadiendoSesion] = useState(false);
 
   return (
     <>
@@ -987,12 +1134,38 @@ export function Constructor({
       <CabeceraRutina rutina={rutina} alumnos={alumnos} />
 
       <section className={styles.tarjeta}>
-        <h2>Resumen de toda la rutina</h2>
-        <Resumen items={todos} catalogo={catalogo} titulo="Material y músculos de la rutina completa" />
+        <h2>Resumen de la rutina</h2>
+        <ResumenRutina sesiones={sesiones} semanas={rutina.semanas} entrenosSemana={rutina.entrenosSemana} catalogo={catalogo} />
       </section>
 
       <section className={styles.tarjeta}>
-        <h2>Sesiones ({sesiones.length})</h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <h2 style={{ margin: 0 }}>Sesiones ({sesiones.length})</h2>
+          <IconoBoton titulo="Añadir una sesión" onClick={() => setAnadiendoSesion((v) => !v)}>
+            ＋
+          </IconoBoton>
+        </div>
+        {anadiendoSesion && (
+          <form
+            className={styles.añadirItem}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const nombre = nueva.trim();
+              if (!nombre) return;
+              setNueva("");
+              setAnadiendoSesion(false);
+              ejecutar(() => agregarSesion(rutina.id, nombre));
+            }}
+          >
+            <label htmlFor="nueva-sesion" className={styles.oculto}>
+              Nombre de la nueva sesión
+            </label>
+            <input id="nueva-sesion" value={nueva} onChange={(e) => setNueva(e.target.value)} maxLength={80} placeholder="Nueva sesión (por ejemplo: Día 1 · Empuje)" autoFocus />
+            <button className={styles.boton} type="submit" disabled={pendiente || !nueva.trim()}>
+              Añadir sesión
+            </button>
+          </form>
+        )}
         <p className={styles.ayuda}>
           Ordena arrastrando ⠿ o con las flechas. Al pulsar «Unir con el anterior» creas una
           superserie: se hacen seguidas y solo cuenta el descanso del último ejercicio.
@@ -1015,6 +1188,7 @@ export function Constructor({
                     avisar={setAviso}
                     semanas={rutina.semanas}
                     cambios={cambios}
+                    extras={extras}
                   />
                 )}
               </Ordenable>
@@ -1022,30 +1196,6 @@ export function Constructor({
           </div>
         </ListaOrdenable>
 
-        <form
-          className={styles.añadirItem}
-          onSubmit={(e) => {
-            e.preventDefault();
-            const nombre = nueva.trim();
-            if (!nombre) return;
-            setNueva("");
-            ejecutar(() => agregarSesion(rutina.id, nombre));
-          }}
-        >
-          <label htmlFor="nueva-sesion" className={styles.oculto}>
-            Nombre de la nueva sesión
-          </label>
-          <input
-            id="nueva-sesion"
-            value={nueva}
-            onChange={(e) => setNueva(e.target.value)}
-            maxLength={80}
-            placeholder="Nueva sesión (por ejemplo: Día 1 · Empuje)"
-          />
-          <button className={styles.boton} type="submit" disabled={pendiente || !nueva.trim()}>
-            Añadir sesión
-          </button>
-        </form>
       </section>
     </>
   );

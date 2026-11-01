@@ -43,15 +43,17 @@ async function cargar(id: string): Promise<Datos | null> {
   const s = data as unknown as { nombre: string; rutinas: { nombre: string; publicada_en: string | null } | null; rutina_items: Item[] };
 
   // Si Miriam cambió algún ejercicio para esta semana, se enseña esa versión.
-  type Cambio = { item_id: string; series: number | null; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicio_id: string | null; ejercicios: Item["ejercicios"] };
+  type Cambio = { quitado: boolean; item_id: string; series: number | null; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicio_id: string | null; ejercicios: Item["ejercicios"] };
   const semana = s.rutinas?.publicada_en ? numeroSemana(claveDia(s.rutinas.publicada_en), claveDia(new Date().toISOString())) : 1;
   const { data: cambiosDatos } = await supabase
     .from("rutina_cambios_semana")
-    .select("item_id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(nombre, nombre_en, foto_url)")
+    .select("item_id, quitado, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(nombre, nombre_en, foto_url)")
     .eq("semana", semana)
     .in("item_id", s.rutina_items.map((i) => i.id));
   const cambios = new Map(((cambiosDatos ?? []) as unknown as Cambio[]).map((c) => [c.item_id, c]));
-  const items = s.rutina_items.map((i) => {
+  const items = s.rutina_items
+    .filter((i) => !cambios.get(i.id)?.quitado)
+    .map((i) => {
     const c = cambios.get(i.id);
     if (!c) return i;
     const otro = !!c.ejercicio_id;
@@ -65,6 +67,20 @@ async function cargar(id: string): Promise<Datos | null> {
       descanso_seg: c.descanso_seg ?? i.descanso_seg,
       ejercicios: otro ? c.ejercicios : i.ejercicios,
     };
+  });
+
+  // Ejercicios extra que solo hay esta semana (van al final).
+  type Extra = { id: string; series: number; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicios: Item["ejercicios"] };
+  const { data: extrasDatos } = await supabase
+    .from("rutina_extras_semana")
+    .select("id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(nombre, nombre_en, foto_url)")
+    .eq("sesion_id", id)
+    .eq("semana", semana)
+    .order("orden")
+    .order("creado_en");
+  const ultimo = items.reduce((m, i) => Math.max(m, i.orden), 0);
+  ((extrasDatos ?? []) as unknown as Extra[]).forEach((x, k) => {
+    items.push({ id: x.id, orden: ultimo + 1 + k, series: x.series, reps_min: x.reps_min, reps_max: x.reps_max, segundos_min: x.segundos_min, segundos_max: x.segundos_max, descanso_seg: x.descanso_seg ?? 60, grupo: null, ejercicios: x.ejercicios });
   });
   const { data: curso } = await supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle();
   return {

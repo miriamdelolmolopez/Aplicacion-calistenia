@@ -469,6 +469,7 @@ export async function guardarCambioSemana(_previo: Estado, formData: FormData): 
   };
   const peso = decimalOpc(formData, "peso_kg");
   const nota = texto(formData, "nota");
+  const quitado = formData.get("quitar") === "on";
   if (
     !entre(campos.series, 1, 20) ||
     !entre(campos.reps_min, 1, 500) ||
@@ -490,25 +491,85 @@ export async function guardarCambioSemana(_previo: Estado, formData: FormData): 
   if (!original) return { error: "No se ha encontrado ese ejercicio." };
 
   const { error } = await admin.from("rutina_cambios_semana").upsert(
-    {
-      item_id: item,
-      semana,
-      ejercicio_id: ejercicio && ejercicio !== original.ejercicio_id ? ejercicio : null,
-      ...campos,
-      peso_kg: peso,
-      nota: nota || null,
-    },
+    quitado
+      ? { item_id: item, semana, quitado: true, ejercicio_id: null, series: null, reps_min: null, reps_max: null, segundos_min: null, segundos_max: null, peso_kg: null, distancia_m: null, descanso_seg: null, nota: null }
+      : {
+          item_id: item,
+          semana,
+          quitado: false,
+          ejercicio_id: ejercicio && ejercicio !== original.ejercicio_id ? ejercicio : null,
+          ...campos,
+          peso_kg: peso,
+          nota: nota || null,
+        },
     { onConflict: "item_id,semana" },
   );
   if (error) return { error: mensajeDe(error) };
   refrescar(rutinaId);
-  return { mensaje: `Guardado para la semana ${semana}.` };
+  return { mensaje: quitado ? `Esa semana ${semana} no se hará este ejercicio.` : `Guardado para la semana ${semana}.` };
 }
 
 export async function quitarCambioSemana(rutinaId: string, cambioId: string): Promise<Resultado> {
   await requireAdmin();
   if (!UUID.test(rutinaId) || !UUID.test(cambioId)) return { ok: false, error: "Cambio no válido." };
   const { error } = await createAdminClient().from("rutina_cambios_semana").delete().eq("id", cambioId);
+  if (error) return { ok: false, error: mensajeDe(error) };
+  refrescar(rutinaId);
+  return { ok: true };
+}
+
+// Añadir un ejercicio extra que solo hay en una semana de una sesión.
+export async function guardarExtraSemana(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin();
+  const sesion = texto(formData, "sesion");
+  const rutinaId = texto(formData, "rutina");
+  const ejercicio = texto(formData, "ejercicio");
+  const semana = enteroOpc(formData, "semana");
+  if (!UUID.test(sesion) || !UUID.test(rutinaId)) return { error: "Sesión no válida." };
+  if (!UUID.test(ejercicio)) return { error: "Elige el ejercicio." };
+  if (semana === null || !(semana >= 1 && semana <= 52)) return { error: "Elige la semana." };
+
+  const series = enteroOpc(formData, "series");
+  const campos = {
+    reps_min: enteroOpc(formData, "reps_min"),
+    reps_max: enteroOpc(formData, "reps_max"),
+    segundos_min: enteroOpc(formData, "segundos_min"),
+    segundos_max: enteroOpc(formData, "segundos_max"),
+    distancia_m: enteroOpc(formData, "distancia_m"),
+    descanso_seg: enteroOpc(formData, "descanso_seg"),
+  };
+  const peso = decimalOpc(formData, "peso_kg");
+  const nota = texto(formData, "nota");
+  if (
+    series === null ||
+    !entre(series, 1, 20) ||
+    !entre(campos.reps_min, 1, 500) ||
+    !entre(campos.reps_max, 1, 500) ||
+    !entre(campos.segundos_min, 1, 7200) ||
+    !entre(campos.segundos_max, 1, 7200) ||
+    !entre(campos.distancia_m, 1, 100000) ||
+    !entre(campos.descanso_seg, 0, 900) ||
+    (peso !== null && !(peso >= 0 && peso <= 500))
+  ) {
+    return { error: "Indica las series (1 a 20) y revisa los números." };
+  }
+  if (campos.reps_min !== null && campos.reps_max !== null && campos.reps_max < campos.reps_min) return { error: "El máximo de repeticiones debe ser igual o mayor que el mínimo." };
+  if (campos.segundos_min !== null && campos.segundos_max !== null && campos.segundos_max < campos.segundos_min) return { error: "El máximo de segundos debe ser igual o mayor que el mínimo." };
+  if (campos.reps_min === null && campos.segundos_min === null && campos.distancia_m === null) return { error: "Pon las repeticiones, los segundos o la distancia." };
+  if (nota.length > 300) return { error: "La nota puede tener como máximo 300 letras." };
+
+  const { error } = await createAdminClient()
+    .from("rutina_extras_semana")
+    .insert({ sesion_id: sesion, semana, ejercicio_id: ejercicio, series, ...campos, peso_kg: peso, nota: nota || null });
+  if (error) return { error: mensajeDe(error) };
+  refrescar(rutinaId);
+  return { mensaje: `Ejercicio extra añadido a la semana ${semana}.` };
+}
+
+export async function quitarExtraSemana(rutinaId: string, extraId: string): Promise<Resultado> {
+  await requireAdmin();
+  if (!UUID.test(rutinaId) || !UUID.test(extraId)) return { ok: false, error: "Ejercicio no válido." };
+  const { error } = await createAdminClient().from("rutina_extras_semana").delete().eq("id", extraId);
   if (error) return { ok: false, error: mensajeDe(error) };
   refrescar(rutinaId);
   return { ok: true };

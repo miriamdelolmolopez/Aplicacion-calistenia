@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
-import BotonFoto from "../../fotos/BotonFoto";
 import styles from "../../admin.module.css";
 import {
   Constructor,
   type CatalogoEjercicio,
   type CambioSemana,
   type DatosRutina,
+  type ExtraSemana,
   type SesionRutina,
 } from "./Constructor";
 
@@ -77,11 +77,20 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   const { data: cambiosDatos } = idsItems.length
     ? await supabase
         .from("rutina_cambios_semana")
-        .select("id, item_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota")
+        .select("id, item_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, quitado")
         .in("item_id", idsItems)
         .order("semana")
     : { data: [] };
   const cambios: CambioSemana[] = ((cambiosDatos ?? []) as CambioSemana[]).map((c) => ({ ...c, peso_kg: c.peso_kg === null ? null : Number(c.peso_kg) }));
+
+  const { data: extrasDatos } = sesiones.length
+    ? await supabase
+        .from("rutina_extras_semana")
+        .select("id, sesion_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota")
+        .in("sesion_id", sesiones.map((s) => s.id))
+        .order("semana")
+    : { data: [] };
+  const extras: ExtraSemana[] = ((extrasDatos ?? []) as ExtraSemana[]).map((x) => ({ ...x, peso_kg: x.peso_kg === null ? null : Number(x.peso_kg) }));
 
   const { data: ejerciciosDatos } = await supabase
     .from("ejercicios")
@@ -121,6 +130,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
     semanas: r.semanas,
     esPlantilla: r.user_id === null,
     alumno: nombreDe(r.profiles),
+    fotoUrl: r.foto_url,
   };
 
   return (
@@ -131,12 +141,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
           ← Volver
         </Link>
       </header>
-      <section className={styles.tarjeta}>
-        <h2>Foto de la rutina</h2>
-        <p className={styles.ayuda}>La ve el/la alumno/a arriba de Mi rutina.</p>
-        <BotonFoto destino="rutina" id={r.id} actual={r.foto_url} />
-      </section>
-      <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} cambios={cambios} />
+      <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} cambios={cambios} extras={extras} />
     </main>
   );
 }

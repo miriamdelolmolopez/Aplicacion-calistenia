@@ -12,7 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 function Fila({ id, children }: { id: string; children: ReactNode }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -57,6 +57,7 @@ export default function ListaArrastrable({ elementos, alOrdenar }: { elementos: 
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const ids = elementos.map((e) => e.id);
+  const idDnd = useId();
 
   function alSoltar(e: DragEndEvent) {
     if (!e.over || e.active.id === e.over.id) return;
@@ -67,7 +68,7 @@ export default function ListaArrastrable({ elementos, alOrdenar }: { elementos: 
   }
 
   return (
-    <DndContext sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
+    <DndContext id={idDnd} sensors={sensores} collisionDetection={closestCenter} onDragEnd={alSoltar}>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {elementos.map((e) => (
