@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 // Menú de una foto: Ver foto, Tomar foto, Subir foto y Quitar foto. Se usa en todas las fotos de la app.
@@ -69,17 +70,23 @@ export default function MenuFoto({
     cursor: "pointer",
   };
 
+  // Si la foto está dentro de una tarjeta que es un enlace, pulsar una opción no debe llevar a otra pantalla.
+  const quieto = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const lista = (
     <div role="menu" aria-label={etiqueta} style={{ width: 230, padding: "6px 0", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 18, boxShadow: "0 10px 30px rgba(0,0,0,0.18)" }}>
       {url && (
-        <button type="button" role="menuitem" style={opcion} onClick={() => { setAbierto(false); setViendo(true); }}>
+        <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); setAbierto(false); setViendo(true); }}>
           <span aria-hidden="true">👁</span> {en ? "View photo" : "Ver foto"}
         </button>
       )}
-      <button type="button" role="menuitem" style={opcion} onClick={() => tomar.current?.click()}>
+      <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); tomar.current?.click(); }}>
         <span aria-hidden="true">📷</span> {en ? "Take photo" : "Tomar foto"}
       </button>
-      <button type="button" role="menuitem" style={opcion} onClick={() => subir.current?.click()}>
+      <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); subir.current?.click(); }}>
         <span aria-hidden="true">📁</span> {en ? "Upload photo" : "Subir foto"}
       </button>
       {url && (
@@ -89,7 +96,8 @@ export default function MenuFoto({
             type="button"
             role="menuitem"
             style={opcion}
-            onClick={() => {
+            onClick={(e) => {
+              quieto(e);
               setAbierto(false);
               void alQuitar();
             }}
@@ -120,7 +128,7 @@ export default function MenuFoto({
       </button>
 
       {abierto && modo === "desplegable" && <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 60 }}>{lista}</div>}
-      {abierto && modo === "ventana" && (
+      {abierto && modo === "ventana" && createPortal(
         <div
           onClick={(e) => {
             e.preventDefault();
@@ -130,13 +138,14 @@ export default function MenuFoto({
           style={{ position: "fixed", inset: 0, zIndex: 90, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(23, 24, 26, 0.45)" }}
         >
           <div onClick={(e) => e.stopPropagation()}>{lista}</div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       <input ref={tomar} type="file" accept="image/*" capture="environment" hidden onClick={(e) => e.stopPropagation()} onChange={archivo} />
       <input ref={subir} type="file" accept="image/*" hidden onClick={(e) => e.stopPropagation()} onChange={archivo} />
 
-      {viendo && url && (
+      {viendo && url && createPortal(
         <div
           onClick={(e) => {
             e.preventDefault();
@@ -147,7 +156,8 @@ export default function MenuFoto({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={url} alt="" style={{ maxWidth: "100%", maxHeight: "90dvh", borderRadius: 16 }} />
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

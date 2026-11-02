@@ -47,7 +47,7 @@ export default function PestanasFicha({
       </nav>
       {pestanas.map((x) =>
         visitadas.includes(x.id) ? (
-          <div key={x.id} hidden={activa !== x.id}>
+          <div key={x.id} hidden={activa !== x.id} style={activa === x.id ? { display: "flex", flexDirection: "column", gap: 16 } : undefined}>
             {paneles[x.id]}
           </div>
         ) : null,

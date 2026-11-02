@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
-import CamaraCard from "../CamaraCard";
 import { useFotoCard } from "../useFotosCards";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import { obtenerFotos } from "../perfil/acciones";
@@ -16,7 +15,7 @@ import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
 import clay from "../ui/clay.module.css";
-import { IconoCorona, IconoFlecha, IconoReloj } from "../ui/Mini";
+import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
 import AvisoVistaAlumna from "../AvisoVistaAlumna";
 import ResumenAdminTarjetas from "./ResumenAdmin";
@@ -211,11 +210,6 @@ export default function Inicio() {
         <section className={clay.banner}>
           <div className={clay.bannerArriba}>
             <h2 className={clay.bannerTitulo}>{textoFrase}</h2>
-            {secciones.includes("reservar") && (
-              <Link href={RUTAS.reservar} className={clay.circuloAccion} aria-label={t.botonReservarClase}>
-                <IconoFlecha />
-              </Link>
-            )}
           </div>
           <span className={clay.bannerEtiqueta}>
             {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
@@ -225,7 +219,6 @@ export default function Inicio() {
             style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", fotoBannerInicio ?? propiaInicio, !fotosListas) }}
             aria-hidden="true"
           />
-          <CamaraCard clave="inicio:banner" abajo />
         </section>
       </div>
 

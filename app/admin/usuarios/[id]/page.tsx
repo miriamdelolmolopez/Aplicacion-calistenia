@@ -273,9 +273,6 @@ export default async function FichaUsuario({
                 </ul>
               </>
             )}
-            <Link href={aFicha("acciones")} className={`${styles.boton} ${styles.botonSecundario}`}>
-              Cambiar o quitar tarifa
-            </Link>
           </section>
 
         </>
