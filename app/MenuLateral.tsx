@@ -65,7 +65,7 @@ export default function MenuLateral({
     <div className={estilos.capa} onClick={onCerrar}>
       <nav className={estilos.panel} aria-label={t.menuAbrir} onClick={(e) => e.stopPropagation()}>
         <div className={estilos.cabecera}>
-          <Image src="/logos/caliscoach.png" alt="CalisCoach" width={48} height={48} style={{ borderRadius: 11 }} />
+          <Image src="/logos/icono-anilla.png" alt="CalisCoach" width={48} height={48} style={{ borderRadius: 11 }} />
           <div>
             <strong>{perfil.nombre || "CalisCoach"}</strong>
             <span>{t[`rol_${perfil.rol}` as ClaveTexto]}</span>
