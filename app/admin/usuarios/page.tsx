@@ -4,8 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ListaUsuarios, { type Usuario } from "./ListaUsuarios";
 import { formasActivas } from "@/lib/formasPago";
-import NuevoUsuario, { type TarifaOpcion } from "./NuevoUsuario";
+import NuevoUsuario, { type DescuentoOpcion, type TarifaOpcion } from "./NuevoUsuario";
 import CabeceraAdmin from "../CabeceraAdmin";
+import { claveDia, textoHora } from "@/lib/fechas";
+import { euros } from "@/lib/formato";
 
 export const metadata = { title: "Usuarios · Administración" };
 
@@ -51,13 +53,24 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
     if (x.user_id) pendienteDe.set(x.user_id, (pendienteDe.get(x.user_id) ?? 0) + x.importe_centimos);
   }
 
-  const { data: tarifasDatos } = await createAdminClient()
-    .from("tipos_bono")
-    .select("id, nombre, servicio, precio_centimos")
-    .eq("activo", true)
-    .order("servicio")
-    .order("precio_centimos");
+  const [{ data: tarifasDatos }, { data: descuentosDatos }] = await Promise.all([
+    createAdminClient()
+      .from("tipos_bono")
+      .select("id, nombre, servicio, precio_centimos, validez_dias")
+      .eq("activo", true)
+      .order("servicio")
+      .order("precio_centimos"),
+    createAdminClient().from("descuentos").select("id, nombre, tipo, valor, caduca_en, usos_max, pagos(estado)").eq("activo", true).order("nombre"),
+  ]);
   const tarifas = (tarifasDatos ?? []) as TarifaOpcion[];
+
+  // Para el alta con tarifa: hoy, la hora de ahora y los descuentos que se pueden elegir (activos, sin caducar y con usos libres).
+  const ahoraIso = new Date().toISOString();
+  const hoy = claveDia(ahoraIso);
+  const ahora = textoHora(ahoraIso);
+  const descuentos: DescuentoOpcion[] = ((descuentosDatos ?? []) as unknown as { id: string; nombre: string; tipo: string; valor: number; caduca_en: string | null; usos_max: number | null; pagos: { estado: string }[] }[])
+    .filter((d) => (d.caduca_en === null || d.caduca_en >= hoy) && (d.usos_max === null || d.pagos.filter((x) => x.estado !== "anulado").length < d.usos_max))
+    .map((d) => ({ id: d.id, tipo: d.tipo, valor: d.valor, texto: `${d.nombre} · ${d.tipo === "porcentaje" ? `${d.valor} %` : euros(d.valor)}` }));
 
   const usuarios: Usuario[] = filas.map(({ foto_path, ...resto }) => ({
     ...resto,
@@ -76,7 +89,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
           ← Volver
         </Link>
       </CabeceraAdmin>
-      <NuevoUsuario tarifas={tarifas} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
+      <NuevoUsuario tarifas={tarifas} descuentos={descuentos} hoy={hoy} ahora={ahora} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
       <ListaUsuarios usuarios={usuarios} />
     </main>
   );

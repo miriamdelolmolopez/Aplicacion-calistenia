@@ -105,6 +105,50 @@ export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
   return { ok: true, devuelta: data === "devuelta" };
 }
 
+export type Apuntado = {
+  reservaId: string;
+  userId: string;
+  nombre: string;
+  esPrueba: boolean;
+  asistencia: "asistio" | "no_asistio" | null;
+};
+
+// Quién está apuntado a una clase, con lo necesario para abrir su ficha o marcar que no vino. Solo la administradora.
+export async function obtenerApuntadosClase(sesionId: string): Promise<Apuntado[]> {
+  const user = await personaActual();
+  if (!user) return [];
+  const admin = createAdminClient();
+  const { data: yo } = await admin.from("profiles").select("rol").eq("id", user.id).maybeSingle();
+  if (yo?.rol !== "admin") return [];
+
+  const { data } = await admin
+    .from("reservas")
+    .select("id, user_id, es_prueba, asistencia")
+    .eq("sesion_id", sesionId)
+    .eq("estado", "reservada")
+    .order("creado_en");
+  const reservas = (data ?? []) as { id: string; user_id: string; es_prueba: boolean; asistencia: "asistio" | "no_asistio" | null }[];
+  if (reservas.length === 0) return [];
+
+  const { data: perfiles } = await admin
+    .from("profiles")
+    .select("id, nombre, apellidos, email")
+    .in("id", reservas.map((r) => r.user_id));
+  const nombres = new Map(
+    ((perfiles ?? []) as { id: string; nombre: string | null; apellidos: string | null; email: string | null }[]).map((p) => [
+      p.id,
+      [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "Sin nombre",
+    ]),
+  );
+  return reservas.map((r) => ({
+    reservaId: r.id,
+    userId: r.user_id,
+    nombre: nombres.get(r.user_id) ?? "Sin nombre",
+    esPrueba: r.es_prueba,
+    asistencia: r.asistencia,
+  }));
+}
+
 export type ClasePasada = {
   id: string;
   tipo: string;

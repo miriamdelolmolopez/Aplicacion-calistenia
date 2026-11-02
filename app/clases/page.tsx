@@ -15,6 +15,7 @@ import PanelFiltros from "../PanelFiltros";
 import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
+import ListaApuntados from "./ListaApuntados";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
@@ -174,6 +175,7 @@ export default function Clases() {
   const fotosCards = useFotosCards();
   const [fotosListas, setFotosListas] = useState(false);
   const [verNombres, setVerNombres] = useState<string | null>(null);
+  const [listaClase, setListaClase] = useState<string | null>(null);
   const [descripciones, setDescripciones] = useState<Record<string, { es: string | null; en: string | null }>>({});
   const [saberMas, setSaberMas] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<"todo" | "grupal" | "individual">("todo");
@@ -497,7 +499,12 @@ export default function Clases() {
                     <button
                       type="button"
                       className={estilos.cuadrados}
-                      onClick={() => veApuntados && c.apuntados.length > 0 && setVerNombres(verNombres === c.id ? null : c.id)}
+                      onClick={() => {
+                        if (c.apuntados.length === 0) return;
+                        // La administradora abre la lista con la ficha de cada persona; el resto, solo los nombres.
+                        if (esAdmin) setListaClase(c.id);
+                        else if (veApuntados) setVerNombres(verNombres === c.id ? null : c.id);
+                      }}
                       aria-label={t.apuntadosLabel}
                     >
                       {cuadrados.map((i) => {
@@ -642,6 +649,10 @@ export default function Clases() {
             );
           })}
         </>
+      )}
+
+      {listaClase && todas.find((c) => c.id === listaClase) && (
+        <ListaApuntados clase={todas.find((c) => c.id === listaClase)!} fotos={fotos} alCerrar={() => setListaClase(null)} />
       )}
 
       {saberMas && (

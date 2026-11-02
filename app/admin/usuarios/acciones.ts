@@ -108,20 +108,37 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   }
 
   // Alumna
-  let servicios = formData.getAll("servicios").map(String).filter((s) => SERVICIOS_VALIDOS.includes(s));
-  const tarifa = String(formData.get("tarifa") ?? "");
+  const servicio = String(formData.get("servicio") ?? "");
+  if (servicio && !SERVICIOS_VALIDOS.includes(servicio)) return { error: "El servicio elegido no es válido." };
+  const servicios = servicio ? [servicio] : []; // sin servicio: solo se da de alta
+  const tarifa = servicio ? String(formData.get("tarifa") ?? "") : "";
+  const descuento = String(formData.get("descuento") ?? "");
   const pagoAhora = String(formData.get("pago") ?? "luego") === "ahora";
   const metodo = String(formData.get("metodo") ?? "");
+  const fin = String(formData.get("fin") ?? "").trim();
   if (tarifa && !(await formaActiva(metodo))) return { error: "Elige cómo paga." };
 
-  let servicioTarifa: string | null = null;
   if (tarifa) {
     const { data: t } = await admin.from("tipos_bono").select("servicio").eq("id", tarifa).eq("activo", true).maybeSingle();
-    if (!t) return { error: "La tarifa elegida no es válida." };
-    servicioTarifa = t.servicio as string;
-    if (!servicios.includes(servicioTarifa)) servicios = [...servicios, servicioTarifa];
+    if (!t || t.servicio !== servicio) return { error: "La tarifa elegida no es válida para ese servicio." };
   }
-  if (servicios.length === 0) return { error: "Marca al menos un servicio (o elige una tarifa)." };
+
+  // Día y hora del pago: la fecha de inicio y la hora elegidas (vacías, ahora mismo). No pueden ser futuras.
+  const inicio = String(formData.get("inicio") ?? "").trim();
+  const hora = String(formData.get("hora") ?? "").trim();
+  let instantePago = new Date();
+  if (tarifa) {
+    if (inicio && !inicioValido(inicio)) return { error: "La fecha de inicio no es válida (no puede ser futura)." };
+    if (inicio) {
+      const d = instanteMadrid(inicio, hora || "00:00");
+      if (!d) return { error: "La fecha o la hora no son válidas." };
+      if (d.getTime() > Date.now() + 60_000) return { error: "La fecha y la hora del pago no pueden ser futuras." };
+      instantePago = d;
+    }
+  }
+  const hastaFin = tarifa && fin ? instanteMadrid(fin, "23:59") : null;
+  if (tarifa && fin && !hastaFin) return { error: "La fecha de fin no es válida." };
+  if (hastaFin && hastaFin.getTime() <= instantePago.getTime()) return { error: "La fecha de fin tiene que ser posterior a la de inicio." };
 
   const { data, error } = await invitar(correo);
   if (error || !data.user) return { error: "No se ha podido crear la cuenta. Inténtalo de nuevo." };
@@ -130,10 +147,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   if (falloRol) return { error: "La cuenta se creó, pero no se pudo asignar el tipo." };
 
   await admin.from("perfil_servicios").delete().eq("user_id", data.user.id);
-  await admin.from("perfil_servicios").insert(servicios.map((servicio) => ({ user_id: data.user!.id, servicio })));
-
-  const inicio = String(formData.get("inicio") ?? "").trim();
-  if (tarifa && inicio && !inicioValido(inicio)) return { error: "La fecha de inicio del bono no es válida (no puede ser futura)." };
+  if (servicios.length > 0) await admin.from("perfil_servicios").insert(servicios.map((s) => ({ user_id: data.user!.id, servicio: s })));
 
   let avisoBono = "";
   if (tarifa) {
@@ -144,9 +158,27 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
       p_pagado: pagoAhora,
       p_nota: "",
       p_admin: user.id,
-      p_descuento: null,
+      p_descuento: descuento || null,
     });
-    if (!falloBono && inicio && bonoNuevo) await fijarInicioBono(admin, bonoNuevo as string, inicio);
+    if (!falloBono && bonoNuevo) {
+      if (inicio) await fijarInicioBono(admin, bonoNuevo as string, inicio);
+      // La base de datos pone la fecha de ahora: se corrige con la elegida y se anota el mes al que corresponde.
+      const periodo = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" }).format(instantePago).slice(0, 7);
+      await admin
+        .from("pagos")
+        .update(pagoAhora ? { pagado_en: instantePago.toISOString(), periodo } : { periodo })
+        .eq("bono_id", bonoNuevo as string);
+      // Fecha de fin elegida (para alargar o acortar): se aplica a lo que ya está en marcha.
+      if (hastaFin) {
+        await admin
+          .from("bonos")
+          .update({ caduca_en: hastaFin.toISOString() })
+          .eq("user_id", data.user.id)
+          .eq("tipo_bono_id", tarifa)
+          .eq("estado", "activo")
+          .gte("creado_en", new Date(Date.now() - 60_000).toISOString());
+      }
+    }
     avisoBono = falloBono
       ? " La cuenta está creada, pero el bono no se pudo registrar: hazlo en Bonos y pagos."
       : pagoAhora
