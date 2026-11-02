@@ -1,7 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { enviarCorreo } from "./email";
-import { enviable, HORA, personas, protegido, reclamar, soltar, type Persona, type TipoAviso } from "./avisos";
+import { administradoras, enviable, HORA, personas, protegido, reclamar, soltar, type Persona, type TipoAviso } from "./avisos";
 import { correoAutomatico, fechaHora, soloFecha } from "./plantillas-email";
 import { claveDia, sumarDias } from "./fechas";
 import type { ClavePlantilla } from "./plantillasAutomatizacion";
@@ -171,7 +171,7 @@ export async function felicitarCumpleanos(): Promise<number> {
       return (m === hoy.mes && d === hoy.dia) || (!bisiesto && m === 2 && d === 29 && hoy.mes === 2 && hoy.dia === 28);
     });
     const lista = await personas(cumplen.map((c) => c.id));
-    const { data: admins } = await admin.from("profiles").select("id, email, nombre, idioma, avisos_reserva, avisos_bono").eq("rol", "admin");
+    const admins = await administradoras("admin_avisa_regalos");
 
     for (const p of lista) {
       if (!enviable(p.email)) continue;
@@ -199,8 +199,7 @@ export async function felicitarCumpleanos(): Promise<number> {
 
       if (regalo === "videollamada") {
         const nombre = [p.nombre].filter(Boolean).join(" ") || p.email;
-        for (const ad of (admins ?? []) as Persona[]) {
-          if (!enviable(ad.email)) continue;
+        for (const ad of admins) {
           await enviarCorreo(
             correoAutomatico({
               para: ad.email,

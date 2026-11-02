@@ -1,7 +1,7 @@
 "use server";
 
 import { after } from "next/server";
-import { avisarPlazaLiberada, avisarReserva } from "@/lib/avisos";
+import { avisarAdminCancelacion, avisarAdminReserva, avisarPlazaLiberada, avisarReserva } from "@/lib/avisos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -54,7 +54,7 @@ export async function reservarClase(sesionId: string): Promise<Resultado> {
     p_sesion: sesionId,
   });
   if (error) return { ok: false, codigo: codigoDe(error.message) };
-  after(() => avisarReserva(user.id, sesionId));
+  after(() => Promise.all([avisarReserva(user.id, sesionId), avisarAdminReserva(user.id, sesionId)]));
   return { ok: true };
 }
 
@@ -99,6 +99,93 @@ export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
     p_reserva: reservaId,
   });
   if (error) return { ok: false, codigo: codigoDe(error.message) };
-  if (reserva) after(() => avisarPlazaLiberada(reserva.sesion_id));
+  if (reserva) {
+    after(() => Promise.all([avisarPlazaLiberada(reserva.sesion_id), avisarAdminCancelacion(user.id, reserva.sesion_id, data === "devuelta")]));
+  }
   return { ok: true, devuelta: data === "devuelta" };
+}
+
+export type ClasePasada = {
+  id: string;
+  tipo: string;
+  empieza_en: string;
+  plazas: number;
+  estado: string;
+  ocupadas: number;
+  mi_reserva: null;
+  apuntados: string[];
+  apuntados_ids: string[];
+  plazas_prueba: number;
+  ocupadas_prueba: number;
+  en_espera: false;
+  posicion: 0;
+  hay_espera: 0;
+  prioridad: false;
+  duracion_min: number;
+  servicio: string;
+  incluido: true;
+};
+
+// Las clases que ya han pasado, con quién estaba apuntado. Solo para la administradora.
+export async function obtenerClasesPasadas(semanas: number): Promise<ClasePasada[]> {
+  const user = await personaActual();
+  if (!user) return [];
+  const admin = createAdminClient();
+  const { data: yo } = await admin.from("profiles").select("rol").eq("id", user.id).maybeSingle();
+  if (yo?.rol !== "admin") return [];
+
+  const ahora = Date.now();
+  const { data: sesiones } = await admin
+    .from("sesiones_clase")
+    .select("id, empieza_en, plazas, estado, plazas_prueba, tipos_clase(nombre, duracion_min, servicio)")
+    .gte("empieza_en", new Date(ahora - semanas * 7 * 86400000).toISOString())
+    .lt("empieza_en", new Date(ahora).toISOString())
+    .order("empieza_en");
+  type Fila = { id: string; empieza_en: string; plazas: number; estado: string; plazas_prueba: number; tipos_clase: { nombre: string; duracion_min: number; servicio: string } | null };
+  const lista = (sesiones ?? []) as unknown as Fila[];
+  if (lista.length === 0) return [];
+
+  // Se piden las reservas por tandas para no pasarse del largo de la consulta.
+  const ids = lista.map((s) => s.id);
+  const tandas: string[][] = [];
+  for (let i = 0; i < ids.length; i += 40) tandas.push(ids.slice(i, i + 40));
+  const [respuestas, { data: perfiles }] = await Promise.all([
+    Promise.all(
+      tandas.map((t) =>
+        admin.from("reservas").select("sesion_id, user_id, es_prueba, creado_en").in("sesion_id", t).eq("estado", "reservada").order("creado_en"),
+      ),
+    ),
+    admin.from("profiles").select("id, nombre, apellidos").limit(5000),
+  ]);
+  const reservas = respuestas.flatMap((r) => (r.data ?? []) as { sesion_id: string; user_id: string; es_prueba: boolean }[]);
+  const nombres = new Map(
+    ((perfiles ?? []) as { id: string; nombre: string | null; apellidos: string | null }[]).map((p) => [
+      p.id,
+      (p.nombre?.trim().split(" ")[0] || "Alumno") + (p.apellidos?.trim() ? ` ${p.apellidos.trim().charAt(0).toUpperCase()}.` : ""),
+    ]),
+  );
+
+  return lista.map((s) => {
+    const suyas = reservas.filter((r) => r.sesion_id === s.id);
+    return {
+      id: s.id,
+      tipo: s.tipos_clase?.nombre ?? "Clase",
+      empieza_en: s.empieza_en,
+      plazas: s.plazas,
+      estado: s.estado,
+      ocupadas: suyas.length,
+      mi_reserva: null,
+      apuntados: suyas.map((r) => nombres.get(r.user_id) ?? "Alumno"),
+      apuntados_ids: suyas.map((r) => r.user_id),
+      plazas_prueba: s.plazas_prueba,
+      ocupadas_prueba: suyas.filter((r) => r.es_prueba).length,
+      en_espera: false,
+      posicion: 0,
+      hay_espera: 0,
+      prioridad: false,
+      duracion_min: s.tipos_clase?.duracion_min ?? 60,
+      servicio: s.tipos_clase?.servicio ?? "grupal",
+      incluido: true,
+    } satisfies ClasePasada;
+  });
 }

@@ -1,10 +1,12 @@
 import "server-only";
 import { enviarCorreo } from "./email";
 import {
+  correoCancelacionParaAdmin,
   correoClaseCancelada,
   correoMinimoNoAlcanzado,
   correoPlazaLiberada,
   correoReserva,
+  correoReservaParaAdmin,
   type Idioma,
 } from "./plantillas-email";
 import { createAdminClient } from "./supabase/admin";
@@ -75,6 +77,57 @@ export function avisarReserva(userId: string, sesionId: string) {
     await enviarCorreo(
       correoReserva({ para: persona.email, idioma: persona.idioma, nombrePersona: persona.nombre ?? "", clase: info(c) }),
     );
+  });
+}
+
+export type AvisoAdmin = "admin_avisa_reserva" | "admin_avisa_cancelacion" | "admin_avisa_minimo" | "admin_avisa_regalos" | "admin_avisa_borrado";
+
+// Las administradoras que quieren recibir un aviso concreto. Se leen todas las columnas y lo que no existe
+// (o no se ha tocado) cuenta como activado, así no se pierde ningún aviso si falta la columna.
+export async function administradoras(aviso: AvisoAdmin): Promise<{ id: string; email: string; nombre: string | null }[]> {
+  const { data } = await createAdminClient().from("profiles").select("*").eq("rol", "admin");
+  return ((data ?? []) as unknown as Record<string, unknown>[])
+    .filter((a) => enviable(a.email as string | null) && a[aviso] !== false)
+    .map((a) => ({ id: a.id as string, email: a.email as string, nombre: (a.nombre as string | null) ?? null }));
+}
+
+async function datosParaAdmin(userId: string, sesionId: string) {
+  const admin = createAdminClient();
+  const [{ data: p }, { data: s }, { count }] = await Promise.all([
+    admin.from("profiles").select("nombre, apellidos, email, rol").eq("id", userId).maybeSingle(),
+    admin.from("sesiones_clase").select("id, empieza_en, plazas, tipos_clase(nombre)").eq("id", sesionId).maybeSingle(),
+    admin.from("reservas").select("id", { count: "exact", head: true }).eq("sesion_id", sesionId).eq("estado", "reservada"),
+  ]);
+  if (!p || !s) return null;
+  const sesion = s as unknown as { empieza_en: string; plazas: number; tipos_clase: { nombre: string } | null };
+  return {
+    persona: [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "Una persona",
+    prueba: p.rol === "invitado",
+    clase: { nombre: sesion.tipos_clase?.nombre ?? "Clase", empieza_en: sesion.empieza_en },
+    apuntados: count ?? 0,
+    plazas: sesion.plazas,
+  };
+}
+
+// Aviso a Miriam: alguien ha reservado una clase.
+export function avisarAdminReserva(userId: string, sesionId: string) {
+  return protegido("reserva (admin)", async () => {
+    const [admins, d] = await Promise.all([administradoras("admin_avisa_reserva"), datosParaAdmin(userId, sesionId)]);
+    if (!d) return;
+    for (const a of admins) {
+      await enviarCorreo(correoReservaParaAdmin({ para: a.email, persona: d.persona, prueba: d.prueba, clase: d.clase, apuntados: d.apuntados, plazas: d.plazas }));
+    }
+  });
+}
+
+// Aviso a Miriam: alguien ha cancelado su reserva.
+export function avisarAdminCancelacion(userId: string, sesionId: string, devuelta: boolean) {
+  return protegido("cancelación (admin)", async () => {
+    const [admins, d] = await Promise.all([administradoras("admin_avisa_cancelacion"), datosParaAdmin(userId, sesionId)]);
+    if (!d) return;
+    for (const a of admins) {
+      await enviarCorreo(correoCancelacionParaAdmin({ para: a.email, persona: d.persona, clase: d.clase, apuntados: d.apuntados, plazas: d.plazas, devuelta }));
+    }
   });
 }
 
@@ -174,7 +227,7 @@ export async function avisarMinimos(): Promise<number> {
       .eq("estado", "programada")
       .gt("empieza_en", new Date(ahora).toISOString())
       .lte("empieza_en", new Date(ahora + 24 * HORA).toISOString());
-    const { data: admins } = await admin.from("profiles").select("id, email").eq("rol", "admin");
+    const admins = await administradoras("admin_avisa_minimo");
 
     for (const c of (sesiones ?? []) as unknown as Clase[]) {
       const minimo = c.tipos_clase?.minimo_alumnos ?? 0;
@@ -187,8 +240,7 @@ export async function avisarMinimos(): Promise<number> {
       const apuntados = count ?? 0;
       if (apuntados >= minimo) continue;
 
-      for (const a of admins ?? []) {
-        if (!enviable(a.email)) continue;
+      for (const a of admins) {
         if (!(await reclamar("minimo_clase", c.id, a.id))) continue;
         const ok = await enviarCorreo(correoMinimoNoAlcanzado({ para: a.email, clase: info(c), apuntados, minimo }));
         if (ok) enviados++;

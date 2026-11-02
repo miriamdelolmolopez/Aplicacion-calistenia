@@ -14,10 +14,21 @@ const OPCIONES: { clave: Clave; es: [string, string]; en: [string, string] }[] =
   { clave: "avisos_novedades", es: ["Mensajes de Miriam", "Cuando llevas tiempo sin venir, aniversarios y novedades."], en: ["Messages from Miriam", "When you have been away for a while, anniversaries and news."] },
 ];
 
+// Lo que recibe la administradora: no tiene reservas ni bono propios, así que sus avisos son otros.
+const OPCIONES_ADMIN: { clave: Clave; es: [string, string]; en: [string, string] }[] = [
+  { clave: "admin_avisa_reserva", es: ["Alguien reserva una clase", "Un correo cada vez que una persona se apunta a una clase."], en: ["Someone books a class", "An email each time a person signs up for a class."] },
+  { clave: "admin_avisa_cancelacion", es: ["Alguien cancela una reserva", "Un correo cada vez que una persona cancela su reserva, y si la clase se le devuelve o no."], en: ["Someone cancels a booking", "An email each time a person cancels, and whether the class is returned to them."] },
+  { clave: "admin_avisa_minimo", es: ["Una clase no llega al mínimo", "Un correo cuando, 24 horas antes, una clase tiene menos personas que el mínimo."], en: ["A class is below the minimum", "An email when, 24 hours before, a class has fewer people than the minimum."] },
+  { clave: "admin_avisa_regalos", es: ["Videollamada de cumpleaños pendiente", "Cuando alguien que cumple años tiene de regalo una videollamada."], en: ["Birthday video call pending", "When someone whose birthday it is gets a video call as a gift."] },
+  { clave: "admin_avisa_borrado", es: ["Petición de borrado de cuenta", "Cuando una persona pide que se borre su cuenta."], en: ["Account deletion request", "When a person asks for their account to be deleted."] },
+];
+
 export default function Notificaciones() {
   const [idioma] = useIdioma();
   const en = idioma === "en";
   const { pref, cambiar } = usePreferencias();
+  const esAdmin = pref?.rol === "admin";
+  const opciones = esAdmin ? OPCIONES_ADMIN : OPCIONES;
 
   return (
     <main className={styles.pagina}>
@@ -28,7 +39,7 @@ export default function Notificaciones() {
         <Cargando />
       ) : (
         <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-          {OPCIONES.map((o) => (
+          {opciones.map((o) => (
             <label key={o.clave} className={estilos.interruptor}>
               <input type="checkbox" checked={pref[o.clave]} onChange={(e) => cambiar(o.clave, e.target.checked)} />
               <span>
@@ -38,9 +49,11 @@ export default function Notificaciones() {
               </span>
             </label>
           ))}
-          <p className={styles.ayuda}>
-            {en ? "Important notices (a spot opened up or a class cancelled) are always sent." : "Los avisos importantes (plaza liberada y clase cancelada) se envían siempre."}
-          </p>
+          {!esAdmin && (
+            <p className={styles.ayuda}>
+              {en ? "Important notices (a spot opened up or a class cancelled) are always sent." : "Los avisos importantes (plaza liberada y clase cancelada) se envían siempre."}
+            </p>
+          )}
         </section>
       )}
     </main>

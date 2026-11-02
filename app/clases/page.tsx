@@ -22,6 +22,7 @@ import { estiloFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 import {
   cancelarMiReserva,
+  obtenerClasesPasadas,
   reservarClase,
   salirListaEspera,
   unirseListaEspera,
@@ -65,7 +66,11 @@ type Datos = {
   pruebaGastada: boolean;
   restantes: number | null;
   lista: Clase[];
+  pasadas: Clase[]; // solo para la administradora: las clases de las semanas anteriores
 };
+
+// Cuántas semanas hacia atrás puede mirar la administradora.
+const SEMANAS_ATRAS = 12;
 
 // Lee todo lo que necesita la pantalla (no cambia ningún estado).
 async function obtenerDatos(): Promise<Datos> {
@@ -108,6 +113,11 @@ async function obtenerDatos(): Promise<Datos> {
       };
     });
 
+  const pasadas: Clase[] =
+    perfil?.rol === "admin"
+      ? (await obtenerClasesPasadas(SEMANAS_ATRAS)).map((c) => ({ ...c, tarde: false, horasCancelacion: 0, creditos: tiposReglas.get(c.tipo)?.creditos ?? 1 }))
+      : [];
+
   // Solo cuenta el bono de clases grupales (el plan online no tiene clases).
   const activos = bonos.filter((b) => b.estado === "activo" && b.servicio !== "online");
 
@@ -122,12 +132,13 @@ async function obtenerDatos(): Promise<Datos> {
     pruebaGastada: gastada === true,
     restantes: activos.length > 0 ? activos.reduce((suma, b) => suma + b.clasesRestantes, 0) : null,
     lista,
+    pasadas,
   };
 }
 
 // Enlaces temporales a las fotos de quienes están apuntados (solo las ven las alumnas).
 async function fotosDe(d: Datos): Promise<Record<string, string>> {
-  const ids = [...new Set(d.lista.flatMap((c) => c.apuntados_ids))];
+  const ids = [...new Set([...d.pasadas, ...d.lista].flatMap((c) => c.apuntados_ids))];
   return ids.length ? obtenerFotos(ids) : {};
 }
 
@@ -201,6 +212,7 @@ export default function Clases() {
 
   const esAlumno = datos?.rol === "alumno";
   const esInvitado = datos?.rol === "invitado";
+  const esAdmin = datos?.rol === "admin";
   const veApuntados = datos?.rol === "alumno" || datos?.rol === "admin";
 
   async function ejecutar(
@@ -260,12 +272,16 @@ export default function Clases() {
   const semanaActual =
     semana ?? (datos ? Math.floor((new Date(`${diaElegido}T12:00:00Z`).getTime() - new Date(`${primerLunes}T12:00:00Z`).getTime()) / (7 * 86400000)) : 0);
   const diasSemana = datos ? Array.from({ length: 7 }, (_, i) => sumarDias(primerLunes, semanaActual * 7 + i)) : [];
+  // La administradora también puede mirar las semanas anteriores.
+  const primeraSemana = esAdmin ? -SEMANAS_ATRAS : 0;
+  const primerDia = esAdmin && datos ? sumarDias(datos.hoy, -SEMANAS_ATRAS * 7) : hoy;
+  const todas = [...(datos?.pasadas ?? []), ...(datos?.lista ?? [])];
 
-  const clasesDelDia = (datos?.lista ?? []).filter(
+  const clasesDelDia = todas.filter(
     (c) => claveDia(c.empieza_en) === diaElegido && (filtro === "todo" || c.servicio === filtro),
   );
   // Si el día elegido no tiene clases, se ofrece saltar al siguiente que sí las tenga.
-  const siguienteConClases = (datos?.lista ?? [])
+  const siguienteConClases = todas
     .filter((c) => claveDia(c.empieza_en) > diaElegido && (filtro === "todo" || c.servicio === filtro))
     .map((c) => claveDia(c.empieza_en))
     .sort()[0];
@@ -319,9 +335,11 @@ export default function Clases() {
 
       {datos && (
         <>
-          <Link href="/clases/mis-reservas" className={estilos.misReservas}>
-            {t.verMisReservasBoton} →
-          </Link>
+          {!esAdmin && (
+            <Link href="/clases/mis-reservas" className={estilos.misReservas}>
+              {t.verMisReservasBoton} →
+            </Link>
+          )}
 
           <PanelFiltros etiqueta={idioma === "en" ? "Filters" : "Filtros"} activos={filtro !== "todo" ? 1 : 0}>
           <div className={estilos.filtros} role="tablist" aria-label={t.filtroTodo}>
@@ -356,14 +374,14 @@ export default function Clases() {
               type="button"
               className={estilos.flecha}
               aria-label={t.semanaAnterior}
-              disabled={semanaActual <= 0}
+              disabled={semanaActual <= primeraSemana}
               onClick={() => setSemana(semanaActual - 1)}
             >
               ‹
             </button>
             <div className={estilos.dias}>
               {diasSemana.map((d, i) => {
-                const fuera = d < hoy || d > ultimo;
+                const fuera = d < primerDia || d > ultimo;
                 return (
                   <button
                     key={d}

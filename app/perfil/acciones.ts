@@ -1,5 +1,6 @@
 "use server";
 
+import { administradoras } from "@/lib/avisos";
 import { enviarCorreo } from "@/lib/email";
 import { correoSolicitudBorrado } from "@/lib/plantillas-email";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -120,13 +121,13 @@ export async function pedirBorradoCuenta(): Promise<Resultado> {
   const { error } = await admin.from("solicitudes_borrado").insert({ user_id: user.id });
   if (error) return { ok: error.code === "23505" }; // ya había una pendiente
 
-  const [{ data: yo }, { data: admins }] = await Promise.all([
+  const [{ data: yo }, admins] = await Promise.all([
     admin.from("profiles").select("nombre, apellidos, email").eq("id", user.id).maybeSingle(),
-    admin.from("profiles").select("email").eq("rol", "admin"),
+    administradoras("admin_avisa_borrado"),
   ]);
   const nombre = [yo?.nombre, yo?.apellidos].filter(Boolean).join(" ") || "(sin nombre)";
-  for (const a of admins ?? []) {
-    if (a.email) await enviarCorreo(correoSolicitudBorrado({ para: a.email, nombre, correo: yo?.email ?? "" }));
+  for (const a of admins) {
+    await enviarCorreo(correoSolicitudBorrado({ para: a.email, nombre, correo: yo?.email ?? "" }));
   }
   return { ok: true };
 }

@@ -162,6 +162,41 @@ export function correoBonoCaduca(p: { para: string; idioma: Idioma; nombrePerson
   return { para: p.para, asunto: titulo, ...m };
 }
 
+// Aviso para Miriam: alguien ha reservado una clase (siempre en español).
+export function correoReservaParaAdmin(p: { para: string; persona: string; prueba: boolean; clase: ClaseInfo; apuntados: number; plazas: number }): Correo {
+  const cuando = escapar(fechaHora(p.clase.empieza_en, "es"));
+  const titulo = "Nueva reserva";
+  const m = marco({
+    idioma: "es",
+    titulo,
+    parrafos: [
+      `<strong>${escapar(p.persona)}</strong> ha reservado <strong>${escapar(p.clase.nombre)}</strong>${p.prueba ? " (clase de prueba)" : ""}.`,
+      `<strong>${cuando}</strong>`,
+      `Ahora hay ${p.apuntados} de ${p.plazas} plazas ocupadas.`,
+    ],
+    boton: { texto: "Ver las reservas", ruta: "/admin/reservas" },
+  });
+  return { para: p.para, asunto: `${titulo} · ${p.clase.nombre}`, ...m };
+}
+
+// Aviso para Miriam: alguien ha cancelado su reserva (siempre en español).
+export function correoCancelacionParaAdmin(p: { para: string; persona: string; clase: ClaseInfo; apuntados: number; plazas: number; devuelta: boolean }): Correo {
+  const cuando = escapar(fechaHora(p.clase.empieza_en, "es"));
+  const titulo = "Reserva cancelada";
+  const m = marco({
+    idioma: "es",
+    titulo,
+    parrafos: [
+      `<strong>${escapar(p.persona)}</strong> ha cancelado su reserva de <strong>${escapar(p.clase.nombre)}</strong>.`,
+      `<strong>${cuando}</strong>`,
+      `Quedan ${p.apuntados} de ${p.plazas} plazas ocupadas.`,
+      p.devuelta ? "Ha cancelado a tiempo: la clase se ha devuelto a su bono." : "Ha cancelado tarde: la clase no se ha devuelto.",
+    ],
+    boton: { texto: "Ver las reservas", ruta: "/admin/reservas" },
+  });
+  return { para: p.para, asunto: `${titulo} · ${p.clase.nombre}`, ...m };
+}
+
 // Aviso para Miriam: una persona pide que se borre su cuenta.
 export function correoSolicitudBorrado(p: { para: string; nombre: string; correo: string }): Correo {
   const titulo = "Petición de borrado de cuenta";
