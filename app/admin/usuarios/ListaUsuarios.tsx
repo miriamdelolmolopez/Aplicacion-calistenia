@@ -115,8 +115,8 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["id"]>("todos");
   const [estadoFiltro, setEstadoFiltro] = useState<"todos" | "activos" | "inactivos">("todos");
   const [tarifa, setTarifa] = useState("");
-  // «auto»: tabla en ordenador y tarjetas en móvil, hasta que se elige una de las dos.
-  const [vista, setVista] = useState<"auto" | "lista" | "cards">("auto");
+  // Por defecto, tarjetas compactas (en ordenador caben varias por fila); se puede cambiar a lista.
+  const [vista, setVista] = useState<"lista" | "cards">("cards");
   const nombresTarifa = [...new Set(usuarios.flatMap((u) => u.tarifas))].sort((a, b) => a.localeCompare(b, "es"));
 
   const normal = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -293,7 +293,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     </span>
                   )}
                 </div>
-                <div className={`${styles.ayuda} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
+                <div className={`${styles.ayuda} ${estilos.resumenCorto} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
                 <div className={estilos.pie}>
                   <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.botonPagos}>
                     <IconoEuro /> Pagos
@@ -304,7 +304,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
             </li>
           );
         })}
-        {visibles.length === 0 && <p className={styles.ayuda}>No hay nadie que coincida.</p>}
+        {visibles.length === 0 && <p className={styles.ayuda} style={{ gridColumn: "1 / -1" }}>No hay nadie que coincida.</p>}
       </ul>
     </>
   );
