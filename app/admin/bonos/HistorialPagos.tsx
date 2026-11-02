@@ -17,6 +17,7 @@ export type FilaPago = {
   metodoNombre: string;
   estado: string; // pagado | pendiente | anulado
   fecha: string; // instante ISO (cuándo se cobró, o cuándo se creó si sigue pendiente)
+  facturas: { numero: string; enlace: string }[]; // facturas de este pago (la normal y, si se anuló, la rectificativa)
 };
 
 const ESTADOS: Record<string, string> = { pagado: "Cobrado", pendiente: "Pendiente", anulado: "Anulado" };
@@ -107,6 +108,11 @@ export default function HistorialPagos({ pagos }: { pagos: FilaPago[] }) {
               {p.tarifa} · {p.metodoNombre} · {fechaHora(p.fecha)}
               {p.descuento > 0 && ` · descuento −${euros(p.descuento)}`}
             </div>
+            {p.facturas.map((f) => (
+              <a key={f.numero} href={f.enlace} download className={styles.ayuda} style={{ display: "inline-flex", alignItems: "center", minHeight: 40, marginRight: 14, textDecoration: "underline" }}>
+                Descargar {f.numero}
+              </a>
+            ))}
           </div>
           <div style={{ textAlign: "right" }}>
             <strong>{euros(p.importe)}</strong>

@@ -91,6 +91,17 @@ export default async function AdminBonos() {
     .select("id, importe_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, persona_nombre, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))")
     .order("creado_en", { ascending: false })
     .limit(1000);
+  // Facturas de esos pagos (FS la normal, FSR la rectificativa de un pago anulado).
+  const idsPagos = ((historialDatos ?? []) as { id: string }[]).map((h) => h.id);
+  const { data: facturasDatos } = idsPagos.length
+    ? await createAdminClient().from("facturas").select("pago_id, tipo, anio, numero").in("pago_id", idsPagos)
+    : { data: [] };
+  const facturasPorPago = new Map<string, { numero: string; enlace: string }[]>();
+  for (const f of (facturasDatos ?? []) as { pago_id: string; tipo: string; anio: number; numero: number }[]) {
+    const rect = f.tipo === "rectificativa";
+    const fila = { numero: `${rect ? "FSR" : "FS"}-${f.anio}-${String(f.numero).padStart(3, "0")}`, enlace: `/pagos/recibo/${f.pago_id}${rect ? "" : "?tipo=original"}` };
+    facturasPorPago.set(f.pago_id, [...(facturasPorPago.get(f.pago_id) ?? []), fila]);
+  }
   const historial: FilaPago[] = ((historialDatos ?? []) as unknown as (PagoPendiente & {
     estado: string;
     pagado_en: string | null;
@@ -106,6 +117,7 @@ export default async function AdminBonos() {
       metodoNombre: METODOS[h.metodo] ?? h.metodo,
       estado: h.estado,
       fecha: h.pagado_en ?? h.creado_en,
+      facturas: facturasPorPago.get(h.id) ?? [],
     }))
     .sort((a, b) => b.fecha.localeCompare(a.fecha));
 

@@ -4,7 +4,7 @@ import styles from "../admin.module.css";
 import type { TipoBono } from "./FormularioTarifa";
 import ListaTarifas from "./ListaTarifas";
 
-export const metadata = { title: "Tarifas · Administración" };
+export const metadata = { title: "Servicios · Administración" };
 
 export default async function Tarifas() {
   const { supabase } = await requireAdmin();
@@ -19,7 +19,7 @@ export default async function Tarifas() {
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
-        <h1>Tarifas</h1>
+        <h1>Servicios</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
