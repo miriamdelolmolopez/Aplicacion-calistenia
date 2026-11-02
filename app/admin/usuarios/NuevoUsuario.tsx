@@ -202,7 +202,7 @@ export default function NuevoUsuario({
   const [filas, setFilas] = useState<Fila[]>([nueva(0)]);
   const [siguiente, setSiguiente] = useState(1);
   // Prueba gratuita del invitado/a
-  const [prueba, setPrueba] = useState("normal");
+  const [prueba, setPrueba] = useState("grupal");
   const [diasPrueba, setDiasPrueba] = useState("14");
   const [inicioPrueba, setInicioPrueba] = useState(hoy);
   const [finPrueba, setFinPrueba] = useState<string | null>(null);
@@ -280,7 +280,7 @@ export default function NuevoUsuario({
             <>
               <div className={styles.campo}>
                 <label htmlFor="nu-prueba">
-                  ¿Qué va a probar? <AyudaI texto="«Clase de prueba normal» es la de siempre: una clase grupal gratis. Las otras opciones le dan una prueba a medida: cuántas clases (presencial) o cuántos días de rutina (online)." />
+                  ¿Qué va a probar? <AyudaI texto="Qué prueba gratis tiene: presencial grupal, presencial personal u online. En presencial eliges cuántas clases y los días para gastarlas; en online, cuántos días de rutina." />
                 </label>
                 <select
                   id="nu-prueba"
@@ -292,7 +292,6 @@ export default function NuevoUsuario({
                     setFinPrueba(null);
                   }}
                 >
-                  <option value="normal">Clase de prueba normal (1 clase grupal)</option>
                   <option value="grupal">Presencial grupal</option>
                   <option value="individual">Presencial personal</option>
                   <option value="online">Online</option>

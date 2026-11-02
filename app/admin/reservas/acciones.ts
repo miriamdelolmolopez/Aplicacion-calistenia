@@ -80,6 +80,31 @@ export async function cancelarComo(userId: string, reservaId: string): Promise<R
   };
 }
 
+// Quita la reserva decidiendo tú qué pasa con su clase: devolvérsela al bono o que la pierda.
+export async function quitarReservaComo(userId: string, reservaId: string, devolver: boolean): Promise<Resultado> {
+  const { user } = await requireAdmin();
+  if (!UUID.test(userId) || !UUID.test(reservaId)) return { ok: false, error: "Datos no válidos." };
+
+  const admin = createAdminClient();
+  const { data: reserva } = await admin
+    .from("reservas")
+    .select("sesion_id, user_id, sesiones_clase(empieza_en)")
+    .eq("id", reservaId)
+    .maybeSingle();
+  if (!reserva || reserva.user_id !== userId) return { ok: false, error: "No se ha encontrado esa reserva." };
+  const empieza = (reserva.sesiones_clase as unknown as { empieza_en: string } | null)?.empieza_en;
+  const yaPasada = !!empieza && new Date(empieza) <= new Date();
+
+  const { error } = await admin.rpc("cancelar_reserva", { p_user: userId, p_reserva: reservaId, p_admin: user.id, p_devolver: devolver });
+  if (error) return { ok: false, error: error.message };
+  if (!yaPasada) after(() => avisarPlazaLiberada(reserva.sesion_id));
+
+  refrescar();
+  revalidatePath(`/admin/reservas/como/${userId}`);
+  revalidatePath(`/admin/usuarios/${userId}`);
+  return { ok: true, mensaje: devolver ? "Reserva quitada. Se le ha devuelto la clase." : "Reserva quitada. La clase le cuenta como dada." };
+}
+
 // «Borrar»: devuelve la clase de una reserva cancelada fuera de plazo.
 export async function borrarReserva(reservaId: string): Promise<Resultado> {
   const { user } = await requireAdmin();

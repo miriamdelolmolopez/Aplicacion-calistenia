@@ -150,8 +150,8 @@ const REGALO = {
     en: "My gift to you: a free class. It's already added to your pass, book it whenever you like.",
   },
   videollamada: {
-    es: "Mi regalo para ti: una videollamada de 45 minutos, para resolver tus dudas o para entrenar juntas en directo. Respóndeme a este correo y buscamos el día.",
-    en: "My gift to you: a 45-minute video call, to answer your questions or to train together live. Reply to this email and we'll find a day.",
+    es: "Mi regalo para ti: una videollamada de 1 hora, para resolver tus dudas o para entrenar juntas en directo. Respóndeme a este correo y buscamos el día.",
+    en: "My gift to you: a 1-hour video call, to answer your questions or to train together live. Reply to this email and we'll find a day.",
   },
   ninguno: { es: "Que pases un día estupenda.", en: "Have a wonderful day." },
 };
@@ -205,7 +205,7 @@ export async function felicitarCumpleanos(): Promise<number> {
               para: ad.email,
               idioma: "es",
               asunto: "Videollamada de cumpleaños pendiente",
-              mensaje: `${nombre} cumple años hoy y tiene de regalo una videollamada de 45 minutos (dudas o entrenamiento en directo).\n\nQuedad el día; después márcala como hecha en Automatizaciones.`,
+              mensaje: `${nombre} cumple años hoy y tiene de regalo una videollamada de 1 hora (dudas o entrenamiento en directo).\n\nQuedad el día; después márcala como hecha en Automatizaciones.`,
               valores: {},
               ruta: "/admin/automatizaciones",
             }),

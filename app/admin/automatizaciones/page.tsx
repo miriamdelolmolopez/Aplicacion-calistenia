@@ -42,7 +42,7 @@ const INFO: Record<string, Info & { orden: number }> = {
     cuando: "El día del cumpleaños de cada persona (según la fecha de nacimiento de su perfil), en la revisión de la mañana. Una vez al año.",
     aQuien: "A alumnos/as e invitados/as que tengan puesta su fecha de nacimiento.",
     queHace:
-      "Le envía un correo de felicitación. Si tiene un bono de clases presenciales, le suma 1 clase gratis. Si solo tiene plan online, le regala una videollamada de 45 minutos (dudas o entrenamiento en directo) y a ti te llega un aviso para quedar con ella.",
+      "Le envía un correo de felicitación. Si tiene un bono de clases presenciales, le suma 1 clase gratis. Si solo tiene plan online, le regala una videollamada de 1 hora (dudas o entrenamiento en directo) y a ti te llega un aviso para quedar con ella.",
     variables: "{nombre}, {regalo}",
     orden: 4,
   },

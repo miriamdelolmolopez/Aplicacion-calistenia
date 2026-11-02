@@ -44,12 +44,14 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
   const router = useRouter();
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmando, setConfirmando] = useState<string | null>(null);
 
   async function marcarNoVino(p: PersonaClase) {
     setTrabajando(true);
     setError(null);
     const r = await marcarAsistencia(p.reservaId, p.asistencia === "no_asistio" ? null : "no_asistio");
     setTrabajando(false);
+    setConfirmando(null);
     if (!r.ok) return setError(r.error ?? "No se ha podido guardar.");
     router.refresh();
   }
@@ -96,11 +98,25 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
                   aria-label={`${p.nombre} no se presentó`}
                   title="No se presentó"
                   disabled={trabajando}
-                  onClick={() => marcarNoVino(p)}
+                  // Marcar pregunta antes; quitar la marca (por si te equivocaste) es directo.
+                  onClick={() => (p.asistencia === "no_asistio" ? marcarNoVino(p) : setConfirmando(p.reservaId))}
                 >
                   ✗
                 </button>
               </div>
+              {confirmando === p.reservaId && (
+                <div className={styles.aviso} role="alert" style={{ marginTop: 8 }}>
+                  <p style={{ margin: "0 0 10px" }}>¿Vas a marcar que este atleta no se ha presentado?</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button type="button" className={styles.boton} disabled={trabajando} onClick={() => marcarNoVino(p)}>
+                      {trabajando ? "Guardando…" : "Confirmar"}
+                    </button>
+                    <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={trabajando} onClick={() => setConfirmando(null)}>
+                      Descartar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
       </div>

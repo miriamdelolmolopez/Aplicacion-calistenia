@@ -13,6 +13,7 @@ export default async function Tarifas() {
   const { data } = await supabase
     .from("tipos_bono")
     .select("id, nombre, servicio, clases, precio_centimos, validez_dias, orden, activo, requiere_pago, servicio2, clases2, iva_porcentaje, validez_dias2")
+    .not("nombre", "like", "Prueba gratuita · %") // las pruebas de invitados son internas
     .order("orden")
     .order("servicio")
     .order("precio_centimos");

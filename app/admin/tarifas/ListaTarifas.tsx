@@ -12,6 +12,7 @@ import comunes from "../comunes/comunes.module.css";
 import Nuevo from "../comunes/Nuevo";
 import PanelCompleto from "../comunes/PanelCompleto";
 import { duplicarTarifa, eliminarTarifa } from "./acciones";
+import estilosTarifas from "./tarifas.module.css";
 import FormularioTarifa, { SERVICIOS, type TipoBono } from "./FormularioTarifa";
 
 const NOMBRE: Record<string, string> = Object.fromEntries(SERVICIOS.map((s) => [s.valor, s.texto]));
@@ -31,6 +32,13 @@ function contenido(t: TipoBono): string {
 }
 
 const esSuelta = (t: TipoBono) => t.clases === 1 && t.servicio !== "online" && !t.servicio2;
+
+// Las tarifas se agrupan en carpetas según su servicio principal.
+const CARPETAS: { clave: string; nombre: string; icono: string; vale: (t: TipoBono) => boolean }[] = [
+  { clave: "presencial", nombre: "Presencial", icono: "🏋️", vale: (t) => t.servicio === "grupal" || t.servicio === "individual" },
+  { clave: "online", nombre: "Online", icono: "💻", vale: (t) => t.servicio === "online" },
+  { clave: "talleres", nombre: "Talleres", icono: "🎟️", vale: (t) => t.servicio === "taller" },
+];
 
 // Lista de tarifas: arriba «+ Nueva», buscar y filtrar. Cada fila: editar, duplicar y eliminar.
 export default function ListaTarifas({ tarifas }: { tarifas: TipoBono[] }) {
@@ -104,7 +112,15 @@ export default function ListaTarifas({ tarifas }: { tarifas: TipoBono[] }) {
       )}
 
       {visibles.length === 0 && <p className={comunes.sinResultados}>No hay tarifas con ese filtro.</p>}
-      {visibles.map((t) => {
+      {CARPETAS.map((carpeta) => {
+        const delGrupo = visibles.filter((t) => carpeta.vale(t));
+        if (delGrupo.length === 0) return null;
+        return (
+          <details key={carpeta.clave} open className={estilosTarifas.carpeta}>
+            <summary>
+              <span aria-hidden="true">{carpeta.icono}</span> {carpeta.nombre} <em>({delGrupo.length})</em>
+            </summary>
+            {delGrupo.map((t) => {
         const d = desglose(t.precio_centimos, t.iva_porcentaje);
         return (
           <div key={t.id} className={comunes.fila}>
@@ -127,6 +143,9 @@ export default function ListaTarifas({ tarifas }: { tarifas: TipoBono[] }) {
               alEliminar={() => ejecutar(() => eliminarTarifa(t.id))}
             />
           </div>
+        );
+            })}
+          </details>
         );
       })}
 

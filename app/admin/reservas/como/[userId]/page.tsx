@@ -48,7 +48,7 @@ export default async function ReservarComo({
   const desde = instanteMadrid(dia, "00:00")?.toISOString() ?? new Date().toISOString();
   const hasta = instanteMadrid(sumarDias(dia, 1), "00:00")?.toISOString() ?? desde;
 
-  const [{ data: sesiones }, { data: bonos }, firmada, { data: tiposDatos }] = await Promise.all([
+  const [{ data: sesiones }, { data: bonos }, firmada] = await Promise.all([
     admin
       .from("sesiones_clase")
       .select("id, tipo_id, empieza_en, plazas, estado, tipos_clase(nombre, color), reservas(id, estado, user_id)")
@@ -57,9 +57,7 @@ export default async function ReservarComo({
       .order("empieza_en"),
     admin.from("bonos").select("tipos_bono(nombre)").eq("user_id", userId).eq("estado", "activo"),
     perfil.foto_path ? admin.storage.from("avatares").createSignedUrl(perfil.foto_path, 3600) : Promise.resolve({ data: null }),
-    admin.from("tipos_clase").select("id, nombre").eq("activo", true).order("nombre"),
   ]);
-  const tipos = (tiposDatos ?? []) as { id: string; nombre: string }[];
   const foto = firmada.data?.signedUrl ?? null;
   const tarifas = ((bonos ?? []) as unknown as { tipos_bono: { nombre: string } | null }[])
     .map((b) => b.tipos_bono?.nombre)
@@ -114,13 +112,7 @@ export default async function ReservarComo({
         {dia === hoy ? "Hoy" : textoDia(desde)}
       </p>
 
-      {dia < hoy && (
-        <p className={styles.ayuda} style={{ margin: "0 0 12px" }}>
-          Este día ya pasó. Con «Registrar como hecha» se le descuenta una clase de su bono y queda en su historial como «asistió». No se le avisa por correo.
-        </p>
-      )}
-
-      <ClasesComo userId={userId} clases={clases} tipos={tipos} dia={dia} puedeAnadir={dia <= hoy} />
+      <ClasesComo userId={userId} clases={clases} />
     </main>
   );
 }

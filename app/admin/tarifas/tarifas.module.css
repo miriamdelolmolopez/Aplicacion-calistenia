@@ -10,3 +10,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Carpetas de la lista de servicios: presencial, online y talleres */
+.carpeta {
+  margin: 0 0 14px;
+}
+
+.carpeta > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.carpeta > summary em {
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 500;
+  color: var(--secundario);
+}
