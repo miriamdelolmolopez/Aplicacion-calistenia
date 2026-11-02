@@ -282,6 +282,7 @@ export default function Clases() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
+      <h1 style={{ margin: "12px 0 8px", fontSize: "2rem" }}>{t.navReservar}</h1>
 
       {datos && esAlumno && datos.restantes !== null && (
         <p className={styles.aviso}>
