@@ -41,8 +41,11 @@ async function cargar(userId?: string): Promise<Datos> {
     consulta = consulta.eq("user_id", userId);
     perfil = perfil.eq("id", userId);
   } else {
+    // «Mis datos»: solo lo mío. La administradora puede ver las de todas las personas, así que hay que filtrar.
     const { data: sesion } = await supabase.auth.getUser();
-    if (sesion.user) perfil = perfil.eq("id", sesion.user.id);
+    if (!sesion.user) return { filas: [], nacimiento: null };
+    consulta = consulta.eq("user_id", sesion.user.id);
+    perfil = perfil.eq("id", sesion.user.id);
   }
   const [{ data }, { data: p }] = await Promise.all([consulta, perfil.maybeSingle()]);
   const filas = ((data ?? []) as unknown as Fila[]).map((f) => {
