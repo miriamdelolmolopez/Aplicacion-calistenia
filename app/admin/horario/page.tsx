@@ -10,6 +10,7 @@ import { AplicarPlantilla, CalendarioSemana, type TipoOpcion } from "./Controles
 import { IconoArena, IconoProhibido, IconoUsuario } from "./iconos";
 import TarjetaClase from "./TarjetaClase";
 import estilos from "./horario.module.css";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Horarios presenciales · Administración" };
 
@@ -95,13 +96,13 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Horarios presenciales</h1>
         <VerComoAlumno destino="/clases" />
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <AnadirClaseGeneral fecha={base < hoy ? hoy : base} tipos={tipos} />
 

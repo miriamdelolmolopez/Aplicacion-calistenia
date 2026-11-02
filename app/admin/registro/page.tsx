@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { registroAbierto } from "@/lib/registro";
 import styles from "../admin.module.css";
 import ControlRegistro from "../prueba/ControlRegistro";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Registro · Administración" };
 
@@ -12,12 +13,12 @@ export default async function Registro() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Registro</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <h2>Registro de la app</h2>

@@ -6,6 +6,7 @@ import BotonFoto from "../../fotos/BotonFoto";
 import styles from "../../admin.module.css";
 import type { Termino } from "../Controles";
 import { ListaGlosario } from "../ListasAprende";
+import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Glosario · Administración" };
 
@@ -18,13 +19,13 @@ export default async function AdministrarGlosario() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Glosario</h1>
         <VerComoAlumno destino="/aprende/glosario" />
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <ListaGlosario

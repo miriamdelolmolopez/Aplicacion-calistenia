@@ -9,6 +9,7 @@ import styles from "../../../admin.module.css";
 import estilos from "../../reservas.module.css";
 import TiraSemana from "../../TiraSemana";
 import ClasesComo, { type ClaseComo } from "./ClasesComo";
+import CabeceraAdmin from "../../../CabeceraAdmin";
 
 export const metadata = { title: "Reservar en nombre de una persona · Administración" };
 
@@ -83,12 +84,12 @@ export default async function ReservarComo({
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Reservar como {perfil.nombre ?? "el/la alumno/a"}</h1>
         <Link href={`/admin/reservas?dia=${dia}`} className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <div className={estilos.cabeceraPersona}>
         <Avatar nombre={nombre} url={foto} tamano={72} />

@@ -4,6 +4,7 @@ import { fechaCorta } from "@/lib/fechas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ListaRutinas, { type FilaCarpeta, type FilaRutina } from "./ListaRutinas";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Rutinas · Administración" };
 
@@ -68,12 +69,12 @@ export default async function Rutinas() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Rutinas</h1>
         <Link href="/admin/online" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>

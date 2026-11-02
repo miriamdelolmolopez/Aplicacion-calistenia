@@ -3,6 +3,7 @@ import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Aprende · Administración" };
 
@@ -20,13 +21,13 @@ export default async function AdministrarAprende() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Aprende</h1>
         <VerComoAlumno destino="/aprende" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
       <p className={styles.aviso}>Aquí cambias lo que los/las alumnos/as ven en Más → Aprende.</p>
       <section className={styles.tarjeta}>
         {opciones.map((o) => (

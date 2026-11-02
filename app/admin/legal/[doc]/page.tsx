@@ -5,6 +5,7 @@ import { DOCUMENTOS, DOCUMENTOS_CON_ACEPTACION, TITULO_DOCUMENTO, type Documento
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../admin.module.css";
 import EditorLegal from "../EditorLegal";
+import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Texto legal · Administración" };
 
@@ -28,12 +29,12 @@ export default async function EditarLegal({ params }: { params: Promise<{ doc: s
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>{TITULO_DOCUMENTO[documento]}</h1>
         <Link href="/admin/legal" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <p className={styles.ayuda}>
         Versión vigente: <strong>{vigente?.version ?? "ninguna"}</strong>

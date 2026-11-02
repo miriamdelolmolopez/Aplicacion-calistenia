@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../admin.module.css";
 import type { Pregunta } from "../Controles";
 import { ListaPreguntas } from "../ListasAprende";
+import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Preguntas del examen · Administración" };
 
@@ -18,13 +19,13 @@ export default async function AdministrarPreguntas() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Preguntas del examen</h1>
         <VerComoAlumno destino="/aprende/examen" />
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <ListaPreguntas preguntas={preguntas} />

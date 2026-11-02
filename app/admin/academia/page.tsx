@@ -5,6 +5,7 @@ import { COLUMNAS_CURSO, type Curso } from "@/lib/cursos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ListaCursos from "./ListaCursos";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Cursos · Administración" };
 
@@ -17,13 +18,13 @@ export default async function AdministrarAcademia() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Cursos</h1>
         <VerComoAlumno destino="/academia" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <p className={styles.aviso}>
         Aquí creas los cursos. Los <strong>activos</strong> salen en «Cursos actuales», los <strong>próximos</strong> en «Próximos cursos» y los{" "}

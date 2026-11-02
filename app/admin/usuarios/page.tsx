@@ -5,6 +5,7 @@ import styles from "../admin.module.css";
 import ListaUsuarios, { type Usuario } from "./ListaUsuarios";
 import { formasActivas } from "@/lib/formasPago";
 import NuevoUsuario, { type TarifaOpcion } from "./NuevoUsuario";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Usuarios · Administración" };
 
@@ -69,12 +70,12 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Usuarios</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
       <NuevoUsuario tarifas={tarifas} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
       <ListaUsuarios usuarios={usuarios} />
     </main>

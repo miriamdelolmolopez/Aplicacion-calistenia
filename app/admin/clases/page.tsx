@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
 import BotonFoto from "../fotos/BotonFoto";
 import ListaTipos from "./ListaTipos";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Tipos de clase · Administración" };
 
@@ -39,13 +40,13 @@ export default async function AdminClases() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Tipos de clase</h1>
         <VerComoAlumno destino="/clases" />
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <h2>Tipos de clase</h2>

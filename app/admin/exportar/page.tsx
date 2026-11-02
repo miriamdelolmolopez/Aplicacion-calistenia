@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Descargar datos · Administración" };
 
@@ -16,12 +17,12 @@ export default async function Exportar() {
   await requireAdmin();
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Descargar datos</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
       <p className={styles.aviso}>
         Cada botón descarga un archivo CSV que se abre con Excel o Google Sheets. Contiene datos personales y de
         salud: guárdalo en un sitio seguro y bórralo cuando ya no lo necesites.

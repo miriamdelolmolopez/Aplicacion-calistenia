@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../../admin.module.css";
 import estilos from "../../usuarios.module.css";
 import { FormGuiado, HistorialPersona, type FilaPagoPersona } from "./FormulariosPago";
+import CabeceraAdmin from "../../../CabeceraAdmin";
 
 export const metadata = { title: "Pagos de la persona · Administración" };
 
@@ -107,12 +108,12 @@ export default async function PagosPersona({ params, searchParams }: { params: P
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Pagos</h1>
         <Link href={`/admin/usuarios/${id}`} className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <strong style={{ fontSize: "1.1rem" }}>{nombre}</strong>

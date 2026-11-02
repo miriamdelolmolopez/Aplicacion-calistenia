@@ -8,6 +8,7 @@ import styles from "../admin.module.css";
 import { BotonPagado } from "./Controles";
 import HistorialPagos, { type FilaPago } from "./HistorialPagos";
 import RegistrarPago from "./RegistrarPago";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Pagos · Administración" };
 
@@ -125,12 +126,12 @@ export default async function AdminBonos() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Pagos</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <div style={{ marginBottom: 14 }}>
         <RegistrarPago

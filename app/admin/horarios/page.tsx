@@ -8,6 +8,7 @@ import { Aplicar, AnadirClase, QuitarCompacto, Renombrar } from "./Controles";
 import estiloCuadricula from "./cuadricula.module.css";
 import ListaPlantillas, { type ResumenPlantilla } from "./ListaPlantillas";
 import ResumenMes, { type ClaseDia } from "./ResumenMes";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Plantillas presenciales · Administración" };
 
@@ -159,13 +160,13 @@ export default async function Horarios() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Plantillas presenciales</h1>
         <VerComoAlumno destino="/clases" />
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <ListaPlantillas plantillas={resumen} contenidos={contenidos} />
 

@@ -65,7 +65,7 @@ export default function Encuadrador({
       onClick={quieto}
       style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(23, 24, 26, 0.6)" }}
     >
-      <div style={{ width: "100%", maxWidth: 440, maxHeight: "92dvh", overflowY: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 14, background: "var(--blanco)", borderRadius: 24 }}>
+      <div style={{ width: "100%", maxWidth: proporcion > 3 ? 900 : 440, maxHeight: "92dvh", overflowY: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 14, background: "var(--blanco)", borderRadius: 24 }}>
         <strong style={{ fontSize: "1.1rem" }}>Encuadrar foto</strong>
         <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--secundario)" }}>Arrastra la foto hasta dejar a la vista la parte que quieres. Así se verá en la tarjeta.</p>
         <div
@@ -79,7 +79,7 @@ export default function Encuadrador({
           onPointerCancel={() => (arrastre.current = null)}
           style={{
             width: "100%",
-            aspectRatio: String(Math.min(3, Math.max(0.5, proporcion))),
+            aspectRatio: String(Math.min(12, Math.max(0.5, proporcion))),
             backgroundImage: `url("${limpia}")`,
             backgroundSize: "cover",
             backgroundPosition: `${pos.x}% ${pos.y}%`,

@@ -10,6 +10,7 @@ import {
   type ExtraSemana,
   type SesionRutina,
 } from "./Constructor";
+import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Editar rutina · Administración" };
 
@@ -135,12 +136,12 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Editar rutina</h1>
         <Link href="/admin/rutinas" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
       <Constructor rutina={rutina} sesiones={sesiones} catalogo={catalogo} alumnos={alumnos} cambios={cambios} extras={extras} />
     </main>
   );

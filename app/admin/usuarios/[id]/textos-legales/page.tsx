@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../../admin.module.css";
 import ListaTextosLegales, { type Aceptacion } from "./ListaTextosLegales";
+import CabeceraAdmin from "../../../CabeceraAdmin";
 
 export const metadata = { title: "Textos legales aceptados · Administración" };
 
@@ -42,12 +43,12 @@ export default async function TextosLegalesPersona({ params }: { params: Promise
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Textos legales</h1>
         <Link href={`/admin/usuarios/${id}?pestana=perfil`} className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <strong style={{ fontSize: "1.1rem" }}>{nombre}</strong>

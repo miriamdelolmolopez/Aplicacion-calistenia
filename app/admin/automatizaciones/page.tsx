@@ -8,6 +8,7 @@ import { vistaPrevia } from "@/lib/automatizaciones";
 import { CLAVES_NUEVAS, PLANTILLAS, type ClavePlantilla } from "@/lib/plantillasAutomatizacion";
 import NuevaAutomatizacion from "./NuevaAutomatizacion";
 import ListaAutomatizaciones, { type Envios, type Info, type Previa } from "./ListaAutomatizaciones";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Automatizaciones · Administración" };
 
@@ -94,12 +95,12 @@ export default async function Automatizaciones() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Automatizaciones</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <p className={styles.ayuda}>
         Son correos y regalos que se envían solos. La app los revisa una vez al día, por la mañana (sobre las 7:00 u 8:00, hora de Madrid). Los correos salen en el idioma de cada persona. Cada persona recibe cada correo una sola vez, y las

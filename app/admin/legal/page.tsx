@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import { DOCUMENTOS, DOCUMENTOS_CON_ACEPTACION, TITULO_DOCUMENTO } from "@/lib/legalTexto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Textos legales · Administración" };
 
@@ -14,13 +15,13 @@ export default async function TextosLegales() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Textos legales</h1>
         <VerComoAlumno destino="/legal/terminos" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <p className={styles.ayuda}>
         Aquí cambias los textos que ven los/las alumnos/as. Las erratas y aclaraciones se guardan sin más. Si cambian las condiciones o los datos que

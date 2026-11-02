@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import GaleriaFotos from "../fotos/GaleriaFotos";
 import Frases, { type Frase } from "../frases/Frases";
 import styles from "../admin.module.css";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Fotos y frases · Administración" };
 
@@ -19,13 +20,13 @@ export default async function Contenido() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Fotos y frases</h1>
         <VerComoAlumno destino="/inicio" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <h2>Fotos de la app</h2>

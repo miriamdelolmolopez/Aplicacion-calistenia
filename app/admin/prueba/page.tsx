@@ -6,6 +6,7 @@ import { estadoLinkPrueba } from "@/lib/pruebaLink";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ControlesLink from "./Controles";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Link de prueba gratuita · Administración" };
 
@@ -46,12 +47,12 @@ export default async function LinkPrueba() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Link de prueba</h1>
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <h2>Link de clase de prueba gratuita</h2>

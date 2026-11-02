@@ -11,6 +11,7 @@ import { FormularioEjercicio, type EjercicioForm, type Material } from "./Contro
 import NuevoEjercicio from "./NuevoEjercicio";
 import FiltrosEjercicios from "./FiltrosEjercicios";
 import GestionMaterial, { type MaterialFila } from "./GestionMaterial";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Biblioteca · Administración" };
 
@@ -115,13 +116,13 @@ export default async function Ejercicios({
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Biblioteca</h1>
         <VerComoAlumno destino="/biblioteca" />
         <Link href="/admin/online" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <div className={styles.chips}>
         {pestana("biblioteca", `Ejercicios (${todos.filter((e) => e.activo).length})`)}

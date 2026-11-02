@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { fechaCorta } from "@/lib/fechas";
 import styles from "../admin.module.css";
 import ListaPlantillasOnline, { type FilaPlantilla } from "./ListaPlantillasOnline";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Plantillas online · Administración" };
 
@@ -35,12 +36,12 @@ export default async function PlantillasOnline() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Plantillas online</h1>
         <Link href="/admin/online" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>Rutinas modelo sin alumno/a. Cuando creas una rutina para un/a alumno/a puedes empezar desde una de estas plantillas.</p>

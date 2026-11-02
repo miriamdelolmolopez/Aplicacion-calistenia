@@ -6,6 +6,7 @@ import BotonFoto from "../../fotos/BotonFoto";
 import styles from "../../admin.module.css";
 import type { Seccion } from "../Controles";
 import { ListaHistoria } from "../ListasAprende";
+import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Historia · Administración" };
 
@@ -20,13 +21,13 @@ export default async function AdministrarHistoria() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Historia</h1>
         <VerComoAlumno destino="/aprende/historia" />
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <ListaHistoria

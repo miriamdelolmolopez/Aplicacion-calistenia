@@ -24,6 +24,7 @@ import HistorialExamen, { type Intento } from "../../../aprende/examen/Historial
 import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
+import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
 
@@ -523,12 +524,12 @@ export default async function FichaUsuario({
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>{nombre}</h1>
         <Link href="/admin/usuarios" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>

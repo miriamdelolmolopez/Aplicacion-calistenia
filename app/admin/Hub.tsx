@@ -5,6 +5,7 @@ import CamaraCard from "../CamaraCard";
 import { useFotoCard } from "../useFotosCards";
 import { estiloFoto, type FotoNombre } from "@/lib/fotos";
 import styles from "./admin.module.css";
+import CabeceraAdmin from "./CabeceraAdmin";
 
 export type Azulejo = { href?: string; titulo: string; foto: FotoNombre; proximamente?: boolean };
 
@@ -42,12 +43,12 @@ export function Cuadricula({ azulejos }: { azulejos: Azulejo[] }) {
 export default function Hub({ titulo, azulejos }: { titulo: string; azulejos: Azulejo[] }) {
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>{titulo}</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
       <Cuadricula azulejos={azulejos} />
     </main>
   );

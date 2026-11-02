@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import { todasLasFormas } from "@/lib/formasPago";
 import styles from "../admin.module.css";
 import ListaFormas from "./ListaFormas";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Formas de pago · Administración" };
 
@@ -13,13 +14,13 @@ export default async function FormasPago() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Formas de pago</h1>
         <VerComoAlumno destino="/pagos" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <p className={styles.ayuda}>
         Son las opciones que ves en «¿Cómo paga?» al dar de alta a alguien o registrar un bono. Cambiar un nombre también lo cambia en los pagos

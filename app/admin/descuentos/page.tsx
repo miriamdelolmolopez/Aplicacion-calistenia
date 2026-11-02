@@ -3,6 +3,7 @@ import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../admin.module.css";
 import ListaDescuentos, { type FilaDescuento } from "./ListaDescuentos";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Descuentos · Administración" };
 
@@ -45,13 +46,13 @@ export default async function Descuentos() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Descuentos</h1>
         <VerComoAlumno destino="/pagos" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
         <p className={styles.ayuda}>

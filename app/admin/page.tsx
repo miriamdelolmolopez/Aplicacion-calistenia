@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { marcarBorradoAtendido } from "./acciones";
 import styles from "./admin.module.css";
 import { Cuadricula, type Azulejo } from "./Hub";
+import CabeceraAdmin from "./CabeceraAdmin";
 
 export const metadata = { title: "Administración · CalisCoach" };
 
@@ -67,12 +68,12 @@ export default async function Administracion() {
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Administración</h1>
         <Link href="/inicio" className={styles.enlaceBarra}>
           Inicio
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       {cumples.length > 0 && (
         <section className={styles.tarjeta}>

@@ -7,6 +7,7 @@ import styles from "../admin.module.css";
 import { TarjetaClase, type ClaseDelDia } from "./Controles";
 import estilos from "./reservas.module.css";
 import TiraSemana from "./TiraSemana";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Reservas de clases · Administración" };
 
@@ -77,7 +78,7 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Reservas</h1>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <Link href="/admin/horario" className={styles.enlaceBarra}>
@@ -87,7 +88,7 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
             ← Volver
           </Link>
         </div>
-      </header>
+      </CabeceraAdmin>
 
       <TiraSemana dia={dia} hoy={hoy} ruta="/admin/reservas" />
       <p className={styles.ayuda} style={{ margin: "0 0 12px" }}>

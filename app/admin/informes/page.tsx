@@ -10,6 +10,7 @@ import { nombreMes } from "../estadisticas/Graficos";
 import estilos from "../estadisticas/estadisticas.module.css";
 import { BarrasApiladas, BarrasColores, Cambio, COLOR_SERVICIO, LineaMensual, PALETA, Rosca, TarjetaCifra } from "./GraficosPagos";
 import g from "./informes.module.css";
+import CabeceraAdmin from "../CabeceraAdmin";
 
 export const metadata = { title: "Informes · Administración" };
 
@@ -97,12 +98,12 @@ export default async function Informes({
 
   return (
     <main className={styles.pagina}>
-      <header className={styles.barra}>
+      <CabeceraAdmin>
         <h1>Informes</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
-      </header>
+      </CabeceraAdmin>
 
       <div className={estilos.periodos}>
         {pestana("atletas", "Atletas")}
