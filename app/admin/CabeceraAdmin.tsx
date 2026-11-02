@@ -27,7 +27,7 @@ export default function CabeceraAdmin({ children }: { children: ReactNode }) {
   return (
     <header className={styles.barra} style={{ position: "relative", ...estilo }}>
       {children}
-      {personalizable && <CamaraCard clave={clave} />}
+      {personalizable && <CamaraCard clave={clave} izquierda />}
     </header>
   );
 }

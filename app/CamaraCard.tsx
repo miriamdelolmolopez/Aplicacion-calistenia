@@ -10,7 +10,7 @@ import { useMiPerfil } from "./useMiPerfil";
 
 // Icono de cámara en la esquina de una tarjeta con foto: solo lo ve la administradora.
 // La tarjeta que lo contiene tiene que ser position: relative.
-export default function CamaraCard({ clave, abajo = false }: { clave: string; abajo?: boolean }) {
+export default function CamaraCard({ clave, abajo = false, izquierda = false }: { clave: string; abajo?: boolean; izquierda?: boolean }) {
   const perfil = useMiPerfil();
   const propia = useFotoCard(clave);
   const [trabajando, setTrabajando] = useState(false);
@@ -66,7 +66,7 @@ export default function CamaraCard({ clave, abajo = false }: { clave: string; ab
 
   return (
     <>
-      <div ref={caja} className={`${estilos.camara} ${abajo ? estilos.abajo : ""}`} onClick={quieto}>
+      <div ref={caja} className={`${estilos.camara} ${abajo ? estilos.abajo : ""} ${izquierda ? estilos.izquierda : ""}`} onClick={quieto}>
         <MenuFoto url={propia} alElegir={elegir} alQuitar={quitar} ocupado={trabajando} modo="ventana" encuadre={{ medir, guardar: encuadrar }} etiqueta="Foto de esta tarjeta">
           <span className={estilos.boton} title="Cambiar foto">
             {trabajando ? "…" : (
