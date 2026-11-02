@@ -178,6 +178,10 @@ export function AplicarPlantilla({
             ? "Todavía no has marcado ningún día."
             : `Días elegidos (${ordenados.length}): ${ordenados.map(textoFecha).join(", ")}`}
         </p>
+        <label className={styles.casilla}>
+          <input type="checkbox" name="pasadas" />
+          Incluir días pasados (para crear clases que ya se dieron y apuntar a quien las hizo)
+        </label>
         {ordenados.length > 0 && (
           <button
             type="button"

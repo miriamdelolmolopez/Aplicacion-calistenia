@@ -213,6 +213,10 @@ export function Aplicar({ id, hoy }: { id: string; hoy: string }) {
         <label htmlFor={`ap-h-${id}`}>Hasta el día <AyudaI texto="El último día en el que se crean clases. Cuenta ese día." /></label>
         <input id={`ap-h-${id}`} name="hasta" type="date" defaultValue={hoy} required />
       </div>
+      <label className={styles.casilla}>
+        <input type="checkbox" name="pasadas" />
+        Incluir días pasados (para crear clases que ya se dieron y apuntar a quien las hizo)
+      </label>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         {pendiente ? "Publicando…" : "Publicar clases"}
       </button>

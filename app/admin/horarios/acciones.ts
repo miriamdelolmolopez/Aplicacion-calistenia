@@ -188,15 +188,16 @@ export async function aplicarPlantilla(_previo: Estado, formData: FormData): Pro
     p_plantilla: String(formData.get("id") ?? ""),
     p_desde: desde,
     p_hasta: hasta,
+    ...(formData.get("pasadas") === "on" ? { p_pasadas: true } : {}),
   });
-  if (error) return { error: "No se han podido publicar las clases." };
+  if (error) return { error: formData.get("pasadas") === "on" ? "No se han podido publicar las clases. ¿Está ejecutado el archivo 069 en Supabase?" : "No se han podido publicar las clases." };
 
   revalidatePath("/admin/clases");
   const n = Number(data ?? 0);
   return {
     mensaje:
       n === 0
-        ? "No se ha creado ninguna clase: ya existían todas (o esas fechas ya han pasado)."
+        ? "No se ha creado ninguna clase: ya existían todas (o esas fechas ya han pasado: marca «Incluir días pasados» si quieres crearlas)."
         : `Se han publicado ${n} ${n === 1 ? "clase" : "clases"}. Las que ya existían no se han tocado.`,
   };
 }

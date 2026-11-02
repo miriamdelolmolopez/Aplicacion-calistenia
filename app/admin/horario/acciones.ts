@@ -29,7 +29,6 @@ export async function anadirClaseSuelta(_previo: Estado, formData: FormData): Pr
   const tipoId = texto(formData, "tipoId");
   const inicio = instanteMadrid(texto(formData, "fecha"), texto(formData, "hora"));
   if (!inicio) return { error: "Elige el día y la hora." };
-  if (inicio.getTime() <= Date.now()) return { error: "La clase tiene que ser en el futuro." };
 
   const admin = createAdminClient();
   const { data: tipo } = await admin
@@ -62,7 +61,6 @@ export async function cambiarHoraClase(_previo: Estado, formData: FormData): Pro
   const id = texto(formData, "sesionId");
   const inicio = instanteMadrid(texto(formData, "fecha"), texto(formData, "hora"));
   if (!inicio) return { error: "Elige el día y la hora." };
-  if (inicio.getTime() <= Date.now()) return { error: "La nueva hora tiene que ser en el futuro." };
 
   const { error } = await createAdminClient()
     .from("sesiones_clase")
@@ -86,11 +84,12 @@ export async function aplicarPlantillaDias(_previo: Estado, formData: FormData):
   if (dias.length === 0) return { error: "Marca al menos un día." };
   if (dias.length > 31) return { error: "Demasiados días de una vez." };
 
+  const pasadas = formData.get("pasadas") === "on";
   const admin = createAdminClient();
   let creadas = 0;
   for (const dia of dias) {
-    const { data, error } = await admin.rpc("crear_clases_rango", { p_plantilla: plantilla, p_desde: dia, p_hasta: dia });
-    if (error) return { error: "No se han podido crear las clases." };
+    const { data, error } = await admin.rpc("crear_clases_rango", { p_plantilla: plantilla, p_desde: dia, p_hasta: dia, ...(pasadas ? { p_pasadas: true } : {}) });
+    if (error) return { error: pasadas ? "No se han podido crear las clases. ¿Está ejecutado el archivo 069 en Supabase?" : "No se han podido crear las clases." };
     creadas += Number(data ?? 0);
   }
 
@@ -98,7 +97,7 @@ export async function aplicarPlantillaDias(_previo: Estado, formData: FormData):
   return {
     mensaje:
       creadas === 0
-        ? "No se ha creado ninguna clase: ya existían todas (o esos días ya han pasado)."
+        ? "No se ha creado ninguna clase: ya existían todas (o esos días ya han pasado: marca «Incluir días pasados» si quieres crearlas)."
         : `Se han creado ${creadas} ${creadas === 1 ? "clase" : "clases"}. Las que ya existían no se han tocado.`,
   };
 }
@@ -124,8 +123,6 @@ export async function editarClase(_previo: Estado, formData: FormData): Promise<
   const admin = createAdminClient();
   const { data: actual } = await admin.from("sesiones_clase").select("empieza_en, tipo_id").eq("id", id).maybeSingle();
   if (!actual) return { error: "No se ha encontrado la clase." };
-  const mismaHora = new Date(actual.empieza_en as string).getTime() === inicio.getTime();
-  if (!mismaHora && inicio.getTime() <= Date.now()) return { error: "La nueva hora tiene que ser en el futuro." };
 
   const { count: apuntadas } = await admin
     .from("reservas")
