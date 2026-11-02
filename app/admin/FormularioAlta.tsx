@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { altaAlumno, type Estado } from "./acciones";
 import EnlaceCopiable from "./EnlaceCopiable";
 import styles from "./admin.module.css";
+import AyudaI from "./comunes/AyudaI";
 
 const SERVICIOS = [
   { valor: "grupal", etiqueta: "Clases grupales" },
@@ -18,11 +19,11 @@ export default function FormularioAlta() {
     <form action={accion} className={styles.tarjeta}>
       <h2>Dar de alta a un/a alumno/a</h2>
       <div className={styles.campo}>
-        <label htmlFor="correo-alta">Correo del/de la alumno/a</label>
+        <label htmlFor="correo-alta">Correo del/de la alumno/a <AyudaI texto="El correo de la persona. Recibe un correo para entrar a la app." /></label>
         <input id="correo-alta" name="correo" type="email" required />
       </div>
       <fieldset className={styles.grupo}>
-        <legend>Servicios</legend>
+        <legend>Servicios <AyudaI texto="Qué servicios puede ver y usar: clases grupales, entrenamiento individual o entrenamiento online." /></legend>
         {SERVICIOS.map((s) => (
           <label key={s.valor} className={styles.casilla}>
             <input type="checkbox" name="servicios" value={s.valor} />

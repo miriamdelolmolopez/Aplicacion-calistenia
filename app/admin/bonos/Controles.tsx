@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { euros } from "@/lib/formato";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import {
   ajustarBono,
   anularBono,
@@ -75,7 +76,7 @@ export function FormularioRegistrar({
       ) : (
         <>
           <div className={styles.campo}>
-            <label htmlFor="persona">Alumno/a</label>
+            <label htmlFor="persona">Alumno/a <AyudaI texto="La persona que paga." /></label>
             <select id="persona" name="persona" required defaultValue="">
               <option value="" disabled>
                 Elige una persona…
@@ -88,7 +89,7 @@ export function FormularioRegistrar({
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor="tipo">Tarifa</label>
+            <label htmlFor="tipo">Tarifa <AyudaI texto="Qué tarifa contrata. Al registrar el pago, la persona recibe ese servicio." /></label>
             <select id="tipo" name="tipo" required value={tipoElegido} onChange={(e) => setTipoElegido(e.target.value)}>
               <option value="" disabled>
                 Elige una tarifa…
@@ -107,7 +108,7 @@ export function FormularioRegistrar({
           )}
           {descuentos.length > 0 && (
             <div className={styles.campo}>
-              <label htmlFor="descuento">Descuento (opcional)</label>
+              <label htmlFor="descuento">Descuento (opcional) <AyudaI texto="Rebaja el importe con uno de los descuentos que tienes creados." /></label>
               <select
                 id="descuento"
                 name="descuento"
@@ -129,7 +130,7 @@ export function FormularioRegistrar({
             </p>
           )}
           <div className={styles.campo}>
-            <label htmlFor="metodo">¿Cómo paga?</label>
+            <label htmlFor="metodo">¿Cómo paga? <AyudaI texto="La forma de pago. Las opciones salen de «Formas de pago»." /></label>
             <select id="metodo" name="metodo" defaultValue={formas[0]?.clave}>
               {formas.map((f) => (
                 <option key={f.clave} value={f.clave}>
@@ -139,15 +140,15 @@ export function FormularioRegistrar({
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor="fecha">Día del pago</label>
+            <label htmlFor="fecha">Día del pago <AyudaI texto="El día en que pagó. No puede ser futuro." /></label>
             <input id="fecha" name="fecha" type="date" defaultValue={hoy} max={hoy} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor="hora">Hora del pago</label>
+            <label htmlFor="hora">Hora del pago <AyudaI texto="La hora a la que pagó." /></label>
             <input id="hora" name="hora" type="time" defaultValue={ahora} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor="nota">Nota (opcional)</label>
+            <label htmlFor="nota">Nota (opcional) <AyudaI texto="Un apunte sobre este pago, si quieres dejarlo anotado." /></label>
             <input id="nota" name="nota" maxLength={200} />
           </div>
           <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -207,15 +208,15 @@ export function EditorBono({ bonoId, anulado, sinAnular = false }: { bonoId: str
           cambia.
         </p>
         <div className={styles.campo}>
-          <label htmlFor={`cl-${bonoId}`}>Clases (+ o −)</label>
+          <label htmlFor={`cl-${bonoId}`}>Clases (+ o −) <AyudaI texto="Cuántas clases sumar (número positivo) o quitar (negativo) al bono. Con 0 no cambia." /></label>
           <input id={`cl-${bonoId}`} name="clases" type="number" step={1} defaultValue={0} />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`di-${bonoId}`}>Días de caducidad (+ o −)</label>
+          <label htmlFor={`di-${bonoId}`}>Días de caducidad (+ o −) <AyudaI texto="Cuántos días alargar (positivo) o acortar (negativo) la caducidad del bono. Con 0 no cambia." /></label>
           <input id={`di-${bonoId}`} name="dias" type="number" step={1} defaultValue={0} />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`no-${bonoId}`}>Motivo (opcional)</label>
+          <label htmlFor={`no-${bonoId}`}>Motivo (opcional) <AyudaI texto="Por qué haces el ajuste. Se guarda en el historial del bono." /></label>
           <input id={`no-${bonoId}`} name="nota" maxLength={200} />
         </div>
         <button className={styles.boton} type="submit" disabled={pendienteAjuste}>
@@ -227,7 +228,7 @@ export function EditorBono({ bonoId, anulado, sinAnular = false }: { bonoId: str
       <form action={accionAnular} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <div className={styles.campo}>
-          <label htmlFor={`an-${bonoId}`}>Motivo (opcional)</label>
+          <label htmlFor={`an-${bonoId}`}>Motivo (opcional) <AyudaI texto="Por qué quitas la tarifa. Se guarda en el historial del bono." /></label>
           <input id={`an-${bonoId}`} name="nota" maxLength={200} />
         </div>
         <button
@@ -255,7 +256,7 @@ export function FormularioPrecio({
       <input type="hidden" name="tipoId" value={tipo.id} />
       <strong className={styles.nombreTipo}>{tipo.nombre}</strong>
       <div className={styles.campo}>
-        <label htmlFor={`pr-${tipo.id}`}>Precio (€)</label>
+        <label htmlFor={`pr-${tipo.id}`}>Precio (€) <AyudaI texto="El precio de la tarifa, con el IVA incluido." /></label>
         <input
           id={`pr-${tipo.id}`}
           name="precio"

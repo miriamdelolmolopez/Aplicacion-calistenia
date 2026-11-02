@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { crearRutina } from "../rutinas/acciones";
 
 // Crea una plantilla (una rutina sin alumno), en blanco o copiando otra plantilla, y abre su editor.
@@ -19,11 +20,11 @@ export default function NuevaPlantillaOnline({ plantillas }: { plantillas: { id:
     <form action={accion} className={styles.tarjeta}>
       <input type="hidden" name="alumno" value="plantilla" />
       <div className={styles.campo}>
-        <label htmlFor="npo-nombre">Nombre de la plantilla</label>
+        <label htmlFor="npo-nombre">Nombre de la plantilla <AyudaI texto="Cómo llamas a esta plantilla, por ejemplo «Fuerza 4 semanas». Es un modelo para copiar." /></label>
         <input id="npo-nombre" name="nombre" required maxLength={80} placeholder="Fuerza 4 semanas" />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="npo-desde">Empezar desde (opcional)</label>
+        <label htmlFor="npo-desde">Empezar desde (opcional) <AyudaI texto="Copia otra plantilla para no empezar de cero. Luego la editas sin cambiar la original." /></label>
         <select id="npo-desde" name="desde" defaultValue="">
           <option value="">Plantilla en blanco</option>
           {plantillas.map((p) => (

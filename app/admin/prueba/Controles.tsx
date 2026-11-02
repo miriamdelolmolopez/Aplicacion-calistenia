@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { cambiarActivo, crearLink, nuevoCodigo } from "./acciones";
 import estilos from "./prueba.module.css";
 
@@ -39,7 +40,7 @@ export default function ControlesLink({ link, activo }: { link: string | null; a
       ) : (
         <>
           <div className={styles.campo}>
-            <label htmlFor="link-prueba">Link para compartir</label>
+            <label htmlFor="link-prueba">Link para compartir <AyudaI texto="La dirección que le pasas a quien quiere probar una clase gratis. Al entrar se crea su cuenta de invitado/a." /></label>
             <input id="link-prueba" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
           </div>
           <div className={estilos.botones}>
@@ -53,7 +54,7 @@ export default function ControlesLink({ link, activo }: { link: string | null; a
 
           <label className={styles.casilla}>
             <input type="checkbox" checked={activo} disabled={pendiente} onChange={(e) => ejecutar(() => cambiarActivo(e.target.checked))} />
-            Link activado (si lo apagas, nadie puede usarlo)
+            Link activado <AyudaI texto="Si lo apagas, nadie puede usar el link para apuntarse a una clase de prueba. Puedes volver a activarlo cuando quieras." />
           </label>
 
           <button

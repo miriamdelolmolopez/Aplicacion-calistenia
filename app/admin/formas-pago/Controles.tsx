@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { useEnvio } from "../useEnvio";
 import { guardarFormaPago } from "./acciones";
 
@@ -24,16 +25,16 @@ export function FormularioForma({ forma, alTerminar }: { forma?: Forma; alTermin
     <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {forma && <input type="hidden" name="clave" value={forma.clave} />}
       <div className={styles.campo}>
-        <label htmlFor={`fp-n-${p}`}>Nombre</label>
+        <label htmlFor={`fp-n-${p}`}>Nombre <AyudaI texto="Cómo se llama la forma de pago: efectivo, Bizum, transferencia…" /></label>
         <input id={`fp-n-${p}`} name="nombre" required maxLength={40} defaultValue={forma?.nombre ?? ""} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`fp-o-${p}`}>Orden (1 sale primero)</label>
+        <label htmlFor={`fp-o-${p}`}>Orden <AyudaI texto="En qué posición sale al cobrar. Los números más bajos salen primero." /></label>
         <input id={`fp-o-${p}`} name="orden" type="number" min={0} max={999} defaultValue={forma?.orden ?? 0} />
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="activa" defaultChecked={forma?.activa ?? true} />
-        <span>Activa (si la desmarcas, no sale al cobrar; los pagos antiguos se conservan)</span>
+        <span>Activa <AyudaI texto="Si la desmarcas, no sale como opción al cobrar. Los pagos antiguos hechos con ella se conservan." /></span>
       </label>
       <button type="submit" className={styles.boton} disabled={pendiente}>
         {pendiente ? "Guardando…" : forma ? "Guardar" : "Crear"}

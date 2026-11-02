@@ -5,6 +5,7 @@ import MapaCorporal from "../../MapaCorporal";
 import MultiDesplegable from "../MultiDesplegable";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import {
   CATEGORIAS,
   MUSCULOS,
@@ -93,7 +94,7 @@ export function FormularioEjercicio({
       {ejercicio && <input type="hidden" name="id" value={ejercicio.id} />}
 
       <div className={styles.campo}>
-        <label htmlFor={`nombre-${p}`}>Nombre</label>
+        <label htmlFor={`nombre-${p}`}>Nombre <AyudaI texto="Cómo se llama el ejercicio. Es lo que ven los/las alumnos/as en su rutina." /></label>
         <input
           id={`nombre-${p}`}
           name="nombre"
@@ -103,7 +104,7 @@ export function FormularioEjercicio({
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`nombre_en-${p}`}>Nombre en inglés (opcional)</label>
+        <label htmlFor={`nombre_en-${p}`}>Nombre en inglés (opcional) <AyudaI texto="El nombre para quien usa la app en inglés. Si lo dejas vacío, se ve el español." /></label>
         <input
           id={`nombre_en-${p}`}
           name="nombre_en"
@@ -113,7 +114,7 @@ export function FormularioEjercicio({
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor={`categoria-${p}`}>Categoría</label>
+        <label htmlFor={`categoria-${p}`}>Categoría <AyudaI texto="El grupo al que pertenece el ejercicio. Sirve para buscarlo y filtrar la biblioteca." /></label>
         <select id={`categoria-${p}`} name="categoria" defaultValue={ejercicio?.categoria ?? "otros"}>
           {CATEGORIAS.map((c) => (
             <option key={c.valor} value={c.valor}>
@@ -123,7 +124,7 @@ export function FormularioEjercicio({
         </select>
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`tipo-${p}`}>Tipo de ejercicio</label>
+        <label htmlFor={`tipo-${p}`}>Tipo de ejercicio <AyudaI texto="Cómo se mide: por duración, por repeticiones o por repeticiones con peso añadido. Define qué se apunta al hacerlo en la rutina." /></label>
         <select id={`tipo-${p}`} name="tipo" defaultValue={ejercicio?.tipo ?? "repeticiones"}>
           {TIPOS.map((t) => (
             <option key={t.valor} value={t.valor}>
@@ -137,7 +138,7 @@ export function FormularioEjercicio({
       </div>
 
       <fieldset className={styles.grupo}>
-        <legend>Músculos que trabaja</legend>
+        <legend>Músculos que trabaja <AyudaI texto="Los músculos principales y secundarios que se trabajan. Se pintan en el mapa del cuerpo de la ficha del ejercicio." /></legend>
         <p className={styles.ayuda}>
           Elige al menos uno principal. Los principales se ven con más intensidad que los secundarios.
         </p>
@@ -168,7 +169,7 @@ export function FormularioEjercicio({
       </fieldset>
 
       <fieldset className={styles.grupo}>
-        <legend>Material</legend>
+        <legend>Material <AyudaI texto="Lo que hace falta para hacer el ejercicio, por ejemplo barra o paralelas." /></legend>
         {materiales.length === 0 && <p className={styles.ayuda}>Todavía no hay material: añade uno abajo.</p>}
         <MultiDesplegable
           titulo="Material"
@@ -181,7 +182,7 @@ export function FormularioEjercicio({
           <input key={id} type="hidden" name="materiales" value={id} />
         ))}
         <div className={styles.campo}>
-          <label htmlFor={`material-otro-${p}`}>Otro material (opcional)</label>
+          <label htmlFor={`material-otro-${p}`}>Otro material (opcional) <AyudaI texto="Si el material no está en la lista, escríbelo aquí y se añade." /></label>
           <input
             id={`material-otro-${p}`}
             name="material_nuevo"
@@ -192,7 +193,7 @@ export function FormularioEjercicio({
       </fieldset>
 
       <div className={styles.campo}>
-        <label htmlFor={`descripcion-${p}`}>Explicación</label>
+        <label htmlFor={`descripcion-${p}`}>Explicación <AyudaI texto="Los pasos para hacer bien el ejercicio. Sale en la pestaña «Pasos» de la ficha." /></label>
         <textarea
           id={`descripcion-${p}`}
           name="descripcion"
@@ -202,7 +203,7 @@ export function FormularioEjercicio({
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`descripcion_en-${p}`}>Explicación en inglés (opcional)</label>
+        <label htmlFor={`descripcion_en-${p}`}>Explicación en inglés (opcional) <AyudaI texto="La explicación para quien usa la app en inglés. Si la dejas vacía, se ve la de español." /></label>
         <textarea
           id={`descripcion_en-${p}`}
           name="descripcion_en"
@@ -213,7 +214,7 @@ export function FormularioEjercicio({
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor={`dificultad-${p}`}>Dificultad</label>
+        <label htmlFor={`dificultad-${p}`}>Dificultad <AyudaI texto="Lo difícil que es el ejercicio. Se muestra en la ficha con una barra." /></label>
         <select id={`dificultad-${p}`} name="dificultad" defaultValue={ejercicio?.dificultad ?? ""}>
           <option value="">Sin indicar</option>
           {DIFICULTADES.map((d) => (
@@ -225,7 +226,7 @@ export function FormularioEjercicio({
       </div>
 
       <fieldset className={styles.grupo}>
-        <legend>Qué trabaja (de 0 a 100)</legend>
+        <legend>Qué trabaja (de 0 a 100) <AyudaI texto="Cuánto trabaja cada cualidad (fuerza, equilibrio, movilidad…), de 0 a 100. Sale en la pestaña «Trabajo» de la ficha." /></legend>
         <div className={styles.camposItem}>
           {TRABAJOS.map((t) => (
             <div key={t.clave} className={styles.campo}>
@@ -238,7 +239,7 @@ export function FormularioEjercicio({
       </fieldset>
 
       <div className={styles.campo}>
-        <label htmlFor={`video-${p}`}>Vídeo (enlace de YouTube o de Google Drive)</label>
+        <label htmlFor={`video-${p}`}>Vídeo (enlace de YouTube o de Google Drive) <AyudaI texto="Pega el enlace del vídeo del ejercicio. También puedes subir un vídeo desde el móvil o el ordenador." /></label>
         <input
           id={`video-${p}`}
           name="video_url"
@@ -254,7 +255,7 @@ export function FormularioEjercicio({
       {ejercicio && (
         <label className={styles.casilla}>
           <input type="checkbox" name="activo" defaultChecked={ejercicio.activo} />
-          Activo (si lo desmarcas, no se podrá añadir a rutinas nuevas)
+          Activo <AyudaI texto="Si lo desmarcas, no se podrá añadir a rutinas nuevas. Las rutinas que ya lo tienen se quedan como están." />
         </label>
       )}
 

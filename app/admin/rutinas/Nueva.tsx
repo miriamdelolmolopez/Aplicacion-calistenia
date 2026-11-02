@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { crearRutina } from "./acciones";
 
 export type OpcionAlumno = { id: string; texto: string };
@@ -30,11 +31,11 @@ export function NuevaRutina({
   return (
     <form action={accion} className={styles.tarjeta}>
       <div className={styles.campo}>
-        <label htmlFor="nueva-nombre">Nombre</label>
+        <label htmlFor="nueva-nombre">Nombre <AyudaI texto="Cómo se llama la rutina, por ejemplo «Octubre 2026». La persona lo ve en su pantalla de rutina." /></label>
         <input id="nueva-nombre" name="nombre" required maxLength={80} placeholder="Octubre 2026" />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nueva-alumno">Para quién</label>
+        <label htmlFor="nueva-alumno">Para quién <AyudaI texto="El/la alumno/a online a quien va dirigida esta rutina." /></label>
         <select id="nueva-alumno" name="alumno" required defaultValue="">
           <option value="" disabled>
             Elige…
@@ -47,7 +48,7 @@ export function NuevaRutina({
         </select>
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nueva-desde">Empezar desde (opcional)</label>
+        <label htmlFor="nueva-desde">Empezar desde (opcional) <AyudaI texto="Copia las sesiones y ejercicios de una plantilla o de otra rutina para no empezar de cero. Luego la editas sin cambiar la original." /></label>
         <select id="nueva-desde" name="desde" defaultValue="">
           <option value="">Rutina en blanco</option>
           {rutinasBase.map((r) => (

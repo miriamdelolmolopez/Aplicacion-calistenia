@@ -11,7 +11,7 @@ export default function AyudaI({ texto }: { texto: string }) {
     e.stopPropagation();
   };
   return (
-    <span style={{ position: "relative", display: "inline-block", marginLeft: 6, verticalAlign: "middle" }}>
+    <span style={{ position: "relative", display: "inline-block", marginLeft: 6, verticalAlign: "middle", lineHeight: 1 }}>
       <button
         type="button"
         aria-label="¿Qué hace esta opción?"
@@ -20,9 +20,11 @@ export default function AyudaI({ texto }: { texto: string }) {
           quieto(e);
           setAbierta((a) => !a);
         }}
-        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, padding: 0, font: "inherit", fontSize: "0.8rem", fontWeight: 700, color: "var(--acento-oscuro)", background: "transparent", border: "1.5px solid var(--acento)", borderRadius: "50%", cursor: "pointer" }}
+        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, margin: "-8px", padding: 0, background: "transparent", border: 0, cursor: "pointer" }}
       >
-        i
+        <span aria-hidden="true" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, font: "inherit", fontSize: "0.65rem", fontWeight: 700, lineHeight: 1, color: "#8a8d93", border: "1.5px solid #b5b8bd", borderRadius: "50%" }}>
+          i
+        </span>
       </button>
       {abierta && (
         <span

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import comunes from "../comunes/comunes.module.css";
 import PanelCompleto from "../comunes/PanelCompleto";
 import EnlaceCopiable from "../EnlaceCopiable";
@@ -42,12 +43,12 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
         <PanelCompleto titulo="Nuevo usuario" cerrar={() => setAbierto(false)}>
         <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
           <div className={styles.campo}>
-            <label htmlFor="nu-correo">Correo</label>
+            <label htmlFor="nu-correo">Correo <AyudaI texto="El correo de la persona. Con él entra a la app y le llegan los avisos." /></label>
             <input id="nu-correo" name="correo" type="email" required />
           </div>
 
           <fieldset className={styles.grupo}>
-            <legend>Tipo de usuario</legend>
+            <legend>Tipo de usuario <AyudaI texto="Alumno/a: ya entrena contigo y puede tener servicios y tarifa. Invitado/a: recibe un correo para crear su cuenta y hacer su clase de prueba." /></legend>
             <label className={styles.casilla}>
               <input type="radio" name="tipo" value="alumno" checked={tipo === "alumno"} onChange={() => setTipo("alumno")} />
               Alumno/a (ya entrena contigo)
@@ -61,7 +62,7 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
           {tipo === "alumno" && (
             <>
               <fieldset className={styles.grupo}>
-                <legend>Servicios que contrata</legend>
+                <legend>Servicios que contrata <AyudaI texto="Qué servicios puede ver y usar: clases grupales, entrenamiento individual o entrenamiento online." /></legend>
                 {SERVICIOS.map((s) => (
                   <label key={s.valor} className={styles.casilla}>
                     <input type="checkbox" name="servicios" value={s.valor} />
@@ -71,7 +72,7 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
               </fieldset>
 
               <div className={styles.campo}>
-                <label htmlFor="nu-tarifa">Tarifa o bono (opcional)</label>
+                <label htmlFor="nu-tarifa">Tarifa o bono (opcional) <AyudaI texto="Si eliges una, la persona ya la tiene asignada desde el primer día y puede reservar. Si no, la asignas más tarde." /></label>
                 <select id="nu-tarifa" name="tarifa" value={tarifa} onChange={(e) => setTarifa(e.target.value)}>
                   <option value="">Sin bono por ahora</option>
                   {tarifas.map((t) => (
@@ -88,7 +89,7 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
               {tarifa && (
                 <>
                   <fieldset className={styles.grupo}>
-                    <legend>Pago</legend>
+                    <legend>Pago <AyudaI texto="Pagado ahora: el pago queda registrado como cobrado. Pagará luego: queda pendiente de cobrar y lo cobras después desde su ficha." /></legend>
                     <label className={styles.casilla}>
                       <input type="radio" name="pago" value="ahora" defaultChecked />
                       Pagado ahora
@@ -99,12 +100,12 @@ export default function NuevoUsuario({ tarifas, formas, abiertoInicial = false }
                     </label>
                   </fieldset>
                   <div className={styles.campo}>
-                    <label htmlFor="nu-inicio">¿Ya lo tenía empezado? Fecha en que empezó (opcional)</label>
+                    <label htmlFor="nu-inicio">¿Ya lo tenía empezado? Fecha en que empezó (opcional) <AyudaI texto="Si la persona ya venía antes de usar la app, pon el día en que empezó su tarifa. Si lo dejas vacío, empieza hoy." /></label>
                     <input id="nu-inicio" name="inicio" type="date" max={new Date().toISOString().slice(0, 10)} />
                     <span className={styles.ayuda}>Si la dejas vacía, empieza a contar hoy. Después podrás marcar en su ficha las clases que ya hizo.</span>
                   </div>
                   <div className={styles.campo}>
-                    <label htmlFor="nu-metodo">Cómo paga</label>
+                    <label htmlFor="nu-metodo">Cómo paga <AyudaI texto="La forma de pago de este primer pago. Las opciones salen de «Formas de pago»." /></label>
                     <select id="nu-metodo" name="metodo" defaultValue={formas.find((f) => f.clave === "bizum")?.clave ?? formas[0]?.clave}>
                       {formas.map((f) => (
                         <option key={f.clave} value={f.clave}>

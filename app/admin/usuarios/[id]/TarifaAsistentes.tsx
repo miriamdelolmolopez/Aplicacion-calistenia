@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import type { Estado } from "../../acciones";
 import styles from "../../admin.module.css";
+import AyudaI from "../../comunes/AyudaI";
 import PanelCompleto from "../../comunes/PanelCompleto";
 import { sumarDias } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
@@ -131,7 +132,7 @@ function FormularioCambiar({ userId, bono, tarifas, cerrar }: { userId: string; 
             {conFechas && bono.desde ? ` · ${dia(bono.desde)} – ${dia(bono.hasta)}` : ""}
           </p>
           <div className={styles.campo}>
-            <label htmlFor="as-tarifa">¿Qué tarifa tiene que tener?</label>
+            <label htmlFor="as-tarifa">¿Qué tarifa tiene que tener? <AyudaI texto="La tarifa que pasará a tener la persona en lugar de la actual." /></label>
             <select id="as-tarifa" value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={bono.combo}>
               {tarifas.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -161,13 +162,13 @@ function FormularioCambiar({ userId, bono, tarifas, cerrar }: { userId: string; 
         <>
           {(modo === "inicio" || modo === "ambas") && (
             <div className={styles.campo}>
-              <label htmlFor="as-inicio">Fecha de inicio</label>
+              <label htmlFor="as-inicio">Fecha de inicio <AyudaI texto="El día en que empieza esta tarifa. La fecha de fin se calcula con los días de validez." /></label>
               <input id="as-inicio" type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} />
             </div>
           )}
           {(modo === "fin" || modo === "ambas") && (
             <div className={styles.campo}>
-              <label htmlFor="as-fin">Fecha de fin</label>
+              <label htmlFor="as-fin">Fecha de fin <AyudaI texto="El último día de esta tarifa. La fecha de inicio se calcula con los días de validez." /></label>
               <input id="as-fin" type="date" value={fin} onChange={(e) => setFin(e.target.value)} />
             </div>
           )}
@@ -207,7 +208,7 @@ function FormularioCambiar({ userId, bono, tarifas, cerrar }: { userId: string; 
             )}
           </div>
           <div className={styles.campo}>
-            <label htmlFor="as-nota">Motivo (opcional)</label>
+            <label htmlFor="as-nota">Motivo (opcional) <AyudaI texto="Por qué haces el cambio. Se guarda en el historial." /></label>
             <input id="as-nota" name="nota" maxLength={200} />
           </div>
         </>
@@ -351,7 +352,7 @@ function FormularioQuitar({ userId, bono, cerrar }: { userId: string; bono: Bono
             </div>
           </div>
           <div className={styles.campo}>
-            <label htmlFor="qt-nota">Motivo (opcional)</label>
+            <label htmlFor="qt-nota">Motivo (opcional) <AyudaI texto="Por qué quitas la tarifa. Se guarda en el historial." /></label>
             <input id="qt-nota" name="nota" maxLength={200} />
           </div>
         </>

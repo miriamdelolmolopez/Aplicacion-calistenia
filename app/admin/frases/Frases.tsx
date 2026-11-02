@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import PanelFiltros from "../../PanelFiltros";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import AccionesFila from "../comunes/AccionesFila";
 import Buscador from "../comunes/Buscador";
 import comunes from "../comunes/comunes.module.css";
@@ -36,16 +37,16 @@ function FormularioFrase({ frase, alTerminar }: { frase?: Frase; alTerminar: () 
     <form onSubmit={guardar} className={styles.tarjeta}>
       <input type="hidden" name="id" value={frase?.id ?? ""} />
       <div className={styles.campo}>
-        <label htmlFor={`es-${p}`}>Frase en español</label>
+        <label htmlFor={`es-${p}`}>Frase en español <AyudaI texto="La frase que sale en el banner de Inicio para quien usa la app en español." /></label>
         <input id={`es-${p}`} name="texto_es" maxLength={140} defaultValue={frase?.texto_es} required />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`en-${p}`}>Frase en inglés</label>
+        <label htmlFor={`en-${p}`}>Frase en inglés <AyudaI texto="La misma frase para quien usa la app en inglés." /></label>
         <input id={`en-${p}`} name="texto_en" maxLength={140} defaultValue={frase?.texto_en} required />
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="activa" defaultChecked={frase?.activa ?? true} />
-        <span>Activa (sale al azar en Inicio)</span>
+        <span>Activa <AyudaI texto="Si está activa, puede salir al azar en el banner de Inicio. Si la desmarcas, no sale pero se conserva." /></span>
       </label>
       <button type="submit" className={styles.boton} disabled={pendiente}>
         {pendiente ? "Guardando…" : frase ? "Guardar cambios" : "Añadir frase"}

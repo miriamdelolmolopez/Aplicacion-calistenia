@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import CalendarioMes from "../CalendarioMes";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { useEnvio } from "../useEnvio";
 import { anadirClaseSuelta, aplicarPlantillaDias, cambiarHoraClase } from "./acciones";
 
@@ -37,7 +38,7 @@ export function AnadirClase({ fecha, tipos }: { fecha: string; tipos: TipoOpcion
       <form ref={ref} onSubmit={alEnviar} className={styles.formularioInterno}>
         <input type="hidden" name="fecha" value={fecha} />
         <div className={styles.campo}>
-          <label htmlFor={`ac-t-${fecha}`}>Tipo de clase</label>
+          <label htmlFor={`ac-t-${fecha}`}>Tipo de clase <AyudaI texto="Qué clase es. De aquí salen su duración, color y reglas de reserva." /></label>
           <select id={`ac-t-${fecha}`} name="tipoId" required defaultValue="">
             <option value="" disabled>
               Elige…
@@ -50,11 +51,11 @@ export function AnadirClase({ fecha, tipos }: { fecha: string; tipos: TipoOpcion
           </select>
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`ac-h-${fecha}`}>Hora</label>
+          <label htmlFor={`ac-h-${fecha}`}>Hora <AyudaI texto="La hora a la que empieza la clase." /></label>
           <input id={`ac-h-${fecha}`} name="hora" type="time" required />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`ac-p-${fecha}`}>Plazas (vacío = las del tipo)</label>
+          <label htmlFor={`ac-p-${fecha}`}>Plazas <AyudaI texto="Cuántas personas caben en esta clase. Si lo dejas vacío, se usan las plazas del tipo de clase." /></label>
           <input id={`ac-p-${fecha}`} name="plazas" type="number" min={1} max={100} />
         </div>
         <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -77,11 +78,11 @@ export function CambiarHora({ id, fecha, hora }: { id: string; fecha: string; ho
         <input type="hidden" name="sesionId" value={id} />
         <p className={styles.ayuda}>Las personas apuntadas verán la clase en su nueva hora.</p>
         <div className={styles.campo}>
-          <label htmlFor={`ch-f-${id}`}>Día</label>
+          <label htmlFor={`ch-f-${id}`}>Día <AyudaI texto="El nuevo día de la clase." /></label>
           <input id={`ch-f-${id}`} name="fecha" type="date" required defaultValue={fecha} />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`ch-h-${id}`}>Hora</label>
+          <label htmlFor={`ch-h-${id}`}>Hora <AyudaI texto="La nueva hora de la clase." /></label>
           <input id={`ch-h-${id}`} name="hora" type="time" required defaultValue={hora} />
         </div>
         <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -148,7 +149,7 @@ export function AplicarPlantilla({
           crean las clases que falten: las que ya existen y sus reservas no se tocan.
         </p>
         <div className={styles.campo}>
-          <label htmlFor="ap-plantilla">Plantilla</label>
+          <label htmlFor="ap-plantilla">Plantilla <AyudaI texto="El horario semanal que quieres copiar a los días que marques en el calendario." /></label>
           <select id="ap-plantilla" name="plantilla" required defaultValue={plantillas.find((p) => p.principal)?.id ?? ""}>
             <option value="" disabled>
               Elige…

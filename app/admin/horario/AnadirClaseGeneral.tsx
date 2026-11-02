@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { useEnvio } from "../useEnvio";
 import { anadirClaseSuelta } from "./acciones";
 import estilos from "./horario.module.css";
@@ -31,7 +32,7 @@ export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; ti
             <h2>Añadir clase</h2>
             <form ref={ref} onSubmit={alEnviar} className={styles.formularioInterno}>
               <div className={styles.campo}>
-                <label htmlFor="ag-t">Tipo de clase</label>
+                <label htmlFor="ag-t">Tipo de clase <AyudaI texto="Qué clase es. De aquí salen su duración, color y reglas de reserva." /></label>
                 <select id="ag-t" name="tipoId" required defaultValue="">
                   <option value="" disabled>
                     Elige…
@@ -44,19 +45,19 @@ export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; ti
                 </select>
               </div>
               <div className={styles.campo}>
-                <label htmlFor="ag-f">Día</label>
+                <label htmlFor="ag-f">Día <AyudaI texto="El día en que se da la clase." /></label>
                 <input id="ag-f" name="fecha" type="date" required defaultValue={fecha} />
               </div>
               <div className={styles.campo}>
-                <label htmlFor="ag-h">Hora</label>
+                <label htmlFor="ag-h">Hora <AyudaI texto="La hora a la que empieza." /></label>
                 <input id="ag-h" name="hora" type="time" required />
               </div>
               <div className={styles.campo}>
-                <label htmlFor="ag-p">Plazas (vacío = las del tipo)</label>
+                <label htmlFor="ag-p">Plazas <AyudaI texto="Cuántas personas caben en esta clase. Si lo dejas vacío, se usan las plazas del tipo de clase." /></label>
                 <input id="ag-p" name="plazas" type="number" min={1} max={100} />
               </div>
               <div className={styles.campo}>
-                <label htmlFor="ag-i">Plazas para invitados/as (vacío = las del tipo)</label>
+                <label htmlFor="ag-i">Plazas para invitados/as <AyudaI texto="De las plazas totales, cuántas se reservan para personas que vienen a su clase de prueba gratuita. Vacío = las del tipo de clase." /></label>
                 <input id="ag-i" name="plazas_prueba" type="number" min={0} max={100} />
               </div>
               <button className={styles.boton} type="submit" disabled={pendiente}>

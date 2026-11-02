@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { useEnvio } from "../useEnvio";
 import { guardarAutomatizacion } from "./acciones";
 import estilos from "./automatizaciones.module.css";
@@ -59,12 +60,12 @@ export function FormularioAutomatizacion({ auto, info, envios, previa }: { auto:
       </dl>
       <label className={styles.casilla}>
         <input type="checkbox" name="activa" defaultChecked={auto.activa} />
-        <span>Activada</span>
+        <span>Activada <AyudaI texto="Si la desactivas, deja de enviarse este correo automático. Puedes volver a activarla cuando quieras." /></span>
       </label>
 
       {(auto.clave === "bono_caduca" || info.diasEtiqueta) && (
         <div className={styles.campo}>
-          <label htmlFor={`a-d-${p}`}>{info.diasEtiqueta ?? "Días de antelación (avisa cuando al bono le quedan estos días o menos)"}</label>
+          <label htmlFor={`a-d-${p}`}>{info.diasEtiqueta ?? "Días de antelación (avisa cuando al bono le quedan estos días o menos)"} <AyudaI texto="Con cuántos días de antelación se manda el aviso. Es el número que ves en la etiqueta." /></label>
           <input id={`a-d-${p}`} name="dias" type="number" min={1} max={60} required defaultValue={auto.dias} />
         </div>
       )}
@@ -75,19 +76,19 @@ export function FormularioAutomatizacion({ auto, info, envios, previa }: { auto:
           Puedes poner estas palabras entre llaves y se sustituyen solas: {info.variables}. Una línea en blanco separa párrafos.
         </p>
         <div className={styles.campo}>
-          <label htmlFor={`a-ae-${p}`}>Asunto (español)</label>
+          <label htmlFor={`a-ae-${p}`}>Asunto (español) <AyudaI texto="El título del correo, lo primero que ve la persona en su bandeja." /></label>
           <input id={`a-ae-${p}`} name="asunto_es" required maxLength={150} defaultValue={auto.asunto_es} />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`a-me-${p}`}>Mensaje (español)</label>
+          <label htmlFor={`a-me-${p}`}>Mensaje (español) <AyudaI texto="El texto del correo para quien usa la app en español." /></label>
           <textarea id={`a-me-${p}`} name="mensaje_es" required rows={6} maxLength={3000} defaultValue={auto.mensaje_es} />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`a-an-${p}`}>Asunto (inglés)</label>
+          <label htmlFor={`a-an-${p}`}>Asunto (inglés) <AyudaI texto="El título del correo para quien usa la app en inglés." /></label>
           <input id={`a-an-${p}`} name="asunto_en" required maxLength={150} defaultValue={auto.asunto_en} />
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`a-mn-${p}`}>Mensaje (inglés)</label>
+          <label htmlFor={`a-mn-${p}`}>Mensaje (inglés) <AyudaI texto="El texto del correo para quien usa la app en inglés." /></label>
           <textarea id={`a-mn-${p}`} name="mensaje_en" required rows={6} maxLength={3000} defaultValue={auto.mensaje_en} />
         </div>
       </details>

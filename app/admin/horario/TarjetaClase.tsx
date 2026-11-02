@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { useEnvio } from "../useEnvio";
 import { editarClase, eliminarClase } from "./acciones";
 import estilos from "./horario.module.css";
@@ -43,30 +44,30 @@ function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
           <input type="hidden" name="sesionId" value={c.id} />
           <input type="hidden" name="tipoId" value={c.tipoId} />
           <div className={styles.campo}>
-            <label htmlFor={`e-f-${c.id}`}>Día</label>
+            <label htmlFor={`e-f-${c.id}`}>Día <AyudaI texto="El día en que se da la clase." /></label>
             <input id={`e-f-${c.id}`} name="fecha" type="date" required defaultValue={c.fecha} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`e-h-${c.id}`}>Hora</label>
+            <label htmlFor={`e-h-${c.id}`}>Hora <AyudaI texto="La hora a la que empieza." /></label>
             <input id={`e-h-${c.id}`} name="hora" type="time" required defaultValue={c.hora} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`e-p-${c.id}`}>Plazas en total</label>
+            <label htmlFor={`e-p-${c.id}`}>Plazas en total <AyudaI texto="Cuántas personas caben en esta clase, contando las de prueba." /></label>
             <input id={`e-p-${c.id}`} name="plazas" type="number" min={1} max={100} required defaultValue={c.plazas} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`e-i-${c.id}`}>De ellas, plazas para invitados/as (clase de prueba)</label>
+            <label htmlFor={`e-i-${c.id}`}>De ellas, plazas para invitados/as (clase de prueba) <AyudaI texto="Cuántas de las plazas totales se reservan para personas que vienen a su clase de prueba gratuita." /></label>
             <input id={`e-i-${c.id}`} name="plazas_prueba" type="number" min={0} max={100} defaultValue={c.plazasPrueba} />
           </div>
           <p className={styles.ayuda}>
             Estas dos reglas son de todas las clases «{c.nombre}», no solo de esta. Vacío = la regla general.
           </p>
           <div className={styles.campo}>
-            <label htmlFor={`e-c-${c.id}`}>Horas antes para poder cancelar (general: {c.horasPropias === null ? c.horasCancelar : "—"})</label>
+            <label htmlFor={`e-c-${c.id}`}>Horas antes para poder cancelar (general: {c.horasPropias === null ? c.horasCancelar : "—"}) <AyudaI texto="Con cuántas horas de antelación se puede cancelar sin perder la clase. Si lo dejas como está, vale el ajuste general." /></label>
             <input id={`e-c-${c.id}`} name="cancelacion_horas" type="number" min={0} max={168} defaultValue={c.horasPropias ?? ""} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`e-d-${c.id}`}>Días de preinscripción (general: {c.diasPropios === null ? c.diasPreinscripcion : "—"})</label>
+            <label htmlFor={`e-d-${c.id}`}>Días de preinscripción (general: {c.diasPropios === null ? c.diasPreinscripcion : "—"}) <AyudaI texto="Con cuántos días de antelación se puede reservar esta clase. Si lo dejas como está, vale el ajuste general." /></label>
             <input id={`e-d-${c.id}`} name="reserva_dias_max" type="number" min={1} max={365} defaultValue={c.diasPropios ?? ""} />
           </div>
           <button className={styles.boton} type="submit" disabled={pendiente}>

@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import estilos from "./tarifas.module.css";
 import { useEnvio } from "../useEnvio";
 import { guardarTipoBono } from "./acciones";
@@ -60,20 +61,20 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
       {tarifa && <input type="hidden" name="id" value={tarifa.id} />}
 
       <div className={styles.campo}>
-        <label htmlFor={`tf-n-${p}`}>Nombre</label>
+        <label htmlFor={`tf-n-${p}`}>Nombre <AyudaI texto="Cómo se llama el servicio o tarifa. Es lo que ves al cobrar y lo que ve la persona." /></label>
         <input id={`tf-n-${p}`} name="nombre" required maxLength={80} defaultValue={tarifa?.nombre ?? ""} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`tf-o-${p}`}>Orden de aparición (1 sale primero)</label>
+        <label htmlFor={`tf-o-${p}`}>Orden de aparición <AyudaI texto="Para decidir cuál sale antes en las listas. Los números más bajos salen primero (1 sale el primero)." /></label>
         <input id={`tf-o-${p}`} name="orden" type="number" min={0} max={9999} defaultValue={tarifa?.orden ?? 0} />
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="activo" defaultChecked={tarifa?.activo ?? true} />
-        <span>Activa (si la desmarcas, no se puede dar de alta a nadie con ella)</span>
+        <span>Activa <AyudaI texto="Si la desmarcas, no se puede dar de alta a nadie con ella. Lo que ya se ha vendido se mantiene." /></span>
       </label>
 
       <div className={styles.campo}>
-        <label htmlFor={`tf-p-${p}`}>Precio (€, IVA incluido)</label>
+        <label htmlFor={`tf-p-${p}`}>Precio (€, IVA incluido) <AyudaI texto="Lo que paga la persona, con el IVA ya sumado. Por ejemplo 55 o 55,50." /></label>
         <input
           id={`tf-p-${p}`}
           name="precio"
@@ -83,7 +84,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`tf-i-${p}`}>Tipo de IVA</label>
+        <label htmlFor={`tf-i-${p}`}>Tipo de IVA <AyudaI texto="El IVA incluido en el precio. Sirve para calcular la base y la cuota que salen en la factura." /></label>
         <select id={`tf-i-${p}`} name="iva_porcentaje" defaultValue={tarifa?.iva_porcentaje ?? 21}>
           {TIPOS_IVA.map((i) => (
             <option key={i.valor} value={i.valor}>
@@ -98,7 +99,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
       <fieldset className={styles.grupo}>
         <div className={estilos.servicioFila}>
           <div className={styles.campo}>
-            <label htmlFor={`tf-s-${p}`}>Servicio</label>
+            <label htmlFor={`tf-s-${p}`}>Servicio <AyudaI texto="Qué ofrece: clases presenciales (grupales o individuales) o entrenamiento online 1:1." /></label>
             <select id={`tf-s-${p}`} name="servicio" value={servicio} onChange={(e) => setServicio(e.target.value)}>
               {SERVICIOS.map((s) => (
                 <option key={s.valor} value={s.valor}>
@@ -108,7 +109,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`tf-v-${p}`}>Días de validez</label>
+            <label htmlFor={`tf-v-${p}`}>Días de validez <AyudaI texto="Cuántos días dura el servicio desde que empieza. 30 días = un mes, 60 = dos meses, 90 = tres meses." /></label>
             <input id={`tf-v-${p}`} name="validez_dias" type="number" min={1} max={1095} required defaultValue={tarifa?.validez_dias ?? 30} />
           </div>
         </div>
@@ -117,7 +118,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
           <input type="hidden" name="clases" value={tarifa && tarifa.servicio === "online" ? tarifa.clases : 12} />
         ) : (
           <div className={styles.campo}>
-            <label htmlFor={`tf-c-${p}`}>Clases que incluye</label>
+            <label htmlFor={`tf-c-${p}`}>Clases que incluye <AyudaI texto="Cuántas clases (créditos) puede reservar la persona con este servicio mientras dure." /></label>
             <input id={`tf-c-${p}`} name="clases" type="number" min={1} max={100} required defaultValue={tarifa && tarifa.servicio !== "online" ? tarifa.clases : 4} />
           </div>
         )}
@@ -128,7 +129,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
         <fieldset className={styles.grupo}>
           <div className={estilos.servicioFila}>
             <div className={styles.campo}>
-              <label htmlFor={`tf-s2-${p}`}>Servicio</label>
+              <label htmlFor={`tf-s2-${p}`}>Servicio <AyudaI texto="El segundo servicio de una tarifa combinada. Tiene que ser distinto del primero." /></label>
               <select id={`tf-s2-${p}`} name="servicio2" value={segundoValido} onChange={(e) => setServicio2(e.target.value)}>
                 {SERVICIOS.filter((s) => s.valor !== servicio).map((s) => (
                   <option key={s.valor} value={s.valor}>
@@ -138,7 +139,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
               </select>
             </div>
             <div className={styles.campo}>
-              <label htmlFor={`tf-v2-${p}`}>Días de validez</label>
+              <label htmlFor={`tf-v2-${p}`}>Días de validez <AyudaI texto="Cuántos días dura este segundo servicio. Puede ser distinto del primero." /></label>
               <input id={`tf-v2-${p}`} name="validez_dias2" type="number" min={1} max={1095} required defaultValue={tarifa?.validez_dias2 ?? tarifa?.validez_dias ?? 30} />
             </div>
           </div>
@@ -146,7 +147,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
             <input type="hidden" name="clases2" value={tarifa?.servicio2 === "online" && tarifa.clases2 ? tarifa.clases2 : 12} />
           ) : (
             <div className={styles.campo}>
-              <label htmlFor={`tf-c2-${p}`}>Clases que incluye</label>
+              <label htmlFor={`tf-c2-${p}`}>Clases que incluye <AyudaI texto="Cuántas clases (créditos) incluye este segundo servicio." /></label>
               <input id={`tf-c2-${p}`} name="clases2" type="number" min={1} max={100} required defaultValue={tarifa?.clases2 ?? 4} />
             </div>
           )}
@@ -162,7 +163,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
       {!otro && (
         <label className={styles.casilla}>
           <input type="checkbox" name="requiere_pago" defaultChecked={tarifa?.requiere_pago ?? false} />
-          <span>Solo se activa cuando se paga (si no, el/la alumno/a puede reservar aunque el pago esté pendiente)</span>
+          <span>Solo se activa cuando se paga <AyudaI texto="Si la marcas, la persona no puede usar el servicio hasta que el pago esté cobrado. Si no, puede reservar aunque el pago esté pendiente." /></span>
         </label>
       )}
 

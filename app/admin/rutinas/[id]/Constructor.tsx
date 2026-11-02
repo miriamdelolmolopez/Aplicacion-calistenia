@@ -32,6 +32,7 @@ import { FotoRutina, IconoBoton, PreviaAlumno, ResumenRutina, VentanaMusculos } 
 import { minutosEstimados } from "@/lib/duracion";
 import type { Estado } from "../../acciones";
 import styles from "../../admin.module.css";
+import AyudaI from "../../comunes/AyudaI";
 import {
   CATEGORIAS,
   TIPOS,
@@ -353,7 +354,7 @@ function CambiosSemana({
         <p className={styles.ayuda}>Elige la semana y rellena solo lo que cambia: lo que dejes vacío se queda como en la rutina. Si cambias el ejercicio, pon también sus series y repeticiones.</p>
         <div className={styles.camposItem}>
           <div className={styles.campo}>
-            <label htmlFor={`cs-semana-${item.id}`}>Semana</label>
+            <label htmlFor={`cs-semana-${item.id}`}>Semana <AyudaI texto="La semana de la rutina en la que vale este cambio. Las demás semanas no cambian." /></label>
             <select id={`cs-semana-${item.id}`} name="semana" required defaultValue="">
               <option value="" disabled>
                 Elige…
@@ -409,7 +410,7 @@ function CambiosSemana({
           </div>
         </div>
         <div className={styles.campo}>
-          <label htmlFor={`cs-no-${item.id}`}>Nota para esa semana (opcional)</label>
+          <label htmlFor={`cs-no-${item.id}`}>Nota para esa semana (opcional) <AyudaI texto="Un consejo que solo ve la persona esa semana." /></label>
           <input id={`cs-no-${item.id}`} name="nota" maxLength={300} />
         </div>
         <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -519,17 +520,17 @@ function TarjetaItem({
           <input type="hidden" name="rutina" value={rutinaId} />
           <div className={styles.camposItem}>
             <div className={styles.campo}>
-              <label htmlFor={`se-${item.id}`}>Series</label>
+              <label htmlFor={`se-${item.id}`}>Series <AyudaI texto="Cuántas veces se repite el ejercicio seguido (cada vuelta, con su descanso)." /></label>
               <input id={`se-${item.id}`} name="series" type="number" min={1} max={20} required defaultValue={item.series} />
             </div>
             {campos.includes("reps") && (
               <>
                 <div className={styles.campo}>
-                  <label htmlFor={`rm-${item.id}`}>Repeticiones</label>
+                  <label htmlFor={`rm-${item.id}`}>Repeticiones <AyudaI texto="Cuántas repeticiones en cada serie. Si pones «hasta», es un rango, por ejemplo de 8 a 12." /></label>
                   <input id={`rm-${item.id}`} name="reps_min" type="number" min={1} max={500} required defaultValue={item.reps_min ?? ""} />
                 </div>
                 <div className={styles.campo}>
-                  <label htmlFor={`rx-${item.id}`}>hasta (opcional)</label>
+                  <label htmlFor={`rx-${item.id}`}>hasta (opcional) <AyudaI texto="Para un rango de repeticiones: el número más alto. Déjalo vacío si son siempre las mismas." /></label>
                   <input id={`rx-${item.id}`} name="reps_max" type="number" min={1} max={500} defaultValue={item.reps_max ?? ""} />
                 </div>
               </>
@@ -537,30 +538,30 @@ function TarjetaItem({
             {campos.includes("segundos") && (
               <>
                 <div className={styles.campo}>
-                  <label htmlFor={`sm-${item.id}`}>Segundos{tipo?.valor === "duracion" ? "" : " (opcional)"}</label>
+                  <label htmlFor={`sm-${item.id}`}>Segundos{tipo?.valor === "duracion" ? "" : " (opcional)"} <AyudaI texto="Cuántos segundos dura cada serie, en los ejercicios que se hacen por tiempo." /></label>
                   <input id={`sm-${item.id}`} name="segundos_min" type="number" min={1} max={7200} required={tipo?.valor === "duracion"} defaultValue={item.segundos_min ?? ""} />
                 </div>
                 <div className={styles.campo}>
-                  <label htmlFor={`sx-${item.id}`}>hasta (opcional)</label>
+                  <label htmlFor={`sx-${item.id}`}>hasta (opcional) <AyudaI texto="Para un rango de tiempo: los segundos más altos. Déjalo vacío si es siempre el mismo." /></label>
                   <input id={`sx-${item.id}`} name="segundos_max" type="number" min={1} max={7200} defaultValue={item.segundos_max ?? ""} />
                 </div>
               </>
             )}
             {campos.includes("peso") && (
               <div className={styles.campo}>
-                <label htmlFor={`pe-${item.id}`}>{tipo?.peso?.es ?? "Peso (kg)"} · opcional</label>
+                <label htmlFor={`pe-${item.id}`}>{tipo?.peso?.es ?? "Peso (kg)"} · opcional <AyudaI texto="El peso que se añade al ejercicio, en kilos. Puedes dejarlo vacío." /></label>
                 <input id={`pe-${item.id}`} name="peso_kg" inputMode="decimal" defaultValue={item.peso_kg ?? ""} />
               </div>
             )}
             {campos.includes("distancia") && (
               <div className={styles.campo}>
-                <label htmlFor={`di-${item.id}`}>Distancia (m)</label>
+                <label htmlFor={`di-${item.id}`}>Distancia (m) <AyudaI texto="Cuántos metros se recorren en cada serie." /></label>
                 <input id={`di-${item.id}`} name="distancia_m" type="number" min={1} max={100000} required defaultValue={item.distancia_m ?? ""} />
               </div>
             )}
             <div className={styles.campo}>
               <label htmlFor={`de-${item.id}`}>
-                {enSuper ? "Descanso al terminar la vuelta (s)" : "Descanso (s)"}
+                {enSuper ? "Descanso al terminar la vuelta (s)" : "Descanso (s)"} <AyudaI texto="Cuántos segundos descansa la persona entre una serie y la siguiente." />
               </label>
               <input id={`de-${item.id}`} name="descanso_seg" type="number" min={0} max={900} required defaultValue={item.descanso_seg} />
               {enSuper && !esUltimoDelGrupo && (
@@ -569,7 +570,7 @@ function TarjetaItem({
             </div>
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`no-${item.id}`}>Nota para el/la alumno/a (opcional)</label>
+            <label htmlFor={`no-${item.id}`}>Nota para el/la alumno/a (opcional) <AyudaI texto="Un consejo que ve la persona junto a este ejercicio, por ejemplo «con banda de 15 kg»." /></label>
             <input id={`no-${item.id}`} name="nota" maxLength={300} placeholder="Por ejemplo: con banda de 15 kg" defaultValue={item.nota ?? ""} />
           </div>
           <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -661,7 +662,7 @@ function ExtrasSemana({
         <p className={styles.ayuda}>Añade un ejercicio que solo se hace en una semana concreta (se hace al final de la sesión).</p>
         <div className={styles.camposItem}>
           <div className={styles.campo}>
-            <label htmlFor={`ex-semana-${sesionId}`}>Semana</label>
+            <label htmlFor={`ex-semana-${sesionId}`}>Semana <AyudaI texto="La semana en la que se añade este ejercicio extra. Solo sale esa semana." /></label>
             <select id={`ex-semana-${sesionId}`} name="semana" required defaultValue="">
               <option value="" disabled>
                 Elige…
@@ -674,7 +675,7 @@ function ExtrasSemana({
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`ex-ej-${sesionId}`}>Ejercicio</label>
+            <label htmlFor={`ex-ej-${sesionId}`}>Ejercicio <AyudaI texto="El ejercicio que se añade, solo esa semana, a esta sesión." /></label>
             <select id={`ex-ej-${sesionId}`} name="ejercicio" required defaultValue="">
               <option value="" disabled>
                 Elige…
@@ -837,11 +838,11 @@ function TarjetaSesion({
       {editando && (
         <form onSubmit={guardarNombre} className={styles.formularioInterno}>
           <div className={styles.campo}>
-            <label htmlFor={`sn-${sesion.id}`}>Nombre</label>
+            <label htmlFor={`sn-${sesion.id}`}>Nombre <AyudaI texto="Cómo se llama esta sesión, por ejemplo «Día 1 · Tren superior». La persona lo ve en su rutina." /></label>
             <input id={`sn-${sesion.id}`} name="nombre" required maxLength={80} defaultValue={sesion.nombre} />
           </div>
           <div className={styles.campo}>
-            <label htmlFor={`sno-${sesion.id}`}>Nota (opcional)</label>
+            <label htmlFor={`sno-${sesion.id}`}>Nota (opcional) <AyudaI texto="Un mensaje para la persona sobre esta sesión completa." /></label>
             <input id={`sno-${sesion.id}`} name="nota" maxLength={1000} defaultValue={sesion.nota ?? ""} />
           </div>
           <div className={styles.accionesItem}>
@@ -990,12 +991,12 @@ function CabeceraRutina({
           </div>
         </div>
         <div className={styles.campo}>
-          <label htmlFor="rut-nota">Nota para el/la alumno/a (opcional)</label>
+          <label htmlFor="rut-nota">Nota para el/la alumno/a (opcional) <AyudaI texto="Un mensaje para la persona sobre toda la rutina. Lo ve al abrirla." /></label>
           <textarea id="rut-nota" name="nota" rows={3} maxLength={1000} defaultValue={rutina.nota ?? ""} />
         </div>
         <div className={styles.camposItem}>
           <div className={styles.campo}>
-            <label htmlFor="rut-semanas">Semanas que dura la rutina</label>
+            <label htmlFor="rut-semanas">Semanas que dura la rutina <AyudaI texto="Cuántas semanas dura. La primera semana es la semana en la que se publica la rutina." /></label>
             <select id="rut-semanas" name="semanas" defaultValue={rutina.semanas}>
               {Array.from({ length: 52 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
@@ -1005,7 +1006,7 @@ function CabeceraRutina({
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor="rut-entrenos">Entrenos por semana</label>
+            <label htmlFor="rut-entrenos">Entrenos por semana <AyudaI texto="Cuántos entrenos tiene que hacer la persona cada semana. Con «Los de las sesiones» se usa el número de sesiones de la rutina." /></label>
             <select id="rut-entrenos" name="entrenos_semana" defaultValue={rutina.entrenosSemana ?? ""}>
               <option value="">Los de las sesiones</option>
               {Array.from({ length: 14 }, (_, i) => (
@@ -1057,7 +1058,7 @@ function CabeceraRutina({
         <form action={accionCopia} className={styles.formularioInterno}>
           <input type="hidden" name="id" value={rutina.id} />
           <div className={styles.campo}>
-            <label htmlFor="cop-alumno">Copiar a</label>
+            <label htmlFor="cop-alumno">Copiar a <AyudaI texto="La persona o plantilla a la que se copia esta rutina. La original no cambia." /></label>
             <select id="cop-alumno" name="alumno" required defaultValue="">
               <option value="" disabled>
                 Elige…
@@ -1071,7 +1072,7 @@ function CabeceraRutina({
             </select>
           </div>
           <div className={styles.campo}>
-            <label htmlFor="cop-nombre">Nombre de la copia (opcional)</label>
+            <label htmlFor="cop-nombre">Nombre de la copia (opcional) <AyudaI texto="Cómo se llamará la copia. Es opcional." /></label>
             <input id="cop-nombre" name="nombre" maxLength={80} placeholder={`${rutina.nombre} (copia)`} />
           </div>
           <button className={`${styles.boton} ${styles.botonSecundario}`} type="submit" disabled={pendienteCopia}>

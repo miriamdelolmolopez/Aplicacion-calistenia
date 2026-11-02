@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import estiloCuadricula from "./cuadricula.module.css";
 import {
   anadirClase,
@@ -44,7 +45,7 @@ export function NuevaPlantilla({ alTerminar }: { alTerminar?: () => void } = {})
   return (
     <form action={accion} className={styles.tarjeta}>
       <div className={styles.campo}>
-        <label htmlFor="np-nombre">Nombre (por ejemplo «Verano»)</label>
+        <label htmlFor="np-nombre">Nombre <AyudaI texto="Cómo llamas a esta plantilla de horario, por ejemplo «Verano» o «Curso normal»." /></label>
         <input id="np-nombre" name="nombre" maxLength={60} required />
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -61,7 +62,7 @@ export function Renombrar({ id, nombre }: { id: string; nombre: string }) {
     <form action={accion} className={styles.formularioInterno}>
       <input type="hidden" name="id" value={id} />
       <div className={styles.campo}>
-        <label htmlFor={`rn-${id}`}>Nombre</label>
+        <label htmlFor={`rn-${id}`}>Nombre <AyudaI texto="Cómo se llama la plantilla." /></label>
         <input id={`rn-${id}`} name="nombre" maxLength={60} defaultValue={nombre} />
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -156,7 +157,7 @@ export function AnadirClase({ plantillaId, tipos }: { plantillaId: string; tipos
       <input type="hidden" name="plantillaId" value={plantillaId} />
       <strong>Añadir una clase</strong>
       <div className={styles.campo}>
-        <label htmlFor={`ac-dia-${plantillaId}`}>Día</label>
+        <label htmlFor={`ac-dia-${plantillaId}`}>Día <AyudaI texto="El día de la semana en que se da la clase." /></label>
         <select id={`ac-dia-${plantillaId}`} name="dia" defaultValue="1">
           {DIAS.map((d, i) => (
             <option key={d} value={i + 1}>
@@ -166,11 +167,11 @@ export function AnadirClase({ plantillaId, tipos }: { plantillaId: string; tipos
         </select>
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`ac-hora-${plantillaId}`}>Hora</label>
+        <label htmlFor={`ac-hora-${plantillaId}`}>Hora <AyudaI texto="La hora a la que empieza." /></label>
         <input id={`ac-hora-${plantillaId}`} name="hora" type="time" required />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`ac-tipo-${plantillaId}`}>Tipo de clase</label>
+        <label htmlFor={`ac-tipo-${plantillaId}`}>Tipo de clase <AyudaI texto="Qué clase es. De aquí salen su duración, color y reglas de reserva." /></label>
         <select id={`ac-tipo-${plantillaId}`} name="tipo">
           {tipos.map((t) => (
             <option key={t.id} value={t.id}>
@@ -180,7 +181,7 @@ export function AnadirClase({ plantillaId, tipos }: { plantillaId: string; tipos
         </select>
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`ac-pl-${plantillaId}`}>Plazas (vacío = las del tipo de clase)</label>
+        <label htmlFor={`ac-pl-${plantillaId}`}>Plazas <AyudaI texto="Cuántas personas caben en esta clase. Si lo dejas vacío, se usan las plazas del tipo de clase." /></label>
         <input id={`ac-pl-${plantillaId}`} name="plazas" type="number" min={1} max={100} />
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
@@ -202,11 +203,11 @@ export function Aplicar({ id, hoy }: { id: string; hoy: string }) {
         existen y sus reservas no se tocan. Los/las alumnos/as verán las clases en cuanto las publiques.
       </p>
       <div className={styles.campo}>
-        <label htmlFor={`ap-d-${id}`}>Desde el día</label>
+        <label htmlFor={`ap-d-${id}`}>Desde el día <AyudaI texto="El primer día en el que se crean las clases de esta plantilla. Cuenta ese día." /></label>
         <input id={`ap-d-${id}`} name="desde" type="date" defaultValue={hoy} required />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`ap-h-${id}`}>Hasta el día</label>
+        <label htmlFor={`ap-h-${id}`}>Hasta el día <AyudaI texto="El último día en el que se crean clases. Cuenta ese día." /></label>
         <input id={`ap-h-${id}`} name="hasta" type="date" defaultValue={hoy} required />
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>

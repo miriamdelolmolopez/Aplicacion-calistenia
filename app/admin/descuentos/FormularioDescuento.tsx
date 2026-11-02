@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import { useEnvio } from "../useEnvio";
 import { guardarDescuento } from "./acciones";
 
@@ -35,31 +36,31 @@ export default function FormularioDescuento({ descuento, alTerminar }: { descuen
     <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {descuento && <input type="hidden" name="id" value={descuento.id} />}
       <div className={styles.campo}>
-        <label htmlFor={`d-n-${p}`}>Nombre (por ejemplo «Alumnos/as de siempre»)</label>
+        <label htmlFor={`d-n-${p}`}>Nombre <AyudaI texto="Cómo lo reconoces tú al cobrar, por ejemplo «Alumnos/as de siempre»." /></label>
         <input id={`d-n-${p}`} name="nombre" maxLength={60} required defaultValue={descuento?.nombre ?? ""} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`d-t-${p}`}>Tipo</label>
+        <label htmlFor={`d-t-${p}`}>Tipo <AyudaI texto="Porcentaje: rebaja un tanto por ciento del precio. Importe fijo: rebaja una cantidad de euros." /></label>
         <select id={`d-t-${p}`} name="tipo" value={tipo} onChange={(e) => setTipo(e.target.value)}>
           <option value="porcentaje">Porcentaje (%)</option>
           <option value="euros">Importe fijo (€)</option>
         </select>
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`d-v-${p}`}>{tipo === "porcentaje" ? "Porcentaje (1 a 100)" : "Importe en euros"}</label>
+        <label htmlFor={`d-v-${p}`}>{tipo === "porcentaje" ? "Porcentaje (1 a 100)" : "Importe en euros"} <AyudaI texto="Cuánto se rebaja: un porcentaje del precio o una cantidad de euros, según el tipo elegido." /></label>
         <input id={`d-v-${p}`} name="valor" inputMode="decimal" required defaultValue={valorInicial} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`d-c-${p}`}>Caduca el (opcional)</label>
+        <label htmlFor={`d-c-${p}`}>Caduca el (opcional) <AyudaI texto="Desde ese día ya no se puede aplicar. Si lo dejas vacío, no caduca." /></label>
         <input id={`d-c-${p}`} name="caduca_en" type="date" defaultValue={descuento?.caduca_en ?? ""} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`d-u-${p}`}>Máximo de veces que se puede usar (opcional)</label>
+        <label htmlFor={`d-u-${p}`}>Máximo de veces que se puede usar (opcional) <AyudaI texto="Cuántas veces se puede aplicar en total. Al llegar a ese número deja de salir. Vacío = sin límite." /></label>
         <input id={`d-u-${p}`} name="usos_max" type="number" min={1} max={10000} defaultValue={descuento?.usos_max ?? ""} />
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="activo" defaultChecked={descuento?.activo ?? true} />
-        <span>Activo (si lo desmarcas, no se puede aplicar)</span>
+        <span>Activo <AyudaI texto="Si lo desmarcas, no se puede aplicar a ningún pago nuevo. Los pagos ya hechos no cambian." /></span>
       </label>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         {pendiente ? "Guardando…" : descuento ? "Guardar cambios" : "Crear descuento"}

@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState, useTransition } from "react";
 import PanelFiltros from "../../PanelFiltros";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import AyudaI from "../comunes/AyudaI";
 import AccionesFila from "../comunes/AccionesFila";
 import Buscador from "../comunes/Buscador";
 import comunes from "../comunes/comunes.module.css";
@@ -30,17 +31,17 @@ function FormularioMaterialCompleto({ material, alTerminar }: { material?: Mater
     <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {material && <input type="hidden" name="id" value={material.id} />}
       <div className={styles.campo}>
-        <label htmlFor={`mn-${p}`}>Nombre</label>
+        <label htmlFor={`mn-${p}`}>Nombre <AyudaI texto="Cómo se llama el material, por ejemplo «Anillas»." /></label>
         <input id={`mn-${p}`} name="nombre" required maxLength={60} defaultValue={material?.nombre ?? ""} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`me-${p}`}>Nombre en inglés (opcional)</label>
+        <label htmlFor={`me-${p}`}>Nombre en inglés (opcional) <AyudaI texto="El nombre para quien usa la app en inglés." /></label>
         <input id={`me-${p}`} name="nombre_en" maxLength={60} defaultValue={material?.nombre_en ?? ""} />
       </div>
       {material && (
         <label className={styles.casilla}>
           <input type="checkbox" name="activo" defaultChecked={material.activo} />
-          Visible al elegir material (si lo quitas, no sale en la lista, pero se conserva en los ejercicios)
+          Visible al elegir material <AyudaI texto="Si lo quitas, no sale en la lista al crear ejercicios, pero se conserva en los ejercicios que ya lo tienen." />
         </label>
       )}
       <button className={styles.boton} type="submit" disabled={pendiente}>
