@@ -39,12 +39,13 @@ const FILTROS = [
   { id: "grupal", texto: "Grupales" },
   { id: "individual", texto: "Individuales" },
   { id: "online", texto: "Online" },
+  { id: "taller", texto: "Talleres" },
   { id: "alumno", texto: "Alumnos/as" },
   { id: "invitado", texto: "Invitadas" },
   { id: "sin", texto: "Sin servicio" },
 ] as const;
 
-const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Grupal", individual: "Individual", online: "Online" };
+const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Grupal", individual: "Individual", online: "Online", taller: "Talleres" };
 
 // Días que han pasado desde una fecha (se calcula fuera de los componentes).
 function diasDesde(iso: string): number {
@@ -63,7 +64,7 @@ function nombreDe(u: Usuario): string {
 function resumen(u: Usuario): { texto: string; alerta: boolean } {
   const partes: string[] = [];
   let alerta = false;
-  const presencial = u.servicios.includes("grupal") || u.servicios.includes("individual");
+  const presencial = u.servicios.includes("grupal") || u.servicios.includes("individual") || u.servicios.includes("taller");
   const online = u.servicios.includes("online");
 
   if (presencial) {
@@ -129,7 +130,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
     if (estadoFiltro === "inactivos" && u.tarifas.length > 0) return false;
     if (tarifa && !u.tarifas.includes(tarifa)) return false;
     if (filtro === "sin" && !(u.rol === "alumno" && u.servicios.length === 0)) return false;
-    if (["grupal", "individual", "online"].includes(filtro) && !u.servicios.includes(filtro)) return false;
+    if (["grupal", "individual", "online", "taller"].includes(filtro) && !u.servicios.includes(filtro)) return false;
     if (q && !normal(`${nombreDe(u)} ${u.email ?? ""}`).includes(q)) return false;
     return true;
   });

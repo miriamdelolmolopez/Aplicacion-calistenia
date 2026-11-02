@@ -95,7 +95,7 @@ export default function Perfil() {
 
   const esAdmin = mi.rol === "admin";
   const online = mi.servicios.includes("online") || mi.planOnline;
-  const presencial = mi.servicios.includes("grupal") || mi.servicios.includes("individual");
+  const presencial = mi.servicios.includes("grupal") || mi.servicios.includes("individual") || mi.servicios.includes("taller");
   const r = datos.resumen;
 
   async function elegirFoto(archivo: File) {
@@ -119,7 +119,7 @@ export default function Perfil() {
   }
 
   const nombreServicio = (s: string) =>
-    s === "online" ? t.servicioOnline : s === "individual" ? t.servicioIndividual : t.servicioGrupal;
+    s === "online" ? t.servicioOnline : s === "individual" ? t.servicioIndividual : s === "taller" ? (idioma === "en" ? "Workshops" : "Talleres") : t.servicioGrupal;
 
   function barra(b: MiBono) {
     const activo = b.estado === "activo";

@@ -9,6 +9,7 @@ import AyudaI from "./comunes/AyudaI";
 const SERVICIOS = [
   { valor: "grupal", etiqueta: "Clases grupales" },
   { valor: "individual", etiqueta: "Entrenamiento individual" },
+  { valor: "taller", etiqueta: "Talleres (gente externa)" },
   { valor: "online", etiqueta: "Entrenamiento online" },
 ];
 

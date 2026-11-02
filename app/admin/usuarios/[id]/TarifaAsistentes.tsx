@@ -29,7 +29,7 @@ export type BonoAsistente = {
   enEspera: number; // otras cuotas en espera del mismo servicio
 };
 
-const SERVICIO: Record<string, string> = { grupal: "grupal", individual: "individual", online: "online" };
+const SERVICIO: Record<string, string> = { grupal: "grupal", individual: "individual", online: "online", taller: "taller" };
 const dia = (f: string | null) => (f ? `${f.slice(8, 10)}/${f.slice(5, 7)}/${f.slice(0, 4)}` : "—");
 
 function Pasos({ paso, total }: { paso: number; total: number }) {

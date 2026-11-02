@@ -9,7 +9,7 @@ import { emailValido } from "@/lib/validaciones";
 
 export type Estado = { error?: string; mensaje?: string; enlace?: string };
 
-const SERVICIOS = ["grupal", "individual", "online"] as const;
+const SERVICIOS = ["grupal", "individual", "online", "taller"] as const;
 
 function serviciosDe(formData: FormData): string[] {
   return formData

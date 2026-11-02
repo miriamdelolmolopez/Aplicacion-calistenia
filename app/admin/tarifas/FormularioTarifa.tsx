@@ -27,6 +27,7 @@ export type TipoBono = {
 export const SERVICIOS = [
   { valor: "grupal", texto: "Presencial grupal" },
   { valor: "individual", texto: "Presencial individual" },
+  { valor: "taller", texto: "Taller (gente externa)" },
   { valor: "online", texto: "Online 1:1" },
 ];
 

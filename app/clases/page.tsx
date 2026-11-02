@@ -178,7 +178,7 @@ export default function Clases() {
   const [listaClase, setListaClase] = useState<string | null>(null);
   const [descripciones, setDescripciones] = useState<Record<string, { es: string | null; en: string | null }>>({});
   const [saberMas, setSaberMas] = useState<string | null>(null);
-  const [filtro, setFiltro] = useState<"todo" | "grupal" | "individual">("todo");
+  const [filtro, setFiltro] = useState<"todo" | "grupal" | "individual" | "taller">("todo");
   const [confirmada, setConfirmada] = useState<ClaseConfirmada | null>(null);
 
   const cargar = useCallback(async () => {
@@ -350,6 +350,7 @@ export default function Clases() {
               [
                 ["grupal", t.filtroGrupales],
                 ["individual", t.filtroPersonal],
+                ["taller", idioma === "en" ? "Workshops" : "Talleres"],
                 ["todo", t.filtroTodo],
               ] as const
             ).map(([valor, texto]) => (

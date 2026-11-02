@@ -135,7 +135,7 @@ export default function MisReservas() {
 
   // Resumen por servicio (solo clases presenciales).
   const bonosClases = datos.bonos.filter((b) => b.servicio !== "online" && b.estado === "activo");
-  const nombreServicio = (s: string) => (s === "individual" ? t.filtroPersonal : t.filtroGrupales);
+  const nombreServicio = (s: string) => (s === "individual" ? t.filtroPersonal : s === "taller" ? (idioma === "en" ? "Workshop" : "Taller") : t.filtroGrupales);
 
   const delDia = dia ? (porDia.get(dia) ?? []) : [];
 

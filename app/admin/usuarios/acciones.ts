@@ -27,7 +27,7 @@ export async function guardarNota(_previo: Estado, formData: FormData): Promise<
   return { mensaje: "Nota guardada." };
 }
 
-const SERVICIOS_VALIDOS = ["grupal", "individual", "online"];
+const SERVICIOS_VALIDOS = ["grupal", "individual", "online", "taller"];
 
 // Fecha de inicio de un bono que la alumna ya tenía empezado (pasada o de hoy, y no de hace más de dos años).
 function inicioValido(fecha: string): boolean {
@@ -84,7 +84,7 @@ export async function registrarClaseHecha(_previo: Estado, formData: FormData): 
   return { mensaje: "Clase registrada. Se ha descontado una clase de su bono y no se le ha avisado." };
 }
 
-const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Clases grupales", individual: "Entrenamiento individual", online: "Entrenamiento online" };
+const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Clases grupales", individual: "Entrenamiento individual", online: "Entrenamiento online", taller: "Talleres" };
 
 // Un servicio del alta tal como llega del formulario, y ya comprobado.
 type FilaAlta = { servicio: string; tarifa: string; inicio: string; fin: string; pagado: boolean; fecha: string; hora: string; metodo: string; descuento: string };

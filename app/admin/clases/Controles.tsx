@@ -145,7 +145,7 @@ export function FormularioTipo({
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
       <input type="hidden" name="tipoId" value={tipo.id} />
       <p className={styles.ayuda}>
-        {tipo.servicio === "individual" ? "Entrenamiento individual: lo ven y reservan solo los/las alumnos/as individuales." : "Clase grupal."}
+        {tipo.servicio === "individual" ? "Entrenamiento individual: lo ven y reservan solo los/las alumnos/as individuales." : tipo.servicio === "taller" ? "Taller: lo reservan solo las personas con el servicio Talleres." : "Clase grupal."}
       </p>
       <div className={styles.campo}>
         <label htmlFor={`no-${tipo.id}`}>Nombre <AyudaI texto="Cómo se llama la clase. Es lo que ve cada persona al reservar y en el calendario." /></label>
@@ -276,10 +276,11 @@ export function NuevoTipo({ alTerminar }: { alTerminar?: () => void } = {}) {
         <input id="nt-nombre" name="nombre" maxLength={60} required />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nt-servicio">Para quién es <AyudaI texto="Clase grupal: la reservan varias personas. Entrenamiento individual: es de una sola persona y solo lo ven los/las alumnos/as con ese servicio." /></label>
+        <label htmlFor="nt-servicio">Para quién es <AyudaI texto="Clase grupal: la reservan varias personas. Entrenamiento individual: es de una sola persona y solo lo ven los/las alumnos/as con ese servicio. Taller: es para gente externa; solo lo reservan las personas con el servicio Talleres." /></label>
         <select id="nt-servicio" name="servicio" defaultValue="grupal">
           <option value="grupal">Clase grupal</option>
           <option value="individual">Entrenamiento individual (1 persona)</option>
+          <option value="taller">Taller (gente externa)</option>
         </select>
       </div>
       <div className={styles.campo}>

@@ -130,7 +130,7 @@ export type Seccion = "inicio" | "reservar" | "reservas" | "rutina" | "bibliotec
 
 export function seccionesDe(p: MiPerfil): Seccion[] {
   const online = p.servicios.includes("online") || p.planOnline;
-  const presencial = p.servicios.includes("grupal") || p.servicios.includes("individual");
+  const presencial = p.servicios.includes("grupal") || p.servicios.includes("individual") || p.servicios.includes("taller");
   const soloOnline = online && !presencial;
 
   const lista: Seccion[] = ["inicio"];

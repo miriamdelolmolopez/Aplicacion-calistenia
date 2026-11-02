@@ -12,7 +12,7 @@ import { FormularioPrecio } from "./Controles";
 
 export type PrecioTarifa = { id: string; nombre: string; servicio: string; precio_centimos: number; iva: number; activo: boolean };
 
-const SERVICIO: Record<string, string> = { grupal: "Presencial grupal", individual: "Presencial individual", online: "Online 1:1" };
+const SERVICIO: Record<string, string> = { grupal: "Presencial grupal", individual: "Presencial individual", online: "Online 1:1", taller: "Taller" };
 
 // El precio que paga la alumna lleva IVA incluido: aquí se ve también la base imponible y el IVA.
 export function desglose(precioCentimos: number, iva: number): { base: number; cuota: number } {

@@ -29,7 +29,7 @@ import CabeceraAdmin from "../../CabeceraAdmin";
 export const metadata = { title: "Ficha de usuario · Administración" };
 
 const ROLES: Record<string, string> = { alumno: "Alumno/a", invitado: "Invitado/a" };
-const SERVICIOS: Record<string, string> = { grupal: "Grupal", individual: "Individual", online: "Online" };
+const SERVICIOS: Record<string, string> = { grupal: "Grupal", individual: "Individual", online: "Online", taller: "Talleres" };
 const ESTADOS_BONO: Record<string, string> = {
   activo: "Activo",
   en_cola: "En espera",
@@ -176,7 +176,7 @@ export default async function FichaUsuario({
       ...bonos.filter((b) => b.estado === "activo" || b.estado === "en_cola").map((b) => b.servicio),
     ]),
   ];
-  const presencial = servicios.includes("grupal") || servicios.includes("individual") || asistencia.total_clases > 0;
+  const presencial = servicios.includes("grupal") || servicios.includes("individual") || servicios.includes("taller") || asistencia.total_clases > 0;
   const online = servicios.includes("online");
   // Su rutina para el botón «Editar rutina»: la publicada, o si no hay, la última que tenga.
   const { data: rutinasPersona } = online

@@ -6,7 +6,7 @@ import { aCentimos } from "@/lib/formato";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Estado } from "../acciones";
 
-const SERVICIOS = ["grupal", "individual", "online"];
+const SERVICIOS = ["grupal", "individual", "online", "taller"];
 
 function texto(formData: FormData, clave: string): string {
   return String(formData.get(clave) ?? "").trim();

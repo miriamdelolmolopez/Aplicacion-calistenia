@@ -24,7 +24,7 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
   const perfil = useMiPerfil();
   const cargado = typeof perfil === "object" && perfil !== null;
   const online = cargado && (perfil.servicios.includes("online") || perfil.planOnline);
-  const presencial = cargado && (perfil.servicios.includes("grupal") || perfil.servicios.includes("individual"));
+  const presencial = cargado && (perfil.servicios.includes("grupal") || perfil.servicios.includes("individual") || perfil.servicios.includes("taller"));
 
   // Sin online no hay gráficas de ejercicios: todo lo suyo está en la primera pantalla.
   const sinGraficas = cargado && !online && vista === "estadisticas";

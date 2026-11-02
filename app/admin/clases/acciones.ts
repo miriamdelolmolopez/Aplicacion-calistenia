@@ -259,9 +259,9 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
   const servicio = String(formData.get("servicio") ?? "grupal");
   const plazas = entero(formData.get("plazas_max"));
   const minimo = entero(formData.get("minimo_alumnos"));
-  const prueba = servicio === "individual" ? 0 : entero(formData.get("plazas_prueba"));
+  const prueba = servicio === "individual" || servicio === "taller" ? 0 : entero(formData.get("plazas_prueba"));
   const duracion = entero(formData.get("duracion_min"));
-  if (servicio !== "grupal" && servicio !== "individual") return { error: "Elige si es grupal o individual." };
+  if (servicio !== "grupal" && servicio !== "individual" && servicio !== "taller") return { error: "Elige si es grupal, individual o taller." };
   if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
   if (!(plazas >= 1 && plazas <= 100)) return { error: "Plazas entre 1 y 100." };
   if (!(minimo >= 0 && minimo <= plazas)) return { error: "El mínimo no puede ser mayor que las plazas." };

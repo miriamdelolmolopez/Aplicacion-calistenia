@@ -7,6 +7,7 @@ import styles from "./admin.module.css";
 const SERVICIOS = [
   { valor: "grupal", etiqueta: "Clases grupales" },
   { valor: "individual", etiqueta: "Entrenamiento individual" },
+  { valor: "taller", etiqueta: "Talleres (gente externa)" },
   { valor: "online", etiqueta: "Entrenamiento online" },
 ];
 

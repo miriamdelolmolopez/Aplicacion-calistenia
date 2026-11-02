@@ -20,7 +20,7 @@ export default function ListaTipos({ tipos, fotos }: { tipos: Tipo[]; fotos: Rec
   const [editando, setEditando] = useState<string | null>(null);
   const [aviso, setAviso] = useState<Estado>({});
   const [busqueda, setBusqueda] = useState("");
-  const [servicio, setServicio] = useState<"todos" | "grupal" | "individual">("todos");
+  const [servicio, setServicio] = useState<"todos" | "grupal" | "individual" | "taller">("todos");
   const [estadoFiltro, setEstadoFiltro] = useState<"todos" | "activos" | "desactivados">("todos");
   const [pendiente, empezar] = useTransition();
 
@@ -52,6 +52,7 @@ export default function ListaTipos({ tipos, fotos }: { tipos: Tipo[]; fotos: Rec
             <option value="todos">Todos</option>
             <option value="grupal">Grupales</option>
             <option value="individual">Individuales</option>
+            <option value="taller">Talleres</option>
           </select>
         </div>
         <div className={styles.campo}>
@@ -83,7 +84,7 @@ export default function ListaTipos({ tipos, fotos }: { tipos: Tipo[]; fotos: Rec
             <div>
               <strong>{t.nombre}</strong>
               <div className={styles.ayuda}>
-                {t.servicio === "individual" ? "Individual" : "Grupal"} · {t.plazas_max} {t.plazas_max === 1 ? "plaza" : "plazas"} · {t.duracion_min} min
+                {t.servicio === "individual" ? "Individual" : t.servicio === "taller" ? "Taller" : "Grupal"} · {t.plazas_max} {t.plazas_max === 1 ? "plaza" : "plazas"} · {t.duracion_min} min
                 {!t.activo && " · Desactivada"}
               </div>
             </div>
