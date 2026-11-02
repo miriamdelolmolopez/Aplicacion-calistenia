@@ -62,6 +62,7 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
   const [campoGrafica, setCampoGrafica] = useState<Campo>("peso_kg");
   const [mensaje, setMensaje] = useState<{ ok: boolean; texto: string } | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [porBorrar, setPorBorrar] = useState<string | null>(null);
 
   useEffect(() => {
     cargar(userId).then(setDatos);
@@ -118,8 +119,11 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
   }
 
   async function borrar(id: string) {
-    if (!confirm(t.confirmaBorrarMedida)) return;
-    await createClient().from("medidas").delete().eq("id", id);
+    setMensaje(null);
+    const { data, error } = await createClient().from("medidas").delete().eq("id", id).select("id");
+    setPorBorrar(null);
+    // Sin error pero sin filas borradas: la base de datos no ha dejado borrarla.
+    if (error || !data || data.length === 0) setMensaje({ ok: false, texto: t.errorBorrarMedida });
     setDatos(await cargar(userId));
   }
 
@@ -198,11 +202,20 @@ export default function Medidas({ userId, soloLectura = false }: { userId?: stri
                       .map((c) => `${f[c.campo]} ${c.unidad}`)
                       .join(" · ")}
                   </span>
-                  {!soloLectura && (
-                    <button type="button" onClick={() => borrar(f.id)} aria-label={t.borrarEntrada}>
+                  {!soloLectura && (porBorrar === f.id ? (
+                    <span className={estilos.confirmaBorrar} role="group" aria-label={t.confirmaBorrarMedida}>
+                      <button type="button" className={estilos.siBorrar} onClick={() => borrar(f.id)}>
+                        {t.siBorrarMedida}
+                      </button>
+                      <button type="button" onClick={() => setPorBorrar(null)}>
+                        {t.noBorrarMedida}
+                      </button>
+                    </span>
+                  ) : (
+                    <button type="button" onClick={() => setPorBorrar(f.id)} aria-label={t.borrarEntrada}>
                       ✕
                     </button>
-                  )}
+                  ))}
                 </li>
               ))}
             </ul>
