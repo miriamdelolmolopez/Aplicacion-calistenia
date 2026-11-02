@@ -4,6 +4,8 @@ import { marcarBorradoAtendido } from "./acciones";
 import styles from "./admin.module.css";
 import { Cuadricula, type Azulejo } from "./Hub";
 import CabeceraAdmin from "./CabeceraAdmin";
+import { seccionesExcluidas } from "@/lib/admin";
+import { sinExcluidas } from "@/lib/seccionesAdmin";
 
 export const metadata = { title: "Administración · CalisCoach" };
 
@@ -52,6 +54,7 @@ const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
 
 export default async function Administracion() {
   const { supabase } = await requireAdmin();
+  const excluidas = await seccionesExcluidas();
 
   // Cumpleaños de hoy (solo las personas que lo tienen activado en Ajustes).
   const { data: cumplesDatos } = await supabase.rpc("cumpleanos_hoy");
@@ -105,7 +108,9 @@ export default async function Administracion() {
         </section>
       )}
 
-      {GRUPOS.map((g, i) => (
+      {GRUPOS.map((g) => ({ ...g, azulejos: sinExcluidas(g.azulejos, excluidas) }))
+        .filter((g) => g.azulejos.length > 0)
+        .map((g, i) => (
         <section key={g.titulo ?? i} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {g.titulo && <h2 className={styles.grupoTitulo}>{g.titulo}</h2>}
           <Cuadricula azulejos={g.azulejos} />

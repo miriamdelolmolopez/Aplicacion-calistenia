@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { OPCIONES_MENU_ADMIN, type OpcionMenuAdmin } from "./opcionesMenuAdmin";
+import { seccionDeRuta } from "@/lib/seccionesAdmin";
+import { createClient } from "@/lib/supabase/client";
 
 // Lo que la administradora elige se guarda en este navegador. Las alumnas no tienen nada de esto: su menú es fijo.
 const CLAVE = "menuAdmin"; // qué opciones de la barra lateral se ven
@@ -11,6 +13,28 @@ const EVENTO = "cambio-menu-admin";
 
 export const MAX_BARRA = 5;
 export const BARRA_POR_DEFECTO = ["/admin", "/admin/usuarios", "/admin/reservas", "/perfil"];
+
+// Las secciones del panel que esta administradora tiene excluidas. Se lee una vez por minuto como mucho.
+let excluidasGuardadas: { cuando: number; lista: Promise<string[]> } | null = null;
+function cargarExcluidas(): Promise<string[]> {
+  if (!excluidasGuardadas || Date.now() - excluidasGuardadas.cuando > 60_000) {
+    excluidasGuardadas = {
+      cuando: Date.now(),
+      lista: (async () => {
+        try {
+          const supabase = createClient();
+          const { data: sesion } = await supabase.auth.getSession();
+          if (!sesion.session) return [];
+          const { data } = await supabase.from("profiles").select("excluidos_admin").eq("id", sesion.session.user.id).maybeSingle();
+          return (data?.excluidos_admin as string[] | null) ?? [];
+        } catch {
+          return [];
+        }
+      })(),
+    };
+  }
+  return excluidasGuardadas.lista;
+}
 
 function suscribir(avisar: () => void) {
   window.addEventListener(EVENTO, avisar);
@@ -70,18 +94,29 @@ export function useMenuAdmin(): {
 
   const porHref = useMemo(() => new Map(OPCIONES_MENU_ADMIN.map((o) => [o.href, o])), []);
 
+  // Lo que esta administradora tiene excluido no sale en ningún menú.
+  const [excluidas, setExcluidas] = useState<string[]>([]);
+  useEffect(() => {
+    let vigente = true;
+    cargarExcluidas().then((e) => vigente && setExcluidas(e));
+    return () => {
+      vigente = false;
+    };
+  }, []);
+  const permitida = useCallback((o: OpcionMenuAdmin) => !excluidas.includes(seccionDeRuta(o.href) ?? ""), [excluidas]);
+
   // Catálogo en el orden elegido: primero lo que ya tiene sitio, después lo nuevo en su orden de siempre.
   const ordenadas = useMemo(() => {
     const conocidas = orden.filter((h) => porHref.has(h));
     const resto = OPCIONES_MENU_ADMIN.filter((o) => !conocidas.includes(o.href)).map((o) => o.href);
-    return [...conocidas, ...resto].map((h) => porHref.get(h)!).filter((o) => !o.soloBarra);
-  }, [orden, porHref]);
+    return [...conocidas, ...resto].map((h) => porHref.get(h)!).filter((o) => !o.soloBarra && permitida(o));
+  }, [orden, porHref, permitida]);
 
   const estaVisible = useCallback((o: OpcionMenuAdmin) => o.fijo || (elegido[o.href] ?? o.defecto), [elegido]);
   const visibles = useMemo(() => ordenadas.filter(estaVisible), [ordenadas, estaVisible]);
 
-  const barra = useMemo(() => hrefsBarra.map((h) => porHref.get(h)).filter((o): o is OpcionMenuAdmin => !!o && o.href !== "/inicio").slice(0, MAX_BARRA), [hrefsBarra, porHref]);
-  const disponiblesBarra = useMemo(() => OPCIONES_MENU_ADMIN.filter((o) => o.href !== "/inicio" && !barra.some((b) => b.href === o.href)), [barra]);
+  const barra = useMemo(() => hrefsBarra.map((h) => porHref.get(h)).filter((o): o is OpcionMenuAdmin => !!o && o.href !== "/inicio" && permitida(o)).slice(0, MAX_BARRA), [hrefsBarra, porHref, permitida]);
+  const disponiblesBarra = useMemo(() => OPCIONES_MENU_ADMIN.filter((o) => o.href !== "/inicio" && permitida(o) && !barra.some((b) => b.href === o.href)), [barra, permitida]);
 
   const mueve = (lista: string[], href: string, direccion: -1 | 1): string[] => {
     const i = lista.indexOf(href);

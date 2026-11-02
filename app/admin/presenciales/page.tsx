@@ -1,20 +1,22 @@
-import { requireAdmin } from "@/lib/admin";
+import { requireAdmin, seccionesExcluidas } from "@/lib/admin";
+import { sinExcluidas } from "@/lib/seccionesAdmin";
 import Hub from "../Hub";
 
 export const metadata = { title: "Clases presenciales · Administración" };
 
 export default async function Presenciales() {
   await requireAdmin();
+  const excluidas = await seccionesExcluidas();
   return (
     <Hub
       titulo="Clases presenciales"
-      azulejos={[
+      azulejos={sinExcluidas([
         { href: "/admin/reservas", titulo: "Reservar clases", foto: "calistenia" },
         { href: "/admin/horario", titulo: "Horarios presenciales", foto: "inicio" },
         { href: "/admin/horarios", titulo: "Plantillas presenciales", foto: "pino" },
         { href: "/admin/clases", titulo: "Tipos de clase", foto: "personal" },
         { href: "/admin/prueba", titulo: "Link de prueba gratuita", foto: "online" },
-      ]}
+      ], excluidas)}
     />
   );
 }

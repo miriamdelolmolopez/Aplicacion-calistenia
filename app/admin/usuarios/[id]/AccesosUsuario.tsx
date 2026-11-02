@@ -126,7 +126,7 @@ export default function AccesosUsuario({
                   </label>
                 ))}
               </details>
-              <span className={styles.ayuda}>Todavía no se ocultan en el panel: de momento solo se guardan. Hasta que se active, una administradora ve todo.</span>
+              <span className={styles.ayuda}>Estas secciones no salen en su panel ni en su menú, y si entra por un enlace no se las enseña. Aún no se bloquean las acciones «por detrás» (próxima fase).</span>
             </div>
           )}
         </>
@@ -171,7 +171,7 @@ export default function AccesosUsuario({
           </ul>
           {asciende && (
             <p className={styles.error}>
-              Va a tener acceso al panel de administración: los pagos y los datos de todas las personas. Las exclusiones todavía no se aplican, así que verá todo.
+              Va a tener acceso al panel de administración: los pagos y los datos de todas las personas. Si quieres que no vea alguna sección, márcala en «Excluidos» antes de guardar.
             </p>
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
