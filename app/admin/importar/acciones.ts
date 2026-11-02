@@ -79,23 +79,29 @@ function preparar(f: FilaImport, cat: Catalogos): { error: string } | { plan: Pl
 
 const normalizarDni = (s: string) => s.replace(/[\s-]/g, "").toUpperCase();
 
-// Antes de importar: por cada correo, lo que impide crear a esa persona (ya tiene cuenta, tarifa o forma de pago que no existen, DNI repetido…).
-export async function comprobarFilas(filas: FilaImport[]): Promise<Record<string, string[]>> {
+// Antes de importar: por cada correo, lo que impide hacerlo (tarifa o forma de pago que no existen, DNI repetido…)
+// y quién ya tiene cuenta (a esas personas solo se les completa lo que les falta).
+export async function comprobarFilas(filas: FilaImport[]): Promise<{ problemas: Record<string, string[]>; existentes: string[] }> {
   await requireAdmin("importar");
   const admin = createAdminClient();
   const cat = await cargarCatalogos();
   const problemas: Record<string, string[]> = {};
   const anota = (correo: string, texto: string) => (problemas[correo] = [...(problemas[correo] ?? []), texto]);
 
+  const existentes = new Set<string>();
   for (let i = 0; i < filas.length; i += 100) {
     const lote = filas.slice(i, i + 100);
-    const { data } = await admin.from("profiles").select("email").in("email", lote.map((f) => f.correo));
-    for (const p of data ?? []) if (p.email) anota(String(p.email).toLowerCase(), "Ya tiene cuenta");
-    const dnis = lote.map((f) => normalizarDni(f.dni)).filter(Boolean);
+    const { data } = await admin.from("profiles").select("email, rol").in("email", lote.map((f) => f.correo));
+    for (const p of data ?? []) {
+      if (!p.email) continue;
+      if (p.rol === "archivado") anota(String(p.email).toLowerCase(), "Está archivada: recupérala primero");
+      else existentes.add(String(p.email).toLowerCase());
+    }
+    const dnis = lote.filter((f) => !existentes.has(f.correo)).map((f) => normalizarDni(f.dni)).filter(Boolean);
     if (dnis.length > 0) {
       const { data: repetidos } = await admin.from("profiles").select("dni").in("dni", dnis);
       const usados = new Set((repetidos ?? []).map((r) => String(r.dni)));
-      for (const f of lote) if (f.dni && usados.has(normalizarDni(f.dni))) anota(f.correo, "Ese DNI ya lo tiene otra persona");
+      for (const f of lote) if (f.dni && !existentes.has(f.correo) && usados.has(normalizarDni(f.dni))) anota(f.correo, "Ese DNI ya lo tiene otra persona");
     }
   }
   const dnisArchivo = new Map<string, string>();
@@ -106,7 +112,66 @@ export async function comprobarFilas(filas: FilaImport[]): Promise<Record<string
     const r = preparar(f, cat);
     if ("error" in r) anota(f.correo, r.error);
   }
-  return problemas;
+  return { problemas, existentes: [...existentes] };
+}
+
+// Completa a alguien que ya tiene cuenta: solo rellena lo que le falta, sin cambiar lo que ya tiene y sin mandarle otra invitación.
+async function completarExistente(admin: ReturnType<typeof createAdminClient>, adminId: string, id: string, f: FilaImport, plan: PlanTarifa | null, correo: string): Promise<ResultadoFila> {
+  const { data: p } = await admin.from("profiles").select("rol, nombre, apellidos, telefono, dni, fecha_nacimiento, contacto_emergencia_nombre, contacto_emergencia_telefono").eq("id", id).maybeSingle();
+  if (!p) return { correo, ok: false, mensaje: "No se ha encontrado su cuenta." };
+  if (p.rol === "archivado") return { correo, ok: false, mensaje: "Está archivada: recupérala primero." };
+
+  const vacio = (v: unknown) => v === null || v === undefined || String(v).trim() === "";
+  const cambios: Record<string, string> = {};
+  const nuevos: string[] = [];
+  const pon = (campo: string, valor: string | null | undefined, etiqueta: string) => {
+    if (valor && vacio((p as Record<string, unknown>)[campo])) {
+      cambios[campo] = valor;
+      nuevos.push(etiqueta);
+    }
+  };
+  pon("nombre", f.nombre?.trim().slice(0, 80), "nombre");
+  pon("apellidos", f.apellidos?.trim().slice(0, 120), "apellidos");
+  pon("telefono", f.telefono?.trim().slice(0, 30), "teléfono");
+  pon("dni", normalizarDni(f.dni ?? ""), "DNI");
+  pon("fecha_nacimiento", f.nacimiento, "fecha de nacimiento");
+  pon("contacto_emergencia_nombre", f.emergenciaNombre?.trim().slice(0, 120), "contacto de emergencia");
+  pon("contacto_emergencia_telefono", f.emergenciaTelefono?.trim().slice(0, 30), "teléfono de emergencia");
+
+  const avisos: string[] = [];
+  if (Object.keys(cambios).length > 0) {
+    const { error } = await admin.from("profiles").update(cambios).eq("id", id);
+    if (error) {
+      // Lo más probable es un DNI que ya tiene otra persona: se reintenta sin él.
+      delete cambios.dni;
+      if (Object.keys(cambios).length > 0) await admin.from("profiles").update(cambios).eq("id", id);
+      avisos.push("El DNI no se pudo guardar (puede que ya lo tenga otra persona).");
+    }
+  }
+
+  // Servicios que le faltan.
+  const { data: tiene } = await admin.from("perfil_servicios").select("servicio").eq("user_id", id);
+  const actuales = new Set((tiene ?? []).map((s) => String(s.servicio)));
+  const queremos = [...new Set([...(f.servicios ?? []), ...(plan ? [plan.servicio] : [])].filter((s) => SERVICIOS.includes(s)))];
+  const faltan = queremos.filter((s) => !actuales.has(s));
+  if (faltan.length > 0 && p.rol !== "invitado") {
+    await admin.from("perfil_servicios").insert(faltan.map((servicio) => ({ user_id: id, servicio })));
+    nuevos.push(`servicio ${faltan.join(" + ")}`);
+  }
+
+  // Tarifa: solo si no tiene ya esa misma en marcha o en espera.
+  if (plan && p.rol !== "invitado") {
+    const { data: bonos } = await admin.from("bonos").select("id").eq("user_id", id).eq("tipo_bono_id", plan.tipoId).in("estado", ["activo", "en_cola"]).limit(1);
+    if ((bonos ?? []).length > 0) avisos.push("Ya tiene esa tarifa: no se ha duplicado.");
+    else {
+      const r = await aplicarTarifa(admin, id, adminId, plan);
+      if (r.ok) nuevos.push(plan.pagado ? "tarifa (cobrada)" : "tarifa (pago pendiente)");
+      else avisos.push("No se pudo registrar la tarifa: añádela desde su ficha.");
+    }
+  }
+
+  const base = nuevos.length > 0 ? `Ya tenía cuenta: se ha completado (${nuevos.join(", ")}).` : "Ya tenía cuenta: no le faltaba nada de lo que trae el archivo.";
+  return { correo, ok: true, mensaje: `${base}${avisos.length > 0 ? " " + avisos.join(" ") : ""}` };
 }
 
 // Crea las cuentas de un grupo pequeño de personas y les manda su invitación (si se pide). Se llama por tandas desde la pantalla.
@@ -127,17 +192,17 @@ export async function importarLote(filas: FilaImport[], enviar: boolean): Promis
     }
     const tipo = f.tipo === "invitado" ? "invitado" : "alumno";
 
-    const { data: existente } = await admin.from("profiles").select("id").eq("email", correo).maybeSingle();
-    if (existente) {
-      resultados.push({ correo, ok: false, mensaje: "Ya tiene cuenta." });
-      continue;
-    }
     const preparada = preparar({ ...f, tipo }, cat);
     if ("error" in preparada) {
       resultados.push({ correo, ok: false, mensaje: preparada.error });
       continue;
     }
     const plan = preparada.plan;
+    const { data: existente } = await admin.from("profiles").select("id").eq("email", correo).maybeSingle();
+    if (existente) {
+      resultados.push(await completarExistente(admin, user.id, existente.id as string, { ...f, tipo }, plan, correo));
+      continue;
+    }
     const servicios = tipo === "alumno" ? [...new Set([...(f.servicios ?? []), ...(plan ? [plan.servicio] : [])].filter((s) => SERVICIOS.includes(s)))] : [];
 
     const { data, error } = await invitar(correo);

@@ -24,6 +24,7 @@ export default function Importador() {
   const [fase, setFase] = useState<Fase>("inicio");
   const [tipoPorDefecto, setTipoPorDefecto] = useState<"alumno" | "invitado">("alumno");
   const [filas, setFilas] = useState<FilaLeida[]>([]);
+  const [existentes, setExistentes] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [cuantas, setCuantas] = useState("15");
   const [enviar, setEnviar] = useState(true);
@@ -49,7 +50,8 @@ export default function Importador() {
       const { filas: leidas, error: fallo } = leerTabla(tabla, tipoPorDefecto);
       if (fallo) return setError(fallo);
       // Se comprueba contra la app: quien ya tiene cuenta, tarifas o formas de pago que no existen, DNI repetido…
-      const delServidor = await comprobarFilas(leidas.filter((f) => f.problemas.length === 0));
+      const { problemas: delServidor, existentes: yaTienen } = await comprobarFilas(leidas.filter((f) => f.problemas.length === 0));
+      setExistentes(yaTienen);
       setFilas(leidas.map((f) => (delServidor[f.correo] ? { ...f, problemas: [...f.problemas, ...delServidor[f.correo]] } : f)));
       setResultados([]);
       setHechas(0);
@@ -124,6 +126,7 @@ export default function Importador() {
         <>
           <p className={styles.aviso}>
             {filas.length} filas leídas: <strong>{listas.length} listas</strong>
+            {existentes.length > 0 && <> ({listas.filter((f) => existentes.includes(f.correo)).length} ya tienen cuenta: solo se les completará lo que les falte, sin cambiar lo que ya tienen)</>}
             {conProblemas > 0 && <> y <strong>{conProblemas} con problemas</strong> (no se importarán)</>}.
           </p>
           <div style={{ maxHeight: 320, overflow: "auto", border: "1px solid var(--linea)", borderRadius: 12 }}>
@@ -147,7 +150,7 @@ export default function Importador() {
                     <td style={{ padding: "6px 8px" }}>{f.servicios.join(" + ")}</td>
                     <td style={{ padding: "6px 8px" }}>{f.tarifa ? `${f.tarifa}${f.inicio ? ` · desde ${f.inicio.split("-").reverse().join("/")}` : ""}` : "—"}</td>
                     <td style={{ padding: "6px 8px" }}>{f.tarifa ? (f.pagado ? `Pagado${f.formaPago ? ` (${f.formaPago})` : ""}` : "Pendiente") : "—"}</td>
-                    <td style={{ padding: "6px 8px", color: f.problemas.length ? "#b42318" : undefined }}>{f.problemas.length ? f.problemas.join(" · ") : "✓ Lista"}</td>
+                    <td style={{ padding: "6px 8px", color: f.problemas.length ? "#b42318" : undefined }}>{f.problemas.length ? f.problemas.join(" · ") : existentes.includes(f.correo) ? "Ya tiene cuenta: se completará lo que falte" : "✓ Nueva"}</td>
                   </tr>
                 ))}
               </tbody>

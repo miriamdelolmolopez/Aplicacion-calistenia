@@ -28,7 +28,7 @@ import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
 
-const ROLES: Record<string, string> = { alumno: "Alumno/a", invitado: "Invitado/a" };
+const ROLES: Record<string, string> = { alumno: "Alumno/a", invitado: "Invitado/a", exalumno: "Exalumno/a", coach: "Coach", admin: "Administradora" };
 const SERVICIOS: Record<string, string> = { grupal: "Grupal", individual: "Individual", online: "Online", taller: "Talleres" };
 const ESTADOS_BONO: Record<string, string> = {
   activo: "Activo",
@@ -45,7 +45,8 @@ const PESTANAS = [
   { id: "perfil", texto: "Perfil" },
   { id: "acciones", texto: "Acciones" },
 ] as const;
-type Pestana = (typeof PESTANAS)[number]["id"];
+type Pestana = (typeof PESTANAS)[number]["id"] | "accesos";
+const PESTANA_ACCESOS = { id: "accesos", texto: "Accesos" } as const;
 
 type Asistencia = {
   total_clases: number;
@@ -100,7 +101,6 @@ export default async function FichaUsuario({
 }) {
   const { id } = await params;
   const { pestana: pedida, mes: mesPedido } = await searchParams;
-  const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "actual";
   const { supabase, user: yo } = await requireAdmin("usuarios");
   const admin = createAdminClient();
   const ahora = new Date().toISOString();
@@ -139,33 +139,11 @@ export default async function FichaUsuario({
   ]);
   if (!p) notFound();
 
-  // Una administradora no tiene tarifas ni reservas: su ficha solo tiene sus accesos (tipo de cuenta, coach y excluidos).
-  if (p.rol === "admin") {
-    const nombreAdmin = [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "Administradora";
-    return (
-      <main className={styles.pagina}>
-        <CabeceraAdmin>
-          <h1>{nombreAdmin}</h1>
-          <Link href="/admin/usuarios" className={styles.enlaceBarra}>
-            ← Volver
-          </Link>
-        </CabeceraAdmin>
-        <section className={styles.tarjeta}>
-          <h2>Accesos</h2>
-          <AccesosUsuario
-            userId={p.id}
-            nombre={nombreAdmin}
-            rolInicial={p.rol}
-            esCoachInicial={!!accesos?.es_coach}
-            tambienAlumno={!!accesos?.tambien_alumno}
-            fueAlumno={!!accesos?.fue_alumno}
-            excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
-            esMiCuenta={yo.id === p.id}
-          />
-        </section>
-      </main>
-    );
-  }
+  // Una administradora tiene Perfil y Accesos; si además es alumna, también las pestañas de una alumna (tarifa, reservas, logros y acciones).
+  const esAdmin = p.rol === "admin";
+  const esAlumna = !esAdmin || !!accesos?.tambien_alumno;
+  const pestanas: readonly { id: string; texto: string }[] = !esAdmin ? PESTANAS : esAlumna ? [...PESTANAS, PESTANA_ACCESOS] : [PESTANAS[3], PESTANA_ACCESOS];
+  const pestana: Pestana = pestanas.some((x) => x.id === pedida) ? (pedida as Pestana) : (pestanas[0].id as Pestana);
 
   // Los bonos se leen cuando ya se han puesto al día.
   const { data: bonosDatos } = await supabase
@@ -177,8 +155,6 @@ export default async function FichaUsuario({
     .order("creado_en", { ascending: false });
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
-
-;
 
   const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string }[];
 
@@ -435,6 +411,8 @@ export default async function FichaUsuario({
             </dl>
           </section>
 
+          {esAlumna && (
+          <>
           <Link href={`/admin/usuarios/${p.id}/textos-legales`} className={estilos.tarjetaEnlace}>
             <span>
               <strong>Textos legales</strong>
@@ -454,6 +432,8 @@ export default async function FichaUsuario({
             <h2>Tests de Aprende</h2>
             <HistorialExamen intentos={intentos} t={{ ...textosAprende.es, sinIntentos: "Todavía no ha hecho ningún examen." }} idioma="es" />
           </section>
+          </>
+          )}
 
           <section className={styles.tarjeta}>
             <h2>Notas privadas</h2>
@@ -545,20 +525,38 @@ export default async function FichaUsuario({
             />
           </section>
 
-          <section className={styles.tarjeta}>
-            <h2>Accesos</h2>
-            <AccesosUsuario
-              userId={p.id}
-              nombre={nombre}
-              rolInicial={p.rol}
-              esCoachInicial={!!accesos?.es_coach}
-            tambienAlumno={!!accesos?.tambien_alumno}
-            fueAlumno={!!accesos?.fue_alumno}
-              excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
-              esMiCuenta={yo.id === p.id}
-            />
-          </section>
+          {!esAdmin && (
+            <section className={styles.tarjeta}>
+              <h2>Accesos</h2>
+              <AccesosUsuario
+                userId={p.id}
+                nombre={nombre}
+                rolInicial={p.rol}
+                esCoachInicial={!!accesos?.es_coach}
+              tambienAlumno={!!accesos?.tambien_alumno}
+              fueAlumno={!!accesos?.fue_alumno}
+                excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
+                esMiCuenta={yo.id === p.id}
+              />
+            </section>
+          )}
         </>
+  );
+
+  const panelAccesos = (
+    <section className={styles.tarjeta}>
+      <h2>Accesos</h2>
+      <AccesosUsuario
+        userId={p.id}
+        nombre={nombre}
+        rolInicial={p.rol}
+        esCoachInicial={!!accesos?.es_coach}
+        tambienAlumno={!!accesos?.tambien_alumno}
+        fueAlumno={!!accesos?.fue_alumno}
+        excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
+        esMiCuenta={yo.id === p.id}
+      />
+    </section>
   );
 
   return (
@@ -582,8 +580,8 @@ export default async function FichaUsuario({
                   {SERVICIOS[s] ?? s}
                 </span>
               ))}
-              <span className={activos.length > 0 ? estilos.activa : estilos.sinTarifa}>{activos.length > 0 ? "Tarifa activa" : "Sin tarifa"}</span>
-              {sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
+              {esAlumna && <span className={activos.length > 0 ? estilos.activa : estilos.sinTarifa}>{activos.length > 0 ? "Tarifa activa" : "Sin tarifa"}</span>}
+              {esAlumna && sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
             </div>
             <div className={styles.ayuda} style={{ overflowWrap: "anywhere" }}>
               {p.email}
@@ -614,8 +612,8 @@ export default async function FichaUsuario({
         key={pestana}
         id={id}
         inicial={pestana}
-        pestanas={PESTANAS}
-        paneles={{ actual: panelActual, reservas: panelReservas, logros: panelLogros, perfil: panelPerfil, acciones: panelAcciones }}
+        pestanas={pestanas}
+        paneles={{ actual: panelActual, reservas: panelReservas, logros: panelLogros, perfil: panelPerfil, acciones: panelAcciones, accesos: panelAccesos }}
       />
 
 

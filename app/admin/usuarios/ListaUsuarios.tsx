@@ -57,6 +57,9 @@ function hace(dias: number): string {
   return dias <= 0 ? "hoy" : dias === 1 ? "ayer" : `hace ${dias} días`;
 }
 
+// Una administradora que no es alumna no tiene tarifas, créditos ni pagos: en su tarjeta solo sale el perfil.
+const soloAdmin = (u: Usuario) => u.rol === "admin" && !(u.etiquetas ?? []).includes("Alumno/a");
+
 function nombreDe(u: Usuario): string {
   return [u.nombre, u.apellidos].filter(Boolean).join(" ") || u.email || "(sin nombre)";
 }
@@ -100,12 +103,12 @@ function resumen(u: Usuario): { texto: string; alerta: boolean } {
 function Botones({ u, conPagos = true }: { u: Usuario; conPagos?: boolean }) {
   return (
     <span className={estilos.iconos}>
-      {conPagos && (
+      {conPagos && !soloAdmin(u) && (
         <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.icono} aria-label="Pagos" title="Pagos">
           <IconoEuro />
         </Link>
       )}
-      <Link href={`/admin/usuarios/${u.id}?pestana=perfil`} className={estilos.icono} aria-label="Editar" title="Editar">
+      <Link href={`/admin/usuarios/${u.id}?pestana=perfil`} className={estilos.icono} aria-label={u.rol === "admin" ? "Perfil" : "Editar"} title={u.rol === "admin" ? "Perfil" : "Editar"}>
         <IconoLapiz />
       </Link>
     </span>
@@ -233,9 +236,9 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                 </td>
                 <td>{(u.etiquetas ?? [u.rol === "invitado" ? "Invitado/a" : "Alumno/a"]).join(", ")}</td>
                 <td>{u.servicios.map((x) => NOMBRE_SERVICIO[x] ?? x).join(", ") || "—"}</td>
-                <td>{u.tarifas.join(" + ") || "—"}</td>
+                <td>{soloAdmin(u) ? "—" : u.tarifas.join(" + ") || "—"}</td>
                 <td>
-                  {u.clases_restantes !== null
+                  {soloAdmin(u) ? "—" : u.clases_restantes !== null
                     ? `${u.clases_restantes} ${u.clases_restantes === 1 ? "clase" : "clases"}${u.bono_caduca ? ` · caduca ${fechaCorta(u.bono_caduca)}` : ""}`
                     : u.plan_online_hasta
                       ? `Online hasta ${fechaCorta(u.plan_online_hasta)}`
@@ -280,35 +283,41 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     ))}
                   </div>
                 )}
-                <div className={estilos.creditos}>
-                  <IconoMarcador />
-                  {u.clases_restantes === null && u.plan_online_hasta ? (
-                    <span>Plan online</span>
-                  ) : (
-                    <span>
-                      <b>{u.clases_restantes ?? 0}</b> {u.clases_restantes === 1 ? "crédito" : "créditos"}
-                    </span>
-                  )}
-                </div>
-                <div className={estilos.tarifaCab}>
-                  <span>TARIFA</span>
-                  <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? "Activa" : "Sin tarifa"}</span>
-                  {u.pendiente_cobro > 0 && <span className={estilos.sinPagar}>Sin pagar · {euros(u.pendiente_cobro)}</span>}
-                </div>
-                <div className={estilos.tarifaCaja}>
-                  <strong>{u.tarifas.join(" + ") || "Sin tarifa activa"}</strong>
-                  {u.tarifa_hasta && (
-                    <span>
-                      {u.tarifa_desde ? `${fechaCorta(u.tarifa_desde)} – ` : "hasta "}
-                      {fechaCorta(u.tarifa_hasta)}
-                    </span>
-                  )}
-                </div>
-                <div className={`${styles.ayuda} ${estilos.resumenCorto} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
+                {!soloAdmin(u) && (
+                  <>
+                    <div className={estilos.creditos}>
+                      <IconoMarcador />
+                      {u.clases_restantes === null && u.plan_online_hasta ? (
+                        <span>Plan online</span>
+                      ) : (
+                        <span>
+                          <b>{u.clases_restantes ?? 0}</b> {u.clases_restantes === 1 ? "crédito" : "créditos"}
+                        </span>
+                      )}
+                    </div>
+                    <div className={estilos.tarifaCab}>
+                      <span>TARIFA</span>
+                      <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? "Activa" : "Sin tarifa"}</span>
+                      {u.pendiente_cobro > 0 && <span className={estilos.sinPagar}>Sin pagar · {euros(u.pendiente_cobro)}</span>}
+                    </div>
+                    <div className={estilos.tarifaCaja}>
+                      <strong>{u.tarifas.join(" + ") || "Sin tarifa activa"}</strong>
+                      {u.tarifa_hasta && (
+                        <span>
+                          {u.tarifa_desde ? `${fechaCorta(u.tarifa_desde)} – ` : "hasta "}
+                          {fechaCorta(u.tarifa_hasta)}
+                        </span>
+                      )}
+                    </div>
+                    <div className={`${styles.ayuda} ${estilos.resumenCorto} ${r.alerta ? estilos.alerta : ""}`}>{r.texto}</div>
+                  </>
+                )}
                 <div className={estilos.pie}>
-                  <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.botonPagos}>
-                    <IconoEuro /> Pagos
-                  </Link>
+                  {!soloAdmin(u) && (
+                    <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.botonPagos}>
+                      <IconoEuro /> Pagos
+                    </Link>
+                  )}
                   <Botones u={u} conPagos={false} />
                 </div>
               </article>

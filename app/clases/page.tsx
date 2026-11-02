@@ -74,6 +74,7 @@ type Datos = {
   restantes: number | null;
   lista: Clase[];
   pasadas: Clase[]; // solo para la administradora: las clases de las semanas anteriores
+  tambienAlumno: boolean; // administradora que además es alumna: reserva con su tarifa
   vistaAlumna: boolean; // la administradora está viendo la app como la ve un/a alumno/a
 };
 
@@ -91,7 +92,7 @@ async function obtenerDatos(): Promise<Datos> {
     supabase.from("ajustes").select("clave, valor"),
     supabase.from("tipos_clase").select("nombre, lista_espera, cancelacion_horas, reserva_dias_max, creditos"),
     usuario
-      ? supabase.from("profiles").select("rol, datos_completos").eq("id", usuario.id).maybeSingle()
+      ? supabase.from("profiles").select("rol, datos_completos, tambien_alumno").eq("id", usuario.id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.rpc("mi_prueba_gastada"),
     obtenerMisBonos(),
@@ -136,6 +137,7 @@ async function obtenerDatos(): Promise<Datos> {
     dias,
     hoy: claveDia(new Date(ahora).toISOString()),
     rol: perfil?.rol ?? "",
+    tambienAlumno: !!(perfil as { tambien_alumno?: boolean } | null)?.tambien_alumno,
     datosCompletos: !!perfil?.datos_completos,
     pruebaGastada: gastada === true,
     restantes: activos.length > 0 ? activos.reduce((suma, b) => suma + b.clasesRestantes, 0) : null,
@@ -238,7 +240,7 @@ export default function Clases() {
   }, []);
 
   // Un/a invitado/a con una prueba gratuita de clases reserva con ella como una alumna.
-  const esAlumno = datos?.rol === "alumno" || (datos?.rol === "invitado" && datos.restantes !== null);
+  const esAlumno = datos?.rol === "alumno" || (datos?.rol === "admin" && datos.tambienAlumno) || (datos?.rol === "invitado" && datos.restantes !== null);
   const esInvitado = datos?.rol === "invitado" && datos.restantes === null;
   // En «Ver como alumno/a» no salen los controles de administradora.
   const esAdmin = datos?.rol === "admin" && !datos.vistaAlumna;
