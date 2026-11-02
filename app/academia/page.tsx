@@ -8,7 +8,7 @@ import styles from "../formularios.module.css";
 import { useIdioma } from "../useIdioma";
 import estilos from "./academia.module.css";
 import { textosAcademia } from "./textosAcademia";
-import { fondoFoto } from "@/lib/fotos";
+import { estiloFoto } from "@/lib/fotos";
 
 // Academia: cursos y formaciones. Dos opciones: cursos actuales o próximos cursos.
 export default function Academia() {
@@ -24,7 +24,7 @@ export default function Academia() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <section className={estilos.banner} style={{ backgroundImage: fondoFoto("pino", fotoBanner) }}>
+      <section className={estilos.banner} style={estiloFoto("pino", fotoBanner)}>
         <h1>{t.bannerTitulo}</h1>
         <p>{t.bannerTexto}</p>
         <CamaraCard clave="cabecera:/academia" />

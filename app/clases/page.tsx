@@ -18,7 +18,7 @@ import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
-import { fondoFoto, fotoDeClase } from "@/lib/fotos";
+import { estiloFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 import {
   cancelarMiReserva,
@@ -439,7 +439,7 @@ export default function Clases() {
                 id={`clase-${c.id}`}
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
-                <div className={estilos.titulo} style={{ backgroundImage: fondoFoto(fotoDeClase(c.tipo), fotosCards[`clase:${c.tipo}`] ?? fotosTipos[c.tipo], !fotosListas) }}>
+                <div className={estilos.titulo} style={estiloFoto(fotoDeClase(c.tipo), fotosCards[`clase:${c.tipo}`] ?? fotosTipos[c.tipo], !fotosListas)}>
                   <h2>{c.tipo}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                   <CamaraCard clave={`clase:${c.tipo}`} />

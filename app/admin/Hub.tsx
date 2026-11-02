@@ -3,21 +3,21 @@
 import Link from "next/link";
 import CamaraCard from "../CamaraCard";
 import { useFotoCard } from "../useFotosCards";
-import { fondoFoto, type FotoNombre } from "@/lib/fotos";
+import { estiloFoto, type FotoNombre } from "@/lib/fotos";
 import styles from "./admin.module.css";
 
 export type Azulejo = { href?: string; titulo: string; foto: FotoNombre; proximamente?: boolean };
 
 function Tarjeta({ a }: { a: Azulejo }) {
   const clave = `azulejo:${a.titulo}`;
-  const fondo = fondoFoto(a.foto, useFotoCard(clave));
+  const fondo = estiloFoto(a.foto, useFotoCard(clave));
   return a.href && !a.proximamente ? (
-    <Link href={a.href} className={styles.azulejo} style={{ backgroundImage: fondo }}>
+    <Link href={a.href} className={styles.azulejo} style={fondo}>
       <span>{a.titulo}</span>
       <CamaraCard clave={clave} />
     </Link>
   ) : (
-    <div className={`${styles.azulejo} ${styles.azulejoApagado}`} style={{ backgroundImage: fondo }} aria-disabled="true">
+    <div className={`${styles.azulejo} ${styles.azulejoApagado}`} style={fondo} aria-disabled="true">
       <span>
         {a.titulo}
         <small>Próximamente</small>

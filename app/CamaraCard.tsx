@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { cambiarFotoApp, quitarFotoApp } from "./admin/fotos/acciones";
+import { useRef, useState } from "react";
+import { cambiarFotoApp, guardarEncuadreFoto, quitarFotoApp } from "./admin/fotos/acciones";
 import { prepararFoto } from "./admin/fotos/prepararFoto";
 import estilos from "./CamaraCard.module.css";
 import MenuFoto from "./MenuFoto";
@@ -15,6 +15,7 @@ export default function CamaraCard({ clave, abajo = false }: { clave: string; ab
   const propia = useFotoCard(clave);
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const caja = useRef<HTMLDivElement>(null);
 
   if (typeof perfil !== "object" || perfil === null || perfil.rolReal !== "admin") return null;
 
@@ -50,10 +51,23 @@ export default function CamaraCard({ clave, abajo = false }: { clave: string; ab
     setTrabajando(false);
   }
 
+  // La forma de la tarjeta (ancho / alto), para encuadrar la foto con la misma forma.
+  function medir(): number {
+    const t = caja.current?.parentElement?.getBoundingClientRect();
+    return t && t.height > 0 ? t.width / t.height : 1.5;
+  }
+
+  async function encuadrar(x: number, y: number) {
+    setError(null);
+    const r = await guardarEncuadreFoto(clave, x, y);
+    if (!r.ok) setError(r.error ?? "No se ha podido guardar el encuadre.");
+    else await recargarFotosCards();
+  }
+
   return (
     <>
-      <div className={`${estilos.camara} ${abajo ? estilos.abajo : ""}`} onClick={quieto}>
-        <MenuFoto url={propia} alElegir={elegir} alQuitar={quitar} ocupado={trabajando} modo="ventana" etiqueta="Foto de esta tarjeta">
+      <div ref={caja} className={`${estilos.camara} ${abajo ? estilos.abajo : ""}`} onClick={quieto}>
+        <MenuFoto url={propia} alElegir={elegir} alQuitar={quitar} ocupado={trabajando} modo="ventana" encuadre={{ medir, guardar: encuadrar }} etiqueta="Foto de esta tarjeta">
           <span className={estilos.boton} title="Cambiar foto">
             {trabajando ? "…" : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

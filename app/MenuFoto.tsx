@@ -1,6 +1,8 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import Encuadrador from "./Encuadrador";
+import { sinEncuadre } from "@/lib/fotos";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 // Menú de una foto: Ver foto, Tomar foto, Subir foto y Quitar foto. Se usa en todas las fotos de la app.
@@ -12,6 +14,7 @@ export default function MenuFoto({
   alQuitar,
   ocupado = false,
   modo = "desplegable",
+  encuadre,
   etiqueta = "Foto",
   idioma = "es",
   children,
@@ -21,6 +24,8 @@ export default function MenuFoto({
   alQuitar: () => void | Promise<void>;
   ocupado?: boolean;
   modo?: "desplegable" | "ventana";
+  // Si se da, el menú tiene «Encuadrar foto»: medir devuelve la forma de la tarjeta y guardar guarda la posición elegida.
+  encuadre?: { medir: () => number; guardar: (x: number, y: number) => Promise<void> };
   etiqueta?: string;
   idioma?: "es" | "en";
   children: ReactNode;
@@ -28,6 +33,7 @@ export default function MenuFoto({
   const en = idioma === "en";
   const [abierto, setAbierto] = useState(false);
   const [viendo, setViendo] = useState(false);
+  const [encuadrando, setEncuadrando] = useState<number | null>(null);
   const tomar = useRef<HTMLInputElement>(null);
   const subir = useRef<HTMLInputElement>(null);
   const caja = useRef<HTMLDivElement>(null);
@@ -81,6 +87,11 @@ export default function MenuFoto({
       {url && (
         <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); setAbierto(false); setViendo(true); }}>
           <span aria-hidden="true">👁</span> {en ? "View photo" : "Ver foto"}
+        </button>
+      )}
+      {url && encuadre && (
+        <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); setAbierto(false); setEncuadrando(encuadre.medir()); }}>
+          <span aria-hidden="true">✥</span> {en ? "Frame photo" : "Encuadrar foto"}
         </button>
       )}
       <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); tomar.current?.click(); }}>
@@ -145,6 +156,8 @@ export default function MenuFoto({
       <input ref={tomar} type="file" accept="image/*" capture="environment" hidden onClick={(e) => e.stopPropagation()} onChange={archivo} />
       <input ref={subir} type="file" accept="image/*" hidden onClick={(e) => e.stopPropagation()} onChange={archivo} />
 
+      {encuadrando !== null && url && encuadre && <Encuadrador url={url} proporcion={encuadrando} guardar={encuadre.guardar} cerrar={() => setEncuadrando(null)} />}
+
       {viendo && url && createPortal(
         <div
           onClick={(e) => {
@@ -155,7 +168,7 @@ export default function MenuFoto({
           style={{ position: "fixed", inset: 0, zIndex: 95, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0, 0, 0, 0.8)" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="" style={{ maxWidth: "100%", maxHeight: "90dvh", borderRadius: 16 }} />
+          <img src={sinEncuadre(url)} alt="" style={{ maxWidth: "100%", maxHeight: "90dvh", borderRadius: 16 }} />
         </div>,
         document.body,
       )}

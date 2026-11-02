@@ -1,6 +1,8 @@
 // Fotos de la app. Las imágenes van en public/fotos. Si un archivo no existe,
 // se ve el degradado de color de debajo, así que nunca queda un hueco vacío.
 
+import type { CSSProperties } from "react";
+
 export type FotoNombre = "portada" | "inicio" | "calistenia" | "pino" | "personal" | "online" | "progreso";
 
 // Color liso de cada foto: se ve si la foto no carga y, en tarjetas con color, tiñe la foto.
@@ -24,6 +26,32 @@ export function fondoFoto(nombre: FotoNombre, propia?: string | null, esperando 
   const foto = esperando ? null : propia ? `url("${propia}")` : `url(/fotos/${nombre}-v2.webp)`;
   const capas = [foto, DEGRADADOS[nombre]];
   return [VELO, ...capas.filter(Boolean)].join(", ");
+}
+
+// El encuadre de una foto de tarjeta se guarda al final de su dirección: «…jpg#e=30,70» (posición en % de ancho y alto).
+const ENCUADRE = /#e=(d{1,3}),(d{1,3})$/;
+
+export function sinEncuadre(url: string): string {
+  return url.replace(ENCUADRE, "");
+}
+
+export function encuadreDeFoto(url?: string | null): { x: number; y: number } {
+  const m = url?.match(ENCUADRE);
+  return m ? { x: Math.min(100, Number(m[1])), y: Math.min(100, Number(m[2])) } : { x: 50, y: 50 };
+}
+
+export function conEncuadre(url: string, x: number, y: number): string {
+  const base = sinEncuadre(url);
+  return x === 50 && y === 50 ? base : `${base}#e=${Math.round(x)},${Math.round(y)}`;
+}
+
+// Fondo de una tarjeta con su foto propia ya encuadrada (si se ha encuadrado).
+export function estiloFoto(nombre: FotoNombre, propia?: string | null, esperando = false): CSSProperties {
+  const e = encuadreDeFoto(propia);
+  return {
+    backgroundImage: fondoFoto(nombre, propia, esperando),
+    ...(propia && ENCUADRE.test(propia) ? { backgroundPosition: `center, ${e.x}% ${e.y}%, center` } : {}),
+  };
 }
 
 // Qué foto lleva cada tipo de clase, según su nombre.

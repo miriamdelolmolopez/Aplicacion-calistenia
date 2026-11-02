@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
+import { conEncuadre, sinEncuadre } from "@/lib/fotos";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type ResultadoFoto = { ok: boolean; url?: string | null; error?: string };
@@ -43,9 +44,10 @@ async function guardarUrl(destino: Destino, id: string, url: string | null): Pro
 }
 
 async function borrarArchivo(url: string | null) {
-  const i = url?.indexOf(MARCA) ?? -1;
-  if (!url || i < 0) return;
-  await createAdminClient().storage.from("fotos").remove([decodeURIComponent(url.slice(i + MARCA.length))]);
+  const limpia = url ? sinEncuadre(url) : null;
+  const i = limpia?.indexOf(MARCA) ?? -1;
+  if (!limpia || i < 0) return;
+  await createAdminClient().storage.from("fotos").remove([decodeURIComponent(limpia.slice(i + MARCA.length))]);
 }
 
 function repasar() {
@@ -83,6 +85,18 @@ export async function cambiarFotoApp(formData: FormData): Promise<ResultadoFoto>
     return { ok: false, error: "No se ha podido guardar la foto." };
   }
   await borrarArchivo(antes);
+  repasar();
+  return { ok: true, url };
+}
+
+// Encuadre de la foto de una tarjeta: qué parte se ve (posición en % de ancho y alto). Se guarda junto a la foto.
+export async function guardarEncuadreFoto(id: string, x: number, y: number): Promise<ResultadoFoto> {
+  await requireAdmin();
+  if (!id || !Number.isFinite(x) || !Number.isFinite(y)) return { ok: false, error: "Encuadre no válido." };
+  const actual = await urlActual("card", id);
+  if (!actual) return { ok: false, error: "Esta tarjeta no tiene foto propia." };
+  const url = conEncuadre(actual, Math.min(100, Math.max(0, x)), Math.min(100, Math.max(0, y)));
+  if (!(await guardarUrl("card", id, url))) return { ok: false, error: "No se ha podido guardar." };
   repasar();
   return { ok: true, url };
 }
