@@ -32,47 +32,45 @@ function cuando(fecha: string, hora: string): { instante: Date } | { error: stri
   return { instante: d };
 }
 
-// «Nuevo guiado»: se elige la tarifa o el bono y se cobra (o se asigna sin cobrar, o se cobra un pago pendiente).
+// «Nuevo pago»: se elige la tarifa y se cobra (o se asigna sin cobrar, dejando el pago pendiente).
 export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<Estado> {
   const { user } = await requireAdmin();
   const userId = String(formData.get("userId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
   const descuento = String(formData.get("descuento") ?? "");
   const metodo = String(formData.get("metodo") ?? "");
-  const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
-  const pendienteId = String(formData.get("pendienteId") ?? "");
-  const sinCobrar = formData.get("sinCobrar") === "on" && !pendienteId;
+  const sinCobrar = formData.get("sinCobrar") === "on";
+  const mes = Number(formData.get("mes"));
+  const anio = Number(formData.get("anio"));
+  const fin = String(formData.get("fin") ?? "").trim();
   if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
-  if (!pendienteId && !UUID.test(tipo)) return { error: "Elige qué va a pagar." };
+  if (!UUID.test(tipo)) return { error: "Elige qué va a pagar." };
   if (!(await formaActiva(metodo))) return { error: "Elige la forma de pago." };
+  if (!(mes >= 1 && mes <= 12) || !(anio >= 2000 && anio <= 2100)) return { error: "El mes o el año al que corresponde no son válidos." };
+
+  const importe = aCentimos(String(formData.get("importe") ?? ""));
+  if (!Number.isFinite(importe) || importe < 0) return { error: "El importe no es válido." };
 
   const c = cuando(String(formData.get("fecha") ?? "").trim(), String(formData.get("hora") ?? "").trim());
   if ("error" in c) return { error: c.error };
-  const periodo = mesMadrid(c.instante);
+  const periodo = `${anio}-${String(mes).padStart(2, "0")}`;
+  const hastaFin = fin ? instanteMadrid(fin, "23:59") : null;
+  if (fin && !hastaFin) return { error: "La fecha de fin no es válida." };
+  if (hastaFin && hastaFin.getTime() <= c.instante.getTime()) return { error: "La fecha de fin tiene que ser posterior al día del pago." };
   const admin = createAdminClient();
 
-  // Cobrar un pago que ya estaba pendiente.
-  if (pendienteId) {
-    const { data: p } = await admin.from("pagos").select("id, user_id").eq("id", pendienteId).maybeSingle();
-    if (!p || p.user_id !== userId) return { error: "No se ha encontrado ese pago." };
-    const { error } = await admin.rpc("cobrar_pago", { p_pago: pendienteId, p_pagado_en: c.instante.toISOString(), p_metodo: metodo, p_periodo: periodo, p_nota: nota, p_admin: user.id });
-    if (error) return { error: error.message };
-    refrescar(userId);
-    return { mensaje: "Pago pendiente cobrado." };
-  }
-
-  // Si esa persona tiene un precio fijo personalizado para esta tarifa, se usa ese.
-  const { data: personalizado } = await admin.from("precios_personalizados").select("precio_centimos").eq("user_id", userId).eq("tipo_bono_id", tipo).maybeSingle();
+  const { data: tarifa } = await admin.from("tipos_bono").select("precio_centimos").eq("id", tipo).maybeSingle();
+  if (!tarifa) return { error: "No se ha encontrado esa tarifa." };
 
   const { data: bonoId, error } = await admin.rpc("crear_bono", {
     p_user: userId,
     p_tipo: tipo,
     p_metodo: metodo,
     p_pagado: !sinCobrar,
-    p_nota: nota,
+    p_nota: "",
     p_admin: user.id,
     p_descuento: descuento || null,
-    ...(personalizado ? { p_precio: personalizado.precio_centimos as number } : {}),
+    ...(importe !== (tarifa.precio_centimos as number) ? { p_precio: importe } : {}),
   });
   if (error) return { error: error.message };
 
@@ -82,6 +80,16 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
       .from("pagos")
       .update(sinCobrar ? { periodo } : { pagado_en: c.instante.toISOString(), periodo })
       .eq("bono_id", bonoId as string);
+    // Fecha de fin elegida: se aplica a lo que ya está en marcha (lo que queda en espera toma su fecha al empezar).
+    if (hastaFin) {
+      await admin
+        .from("bonos")
+        .update({ caduca_en: hastaFin.toISOString() })
+        .eq("user_id", userId)
+        .eq("tipo_bono_id", tipo)
+        .eq("estado", "activo")
+        .gte("creado_en", new Date(Date.now() - 60_000).toISOString());
+    }
   }
 
   refrescar(userId);

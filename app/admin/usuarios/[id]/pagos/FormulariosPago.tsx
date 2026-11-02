@@ -83,6 +83,14 @@ function SelectorForma({ formas, id }: { formas: FormaOpcion[]; id: string }) {
 }
 
 // ---------------------------------------------------------------------------------------------
+const MESES_NOMBRE = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+// Suma días a una fecha AAAA-MM-DD.
+function masDias(fecha: string, dias: number): string {
+  const [a, m, d] = fecha.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1, d + dias)).toISOString().slice(0, 10);
+}
+
 export function FormGuiado({
   userId,
   hoy,
@@ -91,9 +99,6 @@ export function FormGuiado({
   tipos,
   descuentos,
   ultimoTipoId,
-  creditos,
-  pendientes,
-  precios,
 }: {
   userId: string;
   hoy: string;
@@ -102,151 +107,150 @@ export function FormGuiado({
   tipos: TipoPago[];
   descuentos: DescuentoOpcion[];
   ultimoTipoId: string | null;
-  creditos: Record<string, number>;
-  pendientes: PendienteOpcion[];
-  precios: Record<string, number>; // precio fijo personalizado por tarifa (céntimos)
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(pagoGuiado, {});
   const [tipoId, setTipoId] = useState(ultimoTipoId && tipos.some((t) => t.id === ultimoTipoId) ? ultimoTipoId : (tipos[0]?.id ?? ""));
   const [descuentoId, setDescuentoId] = useState("");
   const [fecha, setFecha] = useState(hoy);
+  const [mes, setMes] = useState<number | null>(null);
+  const [anio, setAnio] = useState<number | null>(null);
+  const [importeTexto, setImporteTexto] = useState<string | null>(null);
+  const [fin, setFin] = useState<string | null>(null);
   const [sinCobrar, setSinCobrar] = useState(false);
-  const [cobrarPend, setCobrarPend] = useState(true);
+  const [info, setInfo] = useState(false);
 
   const tipo = tipos.find((t) => t.id === tipoId);
-  const pend = pendientes.find((p) => p.tipoId === tipoId);
-  const usaPendiente = !!pend && cobrarPend;
   const d = descuentos.find((x) => x.id === descuentoId);
-  const personalizado = tipo ? precios[tipo.id] : undefined;
-  const precio = personalizado ?? tipo?.precio ?? 0;
-  const rebaja = tipo && d && !usaPendiente ? (d.tipo === "porcentaje" ? Math.round((precio * d.valor) / 100) : Math.min(d.valor, precio)) : 0;
-  const total = usaPendiente && pend ? pend.importe : precio - rebaja;
-  const base = tipo ? Math.round(total / (1 + tipo.iva / 100)) : 0;
-  const antes = tipo ? (creditos[tipo.servicio] ?? 0) : 0;
-  const despues = usaPendiente ? antes : antes + (tipo?.clases ?? 0);
-  const textoBoton = usaPendiente ? "Cobrar el pago pendiente" : sinCobrar ? "Asignar sin cobrar" : "Añadir pago";
+  const importeValor = importeTexto ?? ((tipo?.precio ?? 0) / 100).toFixed(2).replace(".", ",");
+  const importe = Math.round(Number(importeValor.replace(",", ".")) * 100) || 0;
+  const rebaja = d ? (d.tipo === "porcentaje" ? Math.round((importe * d.valor) / 100) : Math.min(d.valor, importe)) : 0;
+  const mesValor = mes ?? Number(fecha.slice(5, 7));
+  const anioValor = anio ?? Number(fecha.slice(0, 4));
+  const finValor = fin ?? (fecha && tipo ? masDias(fecha, tipo.validez) : "");
+  const anioActual = Number(hoy.slice(0, 4));
 
   return (
-    <div className={estilos.guiado}>
-      <form action={accion} className={styles.tarjeta}>
-        <input type="hidden" name="userId" value={userId} />
-        <input type="hidden" name="pendienteId" value={usaPendiente && pend ? pend.id : ""} />
+    <form action={accion} className={styles.tarjeta}>
+      <input type="hidden" name="userId" value={userId} />
 
+      <div className={styles.campo}>
+        <label htmlFor="pg-tipo">¿Qué pagará?</label>
+        <select
+          id="pg-tipo"
+          name="tipo"
+          value={tipoId}
+          onChange={(e) => {
+            setTipoId(e.target.value);
+            setImporteTexto(null);
+            setFin(null);
+          }}
+          required
+        >
+          {tipos.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.nombre} · {euros(t.precio)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={estilos.dos}>
         <div className={styles.campo}>
-          <label htmlFor="pg-tipo">¿Qué pagará?</label>
-          <select id="pg-tipo" name="tipo" value={tipoId} onChange={(e) => setTipoId(e.target.value)} required>
-            {tipos.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.nombre} · {euros(precios[t.id] ?? t.precio)}
-                {precios[t.id] !== undefined ? " (precio personalizado)" : ""}
+          <label htmlFor="pg-fecha">Día del pago</label>
+          <input id="pg-fecha" name="fecha" type="date" value={fecha} max={hoy} onChange={(e) => { setFecha(e.target.value); setMes(null); setAnio(null); setFin(null); }} />
+        </div>
+        <div className={styles.campo}>
+          <label htmlFor="pg-hora">Hora del pago</label>
+          <input id="pg-hora" name="hora" type="time" defaultValue={ahora} />
+        </div>
+      </div>
+
+      <div className={estilos.dos}>
+        <div className={styles.campo}>
+          <label htmlFor="pg-mes">Corresponde al mes</label>
+          <select id="pg-mes" name="mes" value={mesValor} onChange={(e) => setMes(Number(e.target.value))}>
+            {MESES_NOMBRE.map((n, i) => (
+              <option key={n} value={i + 1}>
+                {n.charAt(0).toUpperCase() + n.slice(1)}
               </option>
             ))}
           </select>
-          {personalizado !== undefined && !usaPendiente && <span className={styles.ayuda}>Tiene un precio fijo personalizado para esta tarifa: {euros(personalizado)} en vez de {euros(tipo?.precio ?? 0)}.</span>}
         </div>
-
-        {pend && (
-          <div className={estilos.opciones}>
-            <label className={`${estilos.opcion} ${cobrarPend ? estilos.opcionMarcada : ""}`}>
-              <input type="radio" checked={cobrarPend} onChange={() => setCobrarPend(true)} />
-              <span>
-                <b>Cobrar el pago pendiente de {euros(pend.importe)}</b>
-                <small>Ya tiene esta tarifa asignada sin cobrar. Se marca como cobrado.</small>
-              </span>
-            </label>
-            <label className={`${estilos.opcion} ${!cobrarPend ? estilos.opcionMarcada : ""}`}>
-              <input type="radio" checked={!cobrarPend} onChange={() => setCobrarPend(false)} />
-              <span>
-                <b>Crear un pago nuevo</b>
-                <small>Se le añade otra tarifa igual (por ejemplo, la del mes siguiente).</small>
-              </span>
-            </label>
-          </div>
-        )}
-
-        {!usaPendiente && descuentos.length > 0 && (
-          <div className={styles.campo}>
-            <label htmlFor="pg-desc">Descuento (opcional)</label>
-            <select id="pg-desc" name="descuento" value={descuentoId} onChange={(e) => setDescuentoId(e.target.value)}>
-              <option value="">Sin descuento</option>
-              {descuentos.map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.texto}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <SelectorForma formas={formas} id="pg" />
-
-        <div className={estilos.dos}>
-          <div className={styles.campo}>
-            <label htmlFor="pg-fecha">Día del pago</label>
-            <input id="pg-fecha" name="fecha" type="date" value={fecha} max={hoy} onChange={(e) => setFecha(e.target.value)} />
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor="pg-hora">Hora</label>
-            <input id="pg-hora" name="hora" type="time" defaultValue={ahora} />
-          </div>
-        </div>
-
-        {!usaPendiente && (
-          <label className={styles.casilla}>
-            <input type="checkbox" name="sinCobrar" checked={sinCobrar} onChange={(e) => setSinCobrar(e.target.checked)} />
-            Asignar la tarifa sin cobrar (el pago queda pendiente)
-          </label>
-        )}
-
         <div className={styles.campo}>
-          <label htmlFor="pg-nota">Nota (opcional)</label>
-          <input id="pg-nota" name="nota" maxLength={200} />
+          <label htmlFor="pg-anio">Corresponde al año</label>
+          <select id="pg-anio" name="anio" value={anioValor} onChange={(e) => setAnio(Number(e.target.value))}>
+            {[anioActual - 2, anioActual - 1, anioActual, anioActual + 1].map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
         </div>
+      </div>
 
-        <Mensajes estado={estado} />
-        <button type="submit" className={styles.boton} disabled={pendiente || !tipo}>
-          {pendiente ? "Guardando…" : textoBoton}
-        </button>
-      </form>
+      <div className={styles.campo}>
+        <label htmlFor="pg-importe">Importe (€, IVA incluido)</label>
+        <input id="pg-importe" name="importe" inputMode="decimal" value={importeValor} onChange={(e) => setImporteTexto(e.target.value)} required />
+        {tipo && importe !== tipo.precio && <span className={styles.ayuda}>El precio de la tarifa es {euros(tipo.precio)}.</span>}
+      </div>
 
-      <aside className={estilos.resumen} aria-label="Resumen del pago">
-        <h3>Resumen</h3>
-        <div>
-          <span>El pago corresponde a</span>
-          <b>{mesTexto(fecha ? fecha.slice(0, 7) : null)}</b>
-        </div>
-        <div>
-          <span>Importe</span>
-          <b>
-            {euros(total)}
-            {rebaja > 0 && <small> (descuento −{euros(rebaja)})</small>}
-          </b>
-          {tipo && (
-            <small>
-              base {euros(base)} + IVA {euros(total - base)} ({tipo.iva} %)
-            </small>
+      <SelectorForma formas={formas} id="pg" />
+
+      <div className={styles.campo}>
+        <label htmlFor="pg-fin">Fecha de fin</label>
+        <input id="pg-fin" name="fin" type="date" value={finValor} min={fecha} onChange={(e) => setFin(e.target.value)} />
+        <span className={styles.ayuda}>Hasta cuándo dura. Por defecto, los días de validez de la tarifa.</span>
+      </div>
+
+      {descuentos.length > 0 && (
+        <div className={styles.campo}>
+          <label htmlFor="pg-desc">Aplicar un descuento</label>
+          <select id="pg-desc" name="descuento" value={descuentoId} onChange={(e) => setDescuentoId(e.target.value)}>
+            <option value="">Sin descuento</option>
+            {descuentos.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.texto}
+              </option>
+            ))}
+          </select>
+          {rebaja > 0 && (
+            <span className={styles.ayuda}>
+              Descuento −{euros(rebaja)}: total {euros(importe - rebaja)}.
+            </span>
           )}
         </div>
-        {tipo && tipo.servicio !== "online" && (
-          <div>
-            <span>Créditos</span>
-            <b>
-              {antes} → {despues}
-            </b>
-          </div>
+      )}
+
+      <div>
+        <label className={styles.casilla}>
+          <input type="checkbox" name="sinCobrar" checked={sinCobrar} onChange={(e) => setSinCobrar(e.target.checked)} />
+          Asignar tarifa sin cobrar (el pago queda pendiente)
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setInfo((v) => !v);
+            }}
+            aria-expanded={info}
+            aria-label="¿Qué significa esta casilla?"
+            title="¿Qué significa?"
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, marginLeft: 8, font: "inherit", fontWeight: 700, fontSize: "0.85rem", color: "var(--acento-oscuro)", background: "transparent", border: "1.5px solid var(--acento)", borderRadius: "50%", cursor: "pointer" }}
+          >
+            i
+          </button>
+        </label>
+        {info && (
+          <p className={styles.ayuda} role="note" style={{ margin: "8px 0 0" }}>
+            Si la marcas, la persona recibe la tarifa ya (puede reservar o entrenar), pero el dinero no se da por cobrado: el pago queda como «pendiente» y lo cobras después desde el Historial. Si no la marcas, el pago se registra como cobrado ahora.
+          </p>
         )}
-        {tipo && tipo.servicio === "online" && (
-          <div>
-            <span>Plan online</span>
-            <b>{tipo.validez} días</b>
-          </div>
-        )}
-        <div>
-          <span>Estado</span>
-          <b>{usaPendiente || !sinCobrar ? "Se cobra ahora" : "Pendiente de cobrar"}</b>
-        </div>
-      </aside>
-    </div>
+      </div>
+
+      <Mensajes estado={estado} />
+      <button type="submit" className={styles.boton} disabled={pendiente || !tipo}>
+        {pendiente ? "Guardando…" : sinCobrar ? "Asignar sin cobrar" : "Añadir pago"}
+      </button>
+    </form>
   );
 }
 

@@ -7,14 +7,13 @@ import { formasActivas, nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../../../admin.module.css";
 import estilos from "../../usuarios.module.css";
-import { FormGuiado, FormManual, HistorialPersona, PreciosPersonalizados, type FilaPagoPersona } from "./FormulariosPago";
+import { FormGuiado, HistorialPersona, type FilaPagoPersona } from "./FormulariosPago";
 
 export const metadata = { title: "Pagos de la persona · Administración" };
 
 const PESTANAS = [
-  { id: "guiado", texto: "Nuevo guiado" },
+  { id: "nuevo", texto: "Nuevo pago" },
   { id: "historial", texto: "Historial" },
-  { id: "manual", texto: "Nuevo manual" },
 ] as const;
 type Pestana = (typeof PESTANAS)[number]["id"];
 
@@ -38,7 +37,7 @@ type DescuentoFila = { id: string; nombre: string; tipo: string; valor: number; 
 export default async function PagosPersona({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string }> }) {
   const { id } = await params;
   const { pestana: pedida } = await searchParams;
-  const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "guiado";
+  const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "nuevo";
   await requireAdmin();
   const admin = createAdminClient();
   const [formas, METODOS] = await Promise.all([formasActivas(), nombresFormas()]);
@@ -49,7 +48,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
 
   await admin.rpc("refrescar_bonos", { p_user: id });
 
-  const [{ data: tiposDatos }, { data: bonosDatos }, { data: pagosDatos }, { data: descuentosDatos }, { data: preciosDatos }] = await Promise.all([
+  const [{ data: tiposDatos }, { data: bonosDatos }, { data: pagosDatos }, { data: descuentosDatos }] = await Promise.all([
     admin.from("tipos_bono").select("id, nombre, servicio, precio_centimos, iva_porcentaje, clases, validez_dias").eq("activo", true).order("servicio").order("orden"),
     admin.from("bonos").select("id, servicio, estado, clases_restantes, tipo_bono_id, caduca_en, creado_en, tipos_bono(nombre)").eq("user_id", id).order("creado_en", { ascending: false }),
     admin
@@ -58,9 +57,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
       .eq("user_id", id)
       .order("creado_en", { ascending: false }),
     admin.from("descuentos").select("id, nombre, tipo, valor, caduca_en, usos_max, pagos(estado)").eq("activo", true).order("nombre"),
-    admin.from("precios_personalizados").select("tipo_bono_id, precio_centimos").eq("user_id", id),
   ]);
-  const precios: Record<string, number> = Object.fromEntries(((preciosDatos ?? []) as { tipo_bono_id: string; precio_centimos: number }[]).map((x) => [x.tipo_bono_id, x.precio_centimos]));
   const tipos = (tiposDatos ?? []) as Tipo[];
   const bonos = (bonosDatos ?? []) as unknown as BonoFila[];
   const pagos = (pagosDatos ?? []) as unknown as PagoFila[];
@@ -108,10 +105,6 @@ export default async function PagosPersona({ params, searchParams }: { params: P
     };
   });
 
-  const bonosOpcion = bonos
-    .filter((b) => b.estado === "activo" || b.estado === "en_cola")
-    .map((b) => ({ id: b.id, texto: `${b.tipos_bono?.nombre ?? "Bono"} · ${b.estado === "activo" ? "activo" : "en espera"} · ${b.clases_restantes} clases` }));
-
   return (
     <main className={styles.pagina}>
       <header className={styles.barra}>
@@ -135,7 +128,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
         ))}
       </nav>
 
-      {pestana === "guiado" && (
+      {pestana === "nuevo" && (
         <FormGuiado
           userId={id}
           hoy={hoy}
@@ -143,9 +136,6 @@ export default async function PagosPersona({ params, searchParams }: { params: P
           formas={formas}
           descuentos={descuentos}
           ultimoTipoId={bonos[0]?.tipo_bono_id ?? null}
-          creditos={creditos}
-          pendientes={pendientes}
-          precios={precios}
           tipos={tiposPago}
         />
       )}
@@ -157,19 +147,6 @@ export default async function PagosPersona({ params, searchParams }: { params: P
         </section>
       )}
 
-      {pestana === "manual" && (
-        <FormManual
-          userId={id}
-          hoy={hoy}
-          ahora={ahora}
-          formas={formas}
-          bonos={bonosOpcion}
-          tipos={tiposPago}
-          precios={precios}
-        />
-      )}
-
-      <PreciosPersonalizados userId={id} tipos={tiposPago} precios={precios} />
     </main>
   );
 }
