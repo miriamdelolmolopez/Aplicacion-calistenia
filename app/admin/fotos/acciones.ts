@@ -144,6 +144,18 @@ export async function anadirFotoGaleria(formData: FormData): Promise<ResultadoFo
   return { ok: true, url };
 }
 
+export async function guardarEncuadreGaleria(clave: string, x: number, y: number): Promise<ResultadoFoto> {
+  await requireAdmin();
+  if (!/^(portada|inicio)(:[a-z0-9]+)?$/.test(clave) || !Number.isFinite(x) || !Number.isFinite(y)) return { ok: false, error: "Foto no válida." };
+  const admin = createAdminClient();
+  const { data } = await admin.from("fotos_app").select("url").eq("clave", clave).maybeSingle();
+  if (!data?.url) return { ok: false, error: "No se ha encontrado la foto." };
+  const url = conEncuadre(data.url, Math.min(100, Math.max(0, x)), Math.min(100, Math.max(0, y)));
+  if ((await admin.from("fotos_app").update({ url }).eq("clave", clave)).error) return { ok: false, error: "No se ha podido guardar." };
+  repasar();
+  return { ok: true, url };
+}
+
 export async function quitarFotoGaleria(clave: string): Promise<ResultadoFoto> {
   await requireAdmin();
   if (!/^(portada|inicio)(:[a-z0-9]+)?$/.test(clave)) return { ok: false, error: "Foto no válida." };

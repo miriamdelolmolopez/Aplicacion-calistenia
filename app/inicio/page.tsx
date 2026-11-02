@@ -21,7 +21,7 @@ import AvisoVistaAlumna from "../AvisoVistaAlumna";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
-import { fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
+import { estiloFoto, fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
 import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
@@ -216,7 +216,7 @@ export default function Inicio() {
           </span>
           <div
             className={clay.bannerFoto}
-            style={{ backgroundImage: fondoFoto(azar?.foto ?? "inicio", fotoBannerInicio ?? propiaInicio, !fotosListas) }}
+            style={estiloFoto(azar?.foto ?? "inicio", propiaInicio ?? fotoBannerInicio, !fotosListas)}
             aria-hidden="true"
           />
         </section>

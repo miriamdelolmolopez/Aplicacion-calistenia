@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { anadirFotoGaleria, quitarFotoGaleria } from "./acciones";
+import Encuadrador from "../../Encuadrador";
+import { encuadreDeFoto, sinEncuadre } from "@/lib/fotos";
+import { anadirFotoGaleria, guardarEncuadreGaleria, quitarFotoGaleria } from "./acciones";
 import estilos from "./botonFoto.module.css";
 import { prepararFoto } from "./prepararFoto";
 
@@ -11,6 +13,7 @@ export default function GaleriaFotos({ destino, fotos }: { destino: "portada" | 
   const router = useRouter();
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [encuadrando, setEncuadrando] = useState<{ clave: string; url: string } | null>(null);
 
   async function anadir(e: React.ChangeEvent<HTMLInputElement>) {
     const archivo = e.target.files?.[0];
@@ -47,7 +50,10 @@ export default function GaleriaFotos({ destino, fotos }: { destino: "portada" | 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
         {fotos.map((f) => (
           <div key={f.clave} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <div className={estilos.mini} style={{ backgroundImage: `url(${f.url})` }} />
+            <div className={estilos.mini} style={{ backgroundImage: `url("${sinEncuadre(f.url)}")`, backgroundSize: "cover", backgroundPosition: `${encuadreDeFoto(f.url).x}% ${encuadreDeFoto(f.url).y}%` }} />
+            <button type="button" className={estilos.boton} disabled={trabajando} onClick={() => setEncuadrando(f)}>
+              Encuadrar
+            </button>
             <button type="button" className={estilos.boton} disabled={trabajando} onClick={() => quitar(f.clave)}>
               Quitar
             </button>
@@ -60,6 +66,18 @@ export default function GaleriaFotos({ destino, fotos }: { destino: "portada" | 
       </label>
       {fotos.length > 1 && <p style={{ margin: 0, fontSize: "0.85rem" }}>Cada vez que alguien entra se enseña una de estas fotos al azar.</p>}
       {error && <p className={estilos.error}>{error}</p>}
+      {encuadrando && (
+        <Encuadrador
+          url={encuadrando.url}
+          proporcion={1.6}
+          guardar={async (x, y) => {
+            const r = await guardarEncuadreGaleria(encuadrando.clave, x, y);
+            if (!r.ok) setError(r.error ?? "No se ha podido guardar el encuadre.");
+            else router.refresh();
+          }}
+          cerrar={() => setEncuadrando(null)}
+        />
+      )}
     </div>
   );
 }
