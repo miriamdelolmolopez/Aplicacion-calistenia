@@ -115,6 +115,8 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["id"]>("todos");
   const [estadoFiltro, setEstadoFiltro] = useState<"todos" | "activos" | "inactivos">("todos");
   const [tarifa, setTarifa] = useState("");
+  // «auto»: tabla en ordenador y tarjetas en móvil, hasta que se elige una de las dos.
+  const [vista, setVista] = useState<"auto" | "lista" | "cards">("auto");
   const nombresTarifa = [...new Set(usuarios.flatMap((u) => u.tarifas))].sort((a, b) => a.localeCompare(b, "es"));
 
   const normal = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -178,12 +180,29 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
           ))}
         </div>
         </PanelFiltros>
-        <p className={styles.ayuda}>
-          {visibles.length} de {usuarios.length} {usuarios.length === 1 ? "persona" : "personas"}
-        </p>
+        <div className={estilos.contador}>
+          <p className={styles.ayuda} style={{ margin: 0 }}>
+            {visibles.length} de {usuarios.length} {usuarios.length === 1 ? "persona" : "personas"}
+          </p>
+          <div className={`${estilos.selectorVista} ${estilos[`vista_${vista}`]}`} role="group" aria-label="Forma de ver la lista">
+            <button type="button" className={estilos.botonLista} aria-label="Ver como lista" title="Lista" onClick={() => setVista("lista")}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+              </svg>
+            </button>
+            <button type="button" className={estilos.botonCards} aria-label="Ver como tarjetas" title="Tarjetas" onClick={() => setVista("cards")}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </section>
 
-      <div className={estilos.tablaCaja}>
+      <div className={`${estilos.tablaCaja} ${estilos[`vista_${vista}`]}`}>
         <table className={estilos.tabla}>
           <thead>
             <tr>
@@ -237,7 +256,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
         </table>
       </div>
 
-      <ul className={estilos.lista}>
+      <ul className={`${estilos.lista} ${estilos[`vista_${vista}`]}`}>
         {visibles.map((u) => {
           const r = resumen(u);
           return (

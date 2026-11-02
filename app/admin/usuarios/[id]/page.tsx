@@ -10,7 +10,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Avatar from "../../../Avatar";
 import Medidas from "../../../perfil/Medidas";
 import Progreso from "../../../progreso/Progreso";
-import EditorPersona from "../../EditorPersona";
 import styles from "../../admin.module.css";
 import estilos from "../usuarios.module.css";
 import { EditorBono } from "../../bonos/Controles";
@@ -393,15 +392,6 @@ export default async function FichaUsuario({
                 <dd>{p.idioma === "en" ? "Inglés" : "Español"}</dd>
               </div>
             </dl>
-            <h3 style={{ margin: "14px 0 0" }}>Tipo de cuenta, servicios y enlace de acceso</h3>
-            <EditorPersona
-                persona={{
-                  id: p.id,
-                  email: p.email ?? "",
-                  rol: p.rol,
-                  servicios: (p.perfil_servicios as { servicio: string }[]).map((s) => s.servicio),
-                }}
-              />
           </section>
 
           <Link href={`/admin/usuarios/${p.id}/textos-legales`} className={estilos.tarjetaEnlace}>

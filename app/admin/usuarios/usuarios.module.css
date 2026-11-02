@@ -203,8 +203,72 @@
     border-radius: 20px;
   }
 
-  .lista {
+  .lista.vista_auto {
     display: none;
+  }
+}
+
+/* Vista elegida a mano */
+.tablaCaja.vista_lista {
+  display: block;
+  overflow-x: auto;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 20px;
+}
+
+.lista.vista_lista {
+  display: none;
+}
+
+.tablaCaja.vista_cards {
+  display: none;
+}
+
+.contador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selectorVista {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--blanco);
+  border: 1px solid var(--carbon);
+  border-radius: 999px;
+}
+
+.selectorVista button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 36px;
+  color: var(--carbon);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.vista_lista .botonLista,
+.vista_cards .botonCards,
+.vista_auto .botonCards {
+  color: var(--acento-oscuro);
+  background: rgba(10, 168, 192, 0.18);
+}
+
+@media (min-width: 1024px) {
+  .vista_auto .botonCards {
+    color: var(--carbon);
+    background: transparent;
+  }
+
+  .vista_auto .botonLista {
+    color: var(--acento-oscuro);
+    background: rgba(10, 168, 192, 0.18);
   }
 }
 
