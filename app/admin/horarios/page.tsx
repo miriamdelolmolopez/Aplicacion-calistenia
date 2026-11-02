@@ -27,7 +27,7 @@ type Item = {
 type Plantilla = { id: string; nombre: string; principal: boolean; plantilla_clases: Item[] };
 
 export default async function Horarios() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("presenciales");
 
   const { data } = await supabase
     .from("plantillas_horario")

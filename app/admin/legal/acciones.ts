@@ -33,7 +33,7 @@ function nombreVersion(): string {
 // «nueva»: publica una versión nueva y todas las personas tendrán que aceptarla para seguir usando la app
 // (solo para la política de privacidad y los términos).
 export async function guardarTextoLegal(documento: string, contenido: string, modo: "menor" | "nueva"): Promise<ResultadoLegal> {
-  await requireAdmin();
+  await requireAdmin("legal");
   if (!(DOCUMENTOS as readonly string[]).includes(documento)) return { ok: false, error: "Documento no válido." };
   const doc = documento as Documento;
   const texto = contenido.replace(/\r\n/g, "\n").trim() + "\n";

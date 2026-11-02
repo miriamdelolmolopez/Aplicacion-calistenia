@@ -37,7 +37,7 @@ function leer(formData: FormData): Campos | { error: string } {
 
 // Crea un taller: un tipo «taller» (si no existe ya con ese nombre) y su clase con el día, la hora y el lugar.
 export async function crearTaller(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("talleres");
   const c = leer(formData);
   if ("error" in c) return { error: c.error };
 
@@ -71,7 +71,7 @@ export async function crearTaller(_previo: Estado, formData: FormData): Promise<
 
 // Cambia los datos de un taller ya creado.
 export async function editarTaller(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("talleres");
   const id = String(formData.get("sesionId") ?? "");
   if (!UUID.test(id)) return { error: "No se ha encontrado el taller." };
   const c = leer(formData);

@@ -8,7 +8,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Registro · Administración" };
 
 export default async function Registro() {
-  await requireAdmin();
+  await requireAdmin("registro");
   const abierto = await registroAbierto();
 
   return (

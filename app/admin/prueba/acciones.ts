@@ -17,7 +17,7 @@ async function guardar(filas: { clave: string; valor: string }[]): Promise<boole
 
 // Crea el código del link (queda apagado hasta que lo actives).
 export async function crearLink(): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const ok = await guardar([
     { clave: "prueba_codigo", valor: generarCodigo() },
     { clave: "prueba_activa", valor: "false" },
@@ -27,21 +27,21 @@ export async function crearLink(): Promise<Estado> {
 
 // Enciende o apaga el link. Apagado, quien lo abre ve «Este enlace no está disponible».
 export async function cambiarActivo(valor: boolean): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const ok = await guardar([{ clave: "prueba_activa", valor: valor ? "true" : "false" }]);
   return ok ? { mensaje: valor ? "Link activado: ya se puede usar." : "Link apagado: nadie puede usarlo." } : { error: "No se ha podido guardar." };
 }
 
 // Cambia el código: el link anterior deja de funcionar.
 export async function nuevoCodigo(): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const ok = await guardar([{ clave: "prueba_codigo", valor: generarCodigo() }]);
   return ok ? { mensaje: "Código nuevo creado. El link anterior ya no funciona." } : { error: "No se ha podido cambiar el código." };
 }
 
 // Abre o cierra el registro de la app. Cerrado, solo entra quien tú das de alta o quien llega con el link de prueba.
 export async function cambiarRegistro(valor: boolean): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const ok = await guardar([{ clave: "registro_abierto", valor: valor ? "true" : "false" }]);
   return ok
     ? { mensaje: valor ? "Registro abierto: cualquiera puede crear una cuenta." : "Registro cerrado: solo entra quien tú das de alta o llega con el link de prueba." }

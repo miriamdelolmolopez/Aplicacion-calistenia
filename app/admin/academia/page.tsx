@@ -10,7 +10,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Cursos · Administración" };
 
 export default async function AdministrarAcademia() {
-  await requireAdmin();
+  await requireAdmin("academia");
 
   const { data } = await createAdminClient().from("cursos").select(COLUMNAS_CURSO).order("creado_en", { ascending: false });
   const cursos = (data ?? []) as Curso[];

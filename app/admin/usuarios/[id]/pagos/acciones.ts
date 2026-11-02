@@ -34,7 +34,7 @@ function cuando(fecha: string, hora: string): { instante: Date } | { error: stri
 
 // «Nuevo pago»: se elige la tarifa y se cobra (o se asigna sin cobrar, dejando el pago pendiente).
 export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
   const descuento = String(formData.get("descuento") ?? "");
@@ -98,7 +98,7 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
 
 // Cobrar un pago pendiente desde el historial, con la fecha, hora y forma que se elijan.
 export async function cobrarPendiente(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const pagoId = String(formData.get("pagoId") ?? "");
   const metodo = String(formData.get("metodo") ?? "");
@@ -120,7 +120,7 @@ export async function cobrarPendiente(_previo: Estado, formData: FormData): Prom
 
 // Anular un pago (aunque ya esté cobrado). El bono no se toca: para quitarlo está «Quitar tarifa».
 export async function anularPagoPersona(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const pagoId = String(formData.get("pagoId") ?? "");
   const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
@@ -138,7 +138,7 @@ export async function anularPagoPersona(_previo: Estado, formData: FormData): Pr
 
 // «Nuevo manual»: un pago a mano (concepto e importe libres), con el mes al que corresponde y, si se quiere, sumar créditos o mover la fecha de fin de un bono.
 export async function pagoManual(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const concepto = String(formData.get("concepto") ?? "").trim().slice(0, 120);
   const importe = aCentimos(String(formData.get("importe") ?? ""));
@@ -200,7 +200,7 @@ export async function pagoManual(_previo: Estado, formData: FormData): Promise<E
 
 // Precio fijo personalizado: el precio de una tarifa para esta persona.
 export async function guardarPrecioPersonalizado(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
   const precio = aCentimos(String(formData.get("precio") ?? ""));
@@ -216,7 +216,7 @@ export async function guardarPrecioPersonalizado(_previo: Estado, formData: Form
 }
 
 export async function quitarPrecioPersonalizado(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
   if (!UUID.test(userId) || !UUID.test(tipo)) return { error: "No se ha encontrado ese precio." };
@@ -229,7 +229,7 @@ export async function quitarPrecioPersonalizado(_previo: Estado, formData: FormD
 // Editar un pago cobrado: día, hora, forma de pago, nota e importe.
 // Si el importe cambia y el pago ya tenía factura, se anula con su rectificativa y se crea otro pago con el importe nuevo (y su factura nueva).
 export async function editarPago(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const pagoId = String(formData.get("pagoId") ?? "");
   const metodo = String(formData.get("metodo") ?? "");

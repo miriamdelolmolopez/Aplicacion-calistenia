@@ -14,7 +14,7 @@ function fecha(iso: string): string {
 }
 
 export default async function EditarLegal({ params }: { params: Promise<{ doc: string }> }) {
-  await requireAdmin();
+  await requireAdmin("legal");
   const { doc } = await params;
   if (!(DOCUMENTOS as readonly string[]).includes(doc)) notFound();
   const documento = doc as Documento;

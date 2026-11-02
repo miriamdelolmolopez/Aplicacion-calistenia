@@ -5,7 +5,7 @@ import Hub from "../Hub";
 export const metadata = { title: "Clases presenciales · Administración" };
 
 export default async function Presenciales() {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const excluidas = await seccionesExcluidas();
   return (
     <Hub

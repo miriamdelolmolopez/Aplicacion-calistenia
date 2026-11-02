@@ -48,7 +48,7 @@ function nombreDe(p: Persona | null) {
 }
 
 export default async function EditarRutina({ params }: { params: Promise<{ id: string }> }) {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("online");
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 

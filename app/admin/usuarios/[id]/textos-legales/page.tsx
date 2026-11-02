@@ -18,7 +18,7 @@ const TITULOS: Record<string, string> = {
 
 export default async function TextosLegalesPersona({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireAdmin();
+  await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const admin = createAdminClient();
 

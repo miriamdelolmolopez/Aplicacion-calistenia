@@ -13,7 +13,7 @@ function refrescar() {
 
 // Crea un descuento nuevo o, si viene con «id», cambia uno existente. Los pagos ya hechos no cambian.
 export async function guardarDescuento(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("descuentos");
 
   const id = String(formData.get("id") ?? "").trim();
   const nombre = String(formData.get("nombre") ?? "").trim().replace(/\s+/g, " ");
@@ -55,7 +55,7 @@ export async function guardarDescuento(_previo: Estado, formData: FormData): Pro
 
 // Copia un descuento para no empezar de cero.
 export async function duplicarDescuento(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("descuentos");
   const admin = createAdminClient();
   const { data: origen } = await admin.from("descuentos").select("nombre, tipo, valor, caduca_en, usos_max, activo").eq("id", id).maybeSingle();
   if (!origen) return { error: "No se ha encontrado ese descuento." };
@@ -73,7 +73,7 @@ export async function duplicarDescuento(id: string): Promise<Estado> {
 
 // Solo se puede eliminar si nunca se ha usado; si se usó, se desactiva (para no perder el rastro de los pagos).
 export async function eliminarDescuento(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("descuentos");
   const admin = createAdminClient();
 
   const { count } = await admin.from("pagos").select("id", { count: "exact", head: true }).eq("descuento_id", id);

@@ -10,11 +10,21 @@ import estilos from "../usuarios.module.css";
 
 type Accion = "guardar" | "archivar" | "borrar" | null;
 
-const TIPOS = [
-  { valor: "alumno", texto: "Alumno/a" },
-  { valor: "invitado", texto: "Invitado/a" },
-  { valor: "admin", texto: "Administradora" },
+type Opciones = { alumno: boolean; exalumno: boolean; coach: boolean; invitado: boolean; admin: boolean };
+
+const OPCIONES: { clave: keyof Opciones; texto: string; ayuda: string }[] = [
+  { clave: "alumno", texto: "Alumno/a", ayuda: "Alumno/a actual: reserva clases y tiene tarifas." },
+  { clave: "exalumno", texto: "Exalumno/a", ayuda: "Ha sido alumno/a alguna vez pero ahora no lo es. No puede serlo a la vez que alumno/a ni que invitado/a." },
+  { clave: "coach", texto: "Coach", ayuda: "Sale al elegir quién da cada clase en los horarios y las plantillas. Entra a la app como alumno/a, pero ve y gestiona las clases que da: cancelarlas y marcar quién no vino." },
+  { clave: "invitado", texto: "Invitado/a", ayuda: "Tiene gratis lo que le hayas dado (prueba). No puede ser alumno/a, exalumno/a ni administradora a la vez." },
+  { clave: "admin", texto: "Administradora", ayuda: "Entra al panel de administración. Puede ser también coach y alumna." },
 ];
+
+function inicialDe(rol: string, esCoach: boolean, tambienAlumno: boolean, fueAlumno: boolean): Opciones {
+  const alumno = rol === "alumno" || (rol === "admin" && tambienAlumno);
+  const invitado = rol === "invitado";
+  return { alumno, exalumno: !alumno && !invitado && (rol === "exalumno" || fueAlumno), coach: esCoach || rol === "coach", invitado, admin: rol === "admin" };
+}
 
 // Los accesos de la persona (tipo de cuenta, coach y secciones excluidas) y los botones de abajo: borrar, guardar y archivar.
 export default function AccesosUsuario({
@@ -22,6 +32,8 @@ export default function AccesosUsuario({
   nombre,
   rolInicial,
   esCoachInicial,
+  tambienAlumno,
+  fueAlumno,
   excluidosIniciales,
   esMiCuenta,
 }: {
@@ -29,13 +41,15 @@ export default function AccesosUsuario({
   nombre: string;
   rolInicial: string;
   esCoachInicial: boolean;
+  tambienAlumno: boolean;
+  fueAlumno: boolean;
   excluidosIniciales: string[];
   esMiCuenta: boolean;
 }) {
   const router = useRouter();
   const archivado = rolInicial === "archivado";
-  const [rol, setRol] = useState(archivado ? "alumno" : rolInicial);
-  const [esCoach, setEsCoach] = useState(esCoachInicial);
+  const inicial = inicialDe(rolInicial, esCoachInicial, tambienAlumno, fueAlumno);
+  const [op, setOp] = useState<Opciones>(inicial);
   const [excluidos, setExcluidos] = useState<string[]>(excluidosIniciales);
   const [accion, setAccion] = useState<Accion>(null);
   const [texto, setTexto] = useState("");
@@ -43,8 +57,20 @@ export default function AccesosUsuario({
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
 
-  const cambiado = rol !== rolInicial || esCoach !== esCoachInicial || excluidos.slice().sort().join() !== excluidosIniciales.slice().sort().join();
-  const asciende = rol === "admin" && rolInicial !== "admin";
+  const cambiado = OPCIONES.some((o) => op[o.clave] !== inicial[o.clave]) || excluidos.slice().sort().join() !== excluidosIniciales.slice().sort().join();
+  const asciende = op.admin && !inicial.admin;
+
+  // Cada opción se activa o desactiva por separado; las que no pueden ir juntas se desactivan solas.
+  function cambiar(clave: keyof Opciones, valor: boolean) {
+    setOp((x) => {
+      const n = { ...x, [clave]: valor };
+      if (valor && clave === "alumno") { n.exalumno = false; n.invitado = false; }
+      if (valor && clave === "exalumno") { n.alumno = false; n.invitado = false; }
+      if (valor && clave === "invitado") { n.alumno = false; n.exalumno = false; n.admin = false; }
+      if (valor && clave === "admin") n.invitado = false;
+      return n;
+    });
+  }
 
   async function ejecutar(hacer: () => Promise<{ ok: boolean; error?: string }>, destino?: string) {
     setTrabajando(true);
@@ -72,45 +98,34 @@ export default function AccesosUsuario({
         </p>
       ) : (
         <>
-          <div className={styles.campo}>
-            <span id="acc-tipo">
-              Tipo de cuenta <AyudaI texto="Alumno/a y invitado/a usan la app como cliente. Administradora entra además al panel de administración." />
-            </span>
-            <div className={estilos.segmentos} role="radiogroup" aria-labelledby="acc-tipo">
-              {TIPOS.map((t) => (
-                <button
-                  key={t.valor}
-                  type="button"
-                  role="radio"
-                  aria-checked={rol === t.valor}
-                  disabled={esMiCuenta && t.valor !== "admin"}
-                  className={`${estilos.segmento} ${rol === t.valor ? estilos.segmentoActivo : ""}`}
-                  onClick={() => setRol(t.valor)}
-                >
-                  {t.texto}
-                </button>
-              ))}
+          {OPCIONES.map((o) => (
+            <div key={o.clave} className={styles.campo}>
+              <span id={`acc-${o.clave}`}>
+                {o.texto} <AyudaI texto={o.ayuda} />
+              </span>
+              <div className={estilos.segmentos} role="radiogroup" aria-labelledby={`acc-${o.clave}`}>
+                {[
+                  { v: true, t: "Sí" },
+                  { v: false, t: "No" },
+                ].map((s) => (
+                  <button
+                    key={s.t}
+                    type="button"
+                    role="radio"
+                    aria-checked={op[o.clave] === s.v}
+                    disabled={esMiCuenta && o.clave === "admin"}
+                    className={`${estilos.segmento} ${op[o.clave] === s.v ? estilos.segmentoActivo : ""}`}
+                    onClick={() => cambiar(o.clave, s.v)}
+                  >
+                    {s.t}
+                  </button>
+                ))}
+              </div>
+              {esMiCuenta && o.clave === "admin" && <span className={styles.ayuda}>Es tu cuenta: no puedes dejar de ser administradora.</span>}
             </div>
-            {esMiCuenta && <span className={styles.ayuda}>Es tu cuenta: no puedes dejar de ser administradora.</span>}
-          </div>
+          ))}
 
-          <div className={styles.campo}>
-            <span id="acc-coach">
-              Es coach (entrenador/a) <AyudaI texto="Si es coach, sale al elegir quién da cada clase en los horarios y las plantillas. Entra a la app como alumno/a, pero ve y gestiona las clases que da: cancelarlas y marcar quién no vino." />
-            </span>
-            <div className={estilos.segmentos} role="radiogroup" aria-labelledby="acc-coach">
-              {[
-                { v: true, t: "Sí" },
-                { v: false, t: "No" },
-              ].map((o) => (
-                <button key={o.t} type="button" role="radio" aria-checked={esCoach === o.v} className={`${estilos.segmento} ${esCoach === o.v ? estilos.segmentoActivo : ""}`} onClick={() => setEsCoach(o.v)}>
-                  {o.t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {rol === "admin" && (
+          {op.admin && (
             <div className={styles.campo}>
               <span>
                 Excluidos <AyudaI texto="Secciones del panel que esta administradora NO puede usar. Dejar todas sin marcar es acceso completo." />
@@ -126,7 +141,7 @@ export default function AccesosUsuario({
                   </label>
                 ))}
               </details>
-              <span className={styles.ayuda}>Estas secciones no salen en su panel ni en su menú, y si entra por un enlace no se las enseña. Aún no se bloquean las acciones «por detrás» (próxima fase).</span>
+              <span className={styles.ayuda}>Estas secciones no salen en su panel ni en su menú, y si entra por un enlace no se las enseña. Tampoco puede hacer esas acciones por detrás.</span>
             </div>
           )}
         </>
@@ -165,9 +180,12 @@ export default function AccesosUsuario({
             ¿Guardar los cambios de accesos de <strong>{nombre}</strong>?
           </p>
           <ul>
-            {rol !== rolInicial && <li>Tipo de cuenta: {TIPOS.find((t) => t.valor === rol)?.texto}</li>}
-            {esCoach !== esCoachInicial && <li>{esCoach ? "Pasa a ser coach" : "Deja de ser coach"}</li>}
-            {rol === "admin" && <li>Secciones excluidas: {excluidos.length}</li>}
+            {OPCIONES.filter((o) => op[o.clave] !== inicial[o.clave]).map((o) => (
+              <li key={o.clave}>
+                {o.texto}: {op[o.clave] ? "Sí" : "No"}
+              </li>
+            ))}
+            {op.admin && <li>Secciones excluidas: {excluidos.length}</li>}
           </ul>
           {asciende && (
             <p className={styles.error}>
@@ -175,7 +193,7 @@ export default function AccesosUsuario({
             </p>
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="button" className={styles.boton} disabled={trabajando} onClick={() => ejecutar(() => guardarAccesos(userId, { rol, esCoach, excluidos }))}>
+            <button type="button" className={styles.boton} disabled={trabajando} onClick={() => ejecutar(() => guardarAccesos(userId, { ...op, excluidos }))}>
               {trabajando ? "Guardando…" : "Sí, guardar"}
             </button>
             <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={trabajando} onClick={() => setAccion(null)}>

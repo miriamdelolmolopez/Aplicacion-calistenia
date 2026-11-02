@@ -14,7 +14,7 @@ const ARCHIVOS = [
 ];
 
 export default async function Exportar() {
-  await requireAdmin();
+  await requireAdmin("exportar");
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>

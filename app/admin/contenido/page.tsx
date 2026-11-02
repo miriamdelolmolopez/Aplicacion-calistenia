@@ -9,7 +9,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Fotos y frases · Administración" };
 
 export default async function Contenido() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("contenido");
 
   const { data: fotosApp } = await supabase.from("fotos_app").select("clave, url");
   const { data: frasesDatos } = await supabase

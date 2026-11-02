@@ -19,7 +19,7 @@ type Descuento = {
 };
 
 export default async function Descuentos() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("descuentos");
 
   const { data } = await supabase
     .from("descuentos")

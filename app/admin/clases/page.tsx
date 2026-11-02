@@ -29,7 +29,7 @@ type Tipo = {
   descripcion_en: string | null;
 };
 export default async function AdminClases() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("presenciales");
 
   const { data: tiposDatos } = await supabase
     .from("tipos_clase")

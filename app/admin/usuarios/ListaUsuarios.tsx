@@ -16,6 +16,7 @@ export type Usuario = {
   nombre: string | null;
   apellidos: string | null;
   rol: string;
+  etiquetas?: string[]; // tipos de cuenta que tiene (Administradora, Alumno/a, Coach…)
   foto: string | null;
   creado_en: string;
   ultima_conexion: string | null;
@@ -230,7 +231,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     </span>
                   </Link>
                 </td>
-                <td>{u.rol === "invitado" ? "Invitado/a" : "Alumno/a"}</td>
+                <td>{(u.etiquetas ?? [u.rol === "invitado" ? "Invitado/a" : "Alumno/a"]).join(", ")}</td>
                 <td>{u.servicios.map((x) => NOMBRE_SERVICIO[x] ?? x).join(", ") || "—"}</td>
                 <td>{u.tarifas.join(" + ") || "—"}</td>
                 <td>
@@ -270,6 +271,15 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     <small>{u.email}</small>
                   </span>
                 </Link>
+                {u.etiquetas && u.etiquetas.length > 0 && (
+                  <div className={estilos.etiquetas}>
+                    {u.etiquetas.map((e) => (
+                      <span key={e} className={e === "Administradora" ? estilos.etiquetaAdmin : estilos.etiqueta}>
+                        {e}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className={estilos.creditos}>
                   <IconoMarcador />
                   {u.clases_restantes === null && u.plan_online_hasta ? (

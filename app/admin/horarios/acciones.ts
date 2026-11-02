@@ -14,7 +14,7 @@ function refrescar() {
 }
 
 export async function crearPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const nombre = limpiarNombre(formData.get("nombre"));
   if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
 
@@ -27,7 +27,7 @@ export async function crearPlantilla(_previo: Estado, formData: FormData): Promi
 }
 
 export async function renombrarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const nombre = limpiarNombre(formData.get("nombre"));
   if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
 
@@ -44,7 +44,7 @@ export async function renombrarPlantilla(_previo: Estado, formData: FormData): P
 
 // Copia la plantilla con todas sus clases, con el nombre «… (copia)».
 export async function duplicarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const admin = createAdminClient();
   const id = String(formData.get("id") ?? "");
 
@@ -77,7 +77,7 @@ export async function duplicarPlantilla(_previo: Estado, formData: FormData): Pr
 }
 
 export async function marcarPrincipal(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const admin = createAdminClient();
   const id = String(formData.get("id") ?? "");
 
@@ -90,7 +90,7 @@ export async function marcarPrincipal(_previo: Estado, formData: FormData): Prom
 }
 
 export async function borrarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const admin = createAdminClient();
   const id = String(formData.get("id") ?? "");
 
@@ -105,7 +105,7 @@ export async function borrarPlantilla(_previo: Estado, formData: FormData): Prom
 }
 
 export async function anadirClase(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const dia = Number(formData.get("dia"));
   const hora = String(formData.get("hora") ?? "");
   const plazasTexto = String(formData.get("plazas") ?? "").trim();
@@ -133,7 +133,7 @@ export async function anadirClase(_previo: Estado, formData: FormData): Promise<
 }
 
 export async function quitarClase(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const { error } = await createAdminClient()
     .from("plantilla_clases")
     .delete()
@@ -145,7 +145,7 @@ export async function quitarClase(_previo: Estado, formData: FormData): Promise<
 
 // Publica (crea) las clases de una plantilla entre dos fechas, ambas incluidas.
 export async function aplicarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const desde = String(formData.get("desde") ?? "");
   const hasta = String(formData.get("hasta") ?? "");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(desde) || !/^\d{4}-\d{2}-\d{2}$/.test(hasta)) {

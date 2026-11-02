@@ -17,7 +17,7 @@ function refrescar() {
 
 // Crea una forma de pago nueva o cambia nombre, orden y si está activa. Los pagos ya hechos no cambian.
 export async function guardarFormaPago(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("formas-pago");
   const clave = texto(formData, "clave");
   const nombre = texto(formData, "nombre");
   const orden = Number(texto(formData, "orden") || "0");
@@ -53,7 +53,7 @@ export async function guardarFormaPago(_previo: Estado, formData: FormData): Pro
 
 // Copia una forma de pago (por ejemplo para crear «Tarjeta» a partir de «Bizum»).
 export async function duplicarForma(clave: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("formas-pago");
   const admin = createAdminClient();
   const { data: origen } = await admin.from("formas_pago").select("clave, nombre, orden, activa").eq("clave", clave).maybeSingle();
   if (!origen) return { error: "No se ha encontrado esa forma de pago." };
@@ -75,7 +75,7 @@ export async function duplicarForma(clave: string): Promise<Estado> {
 
 // Solo se puede eliminar si nunca se ha usado en un pago; si se usó, se desactiva para conservar los pagos antiguos.
 export async function eliminarForma(clave: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("formas-pago");
   const admin = createAdminClient();
   const { count } = await admin.from("pagos").select("id", { count: "exact", head: true }).eq("metodo", clave);
   if ((count ?? 0) > 0) return { error: "Ya se ha usado en algún pago, así que no se puede eliminar. Edítala y desmarca «Activa»." };

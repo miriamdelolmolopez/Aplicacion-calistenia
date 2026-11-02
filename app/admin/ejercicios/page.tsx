@@ -36,7 +36,7 @@ export default async function Ejercicios({
     tipo?: string;
   }>;
 }) {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("online");
   const { vista: vistaPedida, cat, archivados, q, musculo, material, tipo } = await searchParams;
   const vista: Vista = vistaPedida === "material" ? "material" : "biblioteca";
   const verArchivados = archivados === "1";

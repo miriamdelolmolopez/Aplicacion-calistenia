@@ -16,7 +16,7 @@ type Fila = {
 };
 
 export default async function PlantillasOnline() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("online");
 
   const { data } = await supabase
     .from("rutinas")

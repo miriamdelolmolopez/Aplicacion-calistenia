@@ -5,7 +5,7 @@ import Hub from "../Hub";
 export const metadata = { title: "Entrenamientos online 1:1 · Administración" };
 
 export default async function Online() {
-  await requireAdmin();
+  await requireAdmin("online");
   const excluidas = await seccionesExcluidas();
   return (
     <Hub

@@ -24,7 +24,7 @@ function entero(valor: string): number | null {
 
 // Añade una clase suelta en un día y hora concretos.
 export async function anadirClaseSuelta(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const tipoId = texto(formData, "tipoId");
   const inicio = instanteMadrid(texto(formData, "fecha"), texto(formData, "hora"));
@@ -57,7 +57,7 @@ export async function anadirClaseSuelta(_previo: Estado, formData: FormData): Pr
 
 // Cambia el día y la hora de una clase. Las personas apuntadas la verán en su nueva hora.
 export async function cambiarHoraClase(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const id = texto(formData, "sesionId");
   const inicio = instanteMadrid(texto(formData, "fecha"), texto(formData, "hora"));
@@ -78,7 +78,7 @@ export async function cambiarHoraClase(_previo: Estado, formData: FormData): Pro
 
 // Aplica una plantilla de horario solo a los días elegidos.
 export async function aplicarPlantillaDias(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const plantilla = texto(formData, "plantilla");
   const dias = formData.getAll("dias").map(String).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
@@ -106,7 +106,7 @@ export async function aplicarPlantillaDias(_previo: Estado, formData: FormData):
 // Edita una clase concreta: día, hora, plazas y plazas de invitadas. Las reglas de cancelación y de
 // preinscripción son del tipo de clase, así que cambian para todas las clases de ese tipo.
 export async function editarClase(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const id = texto(formData, "sesionId");
   const tipoId = texto(formData, "tipoId");
@@ -150,7 +150,7 @@ export async function editarClase(_previo: Estado, formData: FormData): Promise<
 
 // Elimina una clase. Si tiene personas apuntadas no se borra: hay que cancelarla desde Reservar clases (así se avisa y se devuelven los bonos).
 export async function eliminarClase(sesionId: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const admin = createAdminClient();
 
   const { count } = await admin

@@ -9,7 +9,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Formas de pago · Administración" };
 
 export default async function FormasPago() {
-  await requireAdmin();
+  await requireAdmin("formas-pago");
   const formas = await todasLasFormas();
 
   return (

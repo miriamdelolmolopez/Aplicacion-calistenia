@@ -27,7 +27,7 @@ function nombreDe(p: Persona | null) {
 }
 
 export default async function Reservas({ searchParams }: { searchParams: Promise<{ dia?: string }> }) {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("reservas");
   const { dia: diaPedido } = await searchParams;
 
   const ahoraIso = new Date().toISOString();

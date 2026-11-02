@@ -132,7 +132,7 @@ async function guardarRelaciones(id: string, r: Relaciones) {
 }
 
 export async function crearEjercicio(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const leido = leer(formData);
   if ("error" in leido) return { error: leido.error };
@@ -153,7 +153,7 @@ export async function crearEjercicio(_previo: Estado, formData: FormData): Promi
 }
 
 export async function editarEjercicio(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const leido = leer(formData);
   if ("error" in leido) return { error: leido.error };
@@ -177,7 +177,7 @@ export async function editarEjercicio(_previo: Estado, formData: FormData): Prom
 }
 
 export async function crearMaterial(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const nombre = texto(formData, "nombre");
   const nombreEn = texto(formData, "nombre_en");
@@ -215,7 +215,7 @@ export async function prepararSubidaVideo(
   id: string,
   extension: string,
 ): Promise<{ ok: boolean; error?: string; ruta?: string; token?: string; enlace?: string }> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { ok: false, error: "Ejercicio no válido." };
   const ext = extension.toLowerCase().replace(/^\./, "");
   if (!EXTENSIONES_VIDEO.includes(ext)) return { ok: false, error: "El vídeo debe ser MP4, WebM o MOV." };
@@ -232,7 +232,7 @@ export async function guardarVideoEjercicio(
   id: string,
   enlace: string,
 ): Promise<{ ok: boolean; error?: string; enlace?: string | null }> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { ok: false, error: "Ejercicio no válido." };
 
   const limpio = enlace.trim();
@@ -256,7 +256,7 @@ export async function guardarVideoEjercicio(
 
 // Cambia el nombre de un material, lo oculta o lo muestra.
 export async function editarMaterial(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const id = texto(formData, "id");
   const nombre = texto(formData, "nombre");
@@ -281,7 +281,7 @@ export async function editarMaterial(_previo: Estado, formData: FormData): Promi
 
 // Borra un material (se quita también de los ejercicios que lo tenían).
 export async function borrarMaterial(id: string): Promise<{ ok: boolean; error?: string }> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { ok: false, error: "Material no válido." };
 
   const { error } = await createAdminClient().from("materiales").delete().eq("id", id);
@@ -293,7 +293,7 @@ export async function borrarMaterial(id: string): Promise<{ ok: boolean; error?:
 
 // Copia un ejercicio con sus músculos y su material (queda activo: cámbiale el nombre y lo que haga falta).
 export async function duplicarEjercicio(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { error: "Ejercicio no válido." };
   const admin = createAdminClient();
 
@@ -330,7 +330,7 @@ export async function duplicarEjercicio(id: string): Promise<Estado> {
 
 // Elimina un ejercicio. Si ya está en alguna rutina no se puede: hay que archivarlo.
 export async function eliminarEjercicio(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { error: "Ejercicio no válido." };
   const { error } = await createAdminClient().from("ejercicios").delete().eq("id", id);
   if (error) {
@@ -347,7 +347,7 @@ export async function eliminarEjercicio(id: string): Promise<Estado> {
 
 // Copia un material.
 export async function duplicarMaterial(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { error: "Material no válido." };
   const admin = createAdminClient();
   const { data: o } = await admin.from("materiales").select("nombre, nombre_en").eq("id", id).maybeSingle();

@@ -21,7 +21,7 @@ type Fila = {
 };
 
 export default async function Talleres() {
-  await requireAdmin();
+  await requireAdmin("talleres");
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("sesiones_clase")

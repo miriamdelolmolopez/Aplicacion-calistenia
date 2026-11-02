@@ -11,7 +11,7 @@ import CabeceraAdmin from "../../CabeceraAdmin";
 export const metadata = { title: "Historia · Administración" };
 
 export default async function AdministrarHistoria() {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const { data } = await createAdminClient()
     .from("historia")
     .select("id, titulo_es, titulo_en, texto_es, texto_en, orden, activo, foto_url")

@@ -29,7 +29,7 @@ export default async function ReservarComo({
   params: Promise<{ userId: string }>;
   searchParams: Promise<{ dia?: string }>;
 }) {
-  await requireAdmin();
+  await requireAdmin("reservas");
   const { userId } = await params;
   const { dia: diaPedido } = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(userId)) notFound();

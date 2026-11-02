@@ -101,11 +101,11 @@ export default async function FichaUsuario({
   const { id } = await params;
   const { pestana: pedida, mes: mesPedido } = await searchParams;
   const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "actual";
-  const { supabase, user: yo } = await requireAdmin();
+  const { supabase, user: yo } = await requireAdmin("usuarios");
   const admin = createAdminClient();
   const ahora = new Date().toISOString();
   // Si todavía no está el archivo 066 en Supabase, la consulta falla y se usan valores por defecto.
-  const { data: accesos } = await admin.from("profiles").select("es_coach, excluidos_admin").eq("id", id).maybeSingle();
+  const { data: accesos } = await admin.from("profiles").select("es_coach, excluidos_admin, tambien_alumno, fue_alumno").eq("id", id).maybeSingle();
 
   // Todo lo que no depende de otra consulta se pide a la vez.
   const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
@@ -157,6 +157,8 @@ export default async function FichaUsuario({
             nombre={nombreAdmin}
             rolInicial={p.rol}
             esCoachInicial={!!accesos?.es_coach}
+            tambienAlumno={!!accesos?.tambien_alumno}
+            fueAlumno={!!accesos?.fue_alumno}
             excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
             esMiCuenta={yo.id === p.id}
           />
@@ -550,6 +552,8 @@ export default async function FichaUsuario({
               nombre={nombre}
               rolInicial={p.rol}
               esCoachInicial={!!accesos?.es_coach}
+            tambienAlumno={!!accesos?.tambien_alumno}
+            fueAlumno={!!accesos?.fue_alumno}
               excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
               esMiCuenta={yo.id === p.id}
             />

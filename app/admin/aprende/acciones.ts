@@ -18,7 +18,7 @@ function repasar() {
 
 // ---- Glosario ----
 export async function guardarTermino(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const id = texto(formData, "id");
   const terminoEs = texto(formData, "termino_es");
   const terminoEn = texto(formData, "termino_en");
@@ -48,7 +48,7 @@ export async function guardarTermino(_previo: Estado, formData: FormData): Promi
 
 // ---- Historia ----
 export async function guardarSeccion(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const id = texto(formData, "id");
   const tituloEs = texto(formData, "titulo_es");
   const tituloEn = texto(formData, "titulo_en");
@@ -80,7 +80,7 @@ export async function guardarSeccion(_previo: Estado, formData: FormData): Promi
 
 // ---- Preguntas del examen ----
 export async function guardarPregunta(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const id = texto(formData, "id");
   const preguntaEs = texto(formData, "pregunta_es");
   const preguntaEn = texto(formData, "pregunta_en");
@@ -121,7 +121,7 @@ export async function guardarPregunta(_previo: Estado, formData: FormData): Prom
 const TABLAS = { glosario: "glosario", historia: "historia", preguntas: "preguntas" } as const;
 
 export async function borrarContenido(tabla: keyof typeof TABLAS, id: string): Promise<{ ok: boolean; error?: string }> {
-  await requireAdmin();
+  await requireAdmin("aprende");
   if (!(tabla in TABLAS) || !UUID.test(id)) return { ok: false, error: "No válido." };
   const { error } = await createAdminClient().from(TABLAS[tabla]).delete().eq("id", id);
   if (error) return { ok: false, error: "No se ha podido borrar." };
@@ -131,7 +131,7 @@ export async function borrarContenido(tabla: keyof typeof TABLAS, id: string): P
 
 // Copia un término, apartado o pregunta (la copia queda oculta hasta que la revises).
 export async function duplicarContenido(tabla: keyof typeof TABLAS, id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("aprende");
   if (!(tabla in TABLAS) || !UUID.test(id)) return { error: "No válido." };
   const admin = createAdminClient();
 

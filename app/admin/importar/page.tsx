@@ -7,7 +7,7 @@ import Importador from "./Importador";
 export const metadata = { title: "Importar contactos · Administración" };
 
 export default async function Importar() {
-  await requireAdmin();
+  await requireAdmin("importar");
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>

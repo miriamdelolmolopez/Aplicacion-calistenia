@@ -4,7 +4,18 @@ import { useState } from "react";
 import styles from "../admin.module.css";
 import AyudaI from "../comunes/AyudaI";
 import { leerCsv, leerTabla, PLANTILLA_CSV, type FilaLeida } from "@/lib/importar";
-import { correosConCuenta, importarLote, type ResultadoFila } from "./acciones";
+import { comprobarFilas, importarLote, type ResultadoFila } from "./acciones";
+
+// Las fechas de un Excel llegan como fecha de verdad: se pasan a «día/mes/año» (y la hora, si la tiene).
+function celdaATexto(c: unknown): string {
+  if (c === null || c === undefined) return "";
+  if (c instanceof Date) {
+    const p = (n: number) => String(n).padStart(2, "0");
+    const dia = `${p(c.getUTCDate())}/${p(c.getUTCMonth() + 1)}/${c.getUTCFullYear()}`;
+    return c.getUTCHours() || c.getUTCMinutes() ? `${dia} ${p(c.getUTCHours())}:${p(c.getUTCMinutes())}` : dia;
+  }
+  return String(c);
+}
 
 type Fase = "inicio" | "revisar" | "importando" | "hecho";
 
@@ -29,7 +40,7 @@ export default function Importador() {
       let tabla: string[][];
       if (/\.xlsx$/i.test(archivo.name)) {
         const { readSheet } = await import("read-excel-file/browser");
-        tabla = ((await readSheet(archivo)) as unknown[][]).map((f) => f.map((c) => (c === null || c === undefined ? "" : String(c))));
+        tabla = ((await readSheet(archivo)) as unknown[][]).map((f) => f.map(celdaATexto));
       } else if (/\.(csv|txt)$/i.test(archivo.name)) {
         tabla = leerCsv(await archivo.text());
       } else {
@@ -37,9 +48,9 @@ export default function Importador() {
       }
       const { filas: leidas, error: fallo } = leerTabla(tabla, tipoPorDefecto);
       if (fallo) return setError(fallo);
-      // Las que ya tienen cuenta se marcan para no duplicarlas.
-      const existentes = new Set(await correosConCuenta(leidas.filter((f) => f.problemas.length === 0).map((f) => f.correo)));
-      setFilas(leidas.map((f) => (existentes.has(f.correo) ? { ...f, problemas: [...f.problemas, "Ya tiene cuenta"] } : f)));
+      // Se comprueba contra la app: quien ya tiene cuenta, tarifas o formas de pago que no existen, DNI repetido…
+      const delServidor = await comprobarFilas(leidas.filter((f) => f.problemas.length === 0));
+      setFilas(leidas.map((f) => (delServidor[f.correo] ? { ...f, problemas: [...f.problemas, ...delServidor[f.correo]] } : f)));
       setResultados([]);
       setHechas(0);
       setFase("revisar");
@@ -56,7 +67,7 @@ export default function Importador() {
     for (let i = 0; i < lista.length; i += 5) {
       const lote = lista.slice(i, i + 5);
       const r = await importarLote(
-        lote.map(({ correo, nombre, apellidos, telefono, tipo, servicios }) => ({ correo, nombre, apellidos, telefono, tipo, servicios })),
+        lote.map(({ linea, problemas, ...fila }) => { void linea; void problemas; return fila; }),
         enviar,
       );
       setResultados((x) => [...x, ...r]);
@@ -82,7 +93,7 @@ export default function Importador() {
         <>
           <p className={styles.ayuda}>
             Sube un archivo con tus contactos (CSV o Excel .xlsx). La primera fila son los títulos: <strong>correo</strong> (obligatorio), nombre, apellidos, teléfono,
-            tipo (alumno/a o invitado/a) y servicios (grupal, individual, online, taller; si son varios, sepáralos con «+»).
+            DNI, fecha de nacimiento, contacto de emergencia, tipo (alumno/a o invitado/a) y servicios (grupal, individual, online, taller; si son varios, sepáralos con «+»). Para dar de alta también su tarifa: <strong>tarifa</strong> (el nombre tal como está en Tarifas), fecha inicio, fecha fin (o días), pagado (sí/no), fecha y hora de pago, forma de pago, descuento e importe (solo si no es el precio de la tarifa). Las fechas, mejor como día/mes/año.
           </p>
           <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={descargarPlantilla}>
             Descargar plantilla (CSV)
@@ -119,7 +130,7 @@ export default function Importador() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
               <thead>
                 <tr>
-                  {["Fila", "Correo", "Nombre", "Tipo", "Servicios", "Estado"].map((t) => (
+                  {["Fila", "Correo", "Nombre", "Tipo", "Servicios", "Tarifa", "Pago", "Estado"].map((t) => (
                     <th key={t} style={{ textAlign: "left", padding: "6px 8px", position: "sticky", top: 0, background: "var(--blanco)" }}>
                       {t}
                     </th>
@@ -134,6 +145,8 @@ export default function Importador() {
                     <td style={{ padding: "6px 8px" }}>{[f.nombre, f.apellidos].filter(Boolean).join(" ")}</td>
                     <td style={{ padding: "6px 8px" }}>{f.tipo === "alumno" ? "Alumno/a" : "Invitado/a"}</td>
                     <td style={{ padding: "6px 8px" }}>{f.servicios.join(" + ")}</td>
+                    <td style={{ padding: "6px 8px" }}>{f.tarifa ? `${f.tarifa}${f.inicio ? ` · desde ${f.inicio.split("-").reverse().join("/")}` : ""}` : "—"}</td>
+                    <td style={{ padding: "6px 8px" }}>{f.tarifa ? (f.pagado ? `Pagado${f.formaPago ? ` (${f.formaPago})` : ""}` : "Pendiente") : "—"}</td>
                     <td style={{ padding: "6px 8px", color: f.problemas.length ? "#b42318" : undefined }}>{f.problemas.length ? f.problemas.join(" · ") : "✓ Lista"}</td>
                   </tr>
                 ))}

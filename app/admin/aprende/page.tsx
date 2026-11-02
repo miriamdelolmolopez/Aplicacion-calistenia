@@ -8,7 +8,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Aprende · Administración" };
 
 export default async function AdministrarAprende() {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const admin = createAdminClient();
   const cuenta = async (tabla: string) => (await admin.from(tabla).select("id", { count: "exact", head: true })).count ?? 0;
   const [glosario, historia, preguntas] = await Promise.all([cuenta("glosario"), cuenta("historia"), cuenta("preguntas")]);

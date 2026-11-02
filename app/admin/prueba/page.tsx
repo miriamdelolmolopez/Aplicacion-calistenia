@@ -11,7 +11,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Link de prueba gratuita · Administración" };
 
 export default async function LinkPrueba() {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const admin = createAdminClient();
   const { activo, codigo } = await estadoLinkPrueba();
 

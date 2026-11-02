@@ -56,7 +56,7 @@ for (const pl of PLANTILLAS) {
 type Regalo = { id: string; creado_en: string; profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null };
 
 export default async function Automatizaciones() {
-  await requireAdmin();
+  await requireAdmin("automatizaciones");
   const supabase = createAdminClient();
   const [{ data }, { data: regalos }, { data: enviadosDatos }] = await Promise.all([
     supabase.from("automatizaciones").select("clave, activa, dias, asunto_es, mensaje_es, asunto_en, mensaje_en"),

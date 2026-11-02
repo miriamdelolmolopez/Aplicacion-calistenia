@@ -16,14 +16,56 @@ type Fila = Omit<Usuario, "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" |
 export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string; archivadas?: string }> }) {
   const { nuevo, archivadas } = await searchParams;
   const verArchivadas = archivadas === "1";
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("usuarios");
 
   const { data } = await supabase.rpc("resumen_usuarios");
-  const { data: administradoras } = await createAdminClient().from("profiles").select("id, nombre, apellidos, email").eq("rol", "admin").order("nombre");
+  // Las administradoras no salen en el resumen: se piden aparte para poner su tarjeta. Los datos nuevos (coach, también alumna)
+  // se piden en otra consulta, para que la pantalla funcione aunque falte ejecutar el archivo 067 en Supabase.
+  const { data: administradoras } = await createAdminClient().from("profiles").select("id, nombre, apellidos, email, foto_path, creado_en").eq("rol", "admin").order("nombre");
+  const { data: tiposDatos } = await createAdminClient().from("profiles").select("id, es_coach, tambien_alumno, fue_alumno");
+  const tipos = new Map(((tiposDatos ?? []) as { id: string; es_coach: boolean | null; tambien_alumno?: boolean | null; fue_alumno?: boolean | null }[]).map((t) => [t.id, t]));
+  const etiquetasDe = (id: string, rol: string): string[] => {
+    const t = tipos.get(id);
+    const e: string[] = [];
+    if (rol === "admin") e.push("Administradora");
+    if (rol === "alumno" || (rol === "admin" && t?.tambien_alumno)) e.push("Alumno/a");
+    else if (rol === "invitado") e.push("Invitado/a");
+    else if (rol === "exalumno" || (rol !== "archivado" && t?.fue_alumno)) e.push("Exalumno/a");
+    if (t?.es_coach || rol === "coach") e.push("Coach");
+    return e;
+  };
   // Las personas archivadas no salen en la lista normal; con «Ver archivadas» salen solo ellas.
   const todas = (data ?? []) as Fila[];
   const hayArchivadas = todas.some((f) => f.rol === "archivado");
-  const filas = todas.filter((f) => (f.rol === "archivado") === verArchivadas);
+  const conexiones = new Map<string, string | null>();
+  if (!verArchivadas) {
+    for (const a of administradoras ?? []) {
+      const { data: cuenta } = await createAdminClient().auth.admin.getUserById(a.id);
+      conexiones.set(a.id, cuenta.user?.last_sign_in_at ?? null);
+    }
+  }
+  const filasAdmin: Fila[] = verArchivadas
+    ? []
+    : (administradoras ?? []).map((a) => ({
+        id: a.id,
+        email: a.email,
+        nombre: a.nombre,
+        apellidos: a.apellidos,
+        rol: "admin",
+        foto_path: a.foto_path,
+        creado_en: a.creado_en,
+        ultima_conexion: conexiones.get(a.id) ?? null,
+        servicios: [],
+        clases_restantes: null,
+        bono_caduca: null,
+        plan_online_hasta: null,
+        proxima_clase: null,
+        ultima_clase: null,
+        clases_mes: 0,
+        entrenos_mes: 0,
+        ultimo_entreno: null,
+      }));
+  const filas = [...filasAdmin, ...todas.filter((f) => (f.rol === "archivado") === verArchivadas)];
 
   // Fotos (privadas): enlaces temporales solo para esta pantalla.
   const rutas = filas.map((f) => f.foto_path).filter((r): r is string => !!r);
@@ -79,6 +121,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
 
   const usuarios: Usuario[] = filas.map(({ foto_path, ...resto }) => ({
     ...resto,
+    etiquetas: etiquetasDe(resto.id, resto.rol),
     tarifas: tarifasDe.get(resto.id) ?? [],
     tarifa_desde: periodoDe.get(resto.id)?.desde ?? null,
     tarifa_hasta: periodoDe.get(resto.id)?.hasta ?? null,
@@ -95,19 +138,6 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
         </Link>
       </CabeceraAdmin>
       <NuevoUsuario tarifas={tarifas} descuentos={descuentos} hoy={hoy} ahora={ahora} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
-      {(administradoras ?? []).length > 0 && (
-        <p className={styles.ayuda} style={{ margin: "0 0 8px" }}>
-          Administradoras:{" "}
-          {(administradoras ?? []).map((a, i) => (
-            <span key={a.id}>
-              {i > 0 && ", "}
-              <Link href={`/admin/usuarios/${a.id}`} className={styles.enlaceTexto}>
-                {[a.nombre, a.apellidos].filter(Boolean).join(" ") || a.email}
-              </Link>
-            </span>
-          ))}
-        </p>
-      )}
       <p style={{ margin: "0 0 12px" }}>
         {verArchivadas ? (
           <Link href="/admin/usuarios" className={styles.enlaceBarra}>

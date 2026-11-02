@@ -20,7 +20,7 @@ function numero(valor: string): number | null {
 
 // Crea un curso (sin id) o cambia uno que ya existe (con id).
 export async function guardarCurso(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("academia");
 
   const id = texto(formData, "id");
   const titulo = texto(formData, "titulo");
@@ -77,7 +77,7 @@ export async function guardarCurso(_previo: Estado, formData: FormData): Promise
 }
 
 export async function borrarCurso(id: string): Promise<{ ok: boolean; error?: string }> {
-  await requireAdmin();
+  await requireAdmin("academia");
   if (!UUID.test(id)) return { ok: false, error: "Curso no válido." };
   const { error } = await createAdminClient().from("cursos").delete().eq("id", id);
   if (error) return { ok: false, error: "No se ha podido borrar el curso." };
@@ -88,7 +88,7 @@ export async function borrarCurso(id: string): Promise<{ ok: boolean; error?: st
 
 // Copia un curso (queda oculto para que no salga a las alumnas hasta que lo revises).
 export async function duplicarCurso(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("academia");
   if (!UUID.test(id)) return { error: "Curso no válido." };
   const admin = createAdminClient();
   const { data: origen } = await admin

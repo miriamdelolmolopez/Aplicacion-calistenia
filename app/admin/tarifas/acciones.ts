@@ -24,7 +24,7 @@ function entero(valor: string): number {
 
 // Crea o cambia un tipo de bono o de clase suelta. Los bonos que ya se vendieron no cambian.
 export async function guardarTipoBono(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("tarifas");
 
   const id = texto(formData, "id");
   const nombre = texto(formData, "nombre");
@@ -84,7 +84,7 @@ export async function guardarTipoBono(_previo: Estado, formData: FormData): Prom
 
 // Copia una tarifa para no empezar de cero.
 export async function duplicarTarifa(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("tarifas");
   const admin = createAdminClient();
 
   const { data: origen } = await admin
@@ -110,7 +110,7 @@ export async function duplicarTarifa(id: string): Promise<Estado> {
 
 // Elimina una tarifa. Si ya se ha vendido, no se puede borrar: hay que desactivarla.
 export async function eliminarTarifa(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("tarifas");
   const { error } = await createAdminClient().from("tipos_bono").delete().eq("id", id);
   if (error) {
     return {

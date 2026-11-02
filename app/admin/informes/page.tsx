@@ -71,7 +71,7 @@ export default async function Informes({
   searchParams: Promise<{ vista?: string; periodo?: string; desde?: string; hasta?: string }>;
 }) {
   const { vista: v, periodo: p, desde: d, hasta: h } = await searchParams;
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("informes");
   const METODOS = await nombresFormas();
 
   const vista: Vista = v === "pagos" || v === "cumpleanos" ? v : "atletas";

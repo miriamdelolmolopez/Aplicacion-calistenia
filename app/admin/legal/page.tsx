@@ -9,7 +9,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Textos legales · Administración" };
 
 export default async function TextosLegales() {
-  await requireAdmin();
+  await requireAdmin("legal");
   const { data } = await createAdminClient().from("textos_legales").select("documento, version, publicado_en").eq("vigente", true);
   const vigentes = new Map(((data ?? []) as { documento: string; version: string; publicado_en: string }[]).map((d) => [d.documento, d]));
 

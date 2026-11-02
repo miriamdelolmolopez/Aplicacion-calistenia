@@ -20,7 +20,7 @@ function refrescar() {
 
 // Marca si una persona vino a su clase (o lo quita si se pulsa otra vez).
 export async function marcarAsistencia(reservaId: string, valor: Asistencia): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("reservas");
   if (!UUID.test(reservaId)) return { ok: false, error: "Reserva no válida." };
   if (valor !== null && valor !== "asistio" && valor !== "no_asistio") return { ok: false, error: "Valor no válido." };
 
@@ -36,7 +36,7 @@ export async function marcarAsistencia(reservaId: string, valor: Asistencia): Pr
 
 // Reserva una clase en nombre de una persona (usa su bono; puede saltarse el límite de antelación).
 export async function reservarComo(userId: string, sesionId: string): Promise<Resultado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("reservas");
   if (!UUID.test(userId) || !UUID.test(sesionId)) return { ok: false, error: "Datos no válidos." };
 
   const { error } = await createAdminClient().rpc("reservar_clase", { p_user: userId, p_sesion: sesionId, p_admin: user.id });
@@ -49,7 +49,7 @@ export async function reservarComo(userId: string, sesionId: string): Promise<Re
 
 // Cancela como si lo hiciera la persona: si está fuera del plazo de cancelación, la clase le cuenta.
 export async function cancelarComo(userId: string, reservaId: string): Promise<Resultado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("reservas");
   if (!UUID.test(userId) || !UUID.test(reservaId)) return { ok: false, error: "Datos no válidos." };
 
   const admin = createAdminClient();
@@ -82,7 +82,7 @@ export async function cancelarComo(userId: string, reservaId: string): Promise<R
 
 // «Borrar»: devuelve la clase de una reserva cancelada fuera de plazo.
 export async function borrarReserva(reservaId: string): Promise<Resultado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("reservas");
   if (!UUID.test(reservaId)) return { ok: false, error: "Reserva no válida." };
 
   const { error } = await createAdminClient().rpc("devolver_reserva_cancelada", { p_reserva: reservaId, p_admin: user.id });
@@ -104,7 +104,7 @@ const AVISO_HECHA = "Registrada como hecha. Se ha descontado una clase de su bon
 
 // Registra como hecha una clase del calendario que ya empezó.
 export async function registrarHechaComo(userId: string, sesionId: string): Promise<Resultado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("reservas");
   if (!UUID.test(userId) || !UUID.test(sesionId)) return { ok: false, error: "Datos no válidos." };
 
   const admin = createAdminClient();
@@ -122,7 +122,7 @@ export async function registrarHechaComo(userId: string, sesionId: string): Prom
 
 // Añade una clase hecha en un día pasado aunque no estuviera en el calendario (elige el tipo y la hora).
 export async function anadirHechaComo(userId: string, tipoId: string, fecha: string, hora: string): Promise<Resultado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("reservas");
   if (!UUID.test(userId) || !UUID.test(tipoId)) return { ok: false, error: "Elige el tipo de clase." };
   const empieza = instanteMadrid(fecha, hora);
   if (!empieza) return { ok: false, error: "Escribe la hora de la clase." };
@@ -137,7 +137,7 @@ export async function anadirHechaComo(userId: string, tipoId: string, fecha: str
 
 // Quita una clase pasada que se apuntó o se reservó y le devuelve la clase al bono.
 export async function quitarHechaComo(userId: string, reservaId: string): Promise<Resultado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("reservas");
   if (!UUID.test(userId) || !UUID.test(reservaId)) return { ok: false, error: "Datos no válidos." };
 
   const { error } = await createAdminClient().rpc("cancelar_reserva", { p_user: userId, p_reserva: reservaId, p_admin: user.id, p_devolver: true });

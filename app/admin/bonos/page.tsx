@@ -38,7 +38,7 @@ function nombreDe(p: { nombre: string | null; apellidos: string | null; email: s
 }
 
 export default async function AdminBonos() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("pagos");
   const [formas, METODOS] = await Promise.all([formasActivas(), nombresFormas()]);
 
   // Pone al día caducidades y bonos agotados antes de mostrar nada.

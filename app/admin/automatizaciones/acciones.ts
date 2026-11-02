@@ -14,7 +14,7 @@ function texto(formData: FormData, clave: string): string {
 
 // Guarda el interruptor, los días (solo el bono) y los textos de una automatización.
 export async function guardarAutomatizacion(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("automatizaciones");
   const clave = texto(formData, "clave");
   if (!CLAVES.includes(clave)) return { error: "Automatización no válida." };
 
@@ -42,7 +42,7 @@ export async function guardarAutomatizacion(_previo: Estado, formData: FormData)
 }
 
 export async function marcarRegaloHecho(formData: FormData): Promise<void> {
-  await requireAdmin();
+  await requireAdmin("automatizaciones");
   const id = texto(formData, "id");
   if (!id) return;
   await createAdminClient().from("regalos").update({ estado: "hecho" }).eq("id", id).eq("tipo", "videollamada");
@@ -51,7 +51,7 @@ export async function marcarRegaloHecho(formData: FormData): Promise<void> {
 
 // «Nueva»: añade una plantilla de la lista. Nace apagada, para que veas a quién le llegaría antes de activarla.
 export async function crearAutomatizacion(clave: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("automatizaciones");
   const p = PLANTILLAS.find((x) => x.clave === (clave as ClavePlantilla));
   if (!p) return { error: "Esa plantilla no existe." };
 

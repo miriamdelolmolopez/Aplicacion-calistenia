@@ -14,7 +14,9 @@ export async function seccionesExcluidas(): Promise<string[]> {
 
 // Comprueba en el servidor que quien llama es administradora.
 // Se usa al principio de cada página y de cada acción de /admin.
-export async function requireAdmin() {
+// Con la sección (por ejemplo "tarifas") también comprueba que esa administradora no la tenga excluida:
+// así las exclusiones se cumplen en el servidor, no solo escondiendo botones.
+export async function requireAdmin(seccion?: string) {
   const supabase = await createClient();
   // Se verifica la firma del token en el propio servidor (más rápido que preguntar a Supabase).
   const { data: datosSesion } = await supabase.auth.getClaims();
@@ -24,10 +26,11 @@ export async function requireAdmin() {
 
   const { data: perfil } = await supabase
     .from("profiles")
-    .select("rol")
+    .select("rol, excluidos_admin")
     .eq("id", user.id)
     .maybeSingle();
   if (perfil?.rol !== "admin") redirect("/inicio");
+  if (seccion && ((perfil.excluidos_admin as string[] | null) ?? []).includes(seccion)) redirect("/admin");
 
   return { supabase, user };
 }

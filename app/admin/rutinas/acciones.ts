@@ -43,7 +43,7 @@ function refrescar(rutinaId?: string) {
 
 // Crea una rutina vacía, una plantilla (sin alumna) o una copia de una plantilla/rutina.
 export async function crearRutina(_previo: Estado, formData: FormData): Promise<Estado & { id?: string }> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const nombre = texto(formData, "nombre");
   const destino = texto(formData, "alumno"); // "" o "plantilla" = plantilla
@@ -85,7 +85,7 @@ export async function crearRutina(_previo: Estado, formData: FormData): Promise<
 }
 
 export async function actualizarRutina(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const id = texto(formData, "id");
   const nombre = texto(formData, "nombre");
@@ -117,7 +117,7 @@ export async function actualizarRutina(_previo: Estado, formData: FormData): Pro
 }
 
 export async function publicarRutina(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const id = texto(formData, "id");
   if (!UUID.test(id)) return { error: "Rutina no válida." };
 
@@ -129,7 +129,7 @@ export async function publicarRutina(_previo: Estado, formData: FormData): Promi
 }
 
 export async function despublicarRutina(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const id = texto(formData, "id");
   if (!UUID.test(id)) return { error: "Rutina no válida." };
 
@@ -142,7 +142,7 @@ export async function despublicarRutina(_previo: Estado, formData: FormData): Pr
 
 // Copia a otro alumno o la guarda como plantilla (destino «plantilla»).
 export async function copiarRutina(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const id = texto(formData, "id");
   const destino = texto(formData, "alumno");
@@ -168,7 +168,7 @@ export async function copiarRutina(_previo: Estado, formData: FormData): Promise
 }
 
 export async function eliminarRutina(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const id = texto(formData, "id");
   if (!UUID.test(id)) return { error: "Rutina no válida." };
 
@@ -188,7 +188,7 @@ export async function eliminarRutina(_previo: Estado, formData: FormData): Promi
 // ---------- Sesiones ----------
 
 export async function agregarSesion(rutinaId: string, nombre: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const limpio = nombre.trim();
   if (!UUID.test(rutinaId)) return { ok: false, error: "Rutina no válida." };
   if (limpio.length < 1 || limpio.length > 80) return { ok: false, error: "El nombre de la sesión debe tener entre 1 y 80 letras." };
@@ -203,7 +203,7 @@ export async function agregarSesion(rutinaId: string, nombre: string): Promise<R
 }
 
 export async function renombrarSesion(rutinaId: string, sesionId: string, nombre: string, nota: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const limpio = nombre.trim();
   if (!UUID.test(sesionId)) return { ok: false, error: "Sesión no válida." };
   if (limpio.length < 1 || limpio.length > 80) return { ok: false, error: "El nombre debe tener entre 1 y 80 letras." };
@@ -219,7 +219,7 @@ export async function renombrarSesion(rutinaId: string, sesionId: string, nombre
 }
 
 export async function quitarSesion(rutinaId: string, sesionId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(sesionId)) return { ok: false, error: "Sesión no válida." };
 
   const { error } = await createAdminClient().from("rutina_sesiones").delete().eq("id", sesionId);
@@ -229,7 +229,7 @@ export async function quitarSesion(rutinaId: string, sesionId: string): Promise<
 }
 
 export async function reordenarSesiones(rutinaId: string, ids: string[]): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(rutinaId) || ids.some((i) => !UUID.test(i))) return { ok: false, error: "Datos no válidos." };
 
   const { error } = await createAdminClient().rpc("reordenar_sesiones", { p_rutina: rutinaId, p_ids: ids });
@@ -241,7 +241,7 @@ export async function reordenarSesiones(rutinaId: string, ids: string[]): Promis
 // ---------- Ejercicios de una sesión ----------
 
 export async function agregarItem(rutinaId: string, sesionId: string, ejercicioId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(sesionId) || !UUID.test(ejercicioId)) return { ok: false, error: "Datos no válidos." };
 
   const { error } = await createAdminClient().rpc("agregar_item", {
@@ -254,7 +254,7 @@ export async function agregarItem(rutinaId: string, sesionId: string, ejercicioI
 }
 
 export async function quitarItem(rutinaId: string, itemId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(itemId)) return { ok: false, error: "Ejercicio no válido." };
 
   const { error } = await createAdminClient().rpc("quitar_item", { p_item: itemId });
@@ -264,7 +264,7 @@ export async function quitarItem(rutinaId: string, itemId: string): Promise<Resu
 }
 
 export async function reordenarItems(rutinaId: string, sesionId: string, ids: string[]): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(sesionId) || ids.some((i) => !UUID.test(i))) return { ok: false, error: "Datos no válidos." };
 
   const { error } = await createAdminClient().rpc("reordenar_items", { p_sesion: sesionId, p_ids: ids });
@@ -274,7 +274,7 @@ export async function reordenarItems(rutinaId: string, sesionId: string, ids: st
 }
 
 export async function unirConAnterior(rutinaId: string, itemId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(itemId)) return { ok: false, error: "Ejercicio no válido." };
 
   const { error } = await createAdminClient().rpc("unir_con_anterior", { p_item: itemId });
@@ -284,7 +284,7 @@ export async function unirConAnterior(rutinaId: string, itemId: string): Promise
 }
 
 export async function separarItem(rutinaId: string, itemId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(itemId)) return { ok: false, error: "Ejercicio no válido." };
 
   const { error } = await createAdminClient().rpc("separar_item", { p_item: itemId });
@@ -296,7 +296,7 @@ export async function separarItem(rutinaId: string, itemId: string): Promise<Res
 // Guarda series, objetivos, descanso y nota de un ejercicio de la rutina.
 // Los objetivos que piden los campos del tipo del ejercicio son obligatorios; los demás se ignoran.
 export async function guardarItem(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const id = texto(formData, "id");
   const rutinaId = texto(formData, "rutina");
@@ -377,7 +377,7 @@ export async function guardarItem(_previo: Estado, formData: FormData): Promise<
 // ---------- Carpetas (como en un Drive) ----------
 
 export async function crearCarpeta(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const nombre = texto(formData, "nombre");
   const padre = texto(formData, "padre");
   if (nombre.length < 1 || nombre.length > 60) return { error: "El nombre debe tener entre 1 y 60 letras." };
@@ -390,7 +390,7 @@ export async function crearCarpeta(_previo: Estado, formData: FormData): Promise
 }
 
 export async function renombrarCarpeta(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const id = texto(formData, "id");
   const nombre = texto(formData, "nombre");
   if (!UUID.test(id)) return { error: "Carpeta no válida." };
@@ -403,7 +403,7 @@ export async function renombrarCarpeta(_previo: Estado, formData: FormData): Pro
 
 // Borra una carpeta y sus subcarpetas. Las rutinas no se borran: vuelven al inicio.
 export async function eliminarCarpeta(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { error: "Carpeta no válida." };
   const { error } = await createAdminClient().from("carpetas_rutinas").delete().eq("id", id);
   if (error) return { error: "No se ha podido eliminar la carpeta." };
@@ -412,7 +412,7 @@ export async function eliminarCarpeta(id: string): Promise<Estado> {
 }
 
 export async function moverRutina(rutinaId: string, carpetaId: string | null): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(rutinaId) || (carpetaId !== null && !UUID.test(carpetaId))) return { error: "No válido." };
   const { error } = await createAdminClient().from("rutinas").update({ carpeta_id: carpetaId }).eq("id", rutinaId);
   if (error) return { error: "No se ha podido mover la rutina." };
@@ -424,7 +424,7 @@ export async function moverRutina(rutinaId: string, carpetaId: string | null): P
 
 // Copia una rutina para la misma persona (o una plantilla), con «(copia)» en el nombre. Queda como borrador.
 export async function duplicarRutinaLista(id: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(id)) return { error: "Rutina no válida." };
   const admin = createAdminClient();
   const { data: o } = await admin.from("rutinas").select("nombre, user_id").eq("id", id).maybeSingle();
@@ -450,7 +450,7 @@ function entre(valor: number | null, min: number, max: number): boolean {
 
 // Guarda (o cambia) lo que se hace distinto en una semana concreta. Lo que se deja vacío se queda como en la rutina.
 export async function guardarCambioSemana(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
 
   const item = texto(formData, "item");
   const rutinaId = texto(formData, "rutina");
@@ -512,7 +512,7 @@ export async function guardarCambioSemana(_previo: Estado, formData: FormData): 
 }
 
 export async function quitarCambioSemana(rutinaId: string, cambioId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(rutinaId) || !UUID.test(cambioId)) return { ok: false, error: "Cambio no válido." };
   const { error } = await createAdminClient().from("rutina_cambios_semana").delete().eq("id", cambioId);
   if (error) return { ok: false, error: mensajeDe(error) };
@@ -522,7 +522,7 @@ export async function quitarCambioSemana(rutinaId: string, cambioId: string): Pr
 
 // Añadir un ejercicio extra que solo hay en una semana de una sesión.
 export async function guardarExtraSemana(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("online");
   const sesion = texto(formData, "sesion");
   const rutinaId = texto(formData, "rutina");
   const ejercicio = texto(formData, "ejercicio");
@@ -569,7 +569,7 @@ export async function guardarExtraSemana(_previo: Estado, formData: FormData): P
 }
 
 export async function quitarExtraSemana(rutinaId: string, extraId: string): Promise<Resultado> {
-  await requireAdmin();
+  await requireAdmin("online");
   if (!UUID.test(rutinaId) || !UUID.test(extraId)) return { ok: false, error: "Ejercicio no válido." };
   const { error } = await createAdminClient().from("rutina_extras_semana").delete().eq("id", extraId);
   if (error) return { ok: false, error: mensajeDe(error) };

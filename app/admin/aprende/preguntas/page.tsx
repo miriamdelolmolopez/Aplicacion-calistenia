@@ -10,7 +10,7 @@ import CabeceraAdmin from "../../CabeceraAdmin";
 export const metadata = { title: "Preguntas del examen · Administración" };
 
 export default async function AdministrarPreguntas() {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const { data } = await createAdminClient()
     .from("preguntas")
     .select("id, pregunta_es, pregunta_en, opciones_es, opciones_en, correcta, explicacion_es, explicacion_en, activa, creado_en")

@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin";
 import { invitar } from "@/lib/registro";
 import { enviarCorreo } from "@/lib/email";
 import { correoInvitacion } from "@/lib/plantillas-email";
+import { fijarInicioBono, inicioAltaValido } from "@/lib/altaBono";
 import { claveDia, instanteMadrid, sumarDias } from "@/lib/fechas";
 import { formaActiva, formasActivas } from "@/lib/formasPago";
 import { CLAVES_SECCIONES } from "@/lib/seccionesAdmin";
@@ -15,7 +16,7 @@ import type { Estado } from "../acciones";
 
 // Notas privadas de Miriam sobre una persona (nadie más las ve).
 export async function guardarNota(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const texto = String(formData.get("texto") ?? "").slice(0, 4000);
 
@@ -38,32 +39,9 @@ function inicioValido(fecha: string): boolean {
   return d.getTime() <= ahora && d.getTime() >= ahora - 730 * 86_400_000;
 }
 
-// Fecha de inicio de un alta nueva: puede ser pasada (hasta dos años) o futura (hasta un año), por ejemplo el día de un taller.
-function inicioAltaValido(fecha: string): boolean {
-  const d = instanteMadrid(fecha, "00:00");
-  if (!d) return false;
-  const ahora = Date.now();
-  return d.getTime() >= ahora - 730 * 86_400_000 && d.getTime() <= ahora + 365 * 86_400_000;
-}
-
-// Pone la fecha en que empezó el bono (y la de caducidad que le corresponde). Vale también para el segundo bono de un combo.
-async function fijarInicioBono(admin: ReturnType<typeof createAdminClient>, bonoId: string, fecha: string) {
-  const desde = instanteMadrid(fecha, "00:00");
-  if (!desde) return;
-  const { data: base } = await admin.from("bonos").select("user_id, tipo_bono_id, creado_en").eq("id", bonoId).maybeSingle();
-  if (!base) return;
-  const { data: bonos } = await admin.from("bonos").select("id, validez_dias").eq("user_id", base.user_id).eq("tipo_bono_id", base.tipo_bono_id).eq("creado_en", base.creado_en);
-  for (const b of bonos ?? []) {
-    // Se cuenta por días de calendario (en hora de Madrid), para que el cambio de hora no la mueva un día.
-    const caduca = instanteMadrid(sumarDias(fecha, b.validez_dias as number), "00:00") ?? desde;
-    await admin.from("bonos").update({ activo_desde: desde.toISOString(), caduca_en: caduca.toISOString() }).eq("id", b.id);
-  }
-  await admin.rpc("refrescar_bonos", { p_user: base.user_id });
-}
-
 // Cambia la fecha en que empezó un bono que ya existe.
 export async function cambiarInicioBono(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   const bonoId = String(formData.get("bonoId") ?? "");
   const userId = String(formData.get("userId") ?? "");
   const fecha = String(formData.get("inicio") ?? "").trim();
@@ -75,7 +53,7 @@ export async function cambiarInicioBono(_previo: Estado, formData: FormData): Pr
 
 // Registra una clase que la alumna YA hizo (fecha pasada): descuenta una clase de su bono y queda como «asistió».
 export async function registrarClaseHecha(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
   const fecha = String(formData.get("fecha") ?? "").trim();
@@ -104,7 +82,7 @@ type FilaPreparada = FilaAlta & { nombre: string; desde: Date | null; instantePa
 // Alumna: se crea su cuenta con sus servicios y, si se elige, su bono (con el pago hecho o pendiente);
 // se le manda el correo para elegir contraseña y también se devuelve el enlace (por si prefieres WhatsApp).
 export async function crearUsuario(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
 
   const correo = String(formData.get("correo") ?? "").trim().toLowerCase();
   const tipo = String(formData.get("tipo") ?? "");
@@ -221,7 +199,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   const { data, error } = await invitar(correo);
   if (error || !data.user) return { error: "No se ha podido crear la cuenta. Inténtalo de nuevo." };
 
-  const { error: falloRol } = await admin.from("profiles").update({ rol: "alumno" }).eq("id", data.user.id);
+  const { error: falloRol } = await admin.from("profiles").update({ rol: "alumno", fue_alumno: true }).eq("id", data.user.id);
   if (falloRol) return { error: "La cuenta se creó, pero no se pudo asignar el tipo." };
 
   await admin.from("perfil_servicios").delete().eq("user_id", data.user.id);
@@ -281,33 +259,49 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   };
 }
 
-// Los accesos de una persona: qué tipo de cuenta es, si es coach y, si es administradora, qué secciones tiene excluidas.
+// Los accesos de una persona. Cada opción se activa o desactiva por separado, con estas reglas:
+//  · alumno/a, exalumno/a e invitado/a se excluyen entre sí; · una administradora puede ser también alumna y coach; · un invitado/a no puede ser administradora.
+// Si es administradora, además, las secciones del panel que tiene excluidas.
 export async function guardarAccesos(
   userId: string,
-  datos: { rol: string; esCoach: boolean; excluidos: string[] },
+  datos: { alumno: boolean; exalumno: boolean; coach: boolean; invitado: boolean; admin: boolean; excluidos: string[] },
 ): Promise<{ ok: boolean; error?: string }> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
-  if (!["alumno", "invitado", "admin"].includes(datos.rol)) return { ok: false, error: "Elige alumno/a, invitado/a o administradora." };
+  if (datos.invitado && (datos.alumno || datos.exalumno || datos.admin)) return { ok: false, error: "Un/a invitado/a no puede ser a la vez alumno/a, exalumno/a ni administradora." };
+  if (datos.alumno && datos.exalumno) return { ok: false, error: "Si es alumno/a ahora, no puede ser exalumno/a." };
+  if (!datos.alumno && !datos.exalumno && !datos.invitado && !datos.admin && !datos.coach) return { ok: false, error: "Marca al menos una opción." };
 
   const admin = createAdminClient();
-  const { data: persona } = await admin.from("profiles").select("rol").eq("id", userId).maybeSingle();
+  const { data: persona } = await admin.from("profiles").select("rol, fue_alumno").eq("id", userId).maybeSingle();
   if (!persona) return { ok: false, error: "No se ha encontrado a esa persona." };
   if (persona.rol === "archivado") return { ok: false, error: "Está archivada: primero hay que recuperarla." };
 
+  // El tipo de cuenta de base: administradora, alumno/a, invitado/a, exalumno/a o, si solo es coach, «coach».
+  const rol = datos.admin ? "admin" : datos.alumno ? "alumno" : datos.invitado ? "invitado" : datos.exalumno ? "exalumno" : "coach";
+
   // Para no quedarte sin acceso por error: tu propia cuenta no puede dejar de ser administradora,
   // y tiene que quedar siempre al menos una administradora.
-  if (persona.rol === "admin" && datos.rol !== "admin") {
+  if (persona.rol === "admin" && rol !== "admin") {
     if (userId === user.id) return { ok: false, error: "No puedes quitarte a ti misma el acceso de administradora." };
     const { count } = await admin.from("profiles").select("id", { count: "exact", head: true }).eq("rol", "admin");
     if ((count ?? 0) <= 1) return { ok: false, error: "Tiene que quedar al menos una administradora." };
   }
 
-  const excluidos = datos.rol === "admin" ? [...new Set(datos.excluidos.filter((c) => CLAVES_SECCIONES.includes(c)))] : [];
+  const excluidos = rol === "admin" ? [...new Set(datos.excluidos.filter((c) => CLAVES_SECCIONES.includes(c)))] : [];
   if (userId === user.id && excluidos.length > 0) return { ok: false, error: "No puedes excluirte a ti misma secciones: te quedarías sin acceso a ellas." };
 
-  const { error } = await admin.from("profiles").update({ rol: datos.rol, es_coach: !!datos.esCoach, excluidos_admin: excluidos }).eq("id", userId);
-  if (error) return { ok: false, error: "No se ha podido guardar. ¿Está ejecutado el archivo 066 en Supabase?" };
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      rol,
+      es_coach: !!datos.coach,
+      tambien_alumno: rol === "admin" && datos.alumno,
+      fue_alumno: !!persona.fue_alumno || datos.alumno || datos.exalumno,
+      excluidos_admin: excluidos,
+    })
+    .eq("id", userId);
+  if (error) return { ok: false, error: "No se ha podido guardar. ¿Está ejecutado el archivo 067 en Supabase?" };
 
   revalidatePath("/admin");
   revalidatePath("/admin/usuarios");
@@ -317,7 +311,7 @@ export async function guardarAccesos(
 
 // Archiva a una persona: desaparece de las listas y no puede entrar, pero sus datos y pagos se conservan (y salen en Descargar datos).
 export async function archivarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
   if (userId === user.id) return { ok: false, error: "No puedes archivar tu propia cuenta." };
 
@@ -352,7 +346,7 @@ export async function archivarUsuario(userId: string): Promise<{ ok: boolean; er
 
 // Recupera a una persona archivada: vuelve a su tipo de antes y puede volver a entrar.
 export async function desarchivarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
 
   const admin = createAdminClient();
@@ -372,7 +366,7 @@ export async function desarchivarUsuario(userId: string): Promise<{ ok: boolean;
 // Borrado definitivo: solo para cuando la persona lo pide por ley (derecho de supresión) y siempre después de archivarla.
 // Se borran su cuenta y sus datos; los pagos se conservan (la base de datos les guarda su nombre y DNI).
 export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
   if (userId === user.id) return { ok: false, error: "No puedes eliminar tu propia cuenta." };
 
@@ -406,7 +400,7 @@ function refrescarPantallas(userId: string) {
 
 // Cambia la tarifa y/o las fechas de un bono. Las clases ya usadas se respetan.
 export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const bonoId = String(formData.get("bonoId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
@@ -459,7 +453,7 @@ export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData):
 
 // Quita una tarifa: el bono, lo que se hace con su pago y con sus clases reservadas, y si se quita el servicio.
 export async function quitarTarifa(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const bonoId = String(formData.get("bonoId") ?? "");
   const modo = String(formData.get("modo") ?? "ya"); // ya | al_caducar
@@ -523,7 +517,7 @@ export async function quitarTarifa(_previo: Estado, formData: FormData): Promise
 
 // «No enviarle correos»: la app deja de mandarle cualquier correo a esa persona.
 export async function cambiarSinCorreos(userId: string, valor: boolean): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
   const { error } = await createAdminClient().from("profiles").update({ sin_correos: valor }).eq("id", userId);
   if (error) return { error: "No se ha podido guardar." };
@@ -534,7 +528,7 @@ export async function cambiarSinCorreos(userId: string, valor: boolean): Promise
 // Un aviso por correo de una persona (confirmaciones, recordatorios, tarifa, mensajes, cumpleaños).
 const AVISOS = ["avisos_reserva", "avisos_recordatorio", "avisos_bono", "avisos_novedades", "avisar_cumple"];
 export async function cambiarAvisoPersona(userId: string, clave: string, valor: boolean): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("usuarios");
   if (!UUID.test(userId) || !AVISOS.includes(clave)) return { error: "No se ha podido identificar a la persona." };
   const { error } = await createAdminClient().from("profiles").update({ [clave]: valor }).eq("id", userId);
   if (error) return { error: "No se ha podido guardar." };
@@ -544,7 +538,7 @@ export async function cambiarAvisoPersona(userId: string, clave: string, valor: 
 
 // Alargar cortesía: se elige hasta qué día y se calculan los días. También reabre una tarifa que acaba de caducar.
 export async function alargarCortesia(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const bonoId = String(formData.get("bonoId") ?? "");
   const hasta = String(formData.get("hasta") ?? "").trim();

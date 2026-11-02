@@ -8,7 +8,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Servicios · Administración" };
 
 export default async function Tarifas() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("tarifas");
 
   const { data } = await supabase
     .from("tipos_bono")

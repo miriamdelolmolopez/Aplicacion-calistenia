@@ -17,7 +17,7 @@ function entero(valor: FormDataEntryValue | null): number {
 
 // Crea las clases de las próximas semanas a partir del horario semanal.
 export async function generarClases(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const semanas = entero(formData.get("semanas"));
   if (!(semanas >= 1 && semanas <= 12)) return { error: "Elige entre 1 y 12 semanas." };
@@ -35,7 +35,7 @@ export async function generarClases(_previo: Estado, formData: FormData): Promis
 }
 
 export async function cambiarPlazas(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const id = String(formData.get("sesionId") ?? "");
   const plazas = entero(formData.get("plazas"));
@@ -57,7 +57,7 @@ export async function cambiarPlazas(_previo: Estado, formData: FormData): Promis
 
 // Quita a alguien de la lista de espera de una clase.
 export async function quitarDeLista(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const { error } = await createAdminClient()
     .from("lista_espera")
@@ -72,7 +72,7 @@ export async function quitarDeLista(_previo: Estado, formData: FormData): Promis
 // Cancela la clase, devuelve su clase a todos los apuntados y amplía su bono
 // los días indicados (0 = sin ampliar).
 export async function cancelarClase(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("presenciales");
 
   const id = String(formData.get("sesionId") ?? "");
   const motivo = String(formData.get("motivo") ?? "").trim().slice(0, 200);
@@ -99,7 +99,7 @@ export async function cancelarClase(_previo: Estado, formData: FormData): Promis
 }
 
 export async function reactivarClase(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const id = String(formData.get("sesionId") ?? "");
   const { error } = await createAdminClient()
@@ -117,7 +117,7 @@ export async function reactivarClase(_previo: Estado, formData: FormData): Promi
 
 // Apunta a un alumno a una clase (usa su bono; puede saltarse el límite de antelación).
 export async function apuntarAlumno(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("presenciales");
 
   const persona = String(formData.get("persona") ?? "");
   if (!persona) return { error: "Elige una persona." };
@@ -137,7 +137,7 @@ export async function apuntarAlumno(_previo: Estado, formData: FormData): Promis
 
 // Quita a alguien de una clase, devolviéndole o no la clase.
 export async function quitarApuntado(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("presenciales");
 
   const devolver = formData.get("devolver") === "si";
   const reservaId = String(formData.get("reservaId") ?? "");
@@ -160,7 +160,7 @@ export async function quitarApuntado(_previo: Estado, formData: FormData): Promi
 
 // Horas de cancelación, días de antelación y si los alumnos ven a los apuntados.
 export async function cambiarAjustes(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const horas = entero(formData.get("horas"));
   const horasInd = entero(formData.get("horas_individual"));
@@ -187,7 +187,7 @@ export async function cambiarAjustes(_previo: Estado, formData: FormData): Promi
 
 // Plazas por defecto y mínimo de alumnos de cada tipo de clase.
 export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const id = String(formData.get("tipoId") ?? "");
   const nombre = String(formData.get("nombre") ?? "").trim();
@@ -253,7 +253,7 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
 
 // Crea un tipo de clase nuevo (por ejemplo «Movilidad»).
 export async function crearTipo(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
 
   const nombre = String(formData.get("nombre") ?? "").trim();
   const servicio = String(formData.get("servicio") ?? "grupal");
@@ -298,7 +298,7 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
 
 // Copia un tipo de clase (con todos sus ajustes) para no empezar de cero.
 export async function duplicarTipo(tipoId: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const admin = createAdminClient();
 
   const { data: origen } = await admin
@@ -323,7 +323,7 @@ export async function duplicarTipo(tipoId: string): Promise<Estado> {
 
 // Elimina un tipo de clase. Si ya tiene clases publicadas o está en una plantilla, no se puede: se desactiva.
 export async function eliminarTipo(tipoId: string): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("presenciales");
   const { error } = await createAdminClient().from("tipos_clase").delete().eq("id", tipoId);
   if (error) {
     return {

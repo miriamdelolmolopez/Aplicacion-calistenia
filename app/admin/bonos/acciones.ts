@@ -21,7 +21,7 @@ function error(mensaje: string | undefined): Estado {
 }
 
 export async function registrarBono(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("pagos");
 
   const persona = String(formData.get("persona") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
@@ -66,7 +66,7 @@ export async function registrarBono(_previo: Estado, formData: FormData): Promis
 }
 
 export async function marcarPagado(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("pagos");
 
   const { error: fallo } = await createAdminClient().rpc("marcar_pagado", {
     p_pago: String(formData.get("pagoId") ?? ""),
@@ -79,7 +79,7 @@ export async function marcarPagado(_previo: Estado, formData: FormData): Promise
 }
 
 export async function ajustarBono(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("pagos");
 
   const clases = entero(formData.get("clases"));
   const dias = entero(formData.get("dias"));
@@ -103,7 +103,7 @@ export async function ajustarBono(_previo: Estado, formData: FormData): Promise<
 }
 
 export async function anularBono(_previo: Estado, formData: FormData): Promise<Estado> {
-  const { user } = await requireAdmin();
+  const { user } = await requireAdmin("pagos");
 
   const { error: fallo } = await createAdminClient().rpc("anular_bono", {
     p_bono: String(formData.get("bonoId") ?? ""),
@@ -118,7 +118,7 @@ export async function anularBono(_previo: Estado, formData: FormData): Promise<E
 }
 
 export async function cambiarPrecio(_previo: Estado, formData: FormData): Promise<Estado> {
-  await requireAdmin();
+  await requireAdmin("pagos");
 
   const precio = aCentimos(String(formData.get("precio") ?? ""));
   if (Number.isNaN(precio) || precio > 100000) return { error: "Escribe un precio válido, por ejemplo 55 o 55,50." };

@@ -11,7 +11,7 @@ import CabeceraAdmin from "../../CabeceraAdmin";
 export const metadata = { title: "Glosario · Administración" };
 
 export default async function AdministrarGlosario() {
-  await requireAdmin();
+  await requireAdmin("aprende");
   const { data } = await createAdminClient()
     .from("glosario")
     .select("id, termino_es, termino_en, definicion_es, definicion_en, categoria, activo, foto_url");

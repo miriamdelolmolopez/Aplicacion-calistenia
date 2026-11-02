@@ -13,7 +13,7 @@ type Item = { id: string; dia_semana: number; hora: string; plazas: number | nul
 // Vista limpia para imprimir o guardar como PDF (desde el botón o con Ctrl+P).
 export default async function ImprimirHorario({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("presenciales");
 
   const { data } = await supabase
     .from("plantillas_horario")

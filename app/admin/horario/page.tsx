@@ -37,7 +37,7 @@ type Clase = {
 const DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 
 export default async function Horario({ searchParams }: { searchParams: Promise<{ semana?: string }> }) {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("presenciales");
   const { semana } = await searchParams;
 
   const hoy = claveDia(new Date().toISOString());

@@ -39,7 +39,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
   const { id } = await params;
   const { pestana: pedida } = await searchParams;
   const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "nuevo";
-  await requireAdmin();
+  await requireAdmin("usuarios");
   const admin = createAdminClient();
   const [formas, METODOS] = await Promise.all([formasActivas(), nombresFormas()]);
 

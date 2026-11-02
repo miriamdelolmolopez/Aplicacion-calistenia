@@ -26,7 +26,7 @@ function nombreDe(p: Persona | null) {
 }
 
 export default async function Rutinas() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("online");
   const admin = createAdminClient();
 
   // Las carpetas necesitan el archivo 044 en Supabase. Si todavía no está, la pantalla funciona igual, sin carpetas.
