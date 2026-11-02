@@ -13,17 +13,45 @@ function refrescar() {
   revalidatePath("/admin/horarios");
 }
 
+// Siguiente posición libre de la lista (null si todavía falta ejecutar el archivo 068 en Supabase).
+async function siguienteOrden(admin: ReturnType<typeof createAdminClient>): Promise<number | null> {
+  const { data, error } = await admin.from("plantillas_horario").select("orden");
+  if (error) return null;
+  return Math.max(0, ...(data ?? []).map((p) => Number(p.orden) || 0)) + 10;
+}
+
 export async function crearPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
   await requireAdmin("presenciales");
   const nombre = limpiarNombre(formData.get("nombre"));
   if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
 
-  const { error } = await createAdminClient().from("plantillas_horario").insert({ nombre });
+  const admin = createAdminClient();
+  const orden = await siguienteOrden(admin);
+  const { error } = await admin.from("plantillas_horario").insert(orden === null ? { nombre } : { nombre, orden });
   if (error) {
     return { error: error.code === "23505" ? "Ya hay una plantilla con ese nombre." : "No se ha podido crear." };
   }
   refrescar();
   return { mensaje: "Plantilla creada. Ábrela para añadirle clases." };
+}
+
+// Nombre, orden de aparición y si está activa, de una vez.
+export async function guardarPlantilla(id: string, datos: { nombre: string; orden: number; activa: boolean }): Promise<Estado> {
+  await requireAdmin("presenciales");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "No se ha encontrado la plantilla." };
+  const nombre = limpiarNombre(datos.nombre);
+  if (nombre.length < 1 || nombre.length > 60) return { error: "Escribe un nombre (hasta 60 letras)." };
+  const orden = Math.floor(Number(datos.orden));
+  if (!(orden >= 0 && orden <= 9999)) return { error: "El orden es un número de 0 a 9999." };
+
+  const { error } = await createAdminClient().from("plantillas_horario").update({ nombre, orden, activa: !!datos.activa }).eq("id", id);
+  if (error) {
+    if (error.code === "23505") return { error: "Ya hay una plantilla con ese nombre." };
+    return { error: "No se ha podido guardar. ¿Está ejecutado el archivo 068 en Supabase?" };
+  }
+  refrescar();
+  revalidatePath("/admin/horario");
+  return { mensaje: "Guardado." };
 }
 
 export async function renombrarPlantilla(_previo: Estado, formData: FormData): Promise<Estado> {
@@ -56,7 +84,8 @@ export async function duplicarPlantilla(_previo: Estado, formData: FormData): Pr
   let nombre = `${origen.nombre} (copia)`.slice(0, 60);
   for (let n = 2; usados.has(nombre.toLowerCase()); n++) nombre = `${origen.nombre} (copia ${n})`.slice(0, 60);
 
-  const { data: nueva, error } = await admin.from("plantillas_horario").insert({ nombre }).select("id").single();
+  const orden = await siguienteOrden(admin);
+  const { data: nueva, error } = await admin.from("plantillas_horario").insert(orden === null ? { nombre } : { nombre, orden }).select("id").single();
   if (error || !nueva) return { error: "No se ha podido duplicar." };
 
   const { data: clases } = await admin

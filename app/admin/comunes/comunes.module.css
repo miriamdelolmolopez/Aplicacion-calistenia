@@ -102,6 +102,12 @@
   border-radius: 9999px;
 }
 
+.confirmar .guardar {
+  color: #ffffff;
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
 .confirmar .si {
   color: #ffffff;
   background: #d6453d;

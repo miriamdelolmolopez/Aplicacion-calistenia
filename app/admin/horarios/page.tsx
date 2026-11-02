@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, lunesDe, sumarDias, textoHora } from "@/lib/fechas";
 import styles from "../admin.module.css";
-import { Aplicar, AnadirClase, QuitarCompacto, Renombrar } from "./Controles";
+import { Aplicar, BotonAnadirClase, QuitarCompacto } from "./Controles";
 import estiloCuadricula from "./cuadricula.module.css";
 import ListaPlantillas, { type ResumenPlantilla } from "./ListaPlantillas";
 import ResumenMes, { type ClaseDia } from "./ResumenMes";
@@ -24,16 +24,17 @@ type Item = {
   coach_id: string | null;
   tipos_clase: { nombre: string; plazas_max: number; color: string | null } | null;
 };
-type Plantilla = { id: string; nombre: string; principal: boolean; plantilla_clases: Item[] };
+type Plantilla = { id: string; nombre: string; principal: boolean; orden?: number; activa?: boolean; plantilla_clases: Item[] };
 
 export default async function Horarios() {
   const { supabase } = await requireAdmin("presenciales");
 
-  const { data } = await supabase
-    .from("plantillas_horario")
-    .select("id, nombre, principal, plantilla_clases(id, tipo_id, dia_semana, hora, plazas, coach_id, tipos_clase(nombre, plazas_max, color))")
-    .order("principal", { ascending: false })
-    .order("nombre");
+  const columnasClases = "plantilla_clases(id, tipo_id, dia_semana, hora, plazas, coach_id, tipos_clase(nombre, plazas_max, color))";
+  // Orden y «activa» necesitan el archivo 068 en Supabase; si todavía no está, la pantalla funciona igual sin ellos.
+  const conNuevos = await supabase.from("plantillas_horario").select(`id, nombre, principal, orden, activa, ${columnasClases}`).order("orden").order("nombre");
+  const data = conNuevos.error
+    ? (await supabase.from("plantillas_horario").select(`id, nombre, principal, ${columnasClases}`).order("principal", { ascending: false }).order("nombre")).data
+    : conNuevos.data;
   const plantillas = (data ?? []) as unknown as Plantilla[];
 
   const { data: tiposDatos } = await supabase
@@ -71,7 +72,7 @@ export default async function Horarios() {
       ? 0
       : p.plantilla_clases.filter((c) => publicadasSemana.has(`${c.dia_semana}-${c.hora.slice(0, 5)}-${c.tipo_id}`)).length /
         p.plantilla_clases.length;
-  const mejor = plantillas.reduce<{ id: string; puntos: number } | null>((m, p) => {
+  const mejor = plantillas.filter((p) => p.activa !== false).reduce<{ id: string; puntos: number } | null>((m, p) => {
     const puntos = parecido(p);
     return puntos >= 0.6 && (!m || puntos > m.puntos) ? { id: p.id, puntos } : m;
   }, null);
@@ -88,6 +89,9 @@ export default async function Horarios() {
         const items = [...p.plantilla_clases].sort((a, b) => a.hora.localeCompare(b.hora));
         contenidos[p.id] = (
           <>
+            <div>
+              <BotonAnadirClase plantillaId={p.id} tipos={tipos} coaches={coaches} />
+            </div>
 
             {items.length > 0 && (
               <div className={estiloCuadricula.desliza}>
@@ -133,22 +137,13 @@ export default async function Horarios() {
             {items.length === 0 && <p className={styles.ayuda}>Esta plantilla todavía no tiene clases.</p>}
 
             <details className={styles.detalles}>
-              <summary>Añadir clases</summary>
-              <AnadirClase plantillaId={p.id} tipos={tipos} coaches={coaches} />
-            </details>
-
-            <details className={styles.detalles}>
               <summary>Publicar clases (elegir días)</summary>
               <Aplicar id={p.id} hoy={hoy} />
             </details>
 
-            <details className={styles.detalles}>
-              <summary>Nombre y más opciones</summary>
-              <Renombrar id={p.id} nombre={p.nombre} />
-              <Link href={`/admin/horarios/${p.id}/imprimir`} className={`${styles.boton} ${styles.botonSecundario}`}>
-                Imprimir / PDF
-              </Link>
-            </details>
+            <Link href={`/admin/horarios/${p.id}/imprimir`} className={`${styles.boton} ${styles.botonSecundario}`}>
+              Imprimir / PDF
+            </Link>
           </>
         );
   }
@@ -160,6 +155,8 @@ export default async function Horarios() {
     clases: pl.plantilla_clases.length,
     usada: usadaAhora === pl.id,
     principal: pl.principal,
+    orden: pl.orden ?? 0,
+    activa: pl.activa !== false,
     puedeBorrar: usadaAhora !== pl.id,
   }));
 

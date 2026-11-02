@@ -58,7 +58,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
       .lt("empieza_en", hasta)
       .order("empieza_en"),
     supabase.from("tipos_clase").select("id, nombre, plazas_max, plazas_prueba").eq("activo", true).order("orden").order("nombre"),
-    supabase.from("plantillas_horario").select("id, nombre, principal").order("principal", { ascending: false }).order("nombre"),
+    supabase.from("plantillas_horario").select("id, nombre, principal, activa").order("principal", { ascending: false }).order("nombre"),
     supabase.from("ajustes").select("clave, valor"),
     // Días con clases (unos meses antes y después) para marcarlos en los calendarios.
     supabase
@@ -78,7 +78,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
   const tipos = (tiposDatos ?? []) as TipoOpcion[];
   const coaches = await coachesDisponibles();
   const nombreCoach = new Map(coaches.map((c) => [c.id, c.nombre]));
-  const plantillas = (plantillasDatos ?? []) as { id: string; nombre: string; principal: boolean }[];
+  const plantillas = ((plantillasDatos ?? []) as { id: string; nombre: string; principal: boolean; activa?: boolean }[]).filter((p) => p.activa !== false);
   const ajuste = (clave: string, defecto: number) => {
     const v = Number(ajustesDatos?.find((a) => a.clave === clave)?.valor);
     return Number.isFinite(v) ? v : defecto;

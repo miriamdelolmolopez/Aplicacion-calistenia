@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import AyudaI from "../comunes/AyudaI";
+import Nuevo from "../comunes/Nuevo";
 import estiloCuadricula from "./cuadricula.module.css";
 import {
   anadirClase,
@@ -13,7 +14,6 @@ import {
   duplicarPlantilla,
   marcarPrincipal,
   quitarClase,
-  renombrarPlantilla,
 } from "./acciones";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -50,23 +50,6 @@ export function NuevaPlantilla({ alTerminar }: { alTerminar?: () => void } = {})
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
         Crear plantilla
-      </button>
-      <Mensajes estado={estado} />
-    </form>
-  );
-}
-
-export function Renombrar({ id, nombre }: { id: string; nombre: string }) {
-  const [estado, accion, pendiente] = useActionState<Estado, FormData>(renombrarPlantilla, {});
-  return (
-    <form action={accion} className={styles.formularioInterno}>
-      <input type="hidden" name="id" value={id} />
-      <div className={styles.campo}>
-        <label htmlFor={`rn-${id}`}>Nombre <AyudaI texto="Cómo se llama la plantilla." /></label>
-        <input id={`rn-${id}`} name="nombre" maxLength={60} defaultValue={nombre} />
-      </div>
-      <button className={styles.boton} type="submit" disabled={pendiente}>
-        Guardar nombre
       </button>
       <Mensajes estado={estado} />
     </form>
@@ -150,12 +133,21 @@ export function QuitarCompacto({ id, texto }: { id: string; texto: string }) {
   );
 }
 
-export function AnadirClase({ plantillaId, tipos, coaches }: { plantillaId: string; tipos: { id: string; nombre: string }[]; coaches: { id: string; nombre: string }[] }) {
+// Botón «+ Añadir clase» que abre el formulario en su propio panel.
+export function BotonAnadirClase({ plantillaId, tipos, coaches }: { plantillaId: string; tipos: { id: string; nombre: string }[]; coaches: { id: string; nombre: string }[] }) {
+  return <Nuevo etiqueta="Añadir clase" titulo="Añadir una clase" render={(cerrar) => <AnadirClase plantillaId={plantillaId} tipos={tipos} coaches={coaches} alTerminar={cerrar} />} />;
+}
+
+export function AnadirClase({ plantillaId, tipos, coaches, alTerminar }: { plantillaId: string; tipos: { id: string; nombre: string }[]; coaches: { id: string; nombre: string }[]; alTerminar?: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(anadirClase, {});
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar) return;
+    const t = setTimeout(alTerminar, 800);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar]);
   return (
     <form action={accion} className={styles.formularioInterno}>
       <input type="hidden" name="plantillaId" value={plantillaId} />
-      <strong>Añadir una clase</strong>
       <div className={styles.campo}>
         <label htmlFor={`ac-dia-${plantillaId}`}>Día <AyudaI texto="El día de la semana en que se da la clase." /></label>
         <select id={`ac-dia-${plantillaId}`} name="dia" defaultValue="1">
