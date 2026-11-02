@@ -131,6 +131,7 @@ export default function Inicio() {
   const fotoBannerInicio = useFotoCard("inicio:banner");
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const [fotosListas, setFotosListas] = useState(false);
+  const [miFoto, setMiFoto] = useState<string | null>(null);
   const [azar, setAzar] = useState<{ foto: FotoNombre; frase: number } | null>(null);
   const id = perfil && perfil !== "anonimo" ? perfil.id : null;
   const planOnline = !!perfil && perfil !== "anonimo" && perfil.planOnline;
@@ -138,6 +139,18 @@ export default function Inicio() {
   useEffect(() => {
     if (perfil === "anonimo") router.replace("/entrar");
   }, [perfil, router]);
+
+  // Mi foto de perfil, para el saludo de arriba.
+  useEffect(() => {
+    if (!id) return;
+    let vigente = true;
+    obtenerFotos([id])
+      .then((m) => vigente && setMiFoto(m[id] ?? null))
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -198,7 +211,7 @@ export default function Inicio() {
       <AvisoVistaAlumna perfil={perfil} />
       <header className={clay.cabecera}>
         <span className={clay.avatar}>
-          <Avatar nombre={perfil.nombre} tamano={40} />
+          <Avatar nombre={perfil.nombre} url={miFoto} tamano={40} />
         </span>
         <div className={clay.saludo}>
           <p className={clay.saludoSub}>{t.hola}</p>

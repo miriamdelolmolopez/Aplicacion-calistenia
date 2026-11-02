@@ -280,7 +280,62 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   };
 }
 
-// Elimina a una persona y todos sus datos (los pagos se conservan: la base de datos les guarda su nombre y DNI).
+// Archiva a una persona: desaparece de las listas y no puede entrar, pero sus datos y pagos se conservan (y salen en Descargar datos).
+export async function archivarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
+  if (userId === user.id) return { ok: false, error: "No puedes archivar tu propia cuenta." };
+
+  const admin = createAdminClient();
+  const { data: persona } = await admin.from("profiles").select("rol").eq("id", userId).maybeSingle();
+  if (!persona) return { ok: false, error: "No se ha encontrado a esa persona." };
+  if (persona.rol === "admin") return { ok: false, error: "No se puede archivar a una administradora." };
+  if (persona.rol === "archivado") return { ok: true };
+
+  // Sus reservas de clases que todavía no han empezado se quitan (sin devolver la clase) y sale de las listas de espera.
+  const { data: futuras } = await admin
+    .from("reservas")
+    .select("id, sesiones_clase!inner(empieza_en)")
+    .eq("user_id", userId)
+    .eq("estado", "reservada")
+    .gt("sesiones_clase.empieza_en", new Date().toISOString());
+  for (const r of (futuras ?? []) as { id: string }[]) {
+    await admin.rpc("cancelar_reserva", { p_user: userId, p_reserva: r.id, p_admin: user.id, p_devolver: false });
+  }
+  await admin.from("lista_espera").delete().eq("user_id", userId);
+
+  const { error } = await admin.from("profiles").update({ rol: "archivado", rol_anterior: persona.rol, archivado_en: new Date().toISOString() }).eq("id", userId);
+  if (error) return { ok: false, error: "No se ha podido archivar. ¿Está ejecutado el archivo 065 en Supabase?" };
+  // Sin acceso: no puede iniciar sesión mientras esté archivada.
+  await admin.auth.admin.updateUserById(userId, { ban_duration: "876000h" });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/usuarios");
+  revalidatePath(`/admin/usuarios/${userId}`);
+  return { ok: true };
+}
+
+// Recupera a una persona archivada: vuelve a su tipo de antes y puede volver a entrar.
+export async function desarchivarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
+
+  const admin = createAdminClient();
+  const { data: persona } = await admin.from("profiles").select("rol, rol_anterior").eq("id", userId).maybeSingle();
+  if (!persona || persona.rol !== "archivado") return { ok: false, error: "Esa persona no está archivada." };
+
+  const { error } = await admin.from("profiles").update({ rol: persona.rol_anterior === "alumno" ? "alumno" : "invitado", rol_anterior: null, archivado_en: null }).eq("id", userId);
+  if (error) return { ok: false, error: "No se ha podido recuperar." };
+  await admin.auth.admin.updateUserById(userId, { ban_duration: "none" });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/usuarios");
+  revalidatePath(`/admin/usuarios/${userId}`);
+  return { ok: true };
+}
+
+// Borrado definitivo: solo para cuando la persona lo pide por ley (derecho de supresión) y siempre después de archivarla.
+// Se borran su cuenta y sus datos; los pagos se conservan (la base de datos les guarda su nombre y DNI).
 export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
   const { user } = await requireAdmin();
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
@@ -290,6 +345,7 @@ export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; er
   const { data: persona } = await admin.from("profiles").select("rol, foto_path").eq("id", userId).maybeSingle();
   if (!persona) return { ok: false, error: "No se ha encontrado a esa persona." };
   if (persona.rol === "admin") return { ok: false, error: "No se puede eliminar a una administradora." };
+  if (persona.rol !== "archivado") return { ok: false, error: "Primero hay que archivar a la persona. El borrado definitivo es solo para peticiones legales." };
 
   if (persona.foto_path) await admin.storage.from("avatares").remove([persona.foto_path as string]);
 

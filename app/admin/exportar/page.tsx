@@ -6,7 +6,7 @@ import CabeceraAdmin from "../CabeceraAdmin";
 export const metadata = { title: "Descargar datos · Administración" };
 
 const ARCHIVOS = [
-  { tipo: "alumnos", titulo: "Alumnos/as", ayuda: "Datos de cada persona y sus servicios." },
+  { tipo: "alumnos", titulo: "Alumnos/as", ayuda: "Datos de cada persona y sus servicios. Incluye también a las personas archivadas (columna «Archivada el»)." },
   { tipo: "pagos", titulo: "Pagos", ayuda: "Todos los pagos con su persona, importe y método." },
   { tipo: "bonos", titulo: "Bonos", ayuda: "Bonos comprados, clases restantes y caducidad." },
   { tipo: "reservas", titulo: "Historial de clases", ayuda: "Todas las reservas, canceladas y de prueba." },

@@ -13,12 +13,16 @@ export const metadata = { title: "Usuarios · Administración" };
 
 type Fila = Omit<Usuario, "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" | "pendiente_cobro"> & { foto_path: string | null };
 
-export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string }> }) {
-  const { nuevo } = await searchParams;
+export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string; archivadas?: string }> }) {
+  const { nuevo, archivadas } = await searchParams;
+  const verArchivadas = archivadas === "1";
   const { supabase } = await requireAdmin();
 
   const { data } = await supabase.rpc("resumen_usuarios");
-  const filas = (data ?? []) as Fila[];
+  // Las personas archivadas no salen en la lista normal; con «Ver archivadas» salen solo ellas.
+  const todas = (data ?? []) as Fila[];
+  const hayArchivadas = todas.some((f) => f.rol === "archivado");
+  const filas = todas.filter((f) => (f.rol === "archivado") === verArchivadas);
 
   // Fotos (privadas): enlaces temporales solo para esta pantalla.
   const rutas = filas.map((f) => f.foto_path).filter((r): r is string => !!r);
@@ -90,6 +94,19 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
         </Link>
       </CabeceraAdmin>
       <NuevoUsuario tarifas={tarifas} descuentos={descuentos} hoy={hoy} ahora={ahora} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
+      <p style={{ margin: "0 0 12px" }}>
+        {verArchivadas ? (
+          <Link href="/admin/usuarios" className={styles.enlaceBarra}>
+            ← Volver a las personas activas
+          </Link>
+        ) : (
+          hayArchivadas && (
+            <Link href="/admin/usuarios?archivadas=1" className={styles.enlaceBarra}>
+              Ver personas archivadas
+            </Link>
+          )
+        )}
+      </p>
       <ListaUsuarios usuarios={usuarios} />
     </main>
   );

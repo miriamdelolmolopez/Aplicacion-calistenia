@@ -140,7 +140,7 @@ async function construir(tipo: string): Promise<{ nombre: string; csv: string } 
     return {
       nombre: "alumnos",
       csv: aCsv(
-        ["Nombre", "Apellidos", "Correo", "Teléfono", "DNI", "Fecha de nacimiento", "Contacto de emergencia", "Teléfono de emergencia", "Servicios", "Rol", "Alta"],
+        ["Nombre", "Apellidos", "Correo", "Teléfono", "DNI", "Fecha de nacimiento", "Contacto de emergencia", "Teléfono de emergencia", "Servicios", "Rol", "Alta", "Archivada el"],
         perfiles.map((p) => [
           String(p.nombre ?? ""),
           String(p.apellidos ?? ""),
@@ -153,6 +153,7 @@ async function construir(tipo: string): Promise<{ nombre: string; csv: string } 
           de(p.id),
           String(p.rol ?? ""),
           fecha(p.creado_en),
+          fecha(p.archivado_en),
         ]),
       ),
     };

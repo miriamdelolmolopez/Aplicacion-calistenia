@@ -19,7 +19,7 @@ import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas"
 import { AlargarCortesia } from "./CorreosYCortesia";
 import CorreosPersona from "./CorreosPersona";
 import EditorPersona from "../../EditorPersona";
-import EliminarUsuario from "./EliminarUsuario";
+import ArchivarUsuario from "./ArchivarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
@@ -516,8 +516,8 @@ export default async function FichaUsuario({
           </section>
 
           <section className={styles.tarjeta}>
-            <h2>Eliminar usuario</h2>
-            <EliminarUsuario userId={p.id} nombre={nombre} />
+            <h2>{p.rol === "archivado" ? "Persona archivada" : "Archivar usuario"}</h2>
+            <ArchivarUsuario userId={p.id} nombre={nombre} archivado={p.rol === "archivado"} />
           </section>
         </>
   );
