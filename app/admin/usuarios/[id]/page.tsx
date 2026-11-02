@@ -16,11 +16,12 @@ import { EditorBono } from "../../bonos/Controles";
 import AvancesSesion from "./AvancesSesion";
 import Logros from "../../../progreso/Logros";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
-import { AlargarCortesia, InterruptorCorreos } from "./CorreosYCortesia";
+import { AlargarCortesia } from "./CorreosYCortesia";
+import CorreosPersona from "./CorreosPersona";
+import EditorPersona from "../../EditorPersona";
 import EliminarUsuario from "./EliminarUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
-import { ClasesHechas } from "./ClasesHechas";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
 
@@ -104,7 +105,7 @@ export default async function FichaUsuario({
   const ahora = new Date().toISOString();
 
   // Todo lo que no depende de otra consulta se pide a la vez.
-  const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: tiposClaseDatos }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
+  const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
     nombresFormas(),
     supabase
       .from("profiles")
@@ -118,7 +119,7 @@ export default async function FichaUsuario({
     admin.auth.admin.getUserById(id),
     supabase.rpc("asistencia_usuario", { p_user: id }),
     supabase.from("notas_usuario").select("texto").eq("user_id", id).maybeSingle(),
-    admin.from("tipos_clase").select("id, nombre").eq("activo", true).order("nombre"),
+    admin.from("profiles").select("avisos_reserva, avisos_recordatorio, avisos_bono, avisos_novedades, avisar_cumple").eq("id", id).maybeSingle(),
     // Cuántos textos legales ha aceptado (el listado completo está en su propia pantalla).
     admin.from("consentimientos").select("tipo, version, aceptado_en").eq("user_id", id).order("aceptado_en", { ascending: false }),
     supabase.from("intentos_examen").select("id, aciertos, total, creado_en").eq("user_id", id).order("creado_en", { ascending: false }).limit(50),
@@ -145,7 +146,6 @@ export default async function FichaUsuario({
     .order("creado_en", { ascending: false });
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
-  const tiposClase = (tiposClaseDatos ?? []) as { id: string; nombre: string }[];
 
 ;
 
@@ -218,6 +218,16 @@ export default async function FichaUsuario({
     reservasFuturas: futurasPorBono.get(b.id) ?? 0,
     enEspera: bonos.filter((o) => o.id !== b.id && o.estado === "en_cola" && o.servicio === b.servicio).length,
   });
+
+  // Servicios que tiene ahora (en marcha o en espera) y el texto de cada uno.
+  const contratados = bonos.filter((b) => b.estado === "activo" || b.estado === "en_cola");
+  const detalleBono = (b: Bono) =>
+    [
+      b.servicio === "online" ? "Plan online" : `${b.clases_restantes} de ${b.clases_total} clases`,
+      b.activo_desde ? `del ${fechaCorta(b.activo_desde)}${b.caduca_en ? ` al ${fechaCorta(b.caduca_en)}` : ""}` : b.caduca_en ? `hasta el ${fechaCorta(b.caduca_en)}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
   const maxMes = Math.max(1, ...asistencia.por_mes.map((m) => m.clases));
 
@@ -427,67 +437,81 @@ export default async function FichaUsuario({
           <section className={styles.tarjeta}>
             <h2>Acciones</h2>
             <nav className={estilos.acciones} aria-label="Acciones">
+              <details className={estilos.accionDespliega}>
+                <summary>Editar servicios contratados</summary>
+                <div className={estilos.serviciosContratados}>
+                  {contratados.length === 0 && <p className={styles.ayuda}>Ahora mismo no tiene ningún servicio contratado.</p>}
+                  {contratados.map((b) => (
+                    <article key={b.id} className={estilos.histCard}>
+                      <div className={estilos.histCabecera}>
+                        <div>
+                          <strong>{b.tipos_bono?.nombre}</strong>
+                          <div className={styles.ayuda}>{detalleBono(b)}</div>
+                        </div>
+                        <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                      </div>
+                      {b.estado === "activo" && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
+                      <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
+                      <EditorBono bonoId={b.id} anulado={false} sinAnular />
+                    </article>
+                  ))}
+                  <EditorPersona
+                    persona={{
+                      id: p.id,
+                      email: p.email ?? "",
+                      rol: p.rol,
+                      servicios: (p.perfil_servicios as { servicio: string }[]).map((s) => s.servicio),
+                    }}
+                  />
+                </div>
+              </details>
               <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>
               <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
-              <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>
+              {presencial && <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>}
               {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
               {online && rutinaDe && <Link href={`/rutina/ver?como=${p.id}`}>Ver su rutina como alumno/a</Link>}
-              <Link href={aFicha("reservas")}>Calendario de reservas</Link>
-              <Link href={aFicha("perfil")}>Editar datos y servicios</Link>
-              <Link href={`/admin/usuarios/${p.id}/textos-legales`}>Textos legales que aceptó</Link>
+              <Link href={`/admin/usuarios/${p.id}/textos-legales`}>Textos legales</Link>
             </nav>
           </section>
 
           <section className={styles.tarjeta}>
-            <h2>Tarifa y pagos</h2>
-            {bonos.length === 0 && <p className={styles.ayuda}>Todavía no tiene ningún bono.</p>}
-            <ul className={styles.lista}>
-              {bonos.map((b) => {
-                const pago = b.pagos[0];
-                return (
-                  <li key={b.id} className={styles.persona}>
-                    <div className={styles.personaCabecera}>
-                      <div>
-                        <strong>{b.tipos_bono?.nombre}</strong>
+            <h2>Historial de servicios y pagos</h2>
+            {bonos.length === 0 && <p className={styles.ayuda}>Todavía no ha contratado ningún servicio.</p>}
+            {bonos.map((b) => {
+              const pago = b.pagos[0];
+              return (
+                <article key={b.id} className={estilos.histCard}>
+                  <div className={estilos.histCabecera}>
+                    <div>
+                      <strong>{b.tipos_bono?.nombre}</strong>
+                      <div className={styles.ayuda}>{detalleBono(b)}</div>
+                      {pago && (
                         <div className={styles.ayuda}>
-                          {b.servicio === "online" ? "Plan online" : `${b.clases_restantes} de ${b.clases_total} clases`}
-                          {b.caduca_en && ` · caduca ${fechaCorta(b.caduca_en)}`}
+                          {euros(pago.importe_centimos)}
+                          {pago.descuento_centimos > 0 && ` (descuento −${euros(pago.descuento_centimos)})`} · {METODOS[pago.metodo] ?? pago.metodo} · {pago.estado === "pagado" ? "cobrado" : pago.estado === "pendiente" ? "pendiente de cobro" : "anulado"}
                         </div>
-                        {pago && (
-                          <div className={styles.ayuda}>
-                            {euros(pago.importe_centimos)}
-                            {pago.descuento_centimos > 0 && ` (descuento −${euros(pago.descuento_centimos)})`} · {METODOS[pago.metodo] ?? pago.metodo} ·{" "}
-                            {pago.estado === "pagado" ? "cobrado" : pago.estado === "pendiente" ? "PENDIENTE DE COBRO" : "anulado"}
-                          </div>
-                        )}
-                      </div>
-                      <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                      )}
                     </div>
-                    {(b.estado === "activo" || (b.estado === "caducado" && b.clases_restantes > 0)) && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
-                    {(b.estado === "activo" || b.estado === "en_cola") && (
-                      <>
-                        <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
-                        <EditorBono bonoId={b.id} anulado={false} sinAnular />
-                      </>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-            <Link href="/admin/bonos" className={`${styles.boton} ${styles.botonSecundario}`}>
-              Registrar o cambiar bonos
-            </Link>
-            {presencial && (
-              <details>
-                <summary className={styles.ayuda}>Clases que ya hizo antes de entrar en la app</summary>
-                <ClasesHechas userId={p.id} tipos={tiposClase} />
-              </details>
-            )}
+                    <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                  </div>
+                </article>
+              );
+            })}
           </section>
 
           <section className={styles.tarjeta}>
             <h2>Correos</h2>
-            <InterruptorCorreos userId={p.id} inicial={!!(p as { sin_correos?: boolean }).sin_correos} />
+            <CorreosPersona
+              userId={p.id}
+              inicial={{
+                sinCorreos: !!(p as { sin_correos?: boolean }).sin_correos,
+                avisos_reserva: avisosPersona?.avisos_reserva ?? true,
+                avisos_recordatorio: avisosPersona?.avisos_recordatorio ?? true,
+                avisos_bono: avisosPersona?.avisos_bono ?? true,
+                avisos_novedades: avisosPersona?.avisos_novedades ?? true,
+                avisar_cumple: avisosPersona?.avisar_cumple ?? true,
+              }}
+            />
           </section>
 
           <section className={styles.tarjeta}>

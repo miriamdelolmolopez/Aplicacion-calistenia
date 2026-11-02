@@ -398,7 +398,7 @@ export default function TarifaAsistentes({ userId, bono, tarifas }: { userId: st
         Cambiar tarifa y fechas
       </button>
       <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setAbierto("quitar")}>
-        Quitar tarifa
+        Eliminar
       </button>
       {abierto === "cambiar" && (
         <PanelCompleto titulo="Tarifa y cuotas" cerrar={cerrar}>

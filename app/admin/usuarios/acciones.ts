@@ -328,6 +328,17 @@ export async function cambiarSinCorreos(userId: string, valor: boolean): Promise
   return { mensaje: valor ? "A partir de ahora no se le envía ningún correo." : "Vuelve a recibir los correos." };
 }
 
+// Un aviso por correo de una persona (confirmaciones, recordatorios, tarifa, mensajes, cumpleaños).
+const AVISOS = ["avisos_reserva", "avisos_recordatorio", "avisos_bono", "avisos_novedades", "avisar_cumple"];
+export async function cambiarAvisoPersona(userId: string, clave: string, valor: boolean): Promise<Estado> {
+  await requireAdmin();
+  if (!UUID.test(userId) || !AVISOS.includes(clave)) return { error: "No se ha podido identificar a la persona." };
+  const { error } = await createAdminClient().from("profiles").update({ [clave]: valor }).eq("id", userId);
+  if (error) return { error: "No se ha podido guardar." };
+  revalidatePath(`/admin/usuarios/${userId}`);
+  return { mensaje: "Guardado." };
+}
+
 // Alargar cortesía: se elige hasta qué día y se calculan los días. También reabre una tarifa que acaba de caducar.
 export async function alargarCortesia(_previo: Estado, formData: FormData): Promise<Estado> {
   const { user } = await requireAdmin();

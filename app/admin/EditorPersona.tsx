@@ -1,8 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { cambiarPersona, enlaceNuevo, type Estado } from "./acciones";
-import EnlaceCopiable from "./EnlaceCopiable";
+import { cambiarPersona, type Estado } from "./acciones";
 import styles from "./admin.module.css";
 
 const SERVICIOS = [
@@ -20,14 +19,10 @@ type Persona = {
 
 export default function EditorPersona({ persona }: { persona: Persona }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarPersona, {});
-  const [estadoEnlace, accionEnlace, pendienteEnlace] = useActionState<Estado, FormData>(
-    enlaceNuevo,
-    {},
-  );
 
   return (
     <details className={styles.detalles}>
-      <summary>Editar</summary>
+      <summary>Cambiar tipo de cuenta y servicios</summary>
 
       <form action={accion} className={styles.formularioInterno}>
         <input type="hidden" name="userId" value={persona.id} />
@@ -67,27 +62,6 @@ export default function EditorPersona({ persona }: { persona: Persona }) {
         </button>
       </form>
 
-      <form action={accionEnlace} className={styles.formularioInterno}>
-        <input type="hidden" name="correo" value={persona.email} />
-        <button
-          className={`${styles.boton} ${styles.botonSecundario}`}
-          type="submit"
-          disabled={pendienteEnlace}
-        >
-          {pendienteEnlace ? "Generando…" : "Generar enlace nuevo de acceso"}
-        </button>
-        {estadoEnlace.error && (
-          <p className={styles.error} role="alert">
-            {estadoEnlace.error}
-          </p>
-        )}
-        {estadoEnlace.mensaje && (
-          <div role="status">
-            <p className={styles.aviso}>{estadoEnlace.mensaje}</p>
-            {estadoEnlace.enlace && <EnlaceCopiable enlace={estadoEnlace.enlace} />}
-          </div>
-        )}
-      </form>
     </details>
   );
 }
