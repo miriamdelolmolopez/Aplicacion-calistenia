@@ -39,7 +39,7 @@ export function soloFecha(iso: string, idioma: Idioma): string {
   }).format(new Date(iso));
 }
 
-// Marco común con la marca: fondo crema, tarjeta blanca, botón verde oliva.
+// Marco común con la marca: fondo gris claro, tarjeta blanca, botón azul cian.
 function marco(opts: {
   idioma: Idioma;
   titulo: string;
@@ -54,16 +54,16 @@ function marco(opts: {
     .map((p) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.5;">${p}</p>`)
     .join("");
   const botonHtml = opts.boton
-    ? `<p style="margin:22px 0 6px;"><a href="${enlaceApp(opts.boton.ruta)}" style="display:inline-block;padding:12px 22px;background:#70754B;color:#ffffff;text-decoration:none;border-radius:10px;font-size:16px;">${opts.boton.texto}</a></p>`
+    ? `<p style="margin:22px 0 6px;"><a href="${enlaceApp(opts.boton.ruta)}" style="display:inline-block;padding:12px 22px;background:#0aa8c0;color:#ffffff;text-decoration:none;border-radius:10px;font-size:16px;">${opts.boton.texto}</a></p>`
     : "";
-  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#F4EFE6;font-family:Arial,Helvetica,sans-serif;color:#2B2B2A;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4EFE6;padding:24px 12px;"><tr><td align="center">
+  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#f3f4f5;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f5;padding:24px 12px;"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:28px;">
 <tr><td>
-<p style="margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#5A5E3B;">CalisCoach</p>
-<h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:600;">${opts.titulo}</h1>
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#0e7490;">CalisCoach</p>
+<h1 style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;">${opts.titulo}</h1>
 ${parrafosHtml}${botonHtml}
-<p style="margin:22px 0 0;font-size:13px;color:#5A5E3B;">${pie}</p>
+<p style="margin:22px 0 0;font-size:13px;color:#6c757d;">${pie}</p>
 </td></tr></table></td></tr></table></body></html>`;
   const texto = [opts.titulo, "", ...opts.parrafos.map((p) => p.replace(/<[^>]+>/g, "")), opts.boton ? `${opts.boton.texto}: ${enlaceApp(opts.boton.ruta)}` : ""]
     .join("\n")
