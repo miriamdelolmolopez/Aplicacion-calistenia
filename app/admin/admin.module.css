@@ -18,12 +18,11 @@
   color: var(--blanco);
   background-color: #1f2023;
   background-image: linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.15) 70%),
-    url(/fotos/personal-v2.webp), linear-gradient(#967a6f, #967a6f);
+    url(/fotos/banner-manos.webp), linear-gradient(#967a6f, #967a6f);
   background-size: cover;
-  background-position: center 30%;
+  background-position: center 6%;
   border-radius: 28px;
   box-shadow: var(--sombra);
-  background-blend-mode: normal, overlay, normal;
 }
 
 .barra h1 {
