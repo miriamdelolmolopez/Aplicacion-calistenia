@@ -5,8 +5,20 @@ import { cancelarClase } from "../admin/clases/acciones";
 import styles from "../admin/admin.module.css";
 
 // Para la administradora: cancela una clase entera, devuelve su clase a toda la gente apuntada y, si quiere, alarga sus bonos.
-export default function CancelarClaseAdmin({ sesionId, personas, alTerminar }: { sesionId: string; personas: number; alTerminar: () => void }) {
-  const [abierto, setAbierto] = useState(false);
+export default function CancelarClaseAdmin({
+  sesionId,
+  personas,
+  alTerminar,
+  sinBoton,
+  etiqueta = "Cancelar la clase",
+}: {
+  sesionId: string;
+  personas: number;
+  alTerminar: () => void;
+  sinBoton?: boolean; // el formulario ya sale abierto y el botón lo pone quien lo usa
+  etiqueta?: string;
+}) {
+  const [abierto, setAbierto] = useState(!!sinBoton);
   const [trabajando, setTrabajando] = useState(false);
   const [mensaje, setMensaje] = useState<{ texto: string; error: boolean } | null>(null);
 
@@ -20,10 +32,12 @@ export default function CancelarClaseAdmin({ sesionId, personas, alTerminar }: {
   }
 
   return (
-    <div style={{ marginTop: 10 }}>
-      <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} aria-expanded={abierto} onClick={() => setAbierto((a) => !a)}>
-        {abierto ? "Cerrar" : "Cancelar la clase"}
-      </button>
+    <div style={sinBoton ? undefined : { marginTop: 10 }}>
+      {!sinBoton && (
+        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} aria-expanded={abierto} onClick={() => setAbierto((a) => !a)}>
+          {abierto ? "Cerrar" : etiqueta}
+        </button>
+      )}
       {abierto && (
         <form onSubmit={enviar} className={styles.formularioInterno}>
           <input type="hidden" name="sesionId" value={sesionId} />
@@ -40,7 +54,7 @@ export default function CancelarClaseAdmin({ sesionId, personas, alTerminar }: {
             <span className={styles.ayuda}>0 = no alargar. Por lluvia, tu política es 7 días.</span>
           </div>
           <button className={styles.boton} type="submit" disabled={trabajando}>
-            {trabajando ? "Cancelando…" : "Cancelar la clase y devolver las clases"}
+            {trabajando ? "Cancelando…" : "Cancelar y devolver las clases"}
           </button>
         </form>
       )}

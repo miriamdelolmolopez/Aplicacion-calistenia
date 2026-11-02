@@ -21,6 +21,7 @@ import ListaApuntados from "./ListaApuntados";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
+import { vistaAlumnaActiva } from "../useMiPerfil";
 import { estiloFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -70,6 +71,7 @@ type Datos = {
   restantes: number | null;
   lista: Clase[];
   pasadas: Clase[]; // solo para la administradora: las clases de las semanas anteriores
+  vistaAlumna: boolean; // la administradora está viendo la app como la ve un/a alumno/a
 };
 
 // Cuántas semanas hacia atrás puede mirar la administradora.
@@ -136,6 +138,7 @@ async function obtenerDatos(): Promise<Datos> {
     restantes: activos.length > 0 ? activos.reduce((suma, b) => suma + b.clasesRestantes, 0) : null,
     lista,
     pasadas,
+    vistaAlumna: vistaAlumnaActiva(),
   };
 }
 
@@ -229,7 +232,8 @@ export default function Clases() {
   // Un/a invitado/a con una prueba gratuita de clases reserva con ella como una alumna.
   const esAlumno = datos?.rol === "alumno" || (datos?.rol === "invitado" && datos.restantes !== null);
   const esInvitado = datos?.rol === "invitado" && datos.restantes === null;
-  const esAdmin = datos?.rol === "admin";
+  // En «Ver como alumno/a» no salen los controles de administradora.
+  const esAdmin = datos?.rol === "admin" && !datos.vistaAlumna;
   const veApuntados = datos?.rol === "alumno" || datos?.rol === "admin";
 
   async function ejecutar(

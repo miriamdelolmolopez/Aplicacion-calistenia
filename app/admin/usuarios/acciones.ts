@@ -37,6 +37,14 @@ function inicioValido(fecha: string): boolean {
   return d.getTime() <= ahora && d.getTime() >= ahora - 730 * 86_400_000;
 }
 
+// Fecha de inicio de un alta nueva: puede ser pasada (hasta dos años) o futura (hasta un año), por ejemplo el día de un taller.
+function inicioAltaValido(fecha: string): boolean {
+  const d = instanteMadrid(fecha, "00:00");
+  if (!d) return false;
+  const ahora = Date.now();
+  return d.getTime() >= ahora - 730 * 86_400_000 && d.getTime() <= ahora + 365 * 86_400_000;
+}
+
 // Pone la fecha en que empezó el bono (y la de caducidad que le corresponde). Vale también para el segundo bono de un combo.
 async function fijarInicioBono(admin: ReturnType<typeof createAdminClient>, bonoId: string, fecha: string) {
   const desde = instanteMadrid(fecha, "00:00");
@@ -122,7 +130,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
     const dias = Math.floor(Number(formData.get("pd")));
     if (!(dias >= 1 && dias <= 365)) return { error: "Escribe cuántos días dura la prueba (de 1 a 365)." };
     const inicio = String(formData.get("pi") ?? "").trim();
-    if (inicio && !inicioValido(inicio)) return { error: "La fecha de inicio no es válida (no puede ser futura)." };
+    if (inicio && !inicioAltaValido(inicio)) return { error: "La fecha de inicio no es válida." };
     const fin = String(formData.get("pf") ?? "").trim();
     const hastaFin = fin ? instanteMadrid(fin, "23:59") : null;
     if (fin && !hastaFin) return { error: "La fecha de fin no es válida." };
@@ -190,7 +198,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
     }
     const { data: t } = await admin.from("tipos_bono").select("servicio").eq("id", f.tarifa).eq("activo", true).maybeSingle();
     if (!t || t.servicio !== f.servicio) return { error: `La tarifa de ${nombre} no es válida.` };
-    if (f.inicio && !inicioValido(f.inicio)) return { error: `La fecha de inicio de ${nombre} no es válida (no puede ser futura).` };
+    if (f.inicio && !inicioAltaValido(f.inicio)) return { error: `La fecha de inicio de ${nombre} no es válida.` };
     const desde = f.inicio ? instanteMadrid(f.inicio, "00:00") : new Date();
 
     let instantePago = new Date();

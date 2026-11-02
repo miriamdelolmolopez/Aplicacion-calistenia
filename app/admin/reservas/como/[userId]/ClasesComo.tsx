@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import CancelarClaseAdmin from "../../../../clases/CancelarClaseAdmin";
 import Avatar from "../../../../Avatar";
 import styles from "../../../admin.module.css";
 import { borrarReserva, cancelarComo, marcarAsistencia, registrarHechaComo, reservarComo, type Asistencia, type Resultado } from "../../acciones";
@@ -162,7 +161,6 @@ export default function ClasesComo({ userId, clases, dia }: { userId: string; cl
               )}
               {!c.reserva && !c.cancelada && !c.incluido && <span className={styles.ayuda}>No lo tiene contratado</span>}
             </div>
-            {!c.pasada && !c.cancelada && <CancelarClaseAdmin sesionId={c.id} personas={c.ocupadas} alTerminar={() => router.refresh()} />}
             {mensaje?.id === c.id && (
               <p className={mensaje.error ? styles.error : styles.aviso} role={mensaje.error ? "alert" : "status"}>
                 {mensaje.texto}

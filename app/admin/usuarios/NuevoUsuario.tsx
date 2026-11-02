@@ -101,9 +101,9 @@ function TarjetaServicio({
           <div className={estilos.dos}>
             <div className={styles.campo}>
               <label htmlFor={`${p}inicio`}>
-                Empieza <AyudaI texto="El día en que empieza la tarifa. Por defecto, hoy. Si la persona ya venía antes de usar la app, pon el día en que empezó." />
+                Empieza <AyudaI texto="El día en que empieza la tarifa. Por defecto, hoy. Puede ser un día pasado (si ya venía antes de usar la app) o futuro (por ejemplo, el día de un taller)." />
               </label>
-              <input id={`${p}inicio`} name={`${p}inicio`} type="date" value={fila.inicio} max={hoy} onChange={(e) => cambiar({ inicio: e.target.value, fin: null })} required />
+              <input id={`${p}inicio`} name={`${p}inicio`} type="date" value={fila.inicio} onChange={(e) => cambiar({ inicio: e.target.value, fin: null })} required />
             </div>
             <div className={styles.campo}>
               <label htmlFor={`${p}fin`}>
@@ -337,7 +337,6 @@ export default function NuevoUsuario({
                         name="pi"
                         type="date"
                         value={inicioPrueba}
-                        max={hoy}
                         onChange={(e) => {
                           setInicioPrueba(e.target.value);
                           setFinPrueba(null);

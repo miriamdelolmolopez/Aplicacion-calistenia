@@ -89,10 +89,13 @@ export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
   const admin = createAdminClient();
   const { data: reserva } = await admin
     .from("reservas")
-    .select("sesion_id")
+    .select("sesion_id, sesiones_clase(empieza_en)")
     .eq("id", reservaId)
     .eq("user_id", user.id)
     .maybeSingle();
+  // Solo se puede anular una reserva de una clase que todavía no ha empezado.
+  const empieza = (reserva?.sesiones_clase as unknown as { empieza_en: string } | null)?.empieza_en;
+  if (empieza && new Date(empieza).getTime() <= Date.now()) return { ok: false, codigo: "empezada" };
 
   const { data, error } = await admin.rpc("cancelar_reserva", {
     p_user: user.id,

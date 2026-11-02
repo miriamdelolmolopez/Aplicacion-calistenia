@@ -22,7 +22,7 @@ export type Estado = MiPerfil | null | "anonimo";
 // Una administradora puede ver la app como la ve una alumna. Solo cambia lo que se muestra: los permisos siguen siendo los suyos.
 const CLAVE_VISTA_ALUMNA = "vistaAlumna";
 
-function vistaAlumnaActiva(): boolean {
+export function vistaAlumnaActiva(): boolean {
   try {
     return localStorage.getItem(CLAVE_VISTA_ALUMNA) === "1";
   } catch {

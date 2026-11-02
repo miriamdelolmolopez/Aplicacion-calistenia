@@ -8,6 +8,8 @@ import { textoDia, textoHora } from "@/lib/fechas";
 import { enlaceGoogleCalendar, horaFin, textoDatosTaller } from "@/lib/taller";
 import styles from "../admin.module.css";
 import comunes from "../comunes/comunes.module.css";
+import estilos from "./talleres.module.css";
+import { IconoCalendario, IconoCheck, IconoCompartir, IconoCopiar, IconoLapiz, IconoPapelera, IconoPerfil } from "./Iconos";
 import Nuevo from "../comunes/Nuevo";
 import PanelCompleto from "../comunes/PanelCompleto";
 import FormularioTaller, { type TallerForm } from "./FormularioTaller";
@@ -30,6 +32,7 @@ export type TallerFila = {
 function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
   const router = useRouter();
   const [editando, setEditando] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const datos = { nombre: t.nombre, empieza_en: t.empieza_en, duracion_min: t.duracion_min, modalidad: t.modalidad, ubicacion: t.ubicacion, enlace: t.enlace };
   const texto = textoDatosTaller(datos);
@@ -56,10 +59,12 @@ function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
   }
 
   return (
-    <div className={comunes.fila} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
-      <div>
-        <strong>{t.nombre}</strong>
-        {t.cancelado && " (cancelado)"}
+    <div className={estilos.tarjeta}>
+      <div className={estilos.texto}>
+        <strong>
+          {t.nombre}
+          {t.cancelado && " (cancelado)"}
+        </strong>
         <div className={styles.ayuda}>
           {textoDia(t.empieza_en)} · {textoHora(t.empieza_en)} – {horaFin(datos)} ({t.duracion_min} min)
         </div>
@@ -70,26 +75,35 @@ function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
           {t.apuntados}/{t.plazas} plazas ocupadas
         </div>
       </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <Link href={`/admin/reservas?dia=${t.dia}`} className={`${styles.boton} ${styles.botonSecundario}`}>
-          Ver asistentes
+      <div className={estilos.iconos}>
+        <Link href={`/admin/reservas?dia=${t.dia}`} className={estilos.icono} aria-label="Ver asistentes" title="Ver asistentes">
+          <IconoPerfil />
         </Link>
-        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={copiar}>
-          {copiado ? "¡Copiado!" : "Copiar datos"}
+        <button type="button" className={estilos.icono} onClick={copiar} aria-label="Copiar datos" title="Copiar datos">
+          {copiado ? <IconoCheck /> : <IconoCopiar />}
         </button>
-        <a href={`https://wa.me/?text=${encodeURIComponent(texto)}`} target="_blank" rel="noopener noreferrer" className={`${styles.boton} ${styles.botonSecundario}`}>
-          Enviar por WhatsApp
+        <a href={`https://wa.me/?text=${encodeURIComponent(texto)}`} target="_blank" rel="noopener noreferrer" className={estilos.icono} aria-label="Enviar por WhatsApp" title="Enviar por WhatsApp">
+          <IconoCompartir />
         </a>
-        <a href={enlaceGoogleCalendar(datos)} target="_blank" rel="noopener noreferrer" className={`${styles.boton} ${styles.botonSecundario}`}>
-          Google Calendar
+        <a href={enlaceGoogleCalendar(datos)} target="_blank" rel="noopener noreferrer" className={estilos.icono} aria-label="Añadir a Google Calendar" title="Añadir a Google Calendar">
+          <IconoCalendario />
         </a>
         {!t.cancelado && (
-          <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setEditando(true)}>
-            Editar
+          <button type="button" className={estilos.icono} onClick={() => setEditando(true)} aria-label="Editar" title="Editar">
+            <IconoLapiz />
+          </button>
+        )}
+        {!t.cancelado && !t.pasado && (
+          <button type="button" className={`${estilos.icono} ${estilos.peligro}`} onClick={() => setCancelando((c) => !c)} aria-expanded={cancelando} aria-label="Cancelar el taller" title="Cancelar el taller">
+            <IconoPapelera />
           </button>
         )}
       </div>
-      {!t.cancelado && !t.pasado && <CancelarClaseAdmin sesionId={t.id} personas={t.apuntados} alTerminar={() => router.refresh()} />}
+      {cancelando && (
+        <div className={estilos.debajo}>
+          <CancelarClaseAdmin sesionId={t.id} personas={t.apuntados} sinBoton alTerminar={() => router.refresh()} />
+        </div>
+      )}
       {editando && (
         <PanelCompleto titulo={`Editar ${t.nombre}`} cerrar={() => setEditando(false)}>
           <FormularioTaller taller={formulario} hoy={hoy} alTerminar={() => { setEditando(false); router.refresh(); }} />

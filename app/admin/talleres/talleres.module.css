@@ -1,0 +1,62 @@
+/* Cada taller es una tarjeta: el texto a la izquierda y los iconos a la derecha (o debajo si no caben). */
+.tarjeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px 12px;
+  padding: 14px;
+  margin: 0 0 10px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 20px;
+}
+
+.texto {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.texto strong {
+  display: block;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.texto div {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.iconos {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--acento-oscuro);
+  text-decoration: none;
+  background: var(--relleno);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.icono:hover {
+  background: var(--linea);
+}
+
+.peligro {
+  color: #b42318;
+}
+
+.debajo {
+  flex: 1 1 100%;
+}
