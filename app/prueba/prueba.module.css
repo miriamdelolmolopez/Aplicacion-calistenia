@@ -1,9 +1,6 @@
 .logo {
-  width: 88px;
-  height: 88px;
+  width: min(240px, 70vw);
   margin: 0 auto 8px;
-  border-radius: 22px;
-  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.5);
 }
 
 .pasos {

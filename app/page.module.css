@@ -58,11 +58,8 @@
 }
 
 .logo {
-  width: 132px;
-  height: auto;
-  margin-bottom: 10px;
-  border-radius: 28px;
-  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.55);
+  width: min(300px, 80vw);
+  margin-bottom: 14px;
 }
 
 .centro h1 {

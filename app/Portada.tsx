@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import LogoMarca from "./LogoMarca";
 import styles from "./page.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
@@ -29,8 +29,8 @@ export default function Portada() {
       </header>
 
       <section className={styles.centro}>
-        <Image src="/logos/caliscoach.png" alt="" width={256} height={256} priority className={styles.logo} />
-        <h1>CalisCoach</h1>
+        <LogoMarca prioridad className={styles.logo} />
+        <h1 className={styles.oculto}>CalisCoach</h1>
         <p className={styles.lema}>{t.lema}</p>
       </section>
 

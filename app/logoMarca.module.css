@@ -1,0 +1,18 @@
+.claro {
+  display: block;
+  height: auto;
+}
+
+.oscuro {
+  display: none;
+  height: auto;
+}
+
+/* Tema oscuro: se cambia al logo de letras claras */
+:global(html[data-tema="oscuro"]) .claro {
+  display: none;
+}
+
+:global(html[data-tema="oscuro"]) .oscuro {
+  display: block;
+}

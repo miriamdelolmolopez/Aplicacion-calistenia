@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import BarraSuperior from "../BarraSuperior";
+import LogoMarca from "../LogoMarca";
 import styles from "../formularios.module.css";
 import { useIdioma } from "../useIdioma";
 import estilos from "./prueba.module.css";
@@ -39,7 +39,7 @@ export default function Prueba({ disponible, codigo }: { disponible: boolean; co
       <div className={styles.fondoEntrar} aria-hidden="true" />
       <BarraSuperior izquierda={{ href: "/", texto: "volver" }} />
       <div className={styles.cabecera}>
-        <Image src="/logos/caliscoach.png" alt="CalisCoach" width={88} height={88} priority className={estilos.logo} />
+        <LogoMarca prioridad tamanos="240px" className={estilos.logo} />
         <h1>{disponible ? t.titulo : t.noDisponible}</h1>
         <p>{disponible ? t.intro : t.noDisponibleTexto}</p>
       </div>
