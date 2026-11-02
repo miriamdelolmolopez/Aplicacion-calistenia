@@ -69,6 +69,40 @@ export async function crearTaller(_previo: Estado, formData: FormData): Promise<
   return { mensaje: "Taller creado. Ya sale en el calendario de reservas de quien tenga el servicio Talleres." };
 }
 
+// Borra del todo un taller cancelado que nunca tuvo reservas (si las tuvo, se conserva el historial y solo queda cancelado).
+export async function borrarTaller(sesionId: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin("talleres");
+  if (!UUID.test(sesionId)) return { ok: false, error: "No se ha encontrado el taller." };
+  const admin = createAdminClient();
+  const { data: s } = await admin.from("sesiones_clase").select("id, estado, tipo_id, tipos_clase!inner(servicio)").eq("id", sesionId).eq("tipos_clase.servicio", "taller").maybeSingle();
+  if (!s) return { ok: false, error: "No se ha encontrado el taller." };
+  if (s.estado !== "cancelada") return { ok: false, error: "Primero hay que cancelar el taller." };
+  const { count } = await admin.from("reservas").select("id", { count: "exact", head: true }).eq("sesion_id", sesionId);
+  if ((count ?? 0) > 0) return { ok: false, error: "Este taller tuvo reservas: se conserva su historial y no se puede borrar." };
+
+  const { error } = await admin.from("sesiones_clase").delete().eq("id", sesionId);
+  if (error) return { ok: false, error: "No se ha podido borrar." };
+  // Si el tipo de taller se queda sin ninguna fecha, también se quita (si algo lo usa, se deja).
+  const { count: quedan } = await admin.from("sesiones_clase").select("id", { count: "exact", head: true }).eq("tipo_id", s.tipo_id);
+  if (quedan === 0) await admin.from("tipos_clase").delete().eq("id", s.tipo_id).eq("servicio", "taller");
+  refrescar();
+  return { ok: true };
+}
+
+// Vuelve a abrir un taller cancelado que todavía no ha pasado.
+export async function recuperarTaller(sesionId: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin("talleres");
+  if (!UUID.test(sesionId)) return { ok: false, error: "No se ha encontrado el taller." };
+  const admin = createAdminClient();
+  const { data: s } = await admin.from("sesiones_clase").select("empieza_en, estado").eq("id", sesionId).maybeSingle();
+  if (!s || s.estado !== "cancelada") return { ok: false, error: "Ese taller no está cancelado." };
+  if (new Date(s.empieza_en).getTime() <= Date.now()) return { ok: false, error: "Ese taller ya ha pasado." };
+  const { error } = await admin.from("sesiones_clase").update({ estado: "programada" }).eq("id", sesionId);
+  if (error) return { ok: false, error: "No se ha podido recuperar." };
+  refrescar();
+  return { ok: true };
+}
+
 // Cambia los datos de un taller ya creado.
 export async function editarTaller(_previo: Estado, formData: FormData): Promise<Estado> {
   await requireAdmin("talleres");

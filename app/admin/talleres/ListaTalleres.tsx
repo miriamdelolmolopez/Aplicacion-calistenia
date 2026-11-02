@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CancelarClaseAdmin from "../../clases/CancelarClaseAdmin";
+import { borrarTaller, recuperarTaller } from "./acciones";
 import { textoDia, textoHora } from "@/lib/fechas";
 import { enlaceGoogleCalendar, horaFin, textoDatosTaller } from "@/lib/taller";
 import styles from "../admin.module.css";
@@ -23,6 +24,7 @@ export type TallerFila = {
   plazas: number;
   apuntados: number;
   cancelado: boolean;
+  conReservas: boolean; // si alguna vez tuvo reservas (entonces no se puede borrar)
   pasado: boolean;
   modalidad: "presencial" | "online";
   ubicacion: string | null;
@@ -34,6 +36,9 @@ function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
   const [editando, setEditando] = useState(false);
   const [cancelando, setCancelando] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [borrando, setBorrando] = useState(false);
+  const [trabajando, setTrabajando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const datos = { nombre: t.nombre, empieza_en: t.empieza_en, duracion_min: t.duracion_min, modalidad: t.modalidad, ubicacion: t.ubicacion, enlace: t.enlace };
   const texto = textoDatosTaller(datos);
   const formulario: TallerForm = {
@@ -47,6 +52,16 @@ function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
     ubicacion: t.ubicacion ?? "",
     enlace: t.enlace ?? "",
   };
+
+  async function ejecutar(hacer: () => Promise<{ ok: boolean; error?: string }>) {
+    setTrabajando(true);
+    setError(null);
+    const r = await hacer();
+    setTrabajando(false);
+    if (!r.ok) return setError(r.error ?? "No se ha podido hacer.");
+    setBorrando(false);
+    router.refresh();
+  }
 
   async function copiar() {
     try {
@@ -93,12 +108,42 @@ function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
             <IconoLapiz />
           </button>
         )}
+        {t.cancelado && !t.pasado && (
+          <button type="button" className={estilos.icono} disabled={trabajando} onClick={() => ejecutar(() => recuperarTaller(t.id))} aria-label="Recuperar el taller" title="Recuperar el taller">
+            <IconoCheck />
+          </button>
+        )}
+        {t.cancelado && !t.conReservas && (
+          <button type="button" className={`${estilos.icono} ${estilos.peligro}`} onClick={() => setBorrando((b) => !b)} aria-expanded={borrando} aria-label="Borrar el taller" title="Borrar el taller">
+            <IconoPapelera />
+          </button>
+        )}
         {!t.cancelado && !t.pasado && (
           <button type="button" className={`${estilos.icono} ${estilos.peligro}`} onClick={() => setCancelando((c) => !c)} aria-expanded={cancelando} aria-label="Cancelar el taller" title="Cancelar el taller">
             <IconoPapelera />
           </button>
         )}
       </div>
+      {borrando && (
+        <div className={estilos.debajo} role="alertdialog" aria-label="Confirmar borrado">
+          <p className={styles.aviso}>
+            Vas a borrar del todo <strong>{t.nombre}</strong>. No tiene reservas, así que no se pierde ningún dato. No se puede deshacer.
+          </p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" className={styles.boton} disabled={trabajando} onClick={() => ejecutar(() => borrarTaller(t.id))}>
+              {trabajando ? "Borrando…" : "Sí, borrar"}
+            </button>
+            <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={trabajando} onClick={() => setBorrando(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       {cancelando && (
         <div className={estilos.debajo}>
           <CancelarClaseAdmin sesionId={t.id} personas={t.apuntados} sinBoton alTerminar={() => router.refresh()} />

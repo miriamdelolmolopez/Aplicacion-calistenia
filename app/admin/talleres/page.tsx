@@ -39,6 +39,7 @@ export default async function Talleres() {
     plazas: s.plazas,
     apuntados: s.reservas.filter((r) => r.estado === "reservada").length,
     cancelado: s.estado === "cancelada",
+    conReservas: s.reservas.length > 0,
     pasado: new Date(s.empieza_en).getTime() <= ahora,
     modalidad: s.modalidad,
     ubicacion: s.ubicacion,
