@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
+import estilos from "./tarifas.module.css";
 import { useEnvio } from "../useEnvio";
 import { guardarTipoBono } from "./acciones";
 
@@ -44,7 +45,6 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
   const [servicio, setServicio] = useState(tarifa?.servicio ?? "grupal");
   const [otro, setOtro] = useState(!!tarifa?.servicio2);
   const [servicio2, setServicio2] = useState(tarifa?.servicio2 ?? "");
-  const [misma, setMisma] = useState(tarifa ? tarifa.validez_dias2 === null : true);
 
   // Si el segundo servicio coincide con el primero, se cambia al primero libre.
   const segundoValido = servicio2 && servicio2 !== servicio ? servicio2 : (SERVICIOS.find((s) => s.valor !== servicio)?.valor ?? "");
@@ -56,7 +56,7 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
   }, [estado, alTerminar]);
 
   return (
-    <form ref={ref} onSubmit={alEnviar} className={`${styles.tarjeta} ${styles.formularioInterno}`}>
+    <form ref={ref} onSubmit={alEnviar} className={styles.tarjeta}>
       {tarifa && <input type="hidden" name="id" value={tarifa.id} />}
 
       <div className={styles.campo}>
@@ -71,30 +71,6 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
         <input type="checkbox" name="activo" defaultChecked={tarifa?.activo ?? true} />
         <span>Activa (si la desmarcas, no se puede dar de alta a nadie con ella)</span>
       </label>
-
-      <div className={styles.campo}>
-        <label htmlFor={`tf-s-${p}`}>¿A qué servicio afecta?</label>
-        <select id={`tf-s-${p}`} name="servicio" value={servicio} onChange={(e) => setServicio(e.target.value)}>
-          {SERVICIOS.map((s) => (
-            <option key={s.valor} value={s.valor}>
-              {s.texto}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {servicio === "online" ? (
-        <div className={styles.campo}>
-          <label htmlFor={`tf-c-${p}`}>Entrenos incluidos (para el círculo de progreso del/de la alumno/a)</label>
-          <input id={`tf-c-${p}`} name="clases" type="number" min={1} max={100} required defaultValue={tarifa && tarifa.servicio === "online" ? tarifa.clases : 12} />
-          <span className={styles.ayuda}>Los entrenos que haga desde la app cuentan hasta este número.</span>
-        </div>
-      ) : (
-        <div className={styles.campo}>
-          <label htmlFor={`tf-c-${p}`}>Créditos (cuántas clases incluye)</label>
-          <input id={`tf-c-${p}`} name="clases" type="number" min={1} max={100} required defaultValue={tarifa && tarifa.servicio !== "online" ? tarifa.clases : 4} />
-        </div>
-      )}
 
       <div className={styles.campo}>
         <label htmlFor={`tf-p-${p}`}>Precio (€, IVA incluido)</label>
@@ -116,67 +92,71 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
           ))}
         </select>
       </div>
-      <div className={styles.campo}>
-        <label htmlFor={`tf-v-${p}`}>Días de validez (cuándo caduca)</label>
-        <input id={`tf-v-${p}`} name="validez_dias" type="number" min={1} max={1095} required defaultValue={tarifa?.validez_dias ?? 30} />
-        <span className={styles.ayuda}>30 = un mes, 60 = dos meses, 90 = tres meses.</span>
-      </div>
 
-      {!otro ? (
-        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setOtro(true)}>
-          + Añadir otro servicio (para una tarifa combinada)
-        </button>
-      ) : (
-        <fieldset className={styles.grupo}>
-          <legend>Otro servicio incluido</legend>
+      <h3 style={{ margin: "8px 0 0", fontSize: "1.05rem" }}>Servicios que ofrece</h3>
+
+      <fieldset className={styles.grupo}>
+        <div className={estilos.servicioFila}>
           <div className={styles.campo}>
-            <label htmlFor={`tf-s2-${p}`}>Servicio</label>
-            <select id={`tf-s2-${p}`} name="servicio2" value={segundoValido} onChange={(e) => setServicio2(e.target.value)}>
-              {SERVICIOS.filter((s) => s.valor !== servicio).map((s) => (
+            <label htmlFor={`tf-s-${p}`}>Servicio</label>
+            <select id={`tf-s-${p}`} name="servicio" value={servicio} onChange={(e) => setServicio(e.target.value)}>
+              {SERVICIOS.map((s) => (
                 <option key={s.valor} value={s.valor}>
                   {s.texto}
                 </option>
               ))}
             </select>
           </div>
-          {segundoValido === "online" ? (
+          <div className={styles.campo}>
+            <label htmlFor={`tf-v-${p}`}>Días de validez</label>
+            <input id={`tf-v-${p}`} name="validez_dias" type="number" min={1} max={1095} required defaultValue={tarifa?.validez_dias ?? 30} />
+          </div>
+        </div>
+        {servicio === "online" ? (
+          // Los entrenos incluidos del plan online no se piden: se conserva lo que ya tenía (para el círculo de progreso).
+          <input type="hidden" name="clases" value={tarifa && tarifa.servicio === "online" ? tarifa.clases : 12} />
+        ) : (
+          <div className={styles.campo}>
+            <label htmlFor={`tf-c-${p}`}>Clases que incluye</label>
+            <input id={`tf-c-${p}`} name="clases" type="number" min={1} max={100} required defaultValue={tarifa && tarifa.servicio !== "online" ? tarifa.clases : 4} />
+          </div>
+        )}
+        <span className={styles.ayuda}>30 días = un mes, 60 = dos meses, 90 = tres meses.</span>
+      </fieldset>
+
+      {otro && (
+        <fieldset className={styles.grupo}>
+          <div className={estilos.servicioFila}>
             <div className={styles.campo}>
-              <label htmlFor={`tf-c2-${p}`}>Entrenos incluidos</label>
-              <input id={`tf-c2-${p}`} name="clases2" type="number" min={1} max={100} required defaultValue={tarifa?.servicio2 === "online" && tarifa.clases2 ? tarifa.clases2 : 12} />
+              <label htmlFor={`tf-s2-${p}`}>Servicio</label>
+              <select id={`tf-s2-${p}`} name="servicio2" value={segundoValido} onChange={(e) => setServicio2(e.target.value)}>
+                {SERVICIOS.filter((s) => s.valor !== servicio).map((s) => (
+                  <option key={s.valor} value={s.valor}>
+                    {s.texto}
+                  </option>
+                ))}
+              </select>
             </div>
+            <div className={styles.campo}>
+              <label htmlFor={`tf-v2-${p}`}>Días de validez</label>
+              <input id={`tf-v2-${p}`} name="validez_dias2" type="number" min={1} max={1095} required defaultValue={tarifa?.validez_dias2 ?? tarifa?.validez_dias ?? 30} />
+            </div>
+          </div>
+          {segundoValido === "online" ? (
+            <input type="hidden" name="clases2" value={tarifa?.servicio2 === "online" && tarifa.clases2 ? tarifa.clases2 : 12} />
           ) : (
             <div className={styles.campo}>
-              <label htmlFor={`tf-c2-${p}`}>Créditos de este servicio</label>
+              <label htmlFor={`tf-c2-${p}`}>Clases que incluye</label>
               <input id={`tf-c2-${p}`} name="clases2" type="number" min={1} max={100} required defaultValue={tarifa?.clases2 ?? 4} />
             </div>
           )}
-          <div className={styles.campo}>
-            <label htmlFor={`tf-v2-${p}`}>Días de validez de este servicio</label>
-            <input
-              id={`tf-v2-${p}`}
-              name="validez_dias2"
-              type="number"
-              min={1}
-              max={1095}
-              disabled={misma}
-              defaultValue={tarifa?.validez_dias2 ?? tarifa?.validez_dias ?? 30}
-            />
-          </div>
-          <label className={styles.casilla}>
-            <input type="checkbox" name="misma_duracion" checked={misma} onChange={(e) => setMisma(e.target.checked)} />
-            <span>La misma duración que el primero</span>
-          </label>
-          <button
-            type="button"
-            className={`${styles.boton} ${styles.botonSecundario}`}
-            onClick={() => {
-              setOtro(false);
-              setServicio2("");
-            }}
-          >
-            Quitar este servicio
-          </button>
         </fieldset>
+      )}
+
+      {!otro && (
+        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setOtro(true)}>
+          + Añadir otro servicio (para una tarifa combinada)
+        </button>
       )}
 
       {!otro && (
@@ -184,6 +164,19 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
           <input type="checkbox" name="requiere_pago" defaultChecked={tarifa?.requiere_pago ?? false} />
           <span>Solo se activa cuando se paga (si no, el/la alumno/a puede reservar aunque el pago esté pendiente)</span>
         </label>
+      )}
+
+      {otro && (
+        <button
+          type="button"
+          className={`${styles.boton} ${styles.botonSecundario}`}
+          onClick={() => {
+            setOtro(false);
+            setServicio2("");
+          }}
+        >
+          Quitar este servicio
+        </button>
       )}
 
       <button className={styles.boton} type="submit" disabled={pendiente}>

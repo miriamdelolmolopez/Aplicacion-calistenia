@@ -1,0 +1,12 @@
+.servicioFila {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 12px;
+  align-items: end;
+}
+
+@media (max-width: 480px) {
+  .servicioFila {
+    grid-template-columns: 1fr;
+  }
+}
