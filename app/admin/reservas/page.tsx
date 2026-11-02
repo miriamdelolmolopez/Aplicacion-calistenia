@@ -79,7 +79,7 @@ export default async function Reservas({ searchParams }: { searchParams: Promise
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>
-        <h1>Reservas</h1>
+        <h1>Reservar clases</h1>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <Link href="/admin/horario" className={styles.enlaceBarra}>
             Horario

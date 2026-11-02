@@ -18,7 +18,7 @@ export default async function Exportar() {
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>
-        <h1>Descargar datos</h1>
+        <h1>Descargar datos (CSV)</h1>
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>

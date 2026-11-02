@@ -48,7 +48,7 @@ export default async function LinkPrueba() {
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>
-        <h1>Link de prueba</h1>
+        <h1>Link de prueba gratuita</h1>
         <Link href="/admin/presenciales" className={styles.enlaceBarra}>
           ← Volver
         </Link>
