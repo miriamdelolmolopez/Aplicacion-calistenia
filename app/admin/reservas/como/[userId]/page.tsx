@@ -18,8 +18,8 @@ type Fila = {
   empieza_en: string;
   plazas: number;
   estado: string;
-  tipos_clase: { nombre: string; color: string | null } | null;
-  reservas: { id: string; estado: string; user_id: string }[];
+  tipos_clase: { nombre: string; color: string | null; servicio: string } | null;
+  reservas: { id: string; estado: string; user_id: string; asistencia: "asistio" | "no_asistio" | null; profiles: { nombre: string | null; apellidos: string | null; email: string | null; foto_path: string | null } | null }[];
 };
 
 export default async function ReservarComo({
@@ -48,16 +48,28 @@ export default async function ReservarComo({
   const desde = instanteMadrid(dia, "00:00")?.toISOString() ?? new Date().toISOString();
   const hasta = instanteMadrid(sumarDias(dia, 1), "00:00")?.toISOString() ?? desde;
 
-  const [{ data: sesiones }, { data: bonos }, firmada] = await Promise.all([
+  const [{ data: sesiones }, { data: bonos }, firmada, { data: serviciosPerfil }, { data: bonosServicio }] = await Promise.all([
     admin
       .from("sesiones_clase")
-      .select("id, tipo_id, empieza_en, plazas, estado, tipos_clase(nombre, color), reservas(id, estado, user_id)")
+      .select("id, tipo_id, empieza_en, plazas, estado, tipos_clase(nombre, color, servicio), reservas(id, estado, user_id, asistencia, profiles(nombre, apellidos, email, foto_path))")
       .gte("empieza_en", desde)
       .lt("empieza_en", hasta)
       .order("empieza_en"),
     admin.from("bonos").select("tipos_bono(nombre)").eq("user_id", userId).eq("estado", "activo"),
     perfil.foto_path ? admin.storage.from("avatares").createSignedUrl(perfil.foto_path, 3600) : Promise.resolve({ data: null }),
+    admin.from("perfil_servicios").select("servicio").eq("user_id", userId),
+    admin.from("bonos").select("servicio").eq("user_id", userId).in("estado", ["activo", "en_cola"]),
   ]);
+
+  // Solo se puede reservar lo que la persona tiene contratado (igual que ve ella el calendario).
+  const servicios = new Set([...(serviciosPerfil ?? []), ...(bonosServicio ?? [])].map((x) => x.servicio as string));
+  const incluidoPara = (servicio: string) =>
+    perfil.rol === "alumno" ? servicios.has(servicio) || (servicios.size === 0 && servicio === "grupal") : servicio === "grupal" || servicios.has(servicio);
+
+  // Fotos de quienes están apuntados este día.
+  const rutasFoto = [...new Set(((sesiones ?? []) as unknown as Fila[]).flatMap((s) => s.reservas.map((r) => r.profiles?.foto_path).filter((p): p is string => !!p)))];
+  const { data: firmadas } = rutasFoto.length ? await admin.storage.from("avatares").createSignedUrls(rutasFoto, 3600) : { data: [] };
+  const fotoDe = (ruta: string | null | undefined) => (ruta ? (firmadas ?? []).find((x) => x.path === ruta)?.signedUrl ?? null : null);
   const foto = firmada.data?.signedUrl ?? null;
   const tarifas = ((bonos ?? []) as unknown as { tipos_bono: { nombre: string } | null }[])
     .map((b) => b.tipos_bono?.nombre)
@@ -75,6 +87,17 @@ export default async function ReservarComo({
       ocupadas: s.reservas.filter((r) => r.estado === "reservada").length,
       cancelada: s.estado === "cancelada",
       reserva: mia ? { id: mia.id, estado: mia.estado as "reservada" | "cancelada_tarde" } : null,
+      incluido: incluidoPara(s.tipos_clase?.servicio ?? "grupal"),
+      apuntados: s.reservas
+        .filter((r) => r.estado === "reservada" || r.estado === "cancelada_tarde")
+        .map((r) => ({
+          reservaId: r.id,
+          userId: r.user_id,
+          estado: r.estado as "reservada" | "cancelada_tarde",
+          asistencia: r.asistencia,
+          nombre: [r.profiles?.nombre, r.profiles?.apellidos].filter(Boolean).join(" ") || r.profiles?.email || "Sin nombre",
+          foto: fotoDe(r.profiles?.foto_path),
+        })),
     };
   });
 
@@ -112,7 +135,7 @@ export default async function ReservarComo({
         {dia === hoy ? "Hoy" : textoDia(desde)}
       </p>
 
-      <ClasesComo userId={userId} clases={clases} />
+      <ClasesComo userId={userId} clases={clases} dia={dia} />
     </main>
   );
 }

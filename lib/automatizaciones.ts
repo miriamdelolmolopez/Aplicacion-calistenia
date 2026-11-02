@@ -153,7 +153,11 @@ const REGALO = {
     es: "Mi regalo para ti: una videollamada de 1 hora, para resolver tus dudas o para entrenar juntas en directo. Respóndeme a este correo y buscamos el día.",
     en: "My gift to you: a 1-hour video call, to answer your questions or to train together live. Reply to this email and we'll find a day.",
   },
-  ninguno: { es: "Que pases un día estupenda.", en: "Have a wonderful day." },
+  // Sin tarifa activa: un 10 % de descuento en cualquier servicio durante 30 días.
+  ninguno: {
+    es: "Mi regalo para ti: un 10 % de descuento en cualquier servicio, válido durante 30 días desde hoy. Escríbeme cuando quieras usarlo.",
+    en: "My gift to you: a 10% discount on any service, valid for 30 days from today. Write to me whenever you want to use it.",
+  },
 };
 
 export async function felicitarCumpleanos(): Promise<number> {
@@ -172,6 +176,7 @@ export async function felicitarCumpleanos(): Promise<number> {
     });
     const lista = await personas(cumplen.map((c) => c.id));
     const admins = await administradoras("admin_avisa_regalos");
+    const nacimiento = new Map(cumplen.map((c) => [c.id, c.fecha_nacimiento]));
 
     for (const p of lista) {
       if (!enviable(p.email)) continue;
@@ -183,6 +188,7 @@ export async function felicitarCumpleanos(): Promise<number> {
       const activos = (bonos ?? []) as { id: string; servicio: string }[];
       const presencial = activos.find((b) => b.servicio !== "online");
       let regalo: "clase" | "videollamada" | "ninguno" = "ninguno";
+      let descuentoCreado: string | null = null; // nombre del descuento de cumpleaños, si se crea
       if (presencial) {
         const { error } = await admin.rpc("ajustar_bono", { p_bono: presencial.id, p_clases: 1, p_dias: 0, p_nota: "Regalo de cumpleaños", p_admin: null });
         if (!error) {
@@ -194,23 +200,41 @@ export async function felicitarCumpleanos(): Promise<number> {
         if (!error) regalo = "videollamada";
       }
 
+      // Sin nada contratado: se crea un descuento de un solo uso, del 10 %, que vale 30 días.
+      if (regalo === "ninguno") {
+        const hoyIso = `${hoy.anio}-${String(hoy.mes).padStart(2, "0")}-${String(hoy.dia).padStart(2, "0")}`;
+        const nombreDescuento = `Cumpleaños ${[p.nombre].filter(Boolean).join(" ") || p.email} ${hoy.anio}`.slice(0, 60);
+        const { error } = await admin.from("descuentos").insert({ nombre: nombreDescuento, tipo: "porcentaje", valor: 10, activo: true, caduca_en: sumarDias(hoyIso, 30), usos_max: 1 });
+        if (!error) descuentoCreado = nombreDescuento;
+      }
+
       const ok = await enviarCorreo(correo(a, p as Persona & { email: string }, { regalo: REGALO[regalo][p.idioma] }, "/inicio"));
       if (ok) enviados++;
 
-      if (regalo === "videollamada") {
-        const nombre = [p.nombre].filter(Boolean).join(" ") || p.email;
-        for (const ad of admins) {
-          await enviarCorreo(
-            correoAutomatico({
-              para: ad.email,
-              idioma: "es",
-              asunto: "Videollamada de cumpleaños pendiente",
-              mensaje: `${nombre} cumple años hoy y tiene de regalo una videollamada de 1 hora (dudas o entrenamiento en directo).\n\nQuedad el día; después márcala como hecha en Automatizaciones.`,
-              valores: {},
-              ruta: "/admin/automatizaciones",
-            }),
-          );
-        }
+      // Aviso para ti, cada vez que alguien cumple años: quién es, cuántos cumple y qué se le regala.
+      const nombre = [p.nombre].filter(Boolean).join(" ") || p.email;
+      const edad = hoy.anio - Number((nacimiento.get(p.id) ?? "").split("-")[0]);
+      const regaloAdmin =
+        regalo === "clase"
+          ? "Una clase presencial gratis (ya se la he sumado a su bono)."
+          : regalo === "videollamada"
+            ? "Una videollamada de 1 hora gratis (dudas o entrenamiento en directo). Quedad el día; después márcala como hecha en Automatizaciones."
+            : descuentoCreado
+              ? `Un 10 % de descuento en cualquier servicio, válido 30 días (no tiene ninguna tarifa activa). Ya lo he creado en Descuentos como «${descuentoCreado}»: elígelo al cobrarle.`
+              : "Ninguno: no tiene tarifa activa y no se ha podido crear el descuento; créaselo tú en Descuentos.";
+      for (const ad of admins) {
+        await enviarCorreo(
+          correoAutomatico({
+            para: ad.email,
+            idioma: "es",
+            asunto: `Hoy cumple años ${nombre}`,
+            mensaje: `${nombre} cumple ${edad} años hoy.
+
+Regalo: ${regaloAdmin}`,
+            valores: {},
+            ruta: regalo === "videollamada" ? "/admin/automatizaciones" : "/admin",
+          }),
+        );
       }
     }
   });

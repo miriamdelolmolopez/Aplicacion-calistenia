@@ -20,6 +20,7 @@ const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
     azulejos: [
       { href: "/admin/presenciales", titulo: "Clases presenciales", foto: "pino" },
       { href: "/admin/online", titulo: "Entrenamientos online 1:1", foto: "online" },
+      { href: "/admin/talleres", titulo: "Talleres", foto: "pino" },
       { href: "/admin/academia", titulo: "Cursos", foto: "pino" },
       { titulo: "Retos por semanas", foto: "progreso", proximamente: true },
       { titulo: "Membresía", foto: "personal", proximamente: true },

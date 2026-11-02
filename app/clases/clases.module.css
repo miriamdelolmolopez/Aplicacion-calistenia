@@ -413,3 +413,46 @@
   border-color: var(--ui-primary);
   box-shadow: var(--ui-sombra-boton);
 }
+
+/* Datos de un taller: cuándo, dónde y botones para guardarlo o mandarlo */
+.datosTaller {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.datosTaller > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+  cursor: pointer;
+}
+
+.datosTaller p {
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.botonesTaller {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.botonesTaller a,
+.botonesTaller button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+  text-decoration: none;
+  background: var(--relleno);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}

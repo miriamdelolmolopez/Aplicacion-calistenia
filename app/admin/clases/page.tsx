@@ -34,6 +34,7 @@ export default async function AdminClases() {
   const { data: tiposDatos } = await supabase
     .from("tipos_clase")
     .select("id, nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, foto_url, color, color_texto, orden, lista_espera, reserva_dias_max, cancelacion_horas, creditos, descripcion, descripcion_en")
+    .neq("servicio", "taller") // los talleres tienen su propia sección
     .order("orden")
     .order("nombre");
   const tipos = (tiposDatos ?? []) as Tipo[];

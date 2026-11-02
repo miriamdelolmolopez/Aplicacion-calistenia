@@ -15,6 +15,8 @@ import PanelFiltros from "../PanelFiltros";
 import { useIdioma } from "../useIdioma";
 import estilos from "./clases.module.css";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
+import CancelarClaseAdmin from "./CancelarClaseAdmin";
+import DatosTaller from "./DatosTaller";
 import ListaApuntados from "./ListaApuntados";
 import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
@@ -143,6 +145,15 @@ async function fotosDe(d: Datos): Promise<Record<string, string>> {
   return ids.length ? obtenerFotos(ids) : {};
 }
 
+// Dónde y cómo es cada taller (si es online, el enlace).
+type ExtraTaller = { modalidad: "presencial" | "online"; ubicacion: string | null; enlace: string | null };
+async function extrasTallerDe(d: Datos): Promise<Record<string, ExtraTaller>> {
+  const ids = [...d.pasadas, ...d.lista].filter((c) => c.servicio === "taller").map((c) => c.id);
+  if (ids.length === 0) return {};
+  const { data } = await createClient().from("sesiones_clase").select("id, modalidad, ubicacion, enlace").in("id", ids);
+  return Object.fromEntries(((data ?? []) as (ExtraTaller & { id: string })[]).map((x) => [x.id, x]));
+}
+
 // Suma días a una fecha AAAA-MM-DD (sin zonas horarias de por medio).
 function sumarDias(clave: string, dias: number): string {
   const d = new Date(`${clave}T12:00:00Z`);
@@ -170,6 +181,7 @@ export default function Clases() {
   const [dia, setDia] = useState<string | null>(null);
   const [semana, setSemana] = useState<number | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
+  const [extras, setExtras] = useState<Record<string, ExtraTaller>>({});
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const fotosCards = useFotosCards();
@@ -185,12 +197,14 @@ export default function Clases() {
     const d = await obtenerDatos();
     setDatos(d);
     setFotos(await fotosDe(d));
+    setExtras(await extrasTallerDe(d));
   }, []);
 
   useEffect(() => {
     obtenerDatos().then(async (d) => {
       setDatos(d);
       setFotos(await fotosDe(d));
+      setExtras(await extrasTallerDe(d));
     });
     obtenerProfe().then(setProfe);
     obtenerFotosAppCliente().then((f) => {
@@ -452,7 +466,7 @@ export default function Clases() {
             const pruebaLibres = Math.max(Math.min(c.plazas_prueba, c.plazas) - c.ocupadas_prueba, 0);
             const puedeProbar = !!datos && esInvitado && datos.datosCompletos && !datos.pruebaGastada;
             const cuadrados = Array.from({ length: c.plazas }, (_, i) => i);
-            const personal = c.servicio === "individual";
+            const personal = c.servicio === "individual" && !esAdmin; // la administradora ve todos los huecos también en las personales
             // Se ve, pero solo se reserva lo contratado (la administradora no reserva).
             const noIncluida = !c.incluido && datos.rol !== "admin";
 
@@ -475,6 +489,10 @@ export default function Clases() {
                     {t.saberMasLink}
                   </button>
                 </div>
+
+                {c.servicio === "taller" && extras[c.id] && (
+                  <DatosTaller taller={{ nombre: c.tipo, empieza_en: c.empieza_en, duracion_min: c.duracion_min, ...extras[c.id] }} idioma={idioma} />
+                )}
 
                 {!cancelada && personal && (
                   <p className={estilos.plazas}>{completa ? t.huecoOcupado : t.huecoLibre}</p>
@@ -624,6 +642,10 @@ export default function Clases() {
                       )}
                     </div>
                   </div>
+                )}
+
+                {esAdmin && !cancelada && !datos.pasadas.some((p) => p.id === c.id) && (
+                  <CancelarClaseAdmin sesionId={c.id} personas={c.ocupadas} alTerminar={cargar} />
                 )}
 
                 {confirmando === c.id && (

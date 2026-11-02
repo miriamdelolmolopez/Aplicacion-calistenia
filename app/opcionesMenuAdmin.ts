@@ -23,6 +23,7 @@ export const OPCIONES_MENU_ADMIN: OpcionMenuAdmin[] = [
   { href: "/admin/ejercicios", icono: "biblioteca", texto: "Biblioteca de ejercicios", defecto: true },
   { href: "/admin/online", icono: "rutina", texto: "Entrenamientos online 1:1", defecto: true },
   { href: "/admin/academia", icono: "academia", texto: "Cursos", defecto: true },
+  { href: "/admin/talleres", icono: "historial", texto: "Talleres", defecto: false },
   { href: "/admin/bonos", icono: "pagos", texto: "Pagos", defecto: false },
   { href: "/admin/tarifas", icono: "pagos", texto: "Servicios", defecto: false },
   { href: "/admin/descuentos", icono: "pagos", texto: "Descuentos", defecto: false },

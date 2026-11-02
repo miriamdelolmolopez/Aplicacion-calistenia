@@ -280,7 +280,6 @@ export function NuevoTipo({ alTerminar }: { alTerminar?: () => void } = {}) {
         <select id="nt-servicio" name="servicio" defaultValue="grupal">
           <option value="grupal">Clase grupal</option>
           <option value="individual">Entrenamiento individual (1 persona)</option>
-          <option value="taller">Taller (gente externa)</option>
         </select>
       </div>
       <div className={styles.campo}>
