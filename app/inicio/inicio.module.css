@@ -3,7 +3,7 @@
   flex-direction: column;
   justify-content: flex-end;
   gap: 2px;
-  min-height: 220px;
+  min-height: 280px;
   margin: 12px 0 16px;
   padding: 22px;
   color: var(--blanco);
@@ -121,7 +121,7 @@
   flex-direction: column;
   justify-content: flex-end;
   gap: 4px;
-  min-height: 150px;
+  min-height: 200px;
   padding: 16px;
   color: var(--blanco);
   text-decoration: none;
