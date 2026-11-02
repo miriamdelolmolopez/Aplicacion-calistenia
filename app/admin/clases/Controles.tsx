@@ -109,7 +109,9 @@ export function FormularioAjustes({
 
 export function FormularioTipo({
   tipo,
+  alTerminar,
 }: {
+  alTerminar?: () => void;
   tipo: {
     id: string;
     nombre: string;
@@ -131,6 +133,12 @@ export function FormularioTipo({
   };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
+  // Al guardar se vuelve solo a la lista.
+  useEffect(() => {
+    if (!estado.mensaje || !alTerminar) return;
+    const t = setTimeout(alTerminar, 700);
+    return () => clearTimeout(t);
+  }, [estado, alTerminar]);
   const colorActual = colorDeTipo(tipo.color, tipo.nombre);
   return (
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>

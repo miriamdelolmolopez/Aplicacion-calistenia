@@ -101,7 +101,7 @@ export default function ListaTipos({ tipos, fotos }: { tipos: Tipo[]; fotos: Rec
       {abierto && (
         <PanelCompleto titulo={`Editar ${abierto.nombre}`} cerrar={() => setEditando(null)}>
           {fotos[abierto.id]}
-          <FormularioTipo tipo={abierto} />
+          <FormularioTipo tipo={abierto} alTerminar={() => setEditando(null)} />
         </PanelCompleto>
       )}
     </div>
