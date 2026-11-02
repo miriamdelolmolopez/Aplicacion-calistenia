@@ -200,6 +200,13 @@ export default function NuevoUsuario({
   const [tipo, setTipo] = useState<"invitado" | "alumno">("alumno");
   const [filas, setFilas] = useState<Fila[]>([nueva(0)]);
   const [siguiente, setSiguiente] = useState(1);
+  // Prueba gratuita del invitado/a
+  const [prueba, setPrueba] = useState("normal");
+  const [diasPrueba, setDiasPrueba] = useState("14");
+  const [inicioPrueba, setInicioPrueba] = useState(hoy);
+  const [finPrueba, setFinPrueba] = useState<string | null>(null);
+  const diasNum = Math.floor(Number(diasPrueba));
+  const finPruebaValor = finPrueba ?? (inicioPrueba && diasNum >= 1 ? sumarDias(inicioPrueba, diasNum) : "");
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(crearUsuario, {});
   const { ref, alEnviar } = useEnvio(accion, estado, true);
 
@@ -265,6 +272,93 @@ export default function NuevoUsuario({
                 </button>
               )}
               <span className={styles.ayuda}>Si solo quieres dar de alta a la persona, deja el servicio sin elegir.</span>
+            </>
+          )}
+
+          {tipo === "invitado" && (
+            <>
+              <div className={styles.campo}>
+                <label htmlFor="nu-prueba">
+                  ¿Qué va a probar? <AyudaI texto="«Clase de prueba normal» es la de siempre: una clase grupal gratis. Las otras opciones le dan una prueba a medida: cuántas clases (presencial) o cuántos días de rutina (online)." />
+                </label>
+                <select
+                  id="nu-prueba"
+                  name="prueba"
+                  value={prueba}
+                  onChange={(e) => {
+                    setPrueba(e.target.value);
+                    setDiasPrueba(e.target.value === "online" ? "7" : "14");
+                    setFinPrueba(null);
+                  }}
+                >
+                  <option value="normal">Clase de prueba normal (1 clase grupal)</option>
+                  <option value="grupal">Presencial grupal</option>
+                  <option value="individual">Presencial personal</option>
+                  <option value="online">Online</option>
+                </select>
+              </div>
+
+              {prueba !== "normal" && (
+                <>
+                  {prueba !== "online" && (
+                    <div className={styles.campo}>
+                      <label htmlFor="nu-pn">
+                        Número de clases gratis <AyudaI texto="Cuántas clases puede hacer gratis durante su prueba." />
+                      </label>
+                      <input id="nu-pn" name="pn" type="number" min={1} max={50} defaultValue={1} required />
+                    </div>
+                  )}
+                  <div className={styles.campo}>
+                    <label htmlFor="nu-pd">
+                      {prueba === "online" ? "Días de rutina" : "Días para gastarlas"}{" "}
+                      <AyudaI texto={prueba === "online" ? "Cuántos días puede usar su rutina online gratis." : "Cuántos días tiene para gastar sus clases gratis. Después, la prueba termina."} />
+                    </label>
+                    <input
+                      id="nu-pd"
+                      name="pd"
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={diasPrueba}
+                      onChange={(e) => {
+                        setDiasPrueba(e.target.value);
+                        setFinPrueba(null);
+                      }}
+                      required
+                    />
+                  </div>
+                  <div className={estilos.dos}>
+                    <div className={styles.campo}>
+                      <label htmlFor="nu-pi">
+                        Empieza <AyudaI texto="El día en que empieza la prueba. Por defecto, hoy." />
+                      </label>
+                      <input
+                        id="nu-pi"
+                        name="pi"
+                        type="date"
+                        value={inicioPrueba}
+                        max={hoy}
+                        onChange={(e) => {
+                          setInicioPrueba(e.target.value);
+                          setFinPrueba(null);
+                        }}
+                        required
+                      />
+                    </div>
+                    <div className={styles.campo}>
+                      <label htmlFor="nu-pf">
+                        Termina <AyudaI texto="Hasta qué día puede usar la prueba. Sale sola según los días; la puedes cambiar." />
+                      </label>
+                      <input id="nu-pf" name="pf" type="date" value={finPruebaValor} min={inicioPrueba} onChange={(e) => setFinPrueba(e.target.value)} />
+                    </div>
+                  </div>
+                  <span className={styles.ayuda}>
+                    {prueba === "online"
+                      ? "Durante esos días podrá usar su rutina online; la asignas desde Rutinas."
+                      : "La persona reserva con su prueba como una alumna. No se crea ningún pago ni factura."}
+                  </span>
+                </>
+              )}
             </>
           )}
 

@@ -114,10 +114,13 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
 
   const { data: alumnosDatos } = await supabase
     .from("profiles")
-    .select("id, nombre, apellidos, email")
-    .eq("rol", "alumno")
+    .select("id, nombre, apellidos, email, rol")
+    .in("rol", ["alumno", "invitado"])
     .order("nombre");
-  const alumnos = ((alumnosDatos ?? []) as (Persona & { id: string })[]).map((a) => ({
+  const { data: planes } = await supabase.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo");
+  const conPlan = new Set((planes ?? []).map((p) => p.user_id));
+  // Los invitados solo salen si tienen una prueba online en marcha.
+  const alumnos = ((alumnosDatos ?? []) as (Persona & { id: string; rol: string })[]).filter((a) => a.rol === "alumno" || conPlan.has(a.id)).map((a) => ({
     id: a.id,
     texto: nombreDe(a) ?? "(sin nombre)",
   }));

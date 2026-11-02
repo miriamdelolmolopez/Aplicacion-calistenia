@@ -212,8 +212,9 @@ export default function Clases() {
       );
   }, []);
 
-  const esAlumno = datos?.rol === "alumno";
-  const esInvitado = datos?.rol === "invitado";
+  // Un/a invitado/a con una prueba gratuita de clases reserva con ella como una alumna.
+  const esAlumno = datos?.rol === "alumno" || (datos?.rol === "invitado" && datos.restantes !== null);
+  const esInvitado = datos?.rol === "invitado" && datos.restantes === null;
   const esAdmin = datos?.rol === "admin";
   const veApuntados = datos?.rol === "alumno" || datos?.rol === "admin";
 

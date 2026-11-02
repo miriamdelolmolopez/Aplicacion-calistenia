@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/admin";
 import { invitar } from "@/lib/registro";
 import { enviarCorreo } from "@/lib/email";
 import { correoInvitacion } from "@/lib/plantillas-email";
-import { instanteMadrid, sumarDias } from "@/lib/fechas";
+import { claveDia, instanteMadrid, sumarDias } from "@/lib/fechas";
 import { formaActiva, formasActivas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
@@ -107,10 +107,65 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   if (existente) return { error: "Ese correo ya tiene cuenta. Búscalo en la lista." };
 
   if (tipo === "invitado") {
-    const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: "/registro" }));
-    return enviado
-      ? { mensaje: `Invitación enviada a ${correo}. Cuando cree su cuenta aparecerá en la lista.` }
-      : { error: "No se ha podido enviar el correo. Inténtalo de nuevo." };
+    const prueba = String(formData.get("prueba") ?? "normal");
+    if (prueba === "normal") {
+      const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: "/registro" }));
+      return enviado
+        ? { mensaje: `Invitación enviada a ${correo}. Cuando cree su cuenta aparecerá en la lista.` }
+        : { error: "No se ha podido enviar el correo. Inténtalo de nuevo." };
+    }
+
+    // Prueba gratuita a medida: clases (presencial) o días de rutina (online), con sus fechas.
+    if (!SERVICIOS_VALIDOS.includes(prueba)) return { error: "El tipo de prueba no es válido." };
+    const clases = prueba === "online" ? 1 : Math.floor(Number(formData.get("pn")));
+    if (!(clases >= 1 && clases <= 50)) return { error: "Escribe cuántas clases tiene la prueba (de 1 a 50)." };
+    const dias = Math.floor(Number(formData.get("pd")));
+    if (!(dias >= 1 && dias <= 365)) return { error: "Escribe cuántos días dura la prueba (de 1 a 365)." };
+    const inicio = String(formData.get("pi") ?? "").trim();
+    if (inicio && !inicioValido(inicio)) return { error: "La fecha de inicio no es válida (no puede ser futura)." };
+    const fin = String(formData.get("pf") ?? "").trim();
+    const hastaFin = fin ? instanteMadrid(fin, "23:59") : null;
+    if (fin && !hastaFin) return { error: "La fecha de fin no es válida." };
+    if (hastaFin && hastaFin.getTime() <= Date.now()) return { error: "La fecha de fin ya ha pasado: la prueba no se podría usar." };
+
+    const { data: tipoPrueba } = await admin.from("tipos_bono").select("id").eq("nombre", `Prueba gratuita · ${prueba}`).maybeSingle();
+    if (!tipoPrueba) return { error: "Todavía no están creadas las pruebas gratuitas en la base de datos: hay que ejecutar el archivo 062 en Supabase." };
+
+    const { data: invitado, error: falloInvitar } = await invitar(correo);
+    if (falloInvitar || !invitado.user) return { error: "No se ha podido crear la cuenta. Inténtalo de nuevo." };
+    const userId = invitado.user.id;
+
+    await admin.from("perfil_servicios").delete().eq("user_id", userId);
+    await admin.from("perfil_servicios").insert({ user_id: userId, servicio: prueba });
+
+    // La prueba es un bono gratuito (sin pago ni factura).
+    const { data: bono, error: falloBono } = await admin
+      .from("bonos")
+      .insert({ user_id: userId, tipo_bono_id: tipoPrueba.id, servicio: prueba, clases_total: clases, clases_restantes: clases, validez_dias: dias, nota: "Prueba gratuita" })
+      .select("id")
+      .single();
+    let avisoPrueba = "";
+    if (falloBono || !bono) {
+      avisoPrueba = " La cuenta está creada, pero la prueba no se pudo registrar: añádela desde su ficha.";
+    } else {
+      await admin.from("movimientos_bono").insert({ bono_id: bono.id, tipo: "alta", clases, nota: "Prueba gratuita", creado_por: user.id });
+      await admin.rpc("refrescar_bonos", { p_user: userId });
+      await fijarInicioBono(admin, bono.id as string, inicio || claveDia(new Date().toISOString()));
+      if (hastaFin) await admin.from("bonos").update({ caduca_en: hastaFin.toISOString() }).eq("id", bono.id);
+      avisoPrueba = prueba === "online" ? ` Prueba online de ${dias} ${dias === 1 ? "día" : "días"}.` : ` Prueba de ${clases} ${clases === 1 ? "clase" : "clases"}, para gastar en ${dias} ${dias === 1 ? "día" : "días"}.`;
+    }
+
+    const rutaPrueba = `/auth/confirmar?token_hash=${invitado.properties.hashed_token}&type=invite`;
+    const enviadoPrueba = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: rutaPrueba }));
+    revalidatePath("/admin");
+    revalidatePath("/admin/usuarios");
+    const hh = await headers();
+    const hostPrueba = hh.get("host") ?? "localhost:3000";
+    const protocoloPrueba = hh.get("x-forwarded-proto") ?? (hostPrueba.startsWith("localhost") ? "http" : "https");
+    return {
+      mensaje: `Invitado/a creado/a (${correo}).${avisoPrueba} ${enviadoPrueba ? "Le hemos enviado el correo para crear su contraseña. Si prefieres, también puedes mandarle este enlace por WhatsApp:" : "No se pudo enviar el correo: mándale este enlace por WhatsApp:"}`,
+      enlace: `${protocoloPrueba}://${hostPrueba}${rutaPrueba}`,
+    };
   }
 
   // Alumna: uno o varios servicios (o ninguno), cada uno con su tarifa, sus fechas y su pago independiente.

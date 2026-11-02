@@ -46,10 +46,11 @@ export default async function Rutinas() {
   const todas = (data ?? []) as unknown as Fila[];
   const deAlumnos = todas.filter((r) => r.user_id !== null);
 
-  const { data: alumnosDatos } = await supabase.from("profiles").select("id, nombre, apellidos, email").eq("rol", "alumno").order("nombre");
+  const { data: alumnosDatos } = await supabase.from("profiles").select("id, nombre, apellidos, email, rol").in("rol", ["alumno", "invitado"]).order("nombre");
   const { data: planes } = await supabase.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo");
   const conPlan = new Set((planes ?? []).map((p) => p.user_id));
-  const alumnos = ((alumnosDatos ?? []) as (Persona & { id: string })[]).map((a) => ({
+  // Los invitados solo salen si tienen una prueba online en marcha.
+  const alumnos = ((alumnosDatos ?? []) as (Persona & { id: string; rol: string })[]).filter((a) => a.rol === "alumno" || conPlan.has(a.id)).map((a) => ({
     id: a.id,
     texto: `${nombreDe(a)}${conPlan.has(a.id) ? " · plan online activo" : ""}`,
   }));

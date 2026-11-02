@@ -68,7 +68,9 @@ export async function crearRutina(_previo: Estado, formData: FormData): Promise<
 
   if (userId) {
     const { data: persona } = await admin.from("profiles").select("rol").eq("id", userId).maybeSingle();
-    if (persona?.rol !== "alumno") return { error: "La persona debe ser alumno/a." };
+    // También vale un/a invitado/a que tenga una prueba online en marcha.
+    const pruebaOnline = persona?.rol === "invitado" && (await admin.rpc("tiene_plan_online", { p_user: userId })).data === true;
+    if (persona?.rol !== "alumno" && !pruebaOnline) return { error: "La persona debe ser alumno/a (o invitado/a con prueba online)." };
   }
 
   const { data, error } = await admin
