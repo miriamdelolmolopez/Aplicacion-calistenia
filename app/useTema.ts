@@ -17,15 +17,15 @@ function suscribir(avisar: () => void) {
 
 function leer(): Tema {
   try {
-    return localStorage.getItem(CLAVE) === "oscuro" ? "oscuro" : "claro";
+    return localStorage.getItem(CLAVE) === "claro" ? "claro" : "oscuro";
   } catch {
-    return "claro";
+    return "oscuro";
   }
 }
 
 // El tema se recuerda en este dispositivo. Un pequeño script del <head> lo aplica antes de pintar para que no parpadee.
 export function useTema(): [Tema, (nuevo: Tema) => void] {
-  const tema = useSyncExternalStore<Tema>(suscribir, leer, () => "claro");
+  const tema = useSyncExternalStore<Tema>(suscribir, leer, () => "oscuro");
 
   const cambiar = useCallback((nuevo: Tema) => {
     try {
@@ -39,4 +39,5 @@ export function useTema(): [Tema, (nuevo: Tema) => void] {
 }
 
 // Texto del script que va en el <head> (se ejecuta antes de que se vea nada).
-export const SCRIPT_TEMA = `try{if(localStorage.getItem("tema")==="oscuro")document.documentElement.dataset.tema="oscuro"}catch(e){}`;
+// El tema oscuro es el de por defecto: solo se queda en claro quien lo ha elegido.
+export const SCRIPT_TEMA = `try{if(localStorage.getItem("tema")!=="claro")document.documentElement.dataset.tema="oscuro"}catch(e){document.documentElement.dataset.tema="oscuro"}`;

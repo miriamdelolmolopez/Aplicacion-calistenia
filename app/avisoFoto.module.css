@@ -1,0 +1,67 @@
+.capa {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(23, 24, 26, 0.5);
+}
+
+.panel {
+  width: min(400px, 100%);
+  padding: 28px 24px 20px;
+  text-align: center;
+  background: var(--crema);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.panel p {
+  margin: 0 0 16px;
+  line-height: 1.5;
+  color: var(--secundario);
+}
+
+.panel p.error {
+  color: #b42318;
+}
+
+.principal {
+  width: 100%;
+  min-height: 52px;
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  background: var(--acento);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.principal:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.secundarios {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.secundarios button {
+  min-height: 44px;
+  font: inherit;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
