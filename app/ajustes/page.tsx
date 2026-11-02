@@ -112,14 +112,14 @@ export default function Ajustes() {
       </section>
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>
         <h2>{idioma === "en" ? "Legal" : "Textos legales"}</h2>
-        <p className={styles.ayuda}>
-          <Link href="/legal/terminos">{idioma === "en" ? "Terms and conditions" : "Términos y condiciones"}</Link>
-          {" · "}
-          <Link href="/legal/privacidad">{idioma === "en" ? "Privacy policy" : "Política de privacidad"}</Link>
-          {" · "}
-          <Link href="/legal/aviso-legal">{idioma === "en" ? "Legal notice" : "Aviso legal"}</Link>
-          {" · "}
-          <Link href="/legal/cookies">Cookies</Link>
+        <p className={styles.ayuda} style={{ display: "flex", flexWrap: "wrap", gap: "0 14px" }}>
+          <Link href="/legal/terminos" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{idioma === "en" ? "Terms and conditions" : "Términos y condiciones"}</Link>
+          {" "}
+          <Link href="/legal/privacidad" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{idioma === "en" ? "Privacy policy" : "Política de privacidad"}</Link>
+          {" "}
+          <Link href="/legal/aviso-legal" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{idioma === "en" ? "Legal notice" : "Aviso legal"}</Link>
+          {" "}
+          <Link href="/legal/cookies" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>Cookies</Link>
         </p>
       </section>
     </main>

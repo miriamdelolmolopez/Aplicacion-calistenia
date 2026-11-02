@@ -22,10 +22,10 @@ export default async function MisTextosLegales() {
   const [{ data: perfil }, { data: aceptadas }, { data: textos }] = await Promise.all([
     supabase.from("profiles").select("idioma").eq("id", user.id).maybeSingle(),
     supabase.from("consentimientos").select("tipo, version, aceptado_en, concedido").eq("user_id", user.id).order("aceptado_en", { ascending: false }),
-    supabase.from("textos_legales").select("documento, version, contenido"),
+    supabase.from("textos_legales").select("documento, version"),
   ]);
   const idioma: "es" | "en" = perfil?.idioma === "en" ? "en" : "es";
-  const contenido = new Map(((textos ?? []) as { documento: string; version: string; contenido: string }[]).map((t) => [`${t.documento}|${t.version}`, t.contenido]));
+  const contenido = new Map(((textos ?? []) as { documento: string; version: string }[]).map((t) => [`${t.documento}|${t.version}`, true]));
   const aceptaciones: Aceptacion[] = ((aceptadas ?? []) as { tipo: string; version: string; aceptado_en: string; concedido: boolean | null }[]).map((a) => ({
     clave: `${a.tipo}|${a.version}|${a.aceptado_en}`,
     tipo: a.tipo,
@@ -33,7 +33,7 @@ export default async function MisTextosLegales() {
     version: a.version,
     aceptadoEn: a.aceptado_en,
     noAutorizo: a.tipo === "imagen" && a.concedido === false,
-    texto: contenido.get(`${a.tipo}|${a.version}`) ?? null,
+    hayTexto: contenido.has(`${a.tipo}|${a.version}`),
   }));
 
   return (

@@ -10,6 +10,7 @@ export default function VerComoAlumno({ destino }: { destino: string }) {
       type="button"
       onClick={() => cambiarVistaAlumna(true, destino)}
       title="Ver cómo lo ve un/a alumno/a"
+      aria-label="Ver como alumno/a"
       style={{
         marginLeft: "auto",
         display: "inline-flex",
@@ -28,7 +29,9 @@ export default function VerComoAlumno({ destino }: { destino: string }) {
         whiteSpace: "nowrap",
       }}
     >
-      <span aria-hidden="true">👁</span> Ver como alumno/a
+      <span aria-hidden="true">👁</span>
+      <span className="verComoTexto">Ver como alumno/a</span>
+      <style>{`@media (max-width: 640px) { .verComoTexto { display: none; } }`}</style>
     </button>
   );
 }

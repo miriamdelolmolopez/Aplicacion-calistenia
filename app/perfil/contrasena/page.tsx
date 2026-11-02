@@ -70,7 +70,7 @@ export default function CambiarContrasena() {
         ← {t.volver}
       </Link>
       <form className={`${styles.tarjeta} ${estilos.seccion}`} onSubmit={cambiar} noValidate>
-        <h2>{t.cambiarContrasena}</h2>
+        <h1 style={{ margin: 0, fontSize: "1.5rem" }}>{t.cambiarContrasena}</h1>
         {campo("clave-actual", t.claveActual, actual, setActual, "current-password")}
         {campo("clave-nueva", t.claveNueva, nueva, setNueva, "new-password")}
         {campo("clave-repetir", t.claveRepetir, repetida, setRepetida, "new-password")}

@@ -138,7 +138,7 @@ export default async function Ejercicios({
             </div>
             <h2>Tus ejercicios</h2>
             <p className={styles.ayuda}>
-              Solo la ves tú. Más adelante, cada alumno/a verá los ejercicios de su rutina. Te faltan {sinVideo} vídeos
+              Cada alumno/a online ve estos ejercicios en su biblioteca. Te faltan {sinVideo} vídeos
               y {sinExplicacion} explicaciones por completar. Los músculos y el material de los ejercicios de partida
               son una sugerencia: revísalos.
             </p>

@@ -385,7 +385,7 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
             </>
           )}
           {p.estado === "pagado" && (
-            <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline" }}>
+            <a href={`/pagos/recibo/${p.id}`} download className={styles.ayuda} style={{ textDecoration: "underline", display: "inline-flex", alignItems: "center", minHeight: 40 }}>
               Descargar factura
             </a>
           )}

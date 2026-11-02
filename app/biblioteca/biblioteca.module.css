@@ -186,8 +186,7 @@
 }
 
 .heroVacio {
-  aspect-ratio: 1 / 1;
-  max-height: 58dvh;
+  height: 150px;
   background: linear-gradient(160deg, #c9c5bd, #0aa8c0);
 }
 

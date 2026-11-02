@@ -32,7 +32,7 @@ export default function BarraInferior() {
                 contenido: (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <strong style={{ flex: 1 }}>{o.texto}</strong>
-                    <button type="button" className={styles.botonSecundario} aria-label={`Quitar ${o.texto} de la barra`} onClick={() => menu.quitarDeBarra(o.href)}>
+                    <button type="button" className={styles.botonSecundario} style={{ minHeight: 44, padding: "0 16px" }} aria-label={`Quitar ${o.texto} de la barra`} onClick={() => menu.quitarDeBarra(o.href)}>
                       Quitar
                     </button>
                   </div>

@@ -418,13 +418,23 @@
   gap: 4px;
   padding: 4px;
   overflow-x: auto;
+  scrollbar-width: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
   border-radius: 999px;
 }
 
+.pestanas::-webkit-scrollbar {
+  display: none;
+}
+
 .pestana {
   flex: 1 1 auto;
+  font-family: inherit;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
   padding: 9px 8px;
   font-size: 0.82rem;
   font-weight: 600;

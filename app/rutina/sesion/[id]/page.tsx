@@ -159,24 +159,6 @@ export default function Sesion() {
         {t.minAprox.replace("{n}", String(minutosEstimados(datos.items)))}
       </p>
 
-      {(() => {
-        const materiales = [...new Set(datos.items.flatMap((i) => (i.ejercicios?.ejercicio_materiales ?? []).map((m) => (idioma === "en" && m.materiales?.nombre_en) || m.materiales?.nombre || "").filter(Boolean)))].sort((a, b) => a.localeCompare(b));
-        const tipos = [...new Set(datos.items.map((i) => i.ejercicios?.categoria).filter((c): c is string => !!c))].map((c) => CATEGORIAS.find((x) => x.valor === c)?.[idioma] ?? c);
-        return (
-          <ResumenIconos
-            idioma={idioma}
-            datos={[
-              { icono: "⏱", valor: `~${minutosEstimados(datos.items)} min`, texto: idioma === "en" ? "total time" : "tiempo total" },
-              { icono: "🏋️", valor: String(datos.items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
-              { icono: "🔁", valor: String(datos.items.reduce((n, i) => n + i.series, 0)), texto: idioma === "en" ? "sets" : "series" },
-            ]}
-            tipos={tipos}
-            materiales={materiales}
-            intensidades={intensidadesAgregadas(datos.items.map((i) => ({ series: i.series, musculos: i.ejercicios?.ejercicio_musculos ?? [] })))}
-          />
-        );
-      })()}
-
       <ol className={estilos.lista}>
         {datos.items.map((it, pos) => {
           let etiqueta: string | null = null;
@@ -204,6 +186,27 @@ export default function Sesion() {
           );
         })}
       </ol>
+
+      <details style={{ margin: "16px 0 0" }}>
+        <summary style={{ cursor: "pointer", fontWeight: 600, minHeight: 44, display: "flex", alignItems: "center" }}>{idioma === "en" ? "Summary and muscles worked" : "Resumen y músculos que trabaja"}</summary>
+      {(() => {
+        const materiales = [...new Set(datos.items.flatMap((i) => (i.ejercicios?.ejercicio_materiales ?? []).map((m) => (idioma === "en" && m.materiales?.nombre_en) || m.materiales?.nombre || "").filter(Boolean)))].sort((a, b) => a.localeCompare(b));
+        const tipos = [...new Set(datos.items.map((i) => i.ejercicios?.categoria).filter((c): c is string => !!c))].map((c) => CATEGORIAS.find((x) => x.valor === c)?.[idioma] ?? c);
+        return (
+          <ResumenIconos
+            idioma={idioma}
+            datos={[
+              { icono: "⏱", valor: `~${minutosEstimados(datos.items)} min`, texto: idioma === "en" ? "total time" : "tiempo total" },
+              { icono: "🏋️", valor: String(datos.items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
+              { icono: "🔁", valor: String(datos.items.reduce((n, i) => n + i.series, 0)), texto: idioma === "en" ? "sets" : "series" },
+            ]}
+            tipos={tipos}
+            materiales={materiales}
+            intensidades={intensidadesAgregadas(datos.items.map((i) => ({ series: i.series, musculos: i.ejercicios?.ejercicio_musculos ?? [] })))}
+          />
+        );
+      })()}
+      </details>
 
       {error && <p className={styles.error}>{error}</p>}
 

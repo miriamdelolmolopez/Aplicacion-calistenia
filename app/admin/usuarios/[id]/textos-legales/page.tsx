@@ -24,12 +24,12 @@ export default async function TextosLegalesPersona({ params }: { params: Promise
   const [{ data: p }, { data: aceptadasDatos }, { data: textosDatos }] = await Promise.all([
     admin.from("profiles").select("nombre, apellidos, email, rol").eq("id", id).maybeSingle(),
     admin.from("consentimientos").select("tipo, version, aceptado_en, concedido").eq("user_id", id).order("aceptado_en", { ascending: false }),
-    admin.from("textos_legales").select("documento, version, contenido"),
+    admin.from("textos_legales").select("documento, version"),
   ]);
   if (!p || p.rol === "admin") notFound();
   const nombre = [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
 
-  const texto = new Map(((textosDatos ?? []) as { documento: string; version: string; contenido: string }[]).map((t) => [`${t.documento}|${t.version}`, t.contenido]));
+  const texto = new Map(((textosDatos ?? []) as { documento: string; version: string }[]).map((t) => [`${t.documento}|${t.version}`, true]));
   const aceptaciones: Aceptacion[] = ((aceptadasDatos ?? []) as { tipo: string; version: string; aceptado_en: string; concedido: boolean | null }[]).map((a) => ({
     clave: `${a.tipo}|${a.version}|${a.aceptado_en}`,
     tipo: a.tipo,
@@ -37,7 +37,7 @@ export default async function TextosLegalesPersona({ params }: { params: Promise
     version: a.version,
     aceptadoEn: a.aceptado_en,
     noAutorizo: a.tipo === "imagen" && a.concedido === false,
-    texto: texto.get(`${a.tipo}|${a.version}`) ?? null,
+    hayTexto: texto.has(`${a.tipo}|${a.version}`),
   }));
 
   return (
