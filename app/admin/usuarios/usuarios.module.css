@@ -709,3 +709,76 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+
+/* Accesos de una persona: botones tipo interruptor y fila de botones de abajo */
+.segmentos {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  background: var(--relleno);
+  border-radius: 999px;
+}
+
+.segmento {
+  min-height: 40px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.segmento:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.segmentoActivo {
+  color: #fff;
+  background: var(--acento);
+}
+
+.filaBotones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.botonBorrar,
+.botonGuardar,
+.botonArchivar {
+  min-height: 48px;
+  padding: 0 24px;
+  font: inherit;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.botonBorrar {
+  color: #fff;
+  background: #e5484d;
+  border: 0;
+}
+
+.botonGuardar {
+  color: #fff;
+  background: #1a1a1a;
+  border: 0;
+}
+
+.botonGuardar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.botonArchivar {
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, lunesDe, sumarDias, textoHora } from "@/lib/fechas";
+import { coachesDisponibles } from "@/lib/coaches";
 import styles from "../admin.module.css";
 import AnadirClaseGeneral from "./AnadirClaseGeneral";
 import { AplicarPlantilla, CalendarioSemana, type TipoOpcion } from "./Controles";
@@ -22,6 +23,7 @@ type Clase = {
   estado: string;
   motivo_cancelacion: string | null;
   tipo_id: string;
+  coach_id: string | null;
   tipos_clase: {
     nombre: string;
     color: string | null;
@@ -50,7 +52,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
     supabase
       .from("sesiones_clase")
       .select(
-        "id, empieza_en, plazas, plazas_prueba, estado, tipo_id, tipos_clase(nombre, color, servicio, cancelacion_horas, reserva_dias_max), reservas(id, estado)",
+        "id, empieza_en, plazas, plazas_prueba, estado, tipo_id, coach_id, tipos_clase(nombre, color, servicio, cancelacion_horas, reserva_dias_max), reservas(id, estado)",
       )
       .gte("empieza_en", desde)
       .lt("empieza_en", hasta)
@@ -74,6 +76,8 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
   }
   const clases = (clasesDatos ?? []) as unknown as Clase[];
   const tipos = (tiposDatos ?? []) as TipoOpcion[];
+  const coaches = await coachesDisponibles();
+  const nombreCoach = new Map(coaches.map((c) => [c.id, c.nombre]));
   const plantillas = (plantillasDatos ?? []) as { id: string; nombre: string; principal: boolean }[];
   const ajuste = (clave: string, defecto: number) => {
     const v = Number(ajustesDatos?.find((a) => a.clave === clave)?.valor);
@@ -104,7 +108,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
         </Link>
       </CabeceraAdmin>
 
-      <AnadirClaseGeneral fecha={base < hoy ? hoy : base} tipos={tipos} />
+      <AnadirClaseGeneral fecha={base < hoy ? hoy : base} tipos={tipos} coaches={coaches} />
 
       <nav className={estilos.navegacion} aria-label="Cambiar de semana">
         <Link href={`/admin/horario?semana=${anterior}`}>← Anterior</Link>
@@ -188,7 +192,10 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
                               diasPreinscripcion: t?.reserva_dias_max ?? ajuste("reserva_dias_max", 14),
                               horasPropias: t?.cancelacion_horas ?? null,
                               diasPropios: t?.reserva_dias_max ?? null,
+                              coachId: c.coach_id,
+                              coachNombre: c.coach_id ? (nombreCoach.get(c.coach_id) ?? null) : null,
                             }}
+                            coaches={coaches}
                           />
                         );
                       })}

@@ -419,3 +419,10 @@
 .tarjetaClase {
   padding: 8px 4px 10px;
 }
+
+/* Quién da la clase */
+.coachClase {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--secundario);
+}

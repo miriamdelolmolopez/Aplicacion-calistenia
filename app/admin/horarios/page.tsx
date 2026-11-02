@@ -9,6 +9,7 @@ import estiloCuadricula from "./cuadricula.module.css";
 import ListaPlantillas, { type ResumenPlantilla } from "./ListaPlantillas";
 import ResumenMes, { type ClaseDia } from "./ResumenMes";
 import CabeceraAdmin from "../CabeceraAdmin";
+import { coachesDisponibles } from "@/lib/coaches";
 
 export const metadata = { title: "Plantillas presenciales · Administración" };
 
@@ -20,6 +21,7 @@ type Item = {
   dia_semana: number;
   hora: string;
   plazas: number | null;
+  coach_id: string | null;
   tipos_clase: { nombre: string; plazas_max: number; color: string | null } | null;
 };
 type Plantilla = { id: string; nombre: string; principal: boolean; plantilla_clases: Item[] };
@@ -29,7 +31,7 @@ export default async function Horarios() {
 
   const { data } = await supabase
     .from("plantillas_horario")
-    .select("id, nombre, principal, plantilla_clases(id, tipo_id, dia_semana, hora, plazas, tipos_clase(nombre, plazas_max, color))")
+    .select("id, nombre, principal, plantilla_clases(id, tipo_id, dia_semana, hora, plazas, coach_id, tipos_clase(nombre, plazas_max, color))")
     .order("principal", { ascending: false })
     .order("nombre");
   const plantillas = (data ?? []) as unknown as Plantilla[];
@@ -40,6 +42,8 @@ export default async function Horarios() {
     .eq("activo", true)
     .order("nombre");
   const tipos = tiposDatos ?? [];
+  const coaches = await coachesDisponibles();
+  const nombreCoach = new Map(coaches.map((c) => [c.id, c.nombre]));
 
   const hoy = claveDia(new Date().toISOString());
 
@@ -113,6 +117,7 @@ export default async function Horarios() {
                               >
                                 <span>
                                   {nombre} · {plazas}
+                                  {c.coach_id && nombreCoach.get(c.coach_id) ? ` · ${nombreCoach.get(c.coach_id)}` : ""}
                                 </span>
                                 <QuitarCompacto id={c.id} texto={`${hora} ${nombre}`} />
                               </span>
@@ -129,7 +134,7 @@ export default async function Horarios() {
 
             <details className={styles.detalles}>
               <summary>Añadir clases</summary>
-              <AnadirClase plantillaId={p.id} tipos={tipos} />
+              <AnadirClase plantillaId={p.id} tipos={tipos} coaches={coaches} />
             </details>
 
             <details className={styles.detalles}>

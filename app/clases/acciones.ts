@@ -1,7 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { avisarAdminCancelacion, avisarAdminReserva, avisarPlazaLiberada, avisarReserva } from "@/lib/avisos";
+import { avisarAdminCancelacion, avisarAdminReserva, avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -108,6 +109,73 @@ export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
   return { ok: true, devuelta: data === "devuelta" };
 }
 
+// ¿Puede esta persona gestionar la clase? La administradora siempre; un coach, solo las clases que da él o ella.
+async function puedeGestionarClase(userId: string, sesionId: string): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data: yo } = await admin.from("profiles").select("rol, es_coach").eq("id", userId).maybeSingle();
+  if (yo?.rol === "admin") return true;
+  if (!yo?.es_coach) return false;
+  const { data: s } = await admin.from("sesiones_clase").select("coach_id").eq("id", sesionId).maybeSingle();
+  return s?.coach_id === userId;
+}
+
+// Quién da cada clase (coach), con su nombre y su foto, para enseñarlo en las tarjetas.
+export async function obtenerCoachesClases(sesionIds: string[]): Promise<Record<string, { coachId: string; nombre: string; foto: string | null }>> {
+  const user = await personaActual();
+  if (!user || sesionIds.length === 0) return {};
+  const admin = createAdminClient();
+  const { data: sesiones } = await admin.from("sesiones_clase").select("id, coach_id").in("id", sesionIds.slice(0, 300)).not("coach_id", "is", null);
+  const coachIds = [...new Set((sesiones ?? []).map((s) => s.coach_id as string))];
+  if (coachIds.length === 0) return {};
+  const { data: perfiles } = await admin.from("profiles").select("id, nombre, foto_path").in("id", coachIds);
+  const { data: firmadas } = await admin.storage.from("avatares").createSignedUrls((perfiles ?? []).map((p) => p.foto_path as string).filter(Boolean), 3600);
+  const porCoach = new Map((perfiles ?? []).map((p) => [p.id as string, { nombre: (p.nombre as string | null) || "Coach", foto: p.foto_path ? (firmadas ?? []).find((x) => x.path === p.foto_path)?.signedUrl ?? null : null }]));
+  return Object.fromEntries((sesiones ?? []).map((s) => [s.id as string, { coachId: s.coach_id as string, ...(porCoach.get(s.coach_id as string) ?? { nombre: "Coach", foto: null }) }]));
+}
+
+// Si la persona que llama es coach (y su id).
+export async function soyCoach(): Promise<{ id: string; esCoach: boolean }> {
+  const user = await personaActual();
+  if (!user) return { id: "", esCoach: false };
+  const { data } = await createAdminClient().from("profiles").select("es_coach").eq("id", user.id).maybeSingle();
+  return { id: user.id, esCoach: !!data?.es_coach };
+}
+
+// El coach cancela una clase que da él o ella: devuelve su clase a toda la gente apuntada (y puede alargar sus bonos).
+export async function cancelarClaseCoach(_previo: { error?: string; mensaje?: string }, formData: FormData): Promise<{ error?: string; mensaje?: string }> {
+  const user = await personaActual();
+  if (!user) return { error: "Tu sesión ha caducado." };
+  const id = String(formData.get("sesionId") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !(await puedeGestionarClase(user.id, id))) return { error: "Solo puedes cancelar las clases que das tú." };
+  const motivo = String(formData.get("motivo") ?? "").trim().slice(0, 200);
+  const dias = Math.floor(Number(formData.get("dias") ?? 0)) || 0;
+  if (!(dias >= 0 && dias <= 60)) return { error: "Los días de ampliación van de 0 a 60." };
+
+  const enEspera = await personasEnEspera(id);
+  const { data, error } = await createAdminClient().rpc("cancelar_clase", { p_sesion: id, p_motivo: motivo, p_dias: dias, p_admin: user.id });
+  if (error) return { error: error.message };
+  after(() => avisarClaseCancelada(id, dias, enEspera));
+  revalidatePath("/clases");
+  revalidatePath("/admin/reservas");
+  const personas = Number(data ?? 0);
+  return { mensaje: `Clase cancelada. Se ha devuelto la clase a ${personas} ${personas === 1 ? "persona" : "personas"}.` };
+}
+
+// Marca quién vino y quién no a una clase (la administradora, o el coach que la da).
+export async function marcarAsistenciaClase(reservaId: string, valor: "no_asistio" | null): Promise<{ ok: boolean; error?: string }> {
+  const user = await personaActual();
+  if (!user) return { ok: false, error: "Tu sesión ha caducado." };
+  if (!/^[0-9a-f-]{36}$/i.test(reservaId) || (valor !== null && valor !== "no_asistio")) return { ok: false, error: "Datos no válidos." };
+  const admin = createAdminClient();
+  const { data: reserva } = await admin.from("reservas").select("sesion_id").eq("id", reservaId).maybeSingle();
+  if (!reserva || !(await puedeGestionarClase(user.id, reserva.sesion_id as string))) return { ok: false, error: "No puedes cambiar esta clase." };
+
+  const { error } = await admin.from("reservas").update({ asistencia: valor, asistencia_en: valor ? new Date().toISOString() : null }).eq("id", reservaId);
+  if (error) return { ok: false, error: "No se ha podido guardar." };
+  revalidatePath("/admin/reservas");
+  return { ok: true };
+}
+
 export type Apuntado = {
   reservaId: string;
   userId: string;
@@ -121,8 +189,7 @@ export async function obtenerApuntadosClase(sesionId: string): Promise<Apuntado[
   const user = await personaActual();
   if (!user) return [];
   const admin = createAdminClient();
-  const { data: yo } = await admin.from("profiles").select("rol").eq("id", user.id).maybeSingle();
-  if (yo?.rol !== "admin") return [];
+  if (!(await puedeGestionarClase(user.id, sesionId))) return [];
 
   const { data } = await admin
     .from("reservas")

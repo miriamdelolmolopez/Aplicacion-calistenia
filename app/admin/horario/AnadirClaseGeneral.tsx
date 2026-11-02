@@ -10,7 +10,7 @@ import estilos from "./horario.module.css";
 import type { TipoOpcion } from "./Controles";
 
 // Botón destacado de arriba del todo: añade una clase suelta en el día y la hora que elijas.
-export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; tipos: TipoOpcion[] }) {
+export default function AnadirClaseGeneral({ fecha, tipos, coaches }: { fecha: string; tipos: TipoOpcion[]; coaches: { id: string; nombre: string }[] }) {
   const [abierto, setAbierto] = useState(false);
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(anadirClaseSuelta, {});
   const { ref, alEnviar } = useEnvio(accion, estado, true);
@@ -40,6 +40,17 @@ export default function AnadirClaseGeneral({ fecha, tipos }: { fecha: string; ti
                   {tipos.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.nombre} ({t.plazas_max} plazas)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.campo}>
+                <label htmlFor="ag-coach">Coach <AyudaI texto="Quién da la clase. Salen las personas marcadas como coach en su ficha de usuario." /></label>
+                <select id="ag-coach" name="coach" defaultValue="">
+                  <option value="">Sin elegir</option>
+                  {coaches.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
                     </option>
                   ))}
                 </select>

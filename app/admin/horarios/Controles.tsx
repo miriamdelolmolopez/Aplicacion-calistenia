@@ -150,7 +150,7 @@ export function QuitarCompacto({ id, texto }: { id: string; texto: string }) {
   );
 }
 
-export function AnadirClase({ plantillaId, tipos }: { plantillaId: string; tipos: { id: string; nombre: string }[] }) {
+export function AnadirClase({ plantillaId, tipos, coaches }: { plantillaId: string; tipos: { id: string; nombre: string }[]; coaches: { id: string; nombre: string }[] }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(anadirClase, {});
   return (
     <form action={accion} className={styles.formularioInterno}>
@@ -176,6 +176,17 @@ export function AnadirClase({ plantillaId, tipos }: { plantillaId: string; tipos
           {tipos.map((t) => (
             <option key={t.id} value={t.id}>
               {t.nombre}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`ac-coach-${plantillaId}`}>Coach <AyudaI texto="Quién da la clase. Salen las personas marcadas como coach en su ficha de usuario." /></label>
+        <select id={`ac-coach-${plantillaId}`} name="coach" defaultValue="">
+          <option value="">Sin elegir</option>
+          {coaches.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
             </option>
           ))}
         </select>

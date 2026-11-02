@@ -46,7 +46,7 @@ export async function anadirClaseSuelta(_previo: Estado, formData: FormData): Pr
 
   const { error } = await admin
     .from("sesiones_clase")
-    .insert({ tipo_id: tipoId, empieza_en: inicio.toISOString(), plazas, plazas_prueba: prueba });
+    .insert({ tipo_id: tipoId, empieza_en: inicio.toISOString(), plazas, plazas_prueba: prueba, coach_id: texto(formData, "coach") || null });
   if (error) {
     return { error: error.code === "23505" ? "Ya hay una clase de ese tipo a esa hora." : "No se ha podido añadir la clase." };
   }
@@ -134,7 +134,7 @@ export async function editarClase(_previo: Estado, formData: FormData): Promise<
     .eq("estado", "reservada");
   if ((apuntadas ?? 0) > plazas) return { error: `Hay ${apuntadas} personas apuntadas: no puedes dejar menos plazas.` };
 
-  const { error } = await admin.from("sesiones_clase").update({ empieza_en: inicio.toISOString(), plazas, plazas_prueba: prueba }).eq("id", id);
+  const { error } = await admin.from("sesiones_clase").update({ empieza_en: inicio.toISOString(), plazas, plazas_prueba: prueba, coach_id: texto(formData, "coach") || null }).eq("id", id);
   if (error) {
     return { error: error.code === "23505" ? "Ya hay una clase de ese tipo a esa hora." : "No se ha podido guardar la clase." };
   }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cancelarClase } from "../admin/clases/acciones";
+import type { Estado } from "../admin/acciones";
 import styles from "../admin/admin.module.css";
 
 // Para la administradora: cancela una clase entera, devuelve su clase a toda la gente apuntada y, si quiere, alarga sus bonos.
@@ -11,12 +12,14 @@ export default function CancelarClaseAdmin({
   alTerminar,
   sinBoton,
   etiqueta = "Cancelar la clase",
+  accion,
 }: {
   sesionId: string;
   personas: number;
   alTerminar: () => void;
   sinBoton?: boolean; // el formulario ya sale abierto y el botón lo pone quien lo usa
   etiqueta?: string;
+  accion?: (previo: Estado, datos: FormData) => Promise<Estado>; // por defecto, la de la administradora; un coach usa la suya
 }) {
   const [abierto, setAbierto] = useState(!!sinBoton);
   const [trabajando, setTrabajando] = useState(false);
@@ -25,7 +28,7 @@ export default function CancelarClaseAdmin({
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setTrabajando(true);
-    const r = await cancelarClase({}, new FormData(e.currentTarget));
+    const r = await (accion ?? cancelarClase)({}, new FormData(e.currentTarget));
     setTrabajando(false);
     setMensaje({ texto: r.error ?? r.mensaje ?? "", error: !!r.error });
     if (!r.error) alTerminar();

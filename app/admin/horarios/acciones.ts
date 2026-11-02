@@ -61,7 +61,7 @@ export async function duplicarPlantilla(_previo: Estado, formData: FormData): Pr
 
   const { data: clases } = await admin
     .from("plantilla_clases")
-    .select("tipo_id, dia_semana, hora, plazas")
+    .select("tipo_id, dia_semana, hora, plazas, coach_id")
     .eq("plantilla_id", id);
   if (clases && clases.length > 0) {
     const { error: falloClases } = await admin
@@ -123,6 +123,7 @@ export async function anadirClase(_previo: Estado, formData: FormData): Promise<
     dia_semana: dia,
     hora,
     plazas,
+    coach_id: String(formData.get("coach") ?? "") || null,
   });
   if (error) {
     return { error: error.code === "23505" ? "Esa clase ya está en la plantilla a esa hora." : "No se ha podido añadir." };

@@ -25,8 +25,11 @@ import { vistaAlumnaActiva } from "../useMiPerfil";
 import { estiloFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 import {
+  cancelarClaseCoach,
   cancelarMiReserva,
   obtenerClasesPasadas,
+  obtenerCoachesClases,
+  soyCoach,
   reservarClase,
   salirListaEspera,
   unirseListaEspera,
@@ -185,6 +188,8 @@ export default function Clases() {
   const [semana, setSemana] = useState<number | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [extras, setExtras] = useState<Record<string, ExtraTaller>>({});
+  const [coaches, setCoaches] = useState<Record<string, { coachId: string; nombre: string; foto: string | null }>>({});
+  const [yo, setYo] = useState<{ id: string; esCoach: boolean }>({ id: "", esCoach: false });
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const fotosCards = useFotosCards();
@@ -201,6 +206,7 @@ export default function Clases() {
     setDatos(d);
     setFotos(await fotosDe(d));
     setExtras(await extrasTallerDe(d));
+    setCoaches(await obtenerCoachesClases([...d.pasadas, ...d.lista].map((c) => c.id)));
   }, []);
 
   useEffect(() => {
@@ -208,7 +214,9 @@ export default function Clases() {
       setDatos(d);
       setFotos(await fotosDe(d));
       setExtras(await extrasTallerDe(d));
+      setCoaches(await obtenerCoachesClases([...d.pasadas, ...d.lista].map((c) => c.id)));
     });
+    soyCoach().then(setYo);
     obtenerProfe().then(setProfe);
     obtenerFotosAppCliente().then((f) => {
       setFotosTipos(f.tipos);
@@ -486,8 +494,8 @@ export default function Clases() {
                   <CamaraCard clave={`clase:${c.tipo}`} />
                 </div>
                 <div className={estilos.profe}>
-                  <Avatar nombre={profe?.nombre ?? "Miriam"} url={profe?.foto} tamano={28} />
-                  <span>{profe?.nombre ?? "Miriam"}</span>
+                  <Avatar nombre={coaches[c.id]?.nombre ?? profe?.nombre ?? "Miriam"} url={coaches[c.id] ? coaches[c.id].foto : profe?.foto} tamano={28} />
+                  <span>{coaches[c.id]?.nombre ?? profe?.nombre ?? "Miriam"}</span>
                   {cancelada && <strong className={estilos.etiquetaCancelada}>{t.cancelada}</strong>}
                   <button type="button" className={estilos.saberMas} onClick={() => setSaberMas(c.tipo)}>
                     {t.saberMasLink}
@@ -524,10 +532,10 @@ export default function Clases() {
                       type="button"
                       className={estilos.cuadrados}
                       onClick={() => {
-                        if (c.apuntados.length === 0) return;
-                        // La administradora abre la lista con la ficha de cada persona; el resto, solo los nombres.
-                        if (esAdmin) setListaClase(c.id);
-                        else if (veApuntados) setVerNombres(verNombres === c.id ? null : c.id);
+                        // La administradora y el coach de la clase abren la lista de quien está apuntado; el resto, solo los nombres.
+                        if (esAdmin || (yo.esCoach && coaches[c.id]?.coachId === yo.id)) {
+                          if (c.ocupadas > 0) setListaClase(c.id);
+                        } else if (veApuntados && c.apuntados.length > 0) setVerNombres(verNombres === c.id ? null : c.id);
                       }}
                       aria-label={t.apuntadosLabel}
                     >
@@ -648,8 +656,8 @@ export default function Clases() {
                   </div>
                 )}
 
-                {esAdmin && !cancelada && !datos.pasadas.some((p) => p.id === c.id) && (
-                  <CancelarClaseAdmin sesionId={c.id} personas={c.ocupadas} alTerminar={cargar} />
+                {(esAdmin || (yo.esCoach && coaches[c.id]?.coachId === yo.id)) && !cancelada && !datos.pasadas.some((p) => p.id === c.id) && (
+                  <CancelarClaseAdmin sesionId={c.id} personas={c.ocupadas} alTerminar={cargar} accion={esAdmin ? undefined : cancelarClaseCoach} />
                 )}
 
                 {confirmando === c.id && (
@@ -680,7 +688,7 @@ export default function Clases() {
       )}
 
       {listaClase && todas.find((c) => c.id === listaClase) && (
-        <ListaApuntados clase={todas.find((c) => c.id === listaClase)!} fotos={fotos} alCerrar={() => setListaClase(null)} />
+        <ListaApuntados clase={todas.find((c) => c.id === listaClase)!} fotos={fotos} soloCoach={!esAdmin} alCerrar={() => setListaClase(null)} />
       )}
 
       {saberMas && (

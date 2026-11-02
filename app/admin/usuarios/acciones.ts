@@ -7,6 +7,7 @@ import { enviarCorreo } from "@/lib/email";
 import { correoInvitacion } from "@/lib/plantillas-email";
 import { claveDia, instanteMadrid, sumarDias } from "@/lib/fechas";
 import { formaActiva, formasActivas } from "@/lib/formasPago";
+import { CLAVES_SECCIONES } from "@/lib/seccionesAdmin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
 import { headers } from "next/headers";
@@ -278,6 +279,40 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
     mensaje: `Alumno/a creada (${correo}).${avisoBono} ${enviado ? "Le hemos enviado el correo para elegir su contraseña. Si prefieres, también puedes mandarle este enlace por WhatsApp:" : "No se pudo enviar el correo: mándale este enlace por WhatsApp:"}`,
     enlace: `${protocolo}://${host}${ruta}`,
   };
+}
+
+// Los accesos de una persona: qué tipo de cuenta es, si es coach y, si es administradora, qué secciones tiene excluidas.
+export async function guardarAccesos(
+  userId: string,
+  datos: { rol: string; esCoach: boolean; excluidos: string[] },
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
+  if (!["alumno", "invitado", "admin"].includes(datos.rol)) return { ok: false, error: "Elige alumno/a, invitado/a o administradora." };
+
+  const admin = createAdminClient();
+  const { data: persona } = await admin.from("profiles").select("rol").eq("id", userId).maybeSingle();
+  if (!persona) return { ok: false, error: "No se ha encontrado a esa persona." };
+  if (persona.rol === "archivado") return { ok: false, error: "Está archivada: primero hay que recuperarla." };
+
+  // Para no quedarte sin acceso por error: tu propia cuenta no puede dejar de ser administradora,
+  // y tiene que quedar siempre al menos una administradora.
+  if (persona.rol === "admin" && datos.rol !== "admin") {
+    if (userId === user.id) return { ok: false, error: "No puedes quitarte a ti misma el acceso de administradora." };
+    const { count } = await admin.from("profiles").select("id", { count: "exact", head: true }).eq("rol", "admin");
+    if ((count ?? 0) <= 1) return { ok: false, error: "Tiene que quedar al menos una administradora." };
+  }
+
+  const excluidos = datos.rol === "admin" ? [...new Set(datos.excluidos.filter((c) => CLAVES_SECCIONES.includes(c)))] : [];
+  if (userId === user.id && excluidos.length > 0) return { ok: false, error: "No puedes excluirte a ti misma secciones: te quedarías sin acceso a ellas." };
+
+  const { error } = await admin.from("profiles").update({ rol: datos.rol, es_coach: !!datos.esCoach, excluidos_admin: excluidos }).eq("id", userId);
+  if (error) return { ok: false, error: "No se ha podido guardar. ¿Está ejecutado el archivo 066 en Supabase?" };
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/usuarios");
+  revalidatePath(`/admin/usuarios/${userId}`);
+  return { ok: true };
 }
 
 // Archiva a una persona: desaparece de las listas y no puede entrar, pero sus datos y pagos se conservan (y salen en Descargar datos).

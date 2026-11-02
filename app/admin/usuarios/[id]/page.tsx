@@ -19,7 +19,7 @@ import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas"
 import { AlargarCortesia } from "./CorreosYCortesia";
 import CorreosPersona from "./CorreosPersona";
 import EditorPersona from "../../EditorPersona";
-import ArchivarUsuario from "./ArchivarUsuario";
+import AccesosUsuario from "./AccesosUsuario";
 import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
 import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
@@ -101,9 +101,11 @@ export default async function FichaUsuario({
   const { id } = await params;
   const { pestana: pedida, mes: mesPedido } = await searchParams;
   const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "actual";
-  const { supabase } = await requireAdmin();
+  const { supabase, user: yo } = await requireAdmin();
   const admin = createAdminClient();
   const ahora = new Date().toISOString();
+  // Si todavía no está el archivo 066 en Supabase, la consulta falla y se usan valores por defecto.
+  const { data: accesos } = await admin.from("profiles").select("es_coach, excluidos_admin").eq("id", id).maybeSingle();
 
   // Todo lo que no depende de otra consulta se pide a la vez.
   const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
@@ -135,7 +137,33 @@ export default async function FichaUsuario({
     admin.from("tipos_bono").select("id, nombre, servicio, clases, validez_dias").eq("activo", true).order("servicio").order("orden"),
     admin.from("reservas").select("bono_id, sesiones_clase!inner(empieza_en)").eq("user_id", id).eq("estado", "reservada").gt("sesiones_clase.empieza_en", ahora),
   ]);
-  if (!p || p.rol === "admin") notFound();
+  if (!p) notFound();
+
+  // Una administradora no tiene tarifas ni reservas: su ficha solo tiene sus accesos (tipo de cuenta, coach y excluidos).
+  if (p.rol === "admin") {
+    const nombreAdmin = [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "Administradora";
+    return (
+      <main className={styles.pagina}>
+        <CabeceraAdmin>
+          <h1>{nombreAdmin}</h1>
+          <Link href="/admin/usuarios" className={styles.enlaceBarra}>
+            ← Volver
+          </Link>
+        </CabeceraAdmin>
+        <section className={styles.tarjeta}>
+          <h2>Accesos</h2>
+          <AccesosUsuario
+            userId={p.id}
+            nombre={nombreAdmin}
+            rolInicial={p.rol}
+            esCoachInicial={!!accesos?.es_coach}
+            excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
+            esMiCuenta={yo.id === p.id}
+          />
+        </section>
+      </main>
+    );
+  }
 
   // Los bonos se leen cuando ya se han puesto al día.
   const { data: bonosDatos } = await supabase
@@ -516,8 +544,15 @@ export default async function FichaUsuario({
           </section>
 
           <section className={styles.tarjeta}>
-            <h2>{p.rol === "archivado" ? "Persona archivada" : "Archivar usuario"}</h2>
-            <ArchivarUsuario userId={p.id} nombre={nombre} archivado={p.rol === "archivado"} />
+            <h2>Accesos</h2>
+            <AccesosUsuario
+              userId={p.id}
+              nombre={nombre}
+              rolInicial={p.rol}
+              esCoachInicial={!!accesos?.es_coach}
+              excluidosIniciales={(accesos?.excluidos_admin as string[] | null) ?? []}
+              esMiCuenta={yo.id === p.id}
+            />
           </section>
         </>
   );

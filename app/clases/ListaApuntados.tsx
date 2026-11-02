@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
-import { marcarAsistencia } from "../admin/reservas/acciones";
 import { textoHora } from "@/lib/fechas";
-import { obtenerApuntadosClase, type Apuntado } from "./acciones";
+import { marcarAsistenciaClase, obtenerApuntadosClase, type Apuntado } from "./acciones";
 import estilos from "./listaApuntados.module.css";
 
 // Ventana para la administradora: todas las personas apuntadas a una clase, con su ficha, sus pagos
@@ -14,10 +13,12 @@ export default function ListaApuntados({
   clase,
   fotos,
   alCerrar,
+  soloCoach = false,
 }: {
   clase: { id: string; tipo: string; empieza_en: string };
   fotos: Record<string, string>;
   alCerrar: () => void;
+  soloCoach?: boolean; // un coach no ve los pagos ni el perfil de las personas
 }) {
   const [lista, setLista] = useState<Apuntado[] | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -38,7 +39,7 @@ export default function ListaApuntados({
   async function marcar(p: Apuntado, valor: "no_asistio" | null) {
     setError("");
     setTrabajando(p.reservaId);
-    const r = await marcarAsistencia(p.reservaId, valor);
+    const r = await marcarAsistenciaClase(p.reservaId, valor);
     setTrabajando(null);
     setConfirmando(null);
     if (!r.ok) return setError(r.error ?? "No se ha podido guardar.");
@@ -92,12 +93,16 @@ export default function ListaApuntados({
                 </div>
               ) : (
                 <div className={estilos.acciones}>
-                  <Link href={`/admin/usuarios/${p.userId}`} className={estilos.enlace}>
-                    Perfil
-                  </Link>
-                  <Link href={`/admin/usuarios/${p.userId}/pagos`} className={estilos.enlace}>
-                    Pagos
-                  </Link>
+                  {!soloCoach && (
+                    <>
+                      <Link href={`/admin/usuarios/${p.userId}`} className={estilos.enlace}>
+                        Perfil
+                      </Link>
+                      <Link href={`/admin/usuarios/${p.userId}/pagos`} className={estilos.enlace}>
+                        Pagos
+                      </Link>
+                    </>
+                  )}
                   {p.asistencia === "no_asistio" ? (
                     <button type="button" className={estilos.deshacer} disabled={trabajando === p.reservaId} onClick={() => marcar(p, null)}>
                       Quitar la marca

@@ -24,9 +24,13 @@ export type DatosClase = {
   diasPreinscripcion: number;
   horasPropias: number | null; // regla propia del tipo (vacío = la general)
   diasPropios: number | null;
+  coachId: string | null;
+  coachNombre: string | null;
 };
 
-function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
+type CoachOpcion = { id: string; nombre: string };
+
+function Editor({ c, coaches, cerrar }: { c: DatosClase; coaches: CoachOpcion[]; cerrar: () => void }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(editarClase, {});
   const { ref, alEnviar } = useEnvio(accion, estado, false);
 
@@ -50,6 +54,17 @@ function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
           <div className={styles.campo}>
             <label htmlFor={`e-h-${c.id}`}>Hora <AyudaI texto="La hora a la que empieza." /></label>
             <input id={`e-h-${c.id}`} name="hora" type="time" required defaultValue={c.hora} />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor={`e-coach-${c.id}`}>Coach <AyudaI texto="Quién da la clase. Salen las personas marcadas como coach en su ficha de usuario." /></label>
+            <select id={`e-coach-${c.id}`} name="coach" defaultValue={c.coachId ?? ""}>
+              <option value="">Sin elegir</option>
+              {coaches.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+            </select>
           </div>
           <div className={styles.campo}>
             <label htmlFor={`e-p-${c.id}`}>Plazas en total <AyudaI texto="Cuántas personas caben en esta clase, contando las de prueba." /></label>
@@ -93,7 +108,7 @@ function Editor({ c, cerrar }: { c: DatosClase; cerrar: () => void }) {
 }
 
 // Tarjeta resumen de una clase, al estilo de un horario de box: iconos con las cifras importantes.
-export default function TarjetaClase({ c }: { c: DatosClase }) {
+export default function TarjetaClase({ c, coaches }: { c: DatosClase; coaches: CoachOpcion[] }) {
   const [editando, setEditando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [aviso, setAviso] = useState<Estado>({});
@@ -134,6 +149,7 @@ export default function TarjetaClase({ c }: { c: DatosClase }) {
       <strong className={estilos.nombreClase} style={{ color: c.color }}>
         {c.nombre}
       </strong>
+      {c.coachNombre && <span className={estilos.coachClase}>con {c.coachNombre}</span>}
       {c.cancelada && <span className={estilos.etiquetaCancelada}>Cancelada</span>}
       <div className={estilos.cifras}>
         <span className={estilos.apuntadas} title="Personas apuntadas">
@@ -161,7 +177,7 @@ export default function TarjetaClase({ c }: { c: DatosClase }) {
           {c.plazasPrueba}
         </span>
       </div>
-      {editando && <Editor c={c} cerrar={() => setEditando(false)} />}
+      {editando && <Editor c={c} coaches={coaches} cerrar={() => setEditando(false)} />}
     </div>
   );
 }

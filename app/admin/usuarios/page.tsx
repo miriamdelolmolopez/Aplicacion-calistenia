@@ -19,6 +19,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
   const { supabase } = await requireAdmin();
 
   const { data } = await supabase.rpc("resumen_usuarios");
+  const { data: administradoras } = await createAdminClient().from("profiles").select("id, nombre, apellidos, email").eq("rol", "admin").order("nombre");
   // Las personas archivadas no salen en la lista normal; con «Ver archivadas» salen solo ellas.
   const todas = (data ?? []) as Fila[];
   const hayArchivadas = todas.some((f) => f.rol === "archivado");
@@ -94,6 +95,19 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
         </Link>
       </CabeceraAdmin>
       <NuevoUsuario tarifas={tarifas} descuentos={descuentos} hoy={hoy} ahora={ahora} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
+      {(administradoras ?? []).length > 0 && (
+        <p className={styles.ayuda} style={{ margin: "0 0 8px" }}>
+          Administradoras:{" "}
+          {(administradoras ?? []).map((a, i) => (
+            <span key={a.id}>
+              {i > 0 && ", "}
+              <Link href={`/admin/usuarios/${a.id}`} className={styles.enlaceTexto}>
+                {[a.nombre, a.apellidos].filter(Boolean).join(" ") || a.email}
+              </Link>
+            </span>
+          ))}
+        </p>
+      )}
       <p style={{ margin: "0 0 12px" }}>
         {verArchivadas ? (
           <Link href="/admin/usuarios" className={styles.enlaceBarra}>
