@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import AyudaI from "../comunes/AyudaI";
 import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { colorDeTipo, PALETA_CLASES } from "@/lib/colores";
@@ -147,11 +148,11 @@ export function FormularioTipo({
         {tipo.servicio === "individual" ? "Entrenamiento individual: lo ven y reservan solo los/las alumnos/as individuales." : "Clase grupal."}
       </p>
       <div className={styles.campo}>
-        <label htmlFor={`no-${tipo.id}`}>Nombre</label>
+        <label htmlFor={`no-${tipo.id}`}>Nombre <AyudaI texto="Cómo se llama la clase. Es lo que ve cada persona al reservar y en el calendario." /></label>
         <input id={`no-${tipo.id}`} name="nombre" maxLength={60} defaultValue={tipo.nombre} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`du-${tipo.id}`}>Duración (minutos)</label>
+        <label htmlFor={`du-${tipo.id}`}>Duración (minutos) <AyudaI texto="Cuánto dura cada clase. Con esto se calcula la hora a la que termina." /></label>
         <input
           id={`du-${tipo.id}`}
           name="duracion_min"
@@ -163,18 +164,18 @@ export function FormularioTipo({
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="activo" defaultChecked={tipo.activo} />
-        <span>Activo (si lo desactivas no se crean clases nuevas de este tipo)</span>
+        <span>Activo <AyudaI texto="Si lo desactivas, no se crean clases nuevas de este tipo. Las que ya están creadas se quedan como están." /></span>
       </label>
       <div className={styles.campo}>
-        <label htmlFor={`or-${tipo.id}`}>Orden de aparición (1 sale primero)</label>
+        <label htmlFor={`or-${tipo.id}`}>Orden de aparición <AyudaI texto="Para decidir qué tipo de clase sale antes en las listas. Los números más bajos salen primero (1 sale el primero)." /></label>
         <input id={`or-${tipo.id}`} name="orden" type="number" min={0} max={9999} defaultValue={tipo.orden} />
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="lista_espera" defaultChecked={tipo.lista_espera} />
-        <span>Tiene lista de espera (si está llena, los/las alumnos/as pueden apuntarse a la lista)</span>
+        <span>Tiene lista de espera <AyudaI texto="Si la clase está llena, los/las alumnos/as pueden apuntarse a una lista. Cuando se libera una plaza, entra el primero de la lista." /></span>
       </label>
       <div className={styles.campo}>
-        <label htmlFor={`pl-${tipo.id}`}>Plazas</label>
+        <label htmlFor={`pl-${tipo.id}`}>Plazas <AyudaI texto="Cuántas personas caben en cada clase de este tipo." /></label>
         <input
           id={`pl-${tipo.id}`}
           name="plazas_max"
@@ -185,7 +186,7 @@ export function FormularioTipo({
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`mi-${tipo.id}`}>Mínimo</label>
+        <label htmlFor={`mi-${tipo.id}`}>Mínimo <AyudaI texto="Cuántas personas hacen falta para dar la clase. Si el día antes hay menos apuntadas, te llega un aviso por correo para que decidas. No se cancela sola. Con 0 no avisa." /></label>
         <input
           id={`mi-${tipo.id}`}
           name="minimo_alumnos"
@@ -196,7 +197,7 @@ export function FormularioTipo({
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`pp-${tipo.id}`}>Plazas para invitados/as (prueba)</label>
+        <label htmlFor={`pp-${tipo.id}`}>Plazas para invitados/as (prueba) <AyudaI texto="De las plazas totales, cuántas se reservan para personas que vienen a su clase de prueba gratuita." /></label>
         <input
           id={`pp-${tipo.id}`}
           name="plazas_prueba"
@@ -207,28 +208,28 @@ export function FormularioTipo({
         />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`cr-${tipo.id}`}>Créditos que gasta cada reserva (1 = una clase del bono)</label>
+        <label htmlFor={`cr-${tipo.id}`}>Créditos que gasta cada reserva <AyudaI texto="Cuántas clases del bono se descuentan al reservar. Con 1 se gasta una clase; con 2, dos." /></label>
         <input id={`cr-${tipo.id}`} name="creditos" type="number" min={1} max={20} defaultValue={tipo.creditos} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`rd-${tipo.id}`}>Cuántos días antes se puede reservar</label>
+        <label htmlFor={`rd-${tipo.id}`}>Cuántos días antes se puede reservar <AyudaI texto="Con cuántos días de antelación se puede reservar esta clase. Si lo dejas vacío, se usa el ajuste general de reservas." /></label>
         <input id={`rd-${tipo.id}`} name="reserva_dias_max" type="number" min={1} max={365} defaultValue={tipo.reserva_dias_max ?? ""} placeholder="Vacío = el ajuste general" />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`ch-${tipo.id}`}>Horas antes para cancelar sin perder la clase</label>
+        <label htmlFor={`ch-${tipo.id}`}>Horas antes para cancelar sin perder la clase <AyudaI texto="Si cancelan con más horas de antelación que estas, recuperan la clase del bono. Si cancelan más tarde, se pierde. Vacío = el ajuste general." /></label>
         <input id={`ch-${tipo.id}`} name="cancelacion_horas" type="number" min={0} max={168} defaultValue={tipo.cancelacion_horas ?? ""} placeholder="Vacío = el ajuste general" />
         <span className={styles.ayuda}>Lo que dejes vacío sigue el ajuste general de «Ajustes de reservas».</span>
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`de-${tipo.id}`}>Descripción («Saber más» en Reservas)</label>
+        <label htmlFor={`de-${tipo.id}`}>Descripción («Saber más» en Reservas) <AyudaI texto="El texto que sale al pulsar «Saber más» en la clase, cuando se reserva." /></label>
         <textarea id={`de-${tipo.id}`} name="descripcion" rows={5} maxLength={1500} defaultValue={tipo.descripcion ?? ""} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor={`den-${tipo.id}`}>Descripción en inglés (opcional)</label>
+        <label htmlFor={`den-${tipo.id}`}>Descripción en inglés (opcional) <AyudaI texto="El mismo texto para quien usa la app en inglés. Si lo dejas vacío, se ve la descripción en español." /></label>
         <textarea id={`den-${tipo.id}`} name="descripcion_en" rows={5} maxLength={1500} defaultValue={tipo.descripcion_en ?? ""} />
       </div>
       <fieldset className={styles.grupo}>
-        <legend>Color en el calendario de Mis reservas</legend>
+        <legend>Color en el calendario de Mis reservas <AyudaI texto="El color de esta clase en el calendario de «Mis reservas» de cada persona." /></legend>
         <div className={styles.muestras}>
           {PALETA_CLASES.map((p) => (
             <label key={p.color} className={styles.muestra} title={p.nombre}>
@@ -240,7 +241,7 @@ export function FormularioTipo({
         </div>
       </fieldset>
       <fieldset className={styles.grupo}>
-        <legend>Color de la letra sobre ese color</legend>
+        <legend>Color de la letra sobre ese color <AyudaI texto="Elige blanca u oscura según cuál se lea mejor sobre el color de la clase." /></legend>
         <div className={styles.muestras}>
           {[
             { valor: "#FFFFFF", nombre: "Blanca" },
@@ -271,34 +272,34 @@ export function NuevoTipo({ alTerminar }: { alTerminar?: () => void } = {}) {
   return (
     <form action={accion} className={`${styles.filaTipo} ${styles.tipoClase}`}>
       <div className={styles.campo}>
-        <label htmlFor="nt-nombre">Nombre</label>
+        <label htmlFor="nt-nombre">Nombre <AyudaI texto="Cómo se llama la clase. Es lo que ve cada persona al reservar." /></label>
         <input id="nt-nombre" name="nombre" maxLength={60} required />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nt-servicio">Para quién es</label>
+        <label htmlFor="nt-servicio">Para quién es <AyudaI texto="Clase grupal: la reservan varias personas. Entrenamiento individual: es de una sola persona y solo lo ven los/las alumnos/as con ese servicio." /></label>
         <select id="nt-servicio" name="servicio" defaultValue="grupal">
           <option value="grupal">Clase grupal</option>
           <option value="individual">Entrenamiento individual (1 persona)</option>
         </select>
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nt-plazas">Plazas</label>
+        <label htmlFor="nt-plazas">Plazas <AyudaI texto="Cuántas personas caben en cada clase de este tipo." /></label>
         <input id="nt-plazas" name="plazas_max" type="number" min={1} max={100} defaultValue={8} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nt-min">Mínimo</label>
+        <label htmlFor="nt-min">Mínimo <AyudaI texto="Cuántas personas hacen falta para dar la clase. Si el día antes hay menos apuntadas, te llega un aviso por correo. Con 0 no avisa." /></label>
         <input id="nt-min" name="minimo_alumnos" type="number" min={0} max={100} defaultValue={0} />
       </div>
       <div className={styles.campo}>
-        <label htmlFor="nt-prueba">Plazas para invitados/as (prueba)</label>
+        <label htmlFor="nt-prueba">Plazas para invitados/as (prueba) <AyudaI texto="De las plazas totales, cuántas se reservan para personas que vienen a su clase de prueba gratuita." /></label>
         <input id="nt-prueba" name="plazas_prueba" type="number" min={0} max={100} defaultValue={2} />
       </div>
       <label className={styles.casilla}>
         <input type="checkbox" name="lista_espera" defaultChecked />
-        <span>Tiene lista de espera</span>
+        <span>Tiene lista de espera <AyudaI texto="Si la clase está llena, los/las alumnos/as pueden apuntarse a una lista. Cuando se libera una plaza, entra el primero." /></span>
       </label>
       <div className={styles.campo}>
-        <label htmlFor="nt-dur">Duración (minutos)</label>
+        <label htmlFor="nt-dur">Duración (minutos) <AyudaI texto="Cuánto dura cada clase. Con esto se calcula la hora a la que termina." /></label>
         <input id="nt-dur" name="duracion_min" type="number" min={10} max={240} defaultValue={60} />
       </div>
       <button className={styles.boton} type="submit" disabled={pendiente}>
