@@ -9,7 +9,7 @@ import { useIdioma } from "../../useIdioma";
 import Medidas from "../Medidas";
 import estilos from "../perfil.module.css";
 import { createClient } from "@/lib/supabase/client";
-import { fechaNacimientoValida, telefonoValido } from "@/lib/validaciones";
+import { dniNieValido, fechaNacimientoValida, normalizarDni, telefonoValido } from "@/lib/validaciones";
 import Cargando from "../../Cargando";
 
 type Datos = {
@@ -23,6 +23,7 @@ type Datos = {
   sexo: string;
   emNombre: string;
   emTelefono: string;
+  esAdmin: boolean;
 };
 
 async function cargar(): Promise<Datos | null> {
@@ -32,7 +33,7 @@ async function cargar(): Promise<Datos | null> {
   const { data: p } = await supabase
     .from("profiles")
     .select(
-      "id, email, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono",
+      "id, email, rol, nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono",
     )
     .eq("id", sesion.user.id)
     .maybeSingle();
@@ -48,6 +49,7 @@ async function cargar(): Promise<Datos | null> {
     sexo: p.sexo ?? "",
     emNombre: p.contacto_emergencia_nombre ?? "",
     emTelefono: p.contacto_emergencia_telefono ?? "",
+    esAdmin: p.rol === "admin",
   };
 }
 
@@ -55,7 +57,7 @@ export default function MisDatos() {
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null>(null);
-  const [valores, setValores] = useState({ nombre: "", apellidos: "", telefono: "", fecha: "", sexo: "", emNombre: "", emTelefono: "" });
+  const [valores, setValores] = useState({ nombre: "", apellidos: "", telefono: "", dni: "", fecha: "", sexo: "", emNombre: "", emTelefono: "" });
   const [mensaje, setMensaje] = useState<{ ok: boolean; clave: ClaveTexto } | null>(null);
 
   useEffect(() => {
@@ -66,6 +68,7 @@ export default function MisDatos() {
           nombre: d.nombre,
           apellidos: d.apellidos,
           telefono: d.telefono,
+          dni: d.dni,
           fecha: d.fecha,
           sexo: d.sexo,
           emNombre: d.emNombre,
@@ -97,19 +100,23 @@ export default function MisDatos() {
     ) {
       return setMensaje({ ok: false, clave: "errorCampo" });
     }
+    // El DNI solo lo cambia la administradora (la base de datos también lo comprueba).
+    const cambiaDni = datos!.esAdmin && valores.dni.trim() !== "" && normalizarDni(valores.dni) !== datos!.dni;
+    if (cambiaDni && !dniNieValido(valores.dni)) return setMensaje({ ok: false, clave: "errorDni" });
     const { error } = await createClient()
       .from("profiles")
       .update({
         nombre: valores.nombre.trim(),
         apellidos: valores.apellidos.trim(),
         telefono: valores.telefono.trim(),
+        ...(cambiaDni ? { dni: normalizarDni(valores.dni) } : {}),
         fecha_nacimiento: valores.fecha,
         sexo: valores.sexo === "" ? null : valores.sexo,
         contacto_emergencia_nombre: valores.emNombre.trim(),
         contacto_emergencia_telefono: valores.emTelefono.trim(),
       })
       .eq("id", datos!.id);
-    if (error) return setMensaje({ ok: false, clave: "errorGeneral" });
+    if (error) return setMensaje({ ok: false, clave: error.code === "23505" ? "errorDniRepetido" : "errorGeneral" });
     setMensaje({ ok: true, clave: "cambiosGuardados" });
     setDatos(await cargar());
   }
@@ -156,8 +163,14 @@ export default function MisDatos() {
         </div>
         <div className={styles.campo}>
           <label htmlFor="dni">{t.dni}</label>
-          <input id="dni" value={datos.dni} disabled readOnly />
-          <p className={styles.ayuda}>{t.dniSoloMiriam}</p>
+          {datos.esAdmin ? (
+            <input id="dni" value={valores.dni} onChange={(e) => setValores((v) => ({ ...v, dni: e.target.value }))} autoCapitalize="characters" />
+          ) : (
+            <>
+              <input id="dni" value={datos.dni} disabled readOnly />
+              <p className={styles.ayuda}>{t.dniSoloMiriam}</p>
+            </>
+          )}
         </div>
         <fieldset className={styles.grupo}>
           <legend>{t.emergenciaTitulo}</legend>
