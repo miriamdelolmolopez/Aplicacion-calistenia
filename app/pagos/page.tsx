@@ -44,7 +44,7 @@ export default function MisPagos() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <CabeceraFoto foto="portada" titulo={t.navPagos} />
+      <CabeceraFoto titulo={t.navPagos} />
 
       {pagos === null && <Cargando />}
       {pagos?.length === 0 && <p className={styles.aviso}>{t.sinPagos}</p>}

@@ -11,25 +11,17 @@
 .barra {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   gap: 12px;
-  min-height: 120px;
-  padding: 16px 20px;
-  color: var(--blanco);
-  background-color: #1f2023;
-  background-image: linear-gradient(to top, rgba(30, 30, 28, 0.62), rgba(30, 30, 28, 0.15) 70%),
-    url(/fotos/banner-manos.webp), linear-gradient(#967a6f, #967a6f);
-  background-size: cover;
-  background-position: center 6%;
-  border-radius: 28px;
-  box-shadow: var(--sombra);
+  padding: 4px 0 0;
+  color: var(--carbon);
 }
 
 .barra h1 {
   margin: 0;
   font-size: 2rem;
   line-height: 1.1;
-  color: var(--blanco);
+  color: var(--carbon);
 }
 
 /* Enlace de texto sobre el fondo normal (no sobre la cabecera oscura) */
@@ -45,7 +37,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--blanco);
+  color: var(--acento-oscuro);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -807,9 +799,4 @@
   font-size: 0.7rem;
   font-weight: 600;
   opacity: 0.9;
-}
-
-/* Tema oscuro: la cabecera lleva foto y texto encima; se vuelve a poner como era para que la foto no salga en negativo. */
-:global(html[data-tema="oscuro"]) .barra {
-  filter: contrast(1.136) hue-rotate(180deg) invert(1);
 }

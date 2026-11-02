@@ -35,7 +35,7 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <CabeceraFoto foto="progreso" titulo={t.progresoTitulo} />
+      <CabeceraFoto titulo={t.progresoTitulo} />
 
       {online && (
         <>

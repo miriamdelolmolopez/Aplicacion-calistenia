@@ -23,7 +23,7 @@ export default function Aprende() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <CabeceraFoto foto="pino" titulo={t.titulo} />
+      <CabeceraFoto titulo={t.titulo} />
       <ul className={estilos.opciones}>
         {opciones.map((o) => (
           <li key={o.href}>

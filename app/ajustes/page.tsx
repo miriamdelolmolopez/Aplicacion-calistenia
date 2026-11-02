@@ -42,7 +42,7 @@ export default function Ajustes() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/perfil", texto: "volver" }} />
-      <CabeceraFoto foto="pino" titulo={t.ajustesTitulo} />
+      <CabeceraFoto titulo={t.ajustesTitulo} />
 
       <section className={`${styles.tarjeta} ${estilos.seccion}`}>
         <h2>{t.idioma}</h2>

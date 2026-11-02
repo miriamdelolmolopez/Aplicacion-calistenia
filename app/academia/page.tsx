@@ -2,19 +2,15 @@
 
 import Link from "next/link";
 import BarraSuperior from "../BarraSuperior";
-import CamaraCard from "../CamaraCard";
-import { useFotoCard } from "../useFotosCards";
 import styles from "../formularios.module.css";
 import { useIdioma } from "../useIdioma";
 import estilos from "./academia.module.css";
 import { textosAcademia } from "./textosAcademia";
-import { estiloFoto } from "@/lib/fotos";
 
 // Academia: cursos y formaciones. Dos opciones: cursos actuales o próximos cursos.
 export default function Academia() {
   const [idioma] = useIdioma();
   const t = textosAcademia[idioma];
-  const fotoBanner = useFotoCard("cabecera:/academia");
 
   const opciones = [
     { href: "/academia/actuales", titulo: t.actuales, ayuda: t.actualesAyuda },
@@ -24,10 +20,9 @@ export default function Academia() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <section className={estilos.banner} style={estiloFoto("pino", fotoBanner)}>
+      <section className={estilos.banner}>
         <h1>{t.bannerTitulo}</h1>
         <p>{t.bannerTexto}</p>
-        <CamaraCard clave="cabecera:/academia" />
       </section>
       <ul className={estilos.opciones}>
         {opciones.map((o) => (

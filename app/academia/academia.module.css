@@ -1,31 +1,22 @@
 .banner {
-  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   gap: 8px;
-  min-height: 260px;
   margin: 8px 0 16px;
-  padding: 22px;
-  color: var(--blanco);
-  background-color: #1f2023;
-  background-size: cover;
-  background-position: center;
-  border-radius: 28px;
-  box-shadow: var(--sombra);
 }
 
 .banner h1 {
   margin: 0;
   font-size: 2rem;
   line-height: 1.1;
-  color: var(--blanco);
+  color: var(--carbon);
 }
 
 .banner p {
   margin: 0;
-  max-width: 28ch;
+  max-width: 40ch;
   line-height: 1.4;
+  color: var(--secundario);
 }
 
 .opciones {

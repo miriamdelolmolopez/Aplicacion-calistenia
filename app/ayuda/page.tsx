@@ -180,7 +180,7 @@ export default function Ayuda() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <CabeceraFoto foto="inicio" titulo={idioma === "en" ? "Help" : "Ayuda"} />
+      <CabeceraFoto titulo={idioma === "en" ? "Help" : "Ayuda"} />
       <p className={styles.ayuda}>
         {idioma === "en" ? "Frequently asked questions. Tap one to see the answer." : "Preguntas frecuentes. Pulsa una para ver la respuesta."}
       </p>
