@@ -29,7 +29,7 @@ export function fondoFoto(nombre: FotoNombre, propia?: string | null, esperando 
 }
 
 // El encuadre de una foto de tarjeta se guarda al final de su dirección: «…jpg#e=30,70» (posición en % de ancho y alto).
-const ENCUADRE = /#e=(d{1,3}),(d{1,3})$/;
+const ENCUADRE = /#e=(\d{1,3}),(\d{1,3})$/;
 
 export function sinEncuadre(url: string): string {
   return url.replace(ENCUADRE, "");
