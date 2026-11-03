@@ -62,7 +62,7 @@ function FilaDePago({ p }: { p: FilaPago }) {
           </div>
         )}
       </div>
-      <div style={{ textAlign: "right" }}>
+      <div className={comunes.importePago}>
         <strong>{euros(p.importe)}</strong>
         <div>
           <span className={p.estado === "pagado" ? styles.etiquetaSuave : styles.etiqueta}>{ESTADOS[p.estado] ?? p.estado}</span>

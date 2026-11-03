@@ -234,12 +234,22 @@
 }
 
 /* Iconos pequeños a la derecha de cada pago del historial. */
+/* Importe y estado en una columna de ancho fijo, y los iconos en otra: así todos los pagos quedan alineados a la derecha. */
+.importePago {
+  flex: 0 0 110px;
+  text-align: right;
+}
+
+.fila:has(.importePago) > :first-child {
+  flex: 1 1 auto;
+}
+
 .accionesPago {
+  flex: 0 0 138px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-  margin-left: 8px;
 }
 
 .accionesPago .icono {
@@ -254,7 +264,12 @@
 
 @media (max-width: 600px) {
   .accionesPago {
+    flex-basis: 72px;
     max-width: 72px;
+  }
+
+  .importePago {
+    flex-basis: 88px;
   }
 }
 
