@@ -98,12 +98,10 @@ export default function MenuLateral({
             ))}
         </ul>
 
-        {esAdmin && (
-          <Link href={RUTAS.ayuda} className={estilos.enlace} onClick={onCerrar}>
-            <Icono nombre="ayuda" />
-            {t.navAyuda}
-          </Link>
-        )}
+        <Link href={RUTAS.ayuda} className={estilos.enlace} onClick={onCerrar}>
+          <Icono nombre="ayuda" />
+          {t.navAyuda}
+        </Link>
 
         <div className={estilos.pie}>
           <button type="button" className={`${estilos.enlace} ${estilos.salir}`} onClick={salir}>
