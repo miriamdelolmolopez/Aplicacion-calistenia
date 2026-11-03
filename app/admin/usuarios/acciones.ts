@@ -439,6 +439,8 @@ export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData):
   if (modo !== "ninguna" && (!desde || !hasta)) return { error: "Las fechas no son válidas." };
   if (desde && hasta && hasta.getTime() <= desde.getTime()) return { error: "La fecha de fin tiene que ser posterior a la de inicio." };
 
+  const { data: tarifaAntes } = await admin.from("tipos_bono").select("precio_centimos").eq("id", bono.tipo_bono_id).maybeSingle();
+
   const { error } = await admin.rpc("cambiar_bono", {
     p_bono: bonoId,
     p_tipo: tipo || null,
@@ -460,8 +462,41 @@ export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData):
     }
   }
 
+  // Si cambia la tarifa y la persona tiene un pago PENDIENTE de ese bono, su importe pasa al precio de la tarifa nueva
+  // (con el mismo descuento, si lo tenía). Un pago ya cobrado nunca se toca, y un precio puesto a mano tampoco.
+  let aviso = "";
+  if (tipo && tipo !== bono.tipo_bono_id) {
+    const { data: nueva } = await admin.from("tipos_bono").select("precio_centimos").eq("id", tipo).maybeSingle();
+    const { data: pendientes } = await admin.from("pagos").select("id, importe_centimos, importe_original_centimos, descuento_id").eq("bono_id", bonoId).eq("estado", "pendiente");
+    const euros = (c: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(c / 100);
+    for (const p of pendientes ?? []) {
+      if (!nueva || !tarifaAntes) break;
+      const original = (p.importe_original_centimos as number | null) ?? (p.importe_centimos as number);
+      if (original !== tarifaAntes.precio_centimos) {
+        aviso += " Ojo: su pago pendiente tiene un precio puesto a mano, así que no lo he cambiado: revísalo en Pagos.";
+        continue;
+      }
+      const precio = nueva.precio_centimos as number;
+      let rebaja = 0;
+      if (p.descuento_id) {
+        const { data: d } = await admin.from("descuentos").select("tipo, valor").eq("id", p.descuento_id).maybeSingle();
+        if (d) rebaja = d.tipo === "porcentaje" ? Math.round((precio * (d.valor as number)) / 100) : Math.min(d.valor as number, precio);
+      }
+      const { error: falloPago } = await admin
+        .from("pagos")
+        .update({ importe_original_centimos: precio, descuento_centimos: rebaja, importe_centimos: precio - rebaja })
+        .eq("id", p.id)
+        .eq("estado", "pendiente");
+      aviso += falloPago
+        ? " No se pudo actualizar su pago pendiente: cámbialo tú en Pagos."
+        : ` Su pago pendiente pasa de ${euros(p.importe_centimos as number)} a ${euros(precio - rebaja)}.`;
+    }
+  }
+
   refrescarPantallas(userId);
-  return { mensaje: "Cambios guardados." };
+  revalidatePath(`/admin/usuarios/${userId}/pagos`);
+  revalidatePath("/admin/bonos");
+  return { mensaje: `Cambios guardados.${aviso}` };
 }
 
 // Quita una tarifa: el bono, lo que se hace con su pago y con sus clases reservadas, y si se quita el servicio.
