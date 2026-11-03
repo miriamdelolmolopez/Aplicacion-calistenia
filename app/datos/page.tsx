@@ -7,6 +7,7 @@ import BarraSuperior from "../BarraSuperior";
 import styles from "../formularios.module.css";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
+import { olvidarPerfilCargado } from "../useMiPerfil";
 import {
   dniNieValido,
   fechaNacimientoValida,
@@ -161,6 +162,7 @@ export default function Datos() {
       }
     }
 
+    olvidarPerfilCargado();
     router.push("/inicio");
   }
 

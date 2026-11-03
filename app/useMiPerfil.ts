@@ -100,6 +100,12 @@ function cargarPerfilCompartido(): Promise<Estado> {
   return cargaCompartida.promesa;
 }
 
+// Hay que llamarla justo después de cambiar algo que afecta al perfil (por ejemplo, al guardar los datos obligatorios),
+// para que la pantalla siguiente lea el perfil nuevo y no el de hace unos segundos.
+export function olvidarPerfilCargado() {
+  cargaCompartida = null;
+}
+
 // `recargarCon`: si cambia (por ejemplo la ruta), se vuelve a leer el perfil.
 export function useMiPerfil(recargarCon?: string): Estado {
   // Se guarda con qué valor de `recargarCon` se leyó, para no actuar con datos de una pantalla anterior.
@@ -115,12 +121,24 @@ export function useMiPerfil(recargarCon?: string): Estado {
 
   // Si los textos legales cambian, hay que aceptarlos de nuevo para seguir usando la app.
   // Solo se decide con datos recién leídos (si no, tras aceptar volvería a la pantalla de datos).
+  // Antes de mandar a nadie a «Datos» se vuelve a leer el perfil: un componente que ya estaba en pantalla puede tener
+  // el de hace un momento (antes de guardar los datos y aceptar los textos) y, sin esta comprobación, se entraba en bucle.
   useEffect(() => {
     if (!actualizado) return;
     if (perfil && perfil !== "anonimo" && perfil.rolReal !== "admin" && !perfil.legalAceptado) {
-      if (!ruta.startsWith("/datos") && !ruta.startsWith("/legal")) router.replace("/datos");
+      if (ruta.startsWith("/datos") || ruta.startsWith("/legal") || ruta.startsWith("/crear-contrasena")) return;
+      let vigente = true;
+      olvidarPerfilCargado();
+      cargarPerfilCompartido().then((p) => {
+        if (!vigente) return;
+        if (p && p !== "anonimo" && p.rolReal !== "admin" && !p.legalAceptado) router.replace("/datos");
+        else setLeido({ perfil: p, con: recargarCon });
+      });
+      return () => {
+        vigente = false;
+      };
     }
-  }, [perfil, actualizado, ruta, router]);
+  }, [perfil, actualizado, ruta, router, recargarCon]);
 
   return perfil;
 }
