@@ -230,6 +230,21 @@ export function correoMinimoNoAlcanzado(p: { para: string; clase: ClaseInfo; apu
 }
 
 // Invitación a la app: a una persona nueva (invitada) para que cree su cuenta, o a una alumna dada de alta para que elija su contraseña.
+// Enlace para elegir una contraseña nueva (recuperar contraseña o crear la primera). Lo generamos nosotros, así funciona
+// aunque se abra desde la app de correo o desde otro navegador.
+export function correoRecuperacion(p: { para: string; idioma: Idioma; ruta: string }): Correo {
+  const en = p.idioma === "en";
+  const m = marco({
+    idioma: p.idioma,
+    titulo: en ? "Choose your password" : "Elige tu contraseña",
+    parrafos: en
+      ? ["Press the button to choose a new password for CalisCoach. The link works once and expires after a while.", "If you did not ask for this, you can ignore this email: your password stays the same."]
+      : ["Pulsa el botón para elegir una contraseña nueva en CalisCoach. El enlace sirve una sola vez y caduca pasado un tiempo.", "Si no lo has pedido tú, ignora este correo: tu contraseña sigue igual."],
+    boton: { texto: en ? "Choose my password" : "Elegir mi contraseña", ruta: p.ruta },
+  });
+  return { para: p.para, asunto: en ? "Choose your password · CalisCoach" : "Elige tu contraseña · CalisCoach", ...m };
+}
+
 export function correoInvitacion(p: { para: string; alumno: boolean; ruta: string }): Correo {
   const titulo = p.alumno ? "Te damos la bienvenida" : "Te invito a mi app";
   const m = marco({

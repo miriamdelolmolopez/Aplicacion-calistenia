@@ -56,7 +56,8 @@ function Formulario() {
 
       {enlaceMalo && (
         <p className={styles.aviso} role="alert">
-          {t.errorEnlace}
+          {t.errorEnlace}{" "}
+          <Link href="/recuperar">{t.pedirEnlaceNuevo}</Link>
         </p>
       )}
 

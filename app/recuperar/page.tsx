@@ -6,7 +6,7 @@ import styles from "../formularios.module.css";
 import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { emailValido } from "@/lib/validaciones";
-import { createClient } from "@/lib/supabase/client";
+import { pedirRecuperacion } from "./acciones";
 
 export default function Recuperar() {
   const [idioma] = useIdioma();
@@ -23,10 +23,7 @@ export default function Recuperar() {
     if (!emailValido(correo)) return setError(t.errorCampo);
 
     setCargando(true);
-    const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(correo.trim(), {
-      redirectTo: `${location.origin}/auth/confirmar?next=/crear-contrasena`,
-    });
+    await pedirRecuperacion(correo, idioma);
     setCargando(false);
     // Siempre se muestra el mismo mensaje, exista o no el correo.
     setEnviado(true);

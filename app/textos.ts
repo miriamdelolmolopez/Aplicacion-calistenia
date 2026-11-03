@@ -42,7 +42,8 @@ export const textos = {
     entrarBoton: "Iniciar sesión",
     olvidaste: "¿Has olvidado tu contraseña?",
     crearCuenta: "Crear cuenta nueva",
-    errorEnlace: "El enlace ha caducado o no es válido. Pide uno nuevo.",
+    errorEnlace: "El enlace ha caducado o no es válido. Cada enlace sirve una sola vez.",
+    pedirEnlaceNuevo: "Pedir un enlace nuevo para elegir mi contraseña",
     errorCredenciales: "Correo o contraseña incorrectos.",
 
     // Recuperar
@@ -525,7 +526,8 @@ export const textos = {
     entrarBoton: "Log in",
     olvidaste: "Forgot your password?",
     crearCuenta: "Create a new account",
-    errorEnlace: "The link has expired or is not valid. Request a new one.",
+    errorEnlace: "The link has expired or is not valid. Each link works only once.",
+    pedirEnlaceNuevo: "Request a new link to choose my password",
     errorCredenciales: "Wrong email or password.",
 
     recuperarTitulo: "Reset password",

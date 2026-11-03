@@ -8,6 +8,7 @@ import { useIdioma } from "../../useIdioma";
 import estilos from "../perfil.module.css";
 import { textosPerfil, type TextosPerfil } from "../textosPerfil";
 import { createClient } from "@/lib/supabase/client";
+import { pedirRecuperacion } from "../../recuperar/acciones";
 
 type Mensaje = { ok: boolean; clave: keyof TextosPerfil };
 
@@ -19,6 +20,17 @@ export default function CambiarContrasena() {
   const [repetida, setRepetida] = useState("");
   const [mensaje, setMensaje] = useState<Mensaje | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
+  // Para quien no tiene contraseña (entró por invitación o con Google) o no la recuerda: se le manda un enlace para elegir una nueva.
+  async function mandarEnlace() {
+    setEnviando(true);
+    const { data: sesion } = await createClient().auth.getUser();
+    if (sesion.user?.email) await pedirRecuperacion(sesion.user.email, idioma);
+    setEnviando(false);
+    setEnviado(true);
+  }
 
   async function cambiar(e: FormEvent) {
     e.preventDefault();
@@ -83,6 +95,20 @@ export default function CambiarContrasena() {
           {guardando ? t.cargando : t.cambiarContrasena}
         </button>
       </form>
+      <div className={`${styles.tarjeta} ${estilos.seccion}`}>
+        {enviado ? (
+          <p className={styles.aviso} role="status">
+            {t.claveSinEnviado}
+          </p>
+        ) : (
+          <>
+            <p style={{ margin: 0 }}>{t.claveSinPregunta}</p>
+            <button type="button" className={styles.boton} disabled={enviando} onClick={mandarEnlace}>
+              {enviando ? t.cargando : t.claveSinBoton}
+            </button>
+          </>
+        )}
+      </div>
     </main>
   );
 }
