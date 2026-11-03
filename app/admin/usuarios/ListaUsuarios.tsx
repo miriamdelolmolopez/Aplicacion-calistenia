@@ -8,7 +8,7 @@ import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
-import { IconoEuro, IconoLapiz, IconoMarcador } from "./IconosUsuario";
+import { IconoEuro, IconoLapiz } from "./IconosUsuario";
 
 export type Usuario = {
   id: string;
@@ -16,6 +16,10 @@ export type Usuario = {
   nombre: string | null;
   apellidos: string | null;
   rol: string;
+  clases_usadas: number; // clases que ya lleva de las que tiene en su tarifa presencial
+  clases_total: number;
+  online_usados: number; // días que lleva de su plan online
+  online_total: number;
   etiquetas?: string[]; // tipos de cuenta que tiene (Administradora, Alumno/a, Coach…)
   foto: string | null;
   creado_en: string;
@@ -51,11 +55,6 @@ const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Grupal", individual: 
 // Días que han pasado desde una fecha (se calcula fuera de los componentes).
 function diasDesde(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-}
-
-// Días que le quedan hasta una fecha (0 si ya ha pasado).
-function diasHasta(iso: string): number {
-  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000));
 }
 
 function hace(dias: number): string {
@@ -291,15 +290,20 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                 {!soloAdmin(u) && (
                   <>
                     <div className={estilos.creditos}>
-                      <IconoMarcador />
                       {(u.servicios.includes("grupal") || u.servicios.includes("individual") || u.servicios.includes("taller")) && (
                         <span>
-                          <b>{u.clases_restantes ?? 0}</b> {u.clases_restantes === 1 ? "clase" : "clases"}
+                          <b>
+                            {u.clases_usadas}/{u.clases_total}
+                          </b>{" "}
+                          clases
                         </span>
                       )}
                       {u.servicios.includes("online") && (
-                        <span className={estilos.diasOnline}>
-                          <b>{u.plan_online_hasta ? diasHasta(u.plan_online_hasta) : 0}</b> {u.plan_online_hasta && diasHasta(u.plan_online_hasta) === 1 ? "día" : "días"} online
+                        <span>
+                          <b>
+                            {u.online_usados}/{u.online_total}
+                          </b>{" "}
+                          días online
                         </span>
                       )}
                     </div>
