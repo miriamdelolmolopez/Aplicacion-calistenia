@@ -86,6 +86,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
 
   const correo = String(formData.get("correo") ?? "").trim().toLowerCase();
   const tipo = String(formData.get("tipo") ?? "");
+  const idioma = String(formData.get("idioma") ?? "es") === "en" ? "en" : "es";
   if (!emailValido(correo)) return { error: "El correo no es válido." };
   if (tipo !== "invitado" && tipo !== "alumno") return { error: "Elige si es invitado/a o alumno/a." };
 
@@ -96,7 +97,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   if (tipo === "invitado") {
     const prueba = String(formData.get("prueba") ?? "normal");
     if (prueba === "normal") {
-      const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: "/registro" }));
+      const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: "/registro", idioma }));
       return enviado
         ? { mensaje: `Invitación enviada a ${correo}. Cuando cree su cuenta aparecerá en la lista.` }
         : { error: "No se ha podido enviar el correo. Inténtalo de nuevo." };
@@ -124,6 +125,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
 
     await admin.from("perfil_servicios").delete().eq("user_id", userId);
     await admin.from("perfil_servicios").insert({ user_id: userId, servicio: prueba });
+    await admin.from("profiles").update({ idioma }).eq("id", userId);
 
     // La prueba es un bono gratuito (sin pago ni factura).
     const { data: bono, error: falloBono } = await admin
@@ -143,7 +145,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
     }
 
     const rutaPrueba = `/auth/confirmar?token_hash=${invitado.properties.hashed_token}&type=invite`;
-    const enviadoPrueba = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: rutaPrueba }));
+    const enviadoPrueba = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: rutaPrueba, idioma }));
     revalidatePath("/admin");
     revalidatePath("/admin/usuarios");
     const hh = await headers();
@@ -199,7 +201,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   const { data, error } = await invitar(correo);
   if (error || !data.user) return { error: "No se ha podido crear la cuenta. Inténtalo de nuevo." };
 
-  const { error: falloRol } = await admin.from("profiles").update({ rol: "alumno", fue_alumno: true }).eq("id", data.user.id);
+  const { error: falloRol } = await admin.from("profiles").update({ rol: "alumno", fue_alumno: true, idioma }).eq("id", data.user.id);
   if (falloRol) return { error: "La cuenta se creó, pero no se pudo asignar el tipo." };
 
   await admin.from("perfil_servicios").delete().eq("user_id", data.user.id);
@@ -246,7 +248,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
   const avisoBono = avisos.length > 0 ? ` ${avisos.join(" ")}` : "";
 
   const ruta = `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=invite`;
-  const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: true, ruta }));
+  const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: true, ruta, idioma }));
 
   revalidatePath("/admin");
   revalidatePath("/admin/usuarios");

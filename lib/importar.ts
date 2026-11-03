@@ -6,6 +6,7 @@ export type FilaImport = {
   apellidos: string;
   telefono: string;
   tipo: "alumno" | "invitado";
+  idioma: "es" | "en";
   servicios: string[];
   dni: string;
   nacimiento: string; // aaaa-mm-dd
@@ -47,6 +48,9 @@ const COLUMNAS: Record<string, Col> = {
   movil: "telefono",
   phone: "telefono",
   tipo: "tipo",
+  idioma: "idioma",
+  language: "idioma",
+  lengua: "idioma",
   servicio: "servicios",
   servicios: "servicios",
   dni: "dni",
@@ -191,6 +195,7 @@ export function leerTabla(tabla: string[][], tipoPorDefecto: "alumno" | "invitad
     else if (vistos.has(correo)) problemas.push("Repetido en el archivo");
     vistos.add(correo);
     const tipo = tipoDe(dato("tipo"), tipoPorDefecto);
+    const idioma = clave(dato("idioma")).startsWith("en") || clave(dato("idioma")).startsWith("ingl") ? "en" : "es";
     const { servicios, raros } = serviciosDe(dato("servicios"));
     if (raros.length > 0) problemas.push(`Servicio no entendido: ${raros.join(", ")}`);
 
@@ -233,6 +238,7 @@ export function leerTabla(tabla: string[][], tipoPorDefecto: "alumno" | "invitad
       apellidos: dato("apellidos"),
       telefono: dato("telefono"),
       tipo,
+      idioma: idioma as "es" | "en",
       servicios,
       dni: dato("dni"),
       nacimiento,
@@ -255,5 +261,5 @@ export function leerTabla(tabla: string[][], tipoPorDefecto: "alumno" | "invitad
 }
 
 export const PLANTILLA_CSV =
-  "correo;nombre;apellidos;telefono;dni;fecha nacimiento;contacto emergencia;telefono emergencia;tipo;servicios;tarifa;fecha inicio;fecha fin;dias;pagado;fecha pago;hora pago;forma de pago;descuento;importe\r\n" +
-  "ejemplo@correo.com;Ana;García López;600123123;12345678Z;15/03/1990;Luis García;600987987;alumno;grupal;Nombre exacto de la tarifa;01/11/2026;;30;sí;01/11/2026;18:30;Bizum;;\r\n";
+  "correo;nombre;apellidos;telefono;idioma;dni;fecha nacimiento;contacto emergencia;telefono emergencia;tipo;servicios;tarifa;fecha inicio;fecha fin;dias;pagado;fecha pago;hora pago;forma de pago;descuento;importe\r\n" +
+  "ejemplo@correo.com;Ana;García López;600123123;español;12345678Z;15/03/1990;Luis García;600987987;alumno;grupal;Nombre exacto de la tarifa;01/11/2026;;30;sí;01/11/2026;18:30;Bizum;;\r\n";

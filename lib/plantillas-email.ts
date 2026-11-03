@@ -229,40 +229,55 @@ export function correoMinimoNoAlcanzado(p: { para: string; clase: ClaseInfo; apu
   return { para: p.para, asunto: `${titulo} · ${p.clase.nombre}`, ...m };
 }
 
-// Invitación a la app: a una persona nueva (invitada) para que cree su cuenta, o a una alumna dada de alta para que elija su contraseña.
 // Enlace para elegir una contraseña nueva (recuperar contraseña o crear la primera). Lo generamos nosotros, así funciona
-// aunque se abra desde la app de correo o desde otro navegador. Va en español y en inglés en el mismo correo.
-export function correoRecuperacion(p: { para: string; ruta: string }): Correo {
+// aunque se abra desde la app de correo o desde otro navegador. Va en el idioma que tenía la pantalla al pedirlo.
+export function correoRecuperacion(p: { para: string; idioma: Idioma; ruta: string }): Correo {
+  const en = p.idioma === "en";
   const m = marco({
-    idioma: "es",
-    titulo: "Elige tu contraseña · Choose your password",
-    parrafos: [
-      "Pulsa el botón para elegir una contraseña nueva en CalisCoach. El enlace sirve una sola vez y caduca pasado un tiempo. Si no lo has pedido tú, ignora este correo: tu contraseña sigue igual.",
-      "<strong>English:</strong> Press the button to choose a new password for CalisCoach. The link works once and expires after a while. If you did not ask for this, ignore this email: your password stays the same.",
-    ],
-    boton: { texto: "Elegir mi contraseña · Choose my password", ruta: p.ruta },
+    idioma: p.idioma,
+    titulo: en ? "Choose your password" : "Elige tu contraseña",
+    parrafos: en
+      ? ["Press the button to choose a new password for CalisCoach. The link works once and expires after a while.", "If you did not ask for this, you can ignore this email: your password stays the same."]
+      : ["Pulsa el botón para elegir una contraseña nueva en CalisCoach. El enlace sirve una sola vez y caduca pasado un tiempo.", "Si no lo has pedido tú, ignora este correo: tu contraseña sigue igual."],
+    boton: { texto: en ? "Choose my password" : "Elegir mi contraseña", ruta: p.ruta },
   });
-  return { para: p.para, asunto: "Elige tu contraseña · Choose your password · CalisCoach", ...m };
+  return { para: p.para, asunto: en ? "Choose your password · CalisCoach" : "Elige tu contraseña · CalisCoach", ...m };
 }
 
-export function correoInvitacion(p: { para: string; alumno: boolean; ruta: string }): Correo {
-  // Va en español y en inglés en el mismo correo (todavía no se sabe en qué idioma usa la app esa persona).
-  const titulo = p.alumno ? "Te damos la bienvenida · Welcome" : "Te invito a mi app · You are invited";
+// Invitación a la app: a una persona nueva (invitada) para que cree su cuenta, o a una alumna dada de alta para que elija su contraseña.
+// Va en el idioma que se elige al darla de alta.
+export function correoInvitacion(p: { para: string; alumno: boolean; ruta: string; idioma?: Idioma }): Correo {
+  const en = p.idioma === "en";
+  const titulo = en ? (p.alumno ? "Welcome" : "You are invited") : p.alumno ? "Te damos la bienvenida" : "Te invito a mi app";
   const m = marco({
-    idioma: "es",
+    idioma: en ? "en" : "es",
     titulo,
-    parrafos: p.alumno
-      ? [
-          "Miriam del Olmo te ha dado de alta en CalisCoach, su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso. Pulsa el botón para elegir tu contraseña y entrar. Si no esperabas este correo, puedes ignorarlo.",
-          "<strong>English:</strong> Miriam del Olmo has signed you up to CalisCoach, her calisthenics and handstand app. There you book your classes and see your pass and progress. Press the button to choose your password and sign in. If you were not expecting this email, you can ignore it.",
-        ]
-      : [
-          "Miriam del Olmo te invita a CalisCoach, su app de calistenia y pino. Pulsa el botón para crear tu cuenta y empezar. Si no esperabas este correo, puedes ignorarlo.",
-          "<strong>English:</strong> Miriam del Olmo invites you to CalisCoach, her calisthenics and handstand app. Press the button to create your account and get started. If you were not expecting this email, you can ignore it.",
-        ],
-    boton: { texto: p.alumno ? "Elegir mi contraseña · Choose my password" : "Crear mi cuenta · Create my account", ruta: p.ruta },
+    parrafos: en
+      ? p.alumno
+        ? [
+            "Miriam del Olmo has signed you up to CalisCoach, her calisthenics and handstand app. There you book your classes and see your pass and progress.",
+            "Press the button to choose your password and sign in. If you were not expecting this email, you can ignore it.",
+          ]
+        : [
+            "Miriam del Olmo invites you to CalisCoach, her calisthenics and handstand app. Create your account to get started.",
+            "Press the button to create your account. If you were not expecting this email, you can ignore it.",
+          ]
+      : p.alumno
+        ? [
+            "Miriam del Olmo te ha dado de alta en CalisCoach, su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
+            "Pulsa el botón para elegir tu contraseña y entrar. Si no esperabas este correo, puedes ignorarlo.",
+          ]
+        : [
+            "Miriam del Olmo te invita a CalisCoach, su app de calistenia y pino. Crea tu cuenta para empezar.",
+            "Pulsa el botón para crear tu cuenta. Si no esperabas este correo, puedes ignorarlo.",
+          ],
+    boton: { texto: en ? (p.alumno ? "Choose my password" : "Create my account") : p.alumno ? "Elegir mi contraseña" : "Crear mi cuenta", ruta: p.ruta },
   });
-  return { para: p.para, asunto: p.alumno ? "Te damos la bienvenida · Welcome to CalisCoach" : "Te invito a CalisCoach · You are invited to CalisCoach", ...m };
+  return {
+    para: p.para,
+    asunto: en ? (p.alumno ? "Welcome to CalisCoach" : "You are invited to CalisCoach") : p.alumno ? "Te damos la bienvenida · CalisCoach" : "Te invito a CalisCoach",
+    ...m,
+  };
 }
 
 // Correo de una automatización: el texto lo escribe Miriam. Se pueden usar {nombre}, {fecha}, {clase},

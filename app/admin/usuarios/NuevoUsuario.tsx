@@ -230,6 +230,14 @@ export default function NuevoUsuario({
             <input id="nu-correo" name="correo" type="email" required />
           </div>
 
+          <div className={styles.campo}>
+            <label htmlFor="nu-idioma">Idioma <AyudaI texto="El idioma del correo de bienvenida y de los avisos que le lleguen. Después, ella puede cambiarlo en la app." /></label>
+            <select id="nu-idioma" name="idioma" defaultValue="es">
+              <option value="es">Español</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
           <fieldset className={styles.grupo}>
             <legend>Tipo de usuario <AyudaI texto="Alumno/a: ya entrena contigo y puede tener servicios y tarifa. Invitado/a: recibe un correo para crear su cuenta y hacer su clase de prueba." /></legend>
             <label className={styles.casilla}>

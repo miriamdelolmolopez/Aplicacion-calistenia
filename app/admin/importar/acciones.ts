@@ -212,7 +212,7 @@ export async function importarLote(filas: FilaImport[], enviar: boolean): Promis
     }
     const id = data.user.id;
     const avisos: string[] = [];
-    const base = { rol: tipo, fue_alumno: tipo === "alumno", nombre: f.nombre?.trim().slice(0, 80) || null, apellidos: f.apellidos?.trim().slice(0, 120) || null, telefono: f.telefono?.trim().slice(0, 30) || null };
+    const base = { rol: tipo, idioma: f.idioma === "en" ? "en" : "es", fue_alumno: tipo === "alumno", nombre: f.nombre?.trim().slice(0, 80) || null, apellidos: f.apellidos?.trim().slice(0, 120) || null, telefono: f.telefono?.trim().slice(0, 30) || null };
     const extra = {
       dni: normalizarDni(f.dni ?? "") || null,
       fecha_nacimiento: f.nacimiento || null,
@@ -235,7 +235,7 @@ export async function importarLote(filas: FilaImport[], enviar: boolean): Promis
     const ruta = `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=invite`;
     const detalle = avisos.length > 0 ? ` ${avisos.join(" ")}` : "";
     if (enviar) {
-      const ok = await enviarCorreo(correoInvitacion({ para: correo, alumno: tipo === "alumno", ruta }));
+      const ok = await enviarCorreo(correoInvitacion({ para: correo, alumno: tipo === "alumno", ruta, idioma: f.idioma === "en" ? "en" : "es" }));
       const mensaje = ok ? "Cuenta creada e invitación enviada." : "Cuenta creada, pero no se pudo enviar el correo: manda el enlace por WhatsApp.";
       resultados.push({ correo, ok: true, mensaje: mensaje + detalle, enlace: ok ? undefined : `${protocolo}://${host}${ruta}` });
     } else {

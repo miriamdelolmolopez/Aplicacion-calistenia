@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
+import { createClient } from "@/lib/supabase/client";
 import type { Idioma } from "./textos";
 
 const CLAVE = "idioma";
@@ -32,6 +33,12 @@ export function useIdioma(): [Idioma, (nuevo: Idioma) => void] {
     } catch {}
     document.documentElement.lang = nuevo;
     window.dispatchEvent(new Event(EVENTO));
+    // Si hay una sesión iniciada, el idioma también se guarda en el perfil: es el de los correos que le mandamos.
+    const supabase = createClient();
+    supabase.auth
+      .getUser()
+      .then(({ data }) => (data.user ? supabase.from("profiles").update({ idioma: nuevo }).eq("id", data.user.id) : null))
+      .catch(() => {});
   }, []);
 
   return [idioma, cambiar];
