@@ -26,6 +26,10 @@ export default function Privacidad() {
             <span>{t.mostrarFoto}</span>
           </label>
           <label className={estilos.interruptor}>
+            <input type="checkbox" checked={pref.mostrar_apellido} onChange={(e) => cambiar("mostrar_apellido", e.target.checked)} />
+            <span>{t.mostrarApellido}</span>
+          </label>
+          <label className={estilos.interruptor}>
             <input type="checkbox" checked={pref.avisar_cumple} onChange={(e) => cambiar("avisar_cumple", e.target.checked)} />
             <span>{t.avisarCumple}</span>
           </label>

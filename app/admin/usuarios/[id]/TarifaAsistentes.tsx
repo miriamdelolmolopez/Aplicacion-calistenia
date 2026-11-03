@@ -55,6 +55,8 @@ function Opcion({ nombre, valor, marcado, alCambiar, titulo, ayuda, desactivada 
 }
 
 // Cierra el panel solo, un momento después de guardar.
+// (Los botones «Siguiente» y «Confirmar» llevan cada uno su `key`: son el mismo sitio de la pantalla y, sin ella, el navegador
+// trataba el clic en «Siguiente» como un envío del formulario y se guardaba sin pasar por el último paso.)
 function useCerrarAlTerminar(estado: Estado, cerrar: () => void) {
   const ref = useRef(cerrar);
   useEffect(() => {
@@ -237,11 +239,11 @@ function FormularioCambiar({ userId, bono, tarifas, cerrar }: { userId: string; 
           </button>
         )}
         {paso < 3 ? (
-          <button type="button" className={styles.boton} onClick={siguiente}>
+          <button key="siguiente" type="button" className={styles.boton} onClick={siguiente}>
             Siguiente →
           </button>
         ) : (
-          <button type="submit" className={styles.boton} disabled={pendiente || !!estado.mensaje}>
+          <button key="confirmar" type="submit" className={styles.boton} disabled={pendiente || !!estado.mensaje}>
             {pendiente ? "Guardando…" : "Confirmar cambios"}
           </button>
         )}
@@ -376,11 +378,11 @@ function FormularioQuitar({ userId, bono, cerrar }: { userId: string; bono: Bono
           </button>
         )}
         {paso === 1 ? (
-          <button type="button" className={styles.boton} onClick={() => setPaso(2)}>
+          <button key="siguiente" type="button" className={styles.boton} onClick={() => setPaso(2)}>
             Siguiente →
           </button>
         ) : (
-          <button type="submit" className={styles.boton} disabled={pendiente || !!estado.mensaje}>
+          <button key="confirmar" type="submit" className={styles.boton} disabled={pendiente || !!estado.mensaje}>
             {pendiente ? "Guardando…" : "Quitar la tarifa"}
           </button>
         )}

@@ -15,18 +15,19 @@ export type Preferencias = {
   avisos_bono: boolean;
   avisos_novedades: boolean;
   mostrar_foto: boolean;
+  mostrar_apellido: boolean;
   avisar_cumple: boolean;
   imagen: boolean;
   borradoPedido: boolean;
 } & Record<ClaveAdmin, boolean>;
 
-export type Clave = "avisos_reserva" | "avisos_recordatorio" | "avisos_bono" | "avisos_novedades" | "mostrar_foto" | "avisar_cumple" | ClaveAdmin;
+export type Clave = "avisos_reserva" | "avisos_recordatorio" | "avisos_bono" | "avisos_novedades" | "mostrar_foto" | "mostrar_apellido" | "avisar_cumple" | ClaveAdmin;
 
 async function cargar(): Promise<Preferencias | null> {
   const supabase = createClient();
   const { data: sesion } = await supabase.auth.getUser();
   if (!sesion.user) return null;
-  const [{ data: p }, { data: s }, { data: im }, { data: ad }] = await Promise.all([
+  const [{ data: p }, { data: s }, { data: im }, { data: ad }, { data: ap }] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, rol, avisos_reserva, avisos_recordatorio, avisos_bono, avisos_novedades, mostrar_foto, avisar_cumple")
@@ -42,10 +43,12 @@ async function cargar(): Promise<Preferencias | null> {
       .limit(1),
     // Los avisos de la administradora van aparte: si la columna aún no existe, se dan por activados.
     supabase.from("profiles").select(CLAVES_ADMIN.join(", ")).eq("id", sesion.user.id).maybeSingle(),
+    // «Mostrar mi apellido» va aparte: si la columna aún no existe, se da por desactivada.
+    supabase.from("profiles").select("mostrar_apellido").eq("id", sesion.user.id).maybeSingle(),
   ]);
   const admin = Object.fromEntries(CLAVES_ADMIN.map((c) => [c, (ad as unknown as Record<string, boolean> | null)?.[c] !== false])) as Record<ClaveAdmin, boolean>;
   return p
-    ? { ...(p as Omit<Preferencias, "borradoPedido" | "imagen" | ClaveAdmin>), ...admin, imagen: im?.[0]?.concedido === true, borradoPedido: (s ?? []).length > 0 }
+    ? { ...(p as Omit<Preferencias, "borradoPedido" | "imagen" | "mostrar_apellido" | ClaveAdmin>), ...admin, mostrar_apellido: (ap as { mostrar_apellido?: boolean } | null)?.mostrar_apellido === true, imagen: im?.[0]?.concedido === true, borradoPedido: (s ?? []).length > 0 }
     : null;
 }
 
