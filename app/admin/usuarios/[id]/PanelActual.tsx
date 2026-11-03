@@ -58,6 +58,12 @@ export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: 
     .filter((r) => r.bonoId && ids.has(r.bonoId))
     .map((r) => ({ dia: r.dia, hora: r.hora, nombre: r.nombre, color: r.color, estado: r.estado, asistencia: r.asistencia }));
   const total = p.desde && p.hasta ? diasEntre(p.desde, p.hasta) + 1 : 0;
+  // Sin fecha de fin (un regalo que no caduca): el calendario llega hasta dentro de dos meses.
+  const hastaCalendario = p.hasta ?? (() => {
+    const d = new Date(`${hoy}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + 60);
+    return d.toISOString().slice(0, 10);
+  })();
   const llevados = p.desde && total ? Math.min(total, Math.max(0, diasEntre(p.desde, hoy) + 1)) : 0;
   const pct = total ? Math.round((llevados / total) * 100) : 0;
   const soloOnline = p.bonos.every((b) => b.servicio === "online");
@@ -83,12 +89,18 @@ export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: 
           )}
         </div>
         <p style={{ margin: 0 }}>
-          Tarifa: <strong>{p.nombre}</strong> {p.pendiente ? <span className={estilos.sinPagar}>Sin pagar</span> : p.pagado ? <span className={estilos.activa}>Pagado</span> : null}
+          Tarifa: <strong>{p.nombre}</strong> {p.pendiente ? <span className={estilos.sinPagar}>Sin pagar</span> : p.pagado ? <span className={estilos.activa}>Pagado</span> : <span className={estilos.activa}>Sin cobro</span>}
         </p>
         {p.pagado && p.hasta && (
           <p style={{ margin: 0 }}>
             Pagado hasta: <strong>{dmy(p.hasta)}</strong>
           </p>
+        )}
+        {p.desde && !p.hasta && (
+          <div className={estilos.periodoCaja}>
+            <span>Periodo:</span>
+            <strong>Desde {dmy(p.desde)} · sin fecha de fin</strong>
+          </div>
         )}
         {p.desde && p.hasta && (
           <div className={estilos.periodoCaja}>
@@ -138,10 +150,10 @@ export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: 
         );
       })}
 
-      {p.desde && p.hasta && !soloOnline && (
+      {p.desde && !soloOnline && (
         <section className={styles.tarjeta}>
           <h2>Calendario del periodo</h2>
-          <CalendarioReservas meses={mesesDe(p.desde, p.hasta)} eventos={eventos} userId={userId} hoy={hoy} desde={p.desde} hasta={p.hasta} />
+          <CalendarioReservas meses={mesesDe(p.desde, hastaCalendario)} eventos={eventos} userId={userId} hoy={hoy} desde={p.desde} hasta={hastaCalendario} />
         </section>
       )}
 

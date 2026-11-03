@@ -499,6 +499,119 @@ export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData):
   return { mensaje: `Cambios guardados.${aviso}` };
 }
 
+// Da una tarifa del catálogo, o clases / entrenamientos sueltos, SIN cobrar: no crea pago ni factura.
+// Siempre es un bono aparte (salvo que se pida sumarlo a la tarifa actual, solo para clases sueltas).
+export async function anadirSinCobrar(_previo: Estado, formData: FormData): Promise<Estado> {
+  const { user } = await requireAdmin("usuarios");
+  const userId = String(formData.get("userId") ?? "");
+  const que = String(formData.get("que") ?? "");
+  const nota = String(formData.get("nota") ?? "").trim().slice(0, 200);
+  const inicio = String(formData.get("inicio") ?? "").trim();
+  const termina = String(formData.get("termina") ?? "nunca");
+  const sumar = formData.get("sumar") === "on";
+  if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
+  if (que !== "tarifa" && que !== "clases") return { error: "Elige qué le das." };
+
+  const admin = createAdminClient();
+  const { data: persona } = await admin.from("profiles").select("rol, tambien_alumno").eq("id", userId).maybeSingle();
+  if (!persona) return { error: "No se ha encontrado a la persona." };
+  const puedeReservar = persona.rol === "alumno" || persona.rol === "invitado" || (persona.rol === "admin" && !!persona.tambien_alumno);
+  if (!puedeReservar) return { error: "Para que pueda reservar tiene que ser alumno/a o invitado/a: cambia primero su tipo de cuenta en «Cambiar tipo de cuenta y servicios»." };
+
+  // Qué bonos se crean (una tarifa combinada crea dos).
+  type Item = { tipoId: string; servicio: string; clases: number; validez: number };
+  const items: Item[] = [];
+  let nombreTarifa = "";
+  if (que === "tarifa") {
+    const tarifaId = String(formData.get("tarifa") ?? "");
+    if (!UUID.test(tarifaId)) return { error: "Elige una tarifa." };
+    const { data: t } = await admin.from("tipos_bono").select("id, nombre, servicio, clases, validez_dias, servicio2, clases2, validez_dias2, activo").eq("id", tarifaId).maybeSingle();
+    if (!t || !t.activo) return { error: "Esa tarifa no está disponible." };
+    nombreTarifa = t.nombre as string;
+    items.push({ tipoId: t.id as string, servicio: t.servicio as string, clases: t.clases as number, validez: t.validez_dias as number });
+    if (t.servicio2) items.push({ tipoId: t.id as string, servicio: t.servicio2 as string, clases: (t.clases2 as number | null) ?? 1, validez: (t.validez_dias2 as number | null) ?? (t.validez_dias as number) });
+  } else {
+    const servicio = String(formData.get("servicio") ?? "");
+    if (!SERVICIOS_VALIDOS.includes(servicio)) return { error: "Elige el servicio." };
+    const clases = servicio === "online" ? 1 : Math.floor(Number(formData.get("clases")));
+    if (!(clases >= 1 && clases <= 500)) return { error: "El número de clases va de 1 a 500." };
+    const { data: t } = await admin.from("tipos_bono").select("id").eq("nombre", `Regalo · ${servicio}`).maybeSingle();
+    if (!t) return { error: "Faltan los tipos de regalo en la base de datos (archivo 074)." };
+    items.push({ tipoId: t.id as string, servicio, clases, validez: 1095 });
+  }
+
+  // Si se pide sumar a su tarifa actual (solo clases sueltas): se suman a ese bono y ya está.
+  if (que === "clases" && sumar && items[0].servicio !== "online") {
+    const { data: activo } = await admin.from("bonos").select("id").eq("user_id", userId).eq("servicio", items[0].servicio).eq("estado", "activo").maybeSingle();
+    if (!activo) return { error: "No tiene una tarifa activa de ese servicio a la que sumarle las clases: desmarca «sumar» para crear un bono aparte." };
+    const { error } = await admin.rpc("ajustar_bono", { p_bono: activo.id, p_clases: items[0].clases, p_dias: 0, p_nota: `Regalo${nota ? ": " + nota : ""}`, p_admin: user.id });
+    if (error) return { error: error.message };
+    refrescarPantallas(userId);
+    return { mensaje: `Sumadas ${items[0].clases} ${items[0].clases === 1 ? "clase" : "clases"} a su tarifa actual.` };
+  }
+
+  // Fechas.
+  const hoyDia = claveDia(new Date().toISOString());
+  if (inicio && !inicioAltaValido(inicio)) return { error: "La fecha de inicio no es válida (como mucho 2 años atrás o 1 año adelante)." };
+  const desdeDia = inicio || hoyDia;
+  let hastaFin: Date | null = null;
+  let nuncaCaduca = false;
+  let validezDias = items[0].validez;
+  if (termina === "dias") {
+    const n = Math.floor(Number(formData.get("dias")));
+    if (!(n >= 1 && n <= 3650)) return { error: "Los días van de 1 a 3650." };
+    hastaFin = instanteMadrid(sumarDias(desdeDia, n - 1), "23:59");
+    validezDias = Math.min(n, 1095);
+  } else if (termina === "fecha") {
+    const fin = String(formData.get("fin") ?? "").trim();
+    const f = instanteMadrid(fin, "23:59");
+    if (!f) return { error: "Elige la fecha de fin." };
+    if (fin <= desdeDia) return { error: "La fecha de fin tiene que ser posterior a la de inicio." };
+    hastaFin = f;
+    validezDias = Math.min(Math.round((f.getTime() - (instanteMadrid(desdeDia, "00:00")?.getTime() ?? f.getTime())) / 86_400_000) + 1, 1095);
+  } else if (termina === "nunca") {
+    nuncaCaduca = true;
+    validezDias = 1095;
+  } else if (que !== "tarifa") {
+    nuncaCaduca = true;
+    validezDias = 1095;
+  }
+
+  // Se crean los bonos (sin ningún pago) y el historial.
+  const etiqueta = que === "tarifa" ? "Tarifa sin cobro" : "Regalo";
+  const { data: nuevos, error: falloInsert } = await admin
+    .from("bonos")
+    .insert(items.map((i) => ({ user_id: userId, tipo_bono_id: i.tipoId, servicio: i.servicio, clases_total: i.clases, clases_restantes: i.clases, validez_dias: que === "tarifa" && termina === "tarifa" ? i.validez : validezDias, nota: etiqueta })))
+    .select("id, servicio");
+  if (falloInsert || !nuevos) return { error: "No se ha podido crear. Inténtalo de nuevo." };
+  for (let n = 0; n < nuevos.length; n++) {
+    await admin.from("movimientos_bono").insert({ bono_id: nuevos[n].id, tipo: "alta", clases: items[n].clases, nota: `${etiqueta}${nombreTarifa ? ": " + nombreTarifa : ""}${nota ? " · " + nota : ""}`, creado_por: user.id });
+  }
+
+  // Para poder reservar tiene que tener el servicio en su perfil.
+  const { data: servs } = await admin.from("perfil_servicios").select("servicio").eq("user_id", userId);
+  const ya = new Set((servs ?? []).map((s) => s.servicio as string));
+  const faltan = [...new Set(items.map((i) => i.servicio))].filter((s) => !ya.has(s));
+  if (faltan.length > 0) await admin.from("perfil_servicios").insert(faltan.map((servicio) => ({ user_id: userId, servicio })));
+
+  // Se activan los que puedan (si ya tiene uno activo de ese servicio, el nuevo espera su turno).
+  await admin.rpc("refrescar_bonos", { p_user: userId });
+  const { data: despues } = await admin.from("bonos").select("id, estado, activo_desde, caduca_en").in("id", nuevos.map((n) => n.id));
+  const activados = (despues ?? []).filter((b) => b.estado === "activo");
+  const enCola = (despues ?? []).filter((b) => b.estado === "en_cola");
+  if (activados.length > 0) {
+    await fijarInicioBono(admin, activados[0].id as string, desdeDia, que === "tarifa" && termina === "tarifa" ? null : hastaFin);
+    if (nuncaCaduca) await admin.from("bonos").update({ caduca_en: null }).in("id", activados.map((b) => b.id));
+  }
+
+  let mensaje = `${que === "tarifa" ? `Tarifa «${nombreTarifa}» añadida` : "Regalo añadido"} sin cobrar.`;
+  if (activados.length > 0) mensaje += " Ya puede usarlo.";
+  if (enCola.length > 0) mensaje += " Ya tenía una tarifa activa de ese servicio, así que empezará cuando termine la actual.";
+  refrescarPantallas(userId);
+  revalidatePath(`/admin/usuarios/${userId}/pagos`);
+  return { mensaje };
+}
+
 // Quita una tarifa: el bono, lo que se hace con su pago y con sus clases reservadas, y si se quita el servicio.
 export async function quitarTarifa(_previo: Estado, formData: FormData): Promise<Estado> {
   const { user } = await requireAdmin("usuarios");

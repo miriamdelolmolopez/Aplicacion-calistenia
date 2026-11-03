@@ -25,6 +25,7 @@ import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
 import HistorialReservas from "./HistorialReservas";
+import AnadirSinCobrar from "./AnadirSinCobrar";
 import PanelActual from "./PanelActual";
 import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
 import CabeceraAdmin from "../../CabeceraAdmin";
@@ -465,6 +466,7 @@ export default async function FichaUsuario({
               <details className={estilos.accionDespliega}>
                 <summary>Editar servicios contratados</summary>
                 <div className={estilos.serviciosContratados}>
+                  <AnadirSinCobrar userId={p.id} tarifas={tarifasOpciones} hoy={hoy} />
                   {contratados.length === 0 && terminados.length === 0 && <p className={styles.ayuda}>Ahora mismo no tiene ningún servicio contratado.</p>}
                   {contratados.length === 0 && terminados.length > 0 && <p className={styles.ayuda}>No tiene ninguna tarifa activa. Aquí abajo puedes corregir las que han caducado o se han agotado.</p>}
                   {contratados.map((b) => (
