@@ -127,13 +127,25 @@ export async function anularPagoPersona(_previo: Estado, formData: FormData): Pr
   if (!UUID.test(userId) || !UUID.test(pagoId)) return { error: "No se ha encontrado ese pago." };
 
   const admin = createAdminClient();
-  const { data: p } = await admin.from("pagos").select("id, user_id").eq("id", pagoId).maybeSingle();
+  const { data: p } = await admin.from("pagos").select("id, user_id, bono_id").eq("id", pagoId).maybeSingle();
   if (!p || p.user_id !== userId) return { error: "No se ha encontrado ese pago." };
 
   const { error } = await admin.rpc("anular_pago", { p_pago: pagoId, p_nota: nota, p_admin: user.id });
   if (error) return { error: error.message };
+
+  // Si la tarifa de ese pago todavía no había empezado (está «en cola») y no le queda ningún otro pago vivo, se quita también:
+  // si no, se activaría sola más adelante y daría clases sin que haya un pago.
+  let quitada = false;
+  if (p.bono_id) {
+    const { data: bono } = await admin.from("bonos").select("estado").eq("id", p.bono_id).maybeSingle();
+    const { count: vivos } = await admin.from("pagos").select("id", { count: "exact", head: true }).eq("bono_id", p.bono_id).neq("estado", "anulado");
+    if (bono?.estado === "en_cola" && (vivos ?? 0) === 0) {
+      const { error: falloBono } = await admin.rpc("anular_bono", { p_bono: p.bono_id, p_nota: "Pago anulado: la tarifa no había empezado", p_admin: user.id });
+      quitada = !falloBono;
+    }
+  }
   refrescar(userId);
-  return { mensaje: "Pago anulado." };
+  return { mensaje: quitada ? "Pago anulado. Como su tarifa todavía no había empezado, también se ha quitado." : "Pago anulado." };
 }
 
 // «Nuevo manual»: un pago a mano (concepto e importe libres), con el mes al que corresponde y, si se quiere, sumar créditos o mover la fecha de fin de un bono.

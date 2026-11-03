@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { claveDia, sumarDias } from "@/lib/fechas";
 import { TITULAR } from "@/lib/legal";
 import { nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -53,7 +54,7 @@ export async function GET(peticion: Request, contexto: { params: Promise<{ id: s
   const signo = rectificativa ? -1 : 1;
   const [{ data: perfil }, { data: bono }, formas] = await Promise.all([
     admin.from("profiles").select("nombre, apellidos, dni, email, idioma").eq("id", pago.user_id).maybeSingle(),
-    pago.bono_id ? admin.from("bonos").select("tipos_bono(nombre, iva_porcentaje)").eq("id", pago.bono_id).maybeSingle() : Promise.resolve({ data: null }),
+    pago.bono_id ? admin.from("bonos").select("activo_desde, validez_dias, tipos_bono(nombre, iva_porcentaje)").eq("id", pago.bono_id).maybeSingle() : Promise.resolve({ data: null }),
     nombresFormas().catch(() => ({}) as Record<string, string>),
   ]);
   const idioma: "es" | "en" = perfil?.idioma === "en" ? "en" : "es";
@@ -67,6 +68,17 @@ export async function GET(peticion: Request, contexto: { params: Promise<{ id: s
   const concepto = tipo?.nombre ?? (pago.nota as string | null) ?? (es ? "Pago" : "Payment");
   const cliente = [perfil?.nombre, perfil?.apellidos].filter(Boolean).join(" ") || perfil?.email || "";
   const periodo = pago.periodo as string | null;
+  // Lo que cubre el pago: desde que empieza la tarifa hasta que se acaban los días que se pagan (los días de cortesía que se regalen después no cuentan).
+  const infoBono = bono as { activo_desde?: string | null; validez_dias?: number | null } | null;
+  const cubre =
+    infoBono?.activo_desde && infoBono.validez_dias
+      ? (() => {
+          const desde = claveDia(infoBono.activo_desde);
+          const hasta = sumarDias(desde, infoBono.validez_dias - 1);
+          const corta = (dia: string) => new Intl.DateTimeFormat(es ? "es-ES" : "en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" }).format(new Date(`${dia}T12:00:00Z`));
+          return `${corta(desde)} – ${corta(hasta)}`;
+        })()
+      : null;
   const conCliente = Math.abs(total) >= 40000;
 
   const pdf = await PDFDocument.create();
@@ -116,7 +128,8 @@ export async function GET(peticion: Request, contexto: { params: Promise<{ id: s
   }
   fila(es ? "Descripción" : "Description", concepto, true);
   fila(es ? "Fecha del pago" : "Payment date", fecha((pago.pagado_en as string | null) ?? (pago.creado_en as string)));
-  if (periodo && /^\d{4}-\d{2}$/.test(periodo)) fila(es ? "Corresponde a" : "Covers", `${MESES[idioma][Number(periodo.slice(5)) - 1]} ${periodo.slice(0, 4)}`);
+  if (cubre) fila(es ? "Cubre" : "Covers", cubre);
+  else if (periodo && /^[0-9]{4}-[0-9]{2}$/.test(periodo)) fila(es ? "Corresponde a" : "Covers", `${MESES[idioma][Number(periodo.slice(5)) - 1]} ${periodo.slice(0, 4)}`);
   fila(es ? "Forma de pago" : "Payment method", (formas as Record<string, string>)[pago.metodo as string] ?? (pago.metodo as string));
   y -= 6;
   linea();
