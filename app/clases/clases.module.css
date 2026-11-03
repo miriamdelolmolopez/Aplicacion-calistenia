@@ -456,3 +456,50 @@
   border-radius: 999px;
   cursor: pointer;
 }
+
+/* Quién ha cancelado: ✖ = le cuenta la clase, papelera = no le cuenta. Solo lo ven la administradora y el coach. */
+.canceladas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 6px;
+}
+
+.grupoCanceladas {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconoCancelada {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  color: var(--secundario, #888);
+  font-size: 0.8rem;
+}
+
+.iconoCancelada svg {
+  width: 15px;
+  height: 15px;
+}
+
+.miniCuadrado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 6px;
+  opacity: 0.85;
+  font-size: 0.7rem;
+}
+
+.miniCuadrado img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

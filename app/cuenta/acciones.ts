@@ -57,14 +57,15 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
     .select(
       "id, servicio, estado, clases_total, clases_restantes, activo_desde, caduca_en, tipos_bono(nombre), pagos(estado)",
     )
-    .in("estado", ["activo", "en_cola"])
+    .in("estado", ["activo", "en_cola", "agotado"])
     .order("creado_en");
 
-  const filas = (data ?? []) as unknown as Fila[];
-  // Primero el bono que se está gastando y luego los que esperan, por orden de compra.
-  const ordenados = [...filas].sort(
-    (a, b) => Number(b.estado === "activo") - Number(a.estado === "activo"),
-  );
+  // Un bono sin clases pero todavía dentro de sus fechas sigue siendo su tarifa: se enseña con 0 clases.
+  const ahora = new Date().toISOString();
+  const filas = ((data ?? []) as unknown as Fila[]).filter((b) => b.estado !== "agotado" || (b.caduca_en && b.caduca_en > ahora));
+  // Primero los bonos que se están usando y luego los que esperan, por orden de compra.
+  const rango = (e: string) => (e === "activo" ? 0 : e === "agotado" ? 1 : 2);
+  const ordenados = [...filas].sort((a, b) => rango(a.estado) - rango(b.estado));
 
   return ordenados.map((b) => ({
     id: b.id,

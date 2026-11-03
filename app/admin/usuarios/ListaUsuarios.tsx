@@ -20,7 +20,8 @@ export type Usuario = {
   clases_total: number;
   online_usados: number; // días que lleva de su plan online
   online_total: number;
-  etiquetas?: string[]; // tipos de cuenta que tiene (Administradora, Alumno/a, Coach…)
+  etiquetas?: string[];
+  tarifa_sin_clases: boolean; // tiene tarifa vigente pero ya ha gastado todas sus clases // tipos de cuenta que tiene (Administradora, Alumno/a, Coach…)
   foto: string | null;
   creado_en: string;
   ultima_conexion: string | null;
@@ -314,7 +315,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     </div>
                     <div className={estilos.tarifaCab}>
                       <span>TARIFA</span>
-                      <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? "Activa" : "Sin tarifa"}</span>
+                      <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? (u.tarifa_sin_clases ? "Vigente · sin clases" : "Activa") : "Sin tarifa"}</span>
                       {u.pendiente_cobro > 0 && <span className={estilos.sinPagar}>Sin pagar · {euros(u.pendiente_cobro)}</span>}
                     </div>
                     <div className={estilos.tarifaCaja}>

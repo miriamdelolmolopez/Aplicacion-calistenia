@@ -247,6 +247,8 @@ export default async function FichaUsuario({
   // Tarifa actual, lo que está en espera y si hay algo sin pagar.
   const activos = bonos.filter((b) => b.estado === "activo");
   const enEspera = bonos.filter((b) => b.estado === "en_cola");
+  // Bonos con todas las clases gastadas pero todavía dentro de sus fechas: la tarifa sigue vigente.
+  const vigentesSinClases = bonos.filter((b) => b.estado === "agotado" && b.caduca_en && b.caduca_en > ahora);
   const sinPagar = [...activos, ...enEspera].some((b) => b.pagos.some((x) => x.estado === "pendiente"));
 
   // Los periodos (compras de tarifa) con sus fechas, para la pestaña «Actual» y los filtros de «Reservas».
@@ -263,7 +265,8 @@ export default async function FichaUsuario({
     return {
       id: clave,
       nombre: bs[0].tipos_bono?.nombre ?? "Tarifa",
-      estado: bs.some((b) => b.estado === "activo") ? "activo" : bs.some((b) => b.estado === "en_cola") ? "en_cola" : "finalizado",
+      // «Actual» si algún bono está activo o si su tarifa sigue vigente aunque ya no queden clases.
+      estado: bs.some((b) => b.estado === "activo" || (b.estado === "agotado" && b.caduca_en && b.caduca_en > ahora)) ? "activo" : bs.some((b) => b.estado === "en_cola") ? "en_cola" : "finalizado",
       desde: desdes.length ? claveDia(desdes.sort()[0]) : null,
       hasta: hastas.length ? claveDia(hastas.sort().reverse()[0]) : null,
       pagado: bs.some((b) => b.pagos.some((x) => x.estado === "pagado")),
@@ -606,7 +609,11 @@ export default async function FichaUsuario({
                   {SERVICIOS[s] ?? s}
                 </span>
               ))}
-              {esAlumna && <span className={activos.length > 0 ? estilos.activa : estilos.sinTarifa}>{activos.length > 0 ? "Tarifa activa" : "Sin tarifa"}</span>}
+              {esAlumna && (
+                <span className={activos.length > 0 || vigentesSinClases.length > 0 ? estilos.activa : estilos.sinTarifa}>
+                  {activos.length > 0 ? "Tarifa activa" : vigentesSinClases.length > 0 ? "Vigente · sin clases" : "Sin tarifa"}
+                </span>
+              )}
               {esAlumna && sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
             </div>
             <div className={styles.ayuda} style={{ overflowWrap: "anywhere" }}>

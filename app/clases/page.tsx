@@ -16,6 +16,7 @@ import { useIdioma } from "../useIdioma";
 import { useNombresEn } from "../useNombresEn";
 import estilos from "./clases.module.css";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
+import { IconoPapelera } from "../admin/comunes/iconos";
 import CancelarClaseAdmin from "./CancelarClaseAdmin";
 import DatosTaller from "./DatosTaller";
 import ListaApuntados from "./ListaApuntados";
@@ -32,8 +33,10 @@ import {
   obtenerCoachesClases,
   soyCoach,
   reservarClase,
+  obtenerCanceladas,
   salirListaEspera,
   unirseListaEspera,
+  type CanceladaClase,
 } from "./acciones";
 import Cargando from "../Cargando";
 
@@ -129,7 +132,8 @@ async function obtenerDatos(): Promise<Datos> {
       : [];
 
   // Solo cuenta el bono de clases grupales (el plan online no tiene clases).
-  const activos = bonos.filter((b) => b.estado === "activo" && b.servicio !== "online");
+  // (un bono sin clases pero todavía vigente cuenta: la persona tiene tarifa, aunque con 0 clases)
+  const activos = bonos.filter((b) => (b.estado === "activo" || b.estado === "agotado") && b.servicio !== "online");
 
   return {
     sinEspera,
@@ -205,6 +209,27 @@ function PantallaClases() {
   const [extras, setExtras] = useState<Record<string, ExtraTaller>>({});
   const [coaches, setCoaches] = useState<Record<string, { coachId: string; nombre: string; foto: string | null }>>({});
   const [yo, setYo] = useState<{ id: string; esCoach: boolean }>({ id: "", esCoach: false });
+  // Quién ha cancelado cada clase (solo la ven la administradora y el coach de esa clase).
+  const [canceladas, setCanceladas] = useState<Record<string, CanceladaClase[]>>({});
+
+  // (se pide cuando se sabe quién es la persona y las clases que se ven)
+  const puedeVerCanceladas = datos?.rol === "admin" || yo.esCoach;
+  useEffect(() => {
+    if (!datos || !puedeVerCanceladas) return;
+    let vigente = true;
+    obtenerCanceladas([...datos.pasadas, ...datos.lista].map((c) => c.id)).then(async (r) => {
+      if (!vigente) return;
+      setCanceladas(r);
+      const ids = [...new Set(Object.values(r).flat().map((x) => x.userId))];
+      if (ids.length > 0) {
+        const f = await obtenerFotos(ids);
+        if (vigente) setFotos((previas) => ({ ...previas, ...f }));
+      }
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [datos, puedeVerCanceladas]);
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
   const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const fotosCards = useFotosCards();
@@ -284,7 +309,11 @@ function PantallaClases() {
 
   // El texto de un aviso, con la fecha o los números que lleve («caduca el {x}»…).
   const textoAviso = (a: Aviso) =>
-    a.dato ? t[a.clave].replace("{x}", a.dato.split("|")[0]).replace("{y}", a.dato.split("|")[1] ?? "") : t[a.clave].replace(" {x}", "");
+    a.dato
+      ? t[a.clave]
+          .replace("{x}", a.dato.split("|")[0])
+          .replace("{y}", (t as unknown as Record<string, string>)[`servicio_${a.dato.split("|")[1]}`] ?? a.dato.split("|")[1] ?? "")
+      : t[a.clave].replace(" {x}", "");
 
   const reservar = (c: Clase) =>
     ejecutar(c, () => reservarClase(c.id), () => (esInvitado ? "okReservadaPrueba" : "okReservada"), true);
@@ -592,6 +621,35 @@ function PantallaClases() {
                       {c.hay_espera > 0 && ` · ${t.listaEspera}: ${c.hay_espera}`}
                       {c.creditos > 1 && ` · ${idioma === "en" ? "uses" : "gasta"} ${c.creditos} ${idioma === "en" ? "credits" : "clases"}`}
                     </p>
+
+                    {(canceladas[c.id] ?? []).length > 0 && (
+                      <div className={estilos.canceladas}>
+                        {([true, false] as const).map((tarde) => {
+                          const grupo = (canceladas[c.id] ?? []).filter((x) => x.tarde === tarde);
+                          if (grupo.length === 0) return null;
+                          const explicacion = tarde
+                            ? idioma === "en" ? "Cancelled late: the class counts for them" : "Cancelaron tarde: la clase les cuenta"
+                            : idioma === "en" ? "Cancelled in time: the class is not counted" : "Cancelaron a tiempo: la clase no les cuenta";
+                          return (
+                            <span key={String(tarde)} className={estilos.grupoCanceladas} title={explicacion}>
+                              <span className={estilos.iconoCancelada} aria-label={explicacion} role="img">
+                                {tarde ? "✖" : <IconoPapelera />}
+                              </span>
+                              {grupo.map((x, n) => (
+                                <span key={`${x.userId}-${n}`} className={estilos.miniCuadrado} title={x.nombre}>
+                                  {fotos[x.userId] ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={fotos[x.userId]} alt={x.nombre} />
+                                  ) : (
+                                    <span className={estilos.iniciales}>{x.nombre.slice(0, 1)}</span>
+                                  )}
+                                </span>
+                              ))}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
                   </>
                 )}
 

@@ -192,7 +192,7 @@ export default function Inicio() {
 
   const secciones = seccionesDe(perfil);
   const esAdmin = perfil.rol === "admin";
-  const bonosClases = esAdmin ? [] : extra.bonos.filter((b) => b.servicio !== "online" && b.estado === "activo");
+  const bonosClases = esAdmin ? [] : extra.bonos.filter((b) => b.servicio !== "online" && (b.estado === "activo" || b.estado === "agotado"));
   const planOnlineBono = esAdmin ? undefined : extra.bonos.find((b) => b.servicio === "online" && b.estado === "activo");
 
   const frase = extra.frases[azar?.frase ?? 0];

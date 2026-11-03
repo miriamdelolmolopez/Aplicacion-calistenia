@@ -61,7 +61,9 @@ async function motivoTarifa(userId: string, sesionId: string, codigo: string): P
   }
   const ultimo = bonos[0];
   if (ultimo?.estado === "caducado") return { codigo: "tarifaCaducada", dato: ultimo.caduca_en ? fechaCorta(ultimo.caduca_en) : undefined };
-  if (ultimo?.estado === "agotado") return { codigo: "tarifaAgotada" };
+  // Sin clases de ese servicio pero con la tarifa todavía dentro de sus fechas (las de otro servicio sí se pueden reservar).
+  if (ultimo?.estado === "agotado" && ultimo.caduca_en && new Date(ultimo.caduca_en).getTime() > Date.now()) return { codigo: "tarifaAgotada", dato: `${fechaCorta(ultimo.caduca_en)}|${tipo.servicio}` };
+  if (ultimo?.estado === "agotado") return { codigo: "tarifaCaducada", dato: ultimo.caduca_en ? fechaCorta(ultimo.caduca_en) : undefined };
   return { codigo: "sinBono" };
 }
 
@@ -162,6 +164,39 @@ export async function obtenerCoachesClases(sesionIds: string[]): Promise<Record<
   const { data: firmadas } = await admin.storage.from("avatares").createSignedUrls((perfiles ?? []).map((p) => p.foto_path as string).filter(Boolean), 3600);
   const porCoach = new Map((perfiles ?? []).map((p) => [p.id as string, { nombre: (p.nombre as string | null) || "Coach", foto: p.foto_path ? (firmadas ?? []).find((x) => x.path === p.foto_path)?.signedUrl ?? null : null }]));
   return Object.fromEntries((sesiones ?? []).map((s) => [s.id as string, { coachId: s.coach_id as string, ...(porCoach.get(s.coach_id as string) ?? { nombre: "Coach", foto: null }) }]));
+}
+
+export type CanceladaClase = { userId: string; nombre: string; tarde: boolean };
+
+// Quién ha cancelado su reserva en cada clase. «tarde» = cancelada fuera de plazo: la clase le cuenta (no se le devuelve).
+// Solo lo ve la administradora y, de sus propias clases, el coach.
+export async function obtenerCanceladas(sesionIds: string[]): Promise<Record<string, CanceladaClase[]>> {
+  const user = await personaActual();
+  if (!user || sesionIds.length === 0) return {};
+  const admin = createAdminClient();
+  const { data: yo } = await admin.from("profiles").select("rol, es_coach").eq("id", user.id).maybeSingle();
+  if (yo?.rol !== "admin" && !yo?.es_coach) return {};
+
+  let consulta = admin.from("sesiones_clase").select("id").in("id", sesionIds.slice(0, 300)).eq("estado", "programada");
+  if (yo?.rol !== "admin") consulta = consulta.eq("coach_id", user.id);
+  const { data: sesiones } = await consulta;
+  const ids = (sesiones ?? []).map((s) => s.id as string);
+  if (ids.length === 0) return {};
+
+  const { data: reservas } = await admin
+    .from("reservas")
+    .select("sesion_id, user_id, estado, cancelada_en")
+    .in("sesion_id", ids)
+    .in("estado", ["cancelada", "cancelada_tarde"])
+    .order("cancelada_en");
+  const filas = (reservas ?? []) as { sesion_id: string; user_id: string; estado: string }[];
+  if (filas.length === 0) return {};
+  const { data: perfiles } = await admin.from("profiles").select("id, nombre, apellidos").in("id", [...new Set(filas.map((f) => f.user_id))]);
+  const nombres = new Map((perfiles ?? []).map((p) => [p.id as string, [p.nombre, p.apellidos].filter(Boolean).join(" ") || "—"]));
+
+  const salida: Record<string, CanceladaClase[]> = {};
+  for (const f of filas) (salida[f.sesion_id] ??= []).push({ userId: f.user_id, nombre: nombres.get(f.user_id) ?? "—", tarde: f.estado === "cancelada_tarde" });
+  return salida;
 }
 
 // Si la persona que llama es coach (y su id).

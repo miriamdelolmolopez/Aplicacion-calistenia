@@ -11,7 +11,7 @@ import { euros } from "@/lib/formato";
 
 export const metadata = { title: "Usuarios · Administración" };
 
-type Fila = Omit<Usuario, "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" | "pendiente_cobro" | "clases_usadas" | "clases_total" | "online_usados" | "online_total"> & { foto_path: string | null };
+type Fila = Omit<Usuario, "tarifa_sin_clases" | "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" | "pendiente_cobro" | "clases_usadas" | "clases_total" | "online_usados" | "online_total"> & { foto_path: string | null };
 
 export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string; archivadas?: string }> }) {
   const { nuevo, archivadas } = await searchParams;
@@ -85,6 +85,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
   const periodoDe = new Map<string, { desde: string | null; hasta: string | null }>();
   const clasesDe = new Map<string, { usadas: number; total: number }>();
   const onlineDe = new Map<string, { usados: number; total: number }>();
+  const conClasesDe = new Set<string>(); // personas con algún bono al que todavía le quedan clases
   const ahoraMs = new Date().getTime();
   for (const b of (bonosActivos ?? []) as unknown as { user_id: string; servicio: string; estado: string; clases_total: number; clases_restantes: number; activo_desde: string | null; caduca_en: string | null; tipos_bono: { nombre: string } | null }[]) {
     // Un bono agotado que todavía está dentro de su fecha cuenta para las clases que lleva, pero no es una tarifa activa.
@@ -101,8 +102,10 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
       const antes = clasesDe.get(b.user_id) ?? { usadas: 0, total: 0 };
       clasesDe.set(b.user_id, { usadas: antes.usadas + (b.clases_total - b.clases_restantes), total: antes.total + b.clases_total });
     }
-    if (b.estado !== "activo" || !b.tipos_bono) continue;
-    tarifasDe.set(b.user_id, [...(tarifasDe.get(b.user_id) ?? []), b.tipos_bono.nombre]);
+    // Una tarifa con todas las clases gastadas pero todavía dentro de sus fechas sigue vigente: cuenta como tarifa de la persona.
+    if (!b.tipos_bono) continue;
+    if (b.estado === "activo") conClasesDe.add(b.user_id);
+    if (!(tarifasDe.get(b.user_id) ?? []).includes(b.tipos_bono.nombre)) tarifasDe.set(b.user_id, [...(tarifasDe.get(b.user_id) ?? []), b.tipos_bono.nombre]);
     const actual = periodoDe.get(b.user_id) ?? { desde: null, hasta: null };
     periodoDe.set(b.user_id, {
       desde: b.activo_desde && (!actual.desde || b.activo_desde < actual.desde) ? b.activo_desde : actual.desde,
@@ -139,6 +142,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
   const usuarios: Usuario[] = filas.map(({ foto_path, ...resto }) => ({
     ...resto,
     etiquetas: etiquetasDe(resto.id, resto.rol),
+    tarifa_sin_clases: (tarifasDe.get(resto.id) ?? []).length > 0 && !conClasesDe.has(resto.id),
     clases_usadas: clasesDe.get(resto.id)?.usadas ?? 0,
     clases_total: clasesDe.get(resto.id)?.total ?? 0,
     online_usados: onlineDe.get(resto.id)?.usados ?? 0,
