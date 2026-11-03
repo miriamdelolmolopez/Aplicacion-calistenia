@@ -21,6 +21,7 @@ export type Usuario = {
   online_usados: number; // días que lleva de su plan online
   online_total: number;
   etiquetas?: string[];
+  sueltas: number; // clases sueltas (regalos) que le quedan, aparte de su tarifa
   tarifa_sin_clases: boolean; // tiene tarifa vigente pero ya ha gastado todas sus clases // tipos de cuenta que tiene (Administradora, Alumno/a, Coach…)
   foto: string | null;
   creado_en: string;
@@ -302,6 +303,11 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                             {u.clases_usadas}/{u.clases_total}
                           </b>{" "}
                           clases
+                        </span>
+                      )}
+                      {u.sueltas > 0 && (
+                        <span>
+                          <b>+{u.sueltas}</b> {u.sueltas === 1 ? "suelta" : "sueltas"}
                         </span>
                       )}
                       {u.servicios.includes("online") && (

@@ -32,7 +32,53 @@ function mesesDe(desde: string, hasta: string): string[] {
 }
 
 // Pestaña «Actual»: la tarifa de la persona (la actual o cualquiera anterior), cuánto lleva gastado de cada servicio y su calendario.
-export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: { periodos: Periodo[]; reservas: ReservaFila[]; tipos: TipoClaseChip[]; userId: string; hoy: string }) {
+// Clases o días sueltos (regalos, favores…): van aparte de la tarifa, con su motivo.
+function Sueltas({ sueltos }: { sueltos: Periodo[] }) {
+  const vivos = sueltos.filter((s) => s.bonos.some((b) => b.restantes > 0 && b.estado !== "caducado"));
+  const usados = sueltos.filter((s) => !vivos.includes(s));
+  if (sueltos.length === 0) return null;
+  const texto = (s: Periodo) => {
+    const b = s.bonos[0];
+    const unidad = b.servicio === "online" ? "días" : b.total === 1 ? "clase" : "clases";
+    return `${b.restantes} de ${b.total} ${unidad}`;
+  };
+  return (
+    <section className={styles.tarjeta}>
+      <h3 style={{ margin: 0 }}>Clases sueltas</h3>
+      {vivos.length === 0 && <p className={styles.ayuda}>Ahora no le quedan clases sueltas.</p>}
+      <ul className={styles.lista}>
+        {vivos.map((s) => {
+          const b = s.bonos[0];
+          return (
+            <li key={s.id}>
+              <strong>{NOMBRE_SERVICIO[b.servicio] ?? b.servicio}</strong> · le quedan {texto(s)}
+              {s.motivo ? ` · ${s.motivo}` : ""} · dadas el {dmy(s.dado)} ·{" "}
+              {s.sinCaducidad ? "no caducan" : s.hasta ? `hasta el ${dmy(s.hasta)}` : ""}{" "}
+              <span className={estilos.activa}>{b.estado === "activo" ? "En uso" : "Se usan cuando termine la tarifa"}</span>
+            </li>
+          );
+        })}
+      </ul>
+      {usados.length > 0 && (
+        <details>
+          <summary>Ya usadas ({usados.length})</summary>
+          <ul className={styles.lista}>
+            {usados.map((s) => (
+              <li key={s.id}>
+                {NOMBRE_SERVICIO[s.bonos[0].servicio] ?? s.bonos[0].servicio} · {s.bonos[0].total} dadas el {dmy(s.dado)}
+                {s.motivo ? ` · ${s.motivo}` : ""}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  );
+}
+
+export default function PanelActual({ periodos: todos, reservas, tipos, userId, hoy }: { periodos: Periodo[]; reservas: ReservaFila[]; tipos: TipoClaseChip[]; userId: string; hoy: string }) {
+  const periodos = todos.filter((x) => !x.suelto);
+  const sueltos = todos.filter((x) => x.suelto);
   const ordenados = [...periodos].sort((a, b) => (b.desde ?? "").localeCompare(a.desde ?? ""));
   const consulta = ordenados.filter((p) => p.estado !== "en_cola");
   const proximas = ordenados.filter((p) => p.estado === "en_cola");
@@ -41,6 +87,7 @@ export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: 
 
   if (!p) {
     return (
+      <>
       <section className={styles.tarjeta}>
         <h2>Tarifa actual</h2>
         <p className={styles.ayuda}>No tiene ninguna tarifa activa.</p>
@@ -50,6 +97,8 @@ export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: 
           </p>
         ))}
       </section>
+      <Sueltas sueltos={sueltos} />
+      </>
     );
   }
 
@@ -156,6 +205,8 @@ export default function PanelActual({ periodos, reservas, tipos, userId, hoy }: 
           <CalendarioReservas meses={mesesDe(p.desde, hastaCalendario)} eventos={eventos} userId={userId} hoy={hoy} desde={p.desde} hasta={hastaCalendario} />
         </section>
       )}
+
+      <Sueltas sueltos={sueltos} />
 
       {proximas.length > 0 && (
         <section className={styles.tarjeta}>

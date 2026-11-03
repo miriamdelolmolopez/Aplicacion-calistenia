@@ -8,10 +8,11 @@ import NuevoUsuario, { type DescuentoOpcion, type TarifaOpcion } from "./NuevoUs
 import CabeceraAdmin from "../CabeceraAdmin";
 import { claveDia, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
+import { esSuelto, nombreVisible } from "@/lib/regalos";
 
 export const metadata = { title: "Usuarios · Administración" };
 
-type Fila = Omit<Usuario, "tarifa_sin_clases" | "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" | "pendiente_cobro" | "clases_usadas" | "clases_total" | "online_usados" | "online_total"> & { foto_path: string | null };
+type Fila = Omit<Usuario, "tarifa_sin_clases" | "sueltas" | "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" | "pendiente_cobro" | "clases_usadas" | "clases_total" | "online_usados" | "online_total"> & { foto_path: string | null };
 
 export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string; archivadas?: string }> }) {
   const { nuevo, archivadas } = await searchParams;
@@ -80,7 +81,8 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
   const { data: bonosActivos } = await createAdminClient()
     .from("bonos")
     .select("user_id, servicio, estado, clases_total, clases_restantes, activo_desde, caduca_en, tipos_bono(nombre)")
-    .in("estado", ["activo", "agotado"]);
+    .in("estado", ["activo", "agotado", "en_cola"]);
+  const sueltasDe = new Map<string, number>(); // clases sueltas (regalos) que le quedan, aparte de la tarifa
   const tarifasDe = new Map<string, string[]>();
   const periodoDe = new Map<string, { desde: string | null; hasta: string | null }>();
   const clasesDe = new Map<string, { usadas: number; total: number }>();
@@ -88,6 +90,17 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
   const conClasesDe = new Set<string>(); // personas con algún bono al que todavía le quedan clases
   const ahoraMs = new Date().getTime();
   for (const b of (bonosActivos ?? []) as unknown as { user_id: string; servicio: string; estado: string; clases_total: number; clases_restantes: number; activo_desde: string | null; caduca_en: string | null; tipos_bono: { nombre: string } | null }[]) {
+    // Las clases sueltas van aparte de la tarifa: se cuentan solas y no entran en sus clases usadas/total.
+    if (esSuelto(b.tipos_bono?.nombre)) {
+      if (b.estado !== "agotado" && b.clases_restantes > 0) {
+        sueltasDe.set(b.user_id, (sueltasDe.get(b.user_id) ?? 0) + b.clases_restantes);
+        if (b.estado === "activo") conClasesDe.add(b.user_id);
+        const nombre = nombreVisible(b.tipos_bono?.nombre);
+        if (!(tarifasDe.get(b.user_id) ?? []).includes(nombre)) tarifasDe.set(b.user_id, [...(tarifasDe.get(b.user_id) ?? []), nombre]);
+      }
+      continue;
+    }
+    if (b.estado === "en_cola") continue;
     // Un bono agotado que todavía está dentro de su fecha cuenta para las clases que lleva, pero no es una tarifa activa.
     if (b.estado === "agotado" && !(b.caduca_en && new Date(b.caduca_en).getTime() > ahoraMs)) continue;
     if (b.servicio === "online") {
@@ -142,6 +155,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
   const usuarios: Usuario[] = filas.map(({ foto_path, ...resto }) => ({
     ...resto,
     etiquetas: etiquetasDe(resto.id, resto.rol),
+    sueltas: sueltasDe.get(resto.id) ?? 0,
     tarifa_sin_clases: (tarifasDe.get(resto.id) ?? []).length > 0 && !conClasesDe.has(resto.id),
     clases_usadas: clasesDe.get(resto.id)?.usadas ?? 0,
     clases_total: clasesDe.get(resto.id)?.total ?? 0,

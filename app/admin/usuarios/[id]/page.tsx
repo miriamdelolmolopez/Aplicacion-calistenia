@@ -25,6 +25,7 @@ import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
 import HistorialReservas from "./HistorialReservas";
+import { esSuelto, nombreVisible } from "@/lib/regalos";
 import AnadirSinCobrar from "./AnadirSinCobrar";
 import PanelActual from "./PanelActual";
 import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
@@ -71,6 +72,7 @@ type Bono = {
   activo_desde: string | null;
   caduca_en: string | null;
   creado_en: string;
+  sin_caducidad: boolean;
   tipos_bono: { nombre: string } | null;
   pagos: { importe_centimos: number; estado: string; metodo: string; descuento_centimos: number }[];
 };
@@ -154,12 +156,18 @@ export default async function FichaUsuario({
   const { data: bonosDatos } = await supabase
     .from("bonos")
     .select(
-      "id, servicio, estado, tipo_bono_id, clases_total, clases_restantes, activo_desde, caduca_en, creado_en, tipos_bono(nombre), pagos(importe_centimos, estado, metodo, descuento_centimos)",
+      "id, servicio, estado, tipo_bono_id, clases_total, clases_restantes, activo_desde, caduca_en, creado_en, sin_caducidad, tipos_bono(nombre), pagos(importe_centimos, estado, metodo, descuento_centimos)",
     )
     .eq("user_id", id)
     .order("creado_en", { ascending: false });
   const asistencia = asistenciaDatos as Asistencia;
   const bonos = (bonosDatos ?? []) as unknown as Bono[];
+  // Motivo con el que se dio cada bono de clases sueltas (está en su alta del historial).
+  const idsSueltos = bonos.filter((b) => esSuelto(b.tipos_bono?.nombre)).map((b) => b.id);
+  const { data: altasSueltos } = idsSueltos.length
+    ? await admin.from("movimientos_bono").select("bono_id, nota").eq("tipo", "alta").in("bono_id", idsSueltos)
+    : { data: [] as { bono_id: string; nota: string | null }[] };
+  const motivoDe = new Map((altasSueltos ?? []).map((m) => [m.bono_id as string, String(m.nota ?? "").replace(/^Regalo:?\s*/, "").trim()]));
 
   const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string }[];
 
@@ -215,7 +223,7 @@ export default async function FichaUsuario({
   }
   const paraAsistente = (b: Bono): BonoAsistente => ({
     id: b.id,
-    nombre: b.tipos_bono?.nombre ?? "Tarifa",
+    nombre: nombreVisible(b.tipos_bono?.nombre) || "Tarifa",
     tipoId: b.tipo_bono_id,
     servicio: b.servicio,
     estado: b.estado,
@@ -253,7 +261,7 @@ export default async function FichaUsuario({
   const sinPagar = [...activos, ...enEspera].some((b) => b.pagos.some((x) => x.estado === "pendiente"));
 
   // Los periodos (compras de tarifa) con sus fechas, para la pestaña «Actual» y los filtros de «Reservas».
-  const nombreDeBono = new Map(bonos.map((b) => [b.id, b.tipos_bono?.nombre ?? "Tarifa"]));
+  const nombreDeBono = new Map(bonos.map((b) => [b.id, nombreVisible(b.tipos_bono?.nombre) || "Tarifa"]));
   const compras = new Map<string, Bono[]>();
   for (const b of bonos) {
     if (b.estado === "anulado") continue;
@@ -265,7 +273,11 @@ export default async function FichaUsuario({
     const hastas = bs.map((b) => b.caduca_en).filter((x): x is string => !!x);
     return {
       id: clave,
-      nombre: bs[0].tipos_bono?.nombre ?? "Tarifa",
+      nombre: nombreVisible(bs[0].tipos_bono?.nombre) || "Tarifa",
+      suelto: esSuelto(bs[0].tipos_bono?.nombre),
+      motivo: motivoDe.get(bs[0].id) || null,
+      sinCaducidad: bs.every((b) => b.sin_caducidad),
+      dado: claveDia(bs[0].creado_en),
       // «Actual» si algún bono está activo o si su tarifa sigue vigente aunque ya no queden clases.
       estado: bs.some((b) => b.estado === "activo" || (b.estado === "agotado" && b.caduca_en && b.caduca_en > ahora)) ? "activo" : bs.some((b) => b.estado === "en_cola") ? "en_cola" : "finalizado",
       desde: desdes.length ? claveDia(desdes.sort()[0]) : null,
@@ -473,7 +485,7 @@ export default async function FichaUsuario({
                     <article key={b.id} className={estilos.histCard}>
                       <div className={estilos.histCabecera}>
                         <div>
-                          <strong>{b.tipos_bono?.nombre}</strong>
+                          <strong>{nombreVisible(b.tipos_bono?.nombre)}</strong>
                           <div className={styles.ayuda}>{detalleBono(b)}</div>
                         </div>
                         <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
@@ -487,7 +499,7 @@ export default async function FichaUsuario({
                     <article key={b.id} className={estilos.histCard}>
                       <div className={estilos.histCabecera}>
                         <div>
-                          <strong>{b.tipos_bono?.nombre}</strong>
+                          <strong>{nombreVisible(b.tipos_bono?.nombre)}</strong>
                           <div className={styles.ayuda}>{detalleBono(b)}</div>
                         </div>
                         <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
@@ -523,7 +535,7 @@ export default async function FichaUsuario({
                 <article key={b.id} className={estilos.histCard}>
                   <div className={estilos.histCabecera}>
                     <div>
-                      <strong>{b.tipos_bono?.nombre}</strong>
+                      <strong>{nombreVisible(b.tipos_bono?.nombre)}</strong>
                       <div className={styles.ayuda}>{detalleBono(b)}</div>
                       {pago && (
                         <div className={styles.ayuda}>

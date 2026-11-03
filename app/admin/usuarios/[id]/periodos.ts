@@ -11,6 +11,10 @@ export type Periodo = {
   hasta: string | null; // AAAA-MM-DD
   pagado: boolean;
   pendiente: boolean;
+  suelto: boolean; // clases o días sueltos (regalo), aparte de la tarifa
+  motivo: string | null; // por qué se dieron (solo sueltos)
+  sinCaducidad: boolean;
+  dado: string; // día en que se creó
   bonos: PeriodoBono[];
 };
 

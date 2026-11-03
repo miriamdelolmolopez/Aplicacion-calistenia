@@ -1,5 +1,6 @@
 "use client";
 
+import { esSuelto, nombreVisible } from "@/lib/regalos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -297,7 +298,7 @@ export default function Inicio() {
             <section key={b.id} className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
                 <span className={clay.eyebrow}>{t.tuBono}</span>
-                <h3 className={clay.progresoNombre}>{tr(b.nombre)}</h3>
+                <h3 className={clay.progresoNombre}>{esSuelto(b.nombre) ? nombreVisible(b.nombre, idioma) : tr(b.nombre)}</h3>
                 <div className={clay.metaFila}>
                   <span className={clay.metaChip}>
                     <IconoCorona />
@@ -338,7 +339,7 @@ export default function Inicio() {
             <section className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
                 <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
-                <h3 className={clay.progresoNombre}>{tr(planOnlineBono.nombre)}</h3>
+                <h3 className={clay.progresoNombre}>{esSuelto(planOnlineBono.nombre) ? nombreVisible(planOnlineBono.nombre, idioma) : tr(planOnlineBono.nombre)}</h3>
                 <div className={clay.metaFila}>
                   {porEntrenos && (
                     <span className={clay.metaChip}>

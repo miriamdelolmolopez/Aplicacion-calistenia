@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { instanteMadrid } from "@/lib/fechas";
 import { aCentimos } from "@/lib/formato";
+import { esSuelto } from "@/lib/regalos";
 import { formaActiva } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Estado } from "../acciones";
@@ -88,18 +89,47 @@ export async function ajustarBono(_previo: Estado, formData: FormData): Promise<
   if (clases === 0 && dias === 0) return { error: "No has cambiado nada." };
   if (Math.abs(clases) > 50 || Math.abs(dias) > 365) return { error: "Cantidad demasiado grande." };
 
-  const { error: fallo } = await createAdminClient().rpc("ajustar_bono", {
-    p_bono: String(formData.get("bonoId") ?? ""),
-    p_clases: clases,
-    p_dias: dias,
-    p_nota: nota,
-    p_admin: user.id,
-  });
-  if (fallo) return error(fallo.message);
+  const admin = createAdminClient();
+  const bonoId = String(formData.get("bonoId") ?? "");
+
+  // Sumar clases NO toca la tarifa: se crean como clases sueltas aparte (sin caducidad), con su motivo.
+  let sueltas = false;
+  let paraTarifa = clases;
+  if (clases > 0) {
+    const { data: bono } = await admin.from("bonos").select("user_id, servicio, nota, tipos_bono(nombre)").eq("id", bonoId).maybeSingle();
+    const tipo = (bono?.tipos_bono as unknown as { nombre: string } | null)?.nombre;
+    if (bono && !esSuelto(tipo)) {
+      if (bono.servicio === "online") return { error: "Los días online sueltos se dan desde «+ Añadir tarifa o regalo (sin cobrar)» en la ficha de la persona." };
+      const { data: tipoRegalo } = await admin.from("tipos_bono").select("id").eq("nombre", `Regalo · ${bono.servicio}`).maybeSingle();
+      if (!tipoRegalo) return { error: "Faltan los tipos de regalo en la base de datos (archivo 074)." };
+      const { data: nuevo, error: falloAlta } = await admin
+        .from("bonos")
+        .insert({ user_id: bono.user_id, tipo_bono_id: tipoRegalo.id, servicio: bono.servicio, clases_total: clases, clases_restantes: clases, validez_dias: 1095, nota: "Regalo", sin_caducidad: true })
+        .select("id")
+        .single();
+      if (falloAlta || !nuevo) return error(falloAlta?.message);
+      await admin.from("movimientos_bono").insert({ bono_id: nuevo.id, tipo: "alta", clases, nota: `Regalo${nota ? ": " + nota : ""}`, creado_por: user.id });
+      await admin.rpc("refrescar_bonos", { p_user: bono.user_id });
+      await admin.from("bonos").update({ caduca_en: null }).eq("id", nuevo.id);
+      sueltas = true;
+      paraTarifa = 0;
+    }
+  }
+
+  if (paraTarifa !== 0 || dias !== 0) {
+    const { error: fallo } = await admin.rpc("ajustar_bono", {
+      p_bono: bonoId,
+      p_clases: paraTarifa,
+      p_dias: dias,
+      p_nota: nota,
+      p_admin: user.id,
+    });
+    if (fallo) return error(fallo.message);
+  }
 
   revalidatePath("/admin/bonos");
   revalidatePath("/admin/usuarios", "layout");
-  return { mensaje: "Ajuste guardado." };
+  return { mensaje: sueltas ? `Añadidas ${clases} ${clases === 1 ? "clase suelta" : "clases sueltas"}, aparte de su tarifa.` : "Ajuste guardado." };
 }
 
 export async function anularBono(_previo: Estado, formData: FormData): Promise<Estado> {

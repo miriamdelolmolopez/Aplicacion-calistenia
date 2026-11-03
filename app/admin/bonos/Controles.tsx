@@ -204,11 +204,11 @@ export function EditorBono({ bonoId, anulado, sinAnular = false }: { bonoId: str
       <form action={accionAjuste} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <p className={styles.ayuda}>
-          Escribe un número positivo para sumar y negativo para quitar. Déjalo en 0 si no
-          cambia.
+          Un número positivo añade clases sueltas aparte (sin caducidad), sin tocar esta tarifa; uno negativo quita
+          clases de esta tarifa. Déjalo en 0 si no cambia.
         </p>
         <div className={styles.campo}>
-          <label htmlFor={`cl-${bonoId}`}>Clases (+ o −) <AyudaI texto="Cuántas clases sumar (número positivo) o quitar (negativo) al bono. Con 0 no cambia." /></label>
+          <label htmlFor={`cl-${bonoId}`}>Clases (+ o −) <AyudaI texto="Positivo: se añaden como clases sueltas aparte de la tarifa (por ejemplo, un regalo de cumpleaños). Negativo: se quitan de esta tarifa. Con 0 no cambia." /></label>
           <input id={`cl-${bonoId}`} name="clases" type="number" step={1} defaultValue={0} />
         </div>
         <div className={styles.campo}>
