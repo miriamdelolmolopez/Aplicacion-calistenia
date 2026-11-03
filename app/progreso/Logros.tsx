@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BarrasColores, PALETA, TarjetaCifra } from "../admin/informes/GraficosPagos";
 import { useIdioma } from "../useIdioma";
+import { useNombresEn } from "../useNombresEn";
 import { colorDeTipo } from "@/lib/colores";
 import { fechaCorta } from "@/lib/fechas";
 import { calcularLogros, type Logros as DatosLogros, type ReservaLogro } from "@/lib/logros";
@@ -60,6 +61,7 @@ function textos(idioma: "es" | "en", admin: boolean) {
 // Logros de una persona. userId: la ficha de Miriam; sin userId, la propia persona. El % de asistencia solo lo ve Miriam.
 export default function Logros({ userId, admin = false }: { userId?: string; admin?: boolean }) {
   const [idioma] = useIdioma();
+  const tr = useNombresEn();
   const t = textos(idioma, admin);
   const dias = DIAS[idioma];
   const [datos, setDatos] = useState<DatosLogros | null>(null);
@@ -136,7 +138,7 @@ export default function Logros({ userId, admin = false }: { userId?: string; adm
 
           <div className={estilos.bloque}>
             <h3 className={estilos.subtitulo}>{t.porTipo}</h3>
-            <BarrasColores formato={String} filas={l.porTipo.map((x, i) => ({ texto: x.tipo, valor: x.clases, color: x.color ?? PALETA[i % PALETA.length] }))} />
+            <BarrasColores formato={String} filas={l.porTipo.map((x, i) => ({ texto: tr(x.tipo), valor: x.clases, color: x.color ?? PALETA[i % PALETA.length] }))} />
           </div>
           <div className={estilos.bloque}>
             <h3 className={estilos.subtitulo}>{t.porDia}</h3>

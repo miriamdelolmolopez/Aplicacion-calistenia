@@ -697,7 +697,7 @@ export default function Clases() {
 
       {saberMas && (
         <SaberMas
-          titulo={saberMas}
+          titulo={tr(saberMas)}
           descripcion={(idioma === "en" ? descripciones[saberMas]?.en : null) || descripciones[saberMas]?.es || null}
           idioma={idioma}
           alCerrar={() => setSaberMas(null)}

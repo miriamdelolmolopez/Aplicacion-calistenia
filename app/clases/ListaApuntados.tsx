@@ -1,5 +1,6 @@
 "use client";
 
+import { useNombresEn } from "../useNombresEn";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
@@ -20,6 +21,7 @@ export default function ListaApuntados({
   alCerrar: () => void;
   soloCoach?: boolean; // un coach no ve los pagos ni el perfil de las personas
 }) {
+  const tr = useNombresEn();
   const [lista, setLista] = useState<Apuntado[] | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [trabajando, setTrabajando] = useState<string | null>(null);
@@ -48,11 +50,11 @@ export default function ListaApuntados({
 
   return (
     <div className={estilos.capa} onClick={alCerrar}>
-      <div className={estilos.panel} role="dialog" aria-modal="true" aria-label={clase.tipo} onClick={(e) => e.stopPropagation()}>
+      <div className={estilos.panel} role="dialog" aria-modal="true" aria-label={tr(clase.tipo)} onClick={(e) => e.stopPropagation()}>
         <button type="button" className={estilos.cerrar} aria-label="Cerrar" onClick={alCerrar}>
           ✕
         </button>
-        <h2>{clase.tipo}</h2>
+        <h2>{tr(clase.tipo)}</h2>
         <p className={estilos.sub}>
           {textoHora(clase.empieza_en)} · {lista === null ? "…" : `${lista.length} ${lista.length === 1 ? "persona apuntada" : "personas apuntadas"}`}
         </p>

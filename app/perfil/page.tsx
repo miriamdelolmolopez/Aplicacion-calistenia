@@ -12,6 +12,7 @@ import Anillo from "../ui/Anillo";
 import AvisoVistaAlumna from "../AvisoVistaAlumna";
 import vistaEstilos from "../vistaAlumna.module.css";
 import { useIdioma } from "../useIdioma";
+import { useNombresEn } from "../useNombresEn";
 import { useMiPerfil, cambiarVistaAlumna } from "../useMiPerfil";
 import estilos from "./perfil.module.css";
 import { obtenerFotos, quitarFoto, subirFoto } from "./acciones";
@@ -73,6 +74,7 @@ const DIA = 24 * 60 * 60 * 1000;
 
 export default function Perfil() {
   const [idioma] = useIdioma();
+  const tr = useNombresEn();
   const t = textosPerfil[idioma];
   const mi = useMiPerfil();
   const [datos, setDatos] = useState<Datos | null>(null);
@@ -148,7 +150,7 @@ export default function Perfil() {
             {!activo && `${t.siguiente}: `}
             {nombreServicio(b.servicio)}
           </span>
-          <h3 className={clay.progresoNombre}>{b.nombre || nombreServicio(b.servicio)}</h3>
+          <h3 className={clay.progresoNombre}>{b.nombre ? tr(b.nombre) : nombreServicio(b.servicio)}</h3>
           <div className={clay.metaFila}>
             <span className={clay.metaChip}>
               <IconoCorona />
