@@ -122,7 +122,7 @@ export default async function FichaUsuario({
     admin.auth.admin.getUserById(id),
     supabase.rpc("asistencia_usuario", { p_user: id }),
     supabase.from("notas_usuario").select("texto").eq("user_id", id).maybeSingle(),
-    admin.from("profiles").select("avisos_reserva, avisos_recordatorio, avisos_bono, avisos_novedades, avisar_cumple").eq("id", id).maybeSingle(),
+    admin.from("profiles").select("avisos_reserva, avisos_recordatorio, avisos_bono, avisos_novedades, avisar_cumple, avisos_cancelacion, avisos_bono_clases, avisos_inactividad, avisos_cumpleanos").eq("id", id).maybeSingle(),
     // Cuántos textos legales ha aceptado (el listado completo está en su propia pantalla).
     admin.from("consentimientos").select("tipo, version, aceptado_en").eq("user_id", id).order("aceptado_en", { ascending: false }),
     supabase.from("intentos_examen").select("id, aciertos, total, creado_en").eq("user_id", id).order("creado_en", { ascending: false }).limit(50),
@@ -534,8 +534,10 @@ export default async function FichaUsuario({
                 avisos_reserva: avisosPersona?.avisos_reserva ?? true,
                 avisos_recordatorio: avisosPersona?.avisos_recordatorio ?? true,
                 avisos_bono: avisosPersona?.avisos_bono ?? true,
-                avisos_novedades: avisosPersona?.avisos_novedades ?? true,
-                avisar_cumple: avisosPersona?.avisar_cumple ?? true,
+                avisos_cancelacion: avisosPersona?.avisos_cancelacion ?? true,
+                avisos_bono_clases: avisosPersona?.avisos_bono_clases ?? true,
+                avisos_inactividad: avisosPersona?.avisos_inactividad ?? true,
+                avisos_cumpleanos: avisosPersona?.avisos_cumpleanos ?? true,
               }}
             />
           </section>

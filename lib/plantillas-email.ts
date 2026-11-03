@@ -92,6 +92,29 @@ export function correoReserva(p: { para: string; idioma: Idioma; nombrePersona: 
   return { para: p.para, asunto: `${titulo} · ${clase.nombre}`, ...m };
 }
 
+// Confirmación de que la persona ha cancelado su reserva (opcional).
+export function correoCancelacionAlumno(p: { para: string; idioma: Idioma; nombrePersona: string; clase: ClaseInfo; devuelta: boolean }): Correo {
+  const en = p.idioma === "en";
+  const cuando = fechaHora(p.clase.empieza_en, p.idioma);
+  const titulo = en ? "Booking cancelled" : "Reserva cancelada";
+  const m = marco({
+    idioma: p.idioma,
+    titulo,
+    parrafos: [
+      en ? `You have cancelled your booking for <strong>${escapar(p.clase.nombre)}</strong> · <strong>${cuando}</strong>.` : `Has cancelado tu reserva de <strong>${escapar(p.clase.nombre)}</strong> · <strong>${cuando}</strong>.`,
+      p.devuelta
+        ? en
+          ? "The class has been returned to your pass."
+          : "Te hemos devuelto la clase a tu tarifa."
+        : en
+          ? "As it was cancelled outside the cancellation period, the class is not returned."
+          : "Como la cancelaste fuera del plazo de cancelación, la clase no se devuelve.",
+    ],
+    boton: { texto: abrir(p.idioma), ruta: "/clases" },
+  });
+  return { para: p.para, asunto: `${titulo} · ${p.clase.nombre}`, ...m };
+}
+
 export function correoPlazaLiberada(p: { para: string; idioma: Idioma; nombrePersona: string; clase: ClaseInfo; horasPrioridad: number }): Correo {
   const { idioma, clase } = p;
   const cuando = escapar(fechaHora(clase.empieza_en, idioma));

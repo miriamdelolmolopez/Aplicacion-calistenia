@@ -1,6 +1,6 @@
 import "server-only";
 import { enviarCorreo } from "./email";
-import {
+import { correoCancelacionAlumno,
   correoCancelacionParaAdmin,
   correoClaseCancelada,
   correoMinimoNoAlcanzado,
@@ -27,6 +27,10 @@ export type Persona = {
   avisos_bono: boolean;
   avisos_recordatorio: boolean;
   avisos_novedades: boolean;
+  avisos_cancelacion: boolean;
+  avisos_bono_clases: boolean;
+  avisos_inactividad: boolean;
+  avisos_cumpleanos: boolean;
 };
 
 type Clase = {
@@ -43,11 +47,15 @@ export const enviable = (email: string | null): email is string =>
 
 export async function personas(ids: string[]): Promise<Persona[]> {
   if (ids.length === 0) return [];
-  const { data } = await createAdminClient()
+  const admin = createAdminClient();
+  const completo = await admin
     .from("profiles")
-    .select("id, email, nombre, idioma, avisos_reserva, avisos_bono, avisos_recordatorio, avisos_novedades")
+    .select("id, email, nombre, idioma, avisos_reserva, avisos_bono, avisos_recordatorio, avisos_novedades, avisos_cancelacion, avisos_bono_clases, avisos_inactividad, avisos_cumpleanos")
     .in("id", ids);
-  return (data ?? []) as Persona[];
+  if (!completo.error) return (completo.data ?? []) as Persona[];
+  // Si todavía falta el archivo 073 en Supabase, se leen las columnas de siempre y los avisos nuevos cuentan como activados.
+  const { data } = await admin.from("profiles").select("id, email, nombre, idioma, avisos_reserva, avisos_bono, avisos_recordatorio, avisos_novedades").in("id", ids);
+  return ((data ?? []) as Persona[]).map((p) => ({ ...p, avisos_cancelacion: p.avisos_reserva, avisos_bono_clases: p.avisos_bono, avisos_inactividad: p.avisos_novedades, avisos_cumpleanos: true }));
 }
 
 async function clase(sesionId: string): Promise<Clase | null> {
@@ -76,6 +84,17 @@ export function avisarReserva(userId: string, sesionId: string) {
     if (!persona || !c || !enviable(persona.email) || !persona.avisos_reserva) return;
     await enviarCorreo(
       correoReserva({ para: persona.email, idioma: persona.idioma, nombrePersona: persona.nombre ?? "", clase: info(c) }),
+    );
+  });
+}
+
+// Confirmación de que la persona ha cancelado su reserva (opcional).
+export function avisarCancelacionAlumno(userId: string, sesionId: string, devuelta: boolean) {
+  return protegido("cancelación", async () => {
+    const [[persona], c] = await Promise.all([personas([userId]), clase(sesionId)]);
+    if (!persona || !c || !enviable(persona.email) || !persona.avisos_cancelacion) return;
+    await enviarCorreo(
+      correoCancelacionAlumno({ para: persona.email, idioma: persona.idioma, nombrePersona: persona.nombre ?? "", clase: info(c), devuelta }),
     );
   });
 }

@@ -10,18 +10,22 @@ export type AvisosPersona = {
   avisos_reserva: boolean;
   avisos_recordatorio: boolean;
   avisos_bono: boolean;
-  avisos_novedades: boolean;
-  avisar_cumple: boolean;
+  avisos_cancelacion: boolean;
+  avisos_bono_clases: boolean;
+  avisos_inactividad: boolean;
+  avisos_cumpleanos: boolean;
 };
 
 type ClaveAviso = Exclude<keyof AvisosPersona, "sinCorreos">;
 
 const OPCIONES: { clave: ClaveAviso; titulo: string; ayuda: string }[] = [
-  { clave: "avisos_reserva", titulo: "Confirmación de reservas", ayuda: "Un correo cada vez que reserva o cancela una clase." },
+  { clave: "avisos_reserva", titulo: "Confirmación de reserva", ayuda: "Un correo cada vez que reserva una clase." },
+  { clave: "avisos_cancelacion", titulo: "Cancelación de reserva", ayuda: "Un correo cada vez que cancela una reserva." },
   { clave: "avisos_recordatorio", titulo: "Recordatorio de clase", ayuda: "Un aviso el día antes de su clase." },
-  { clave: "avisos_bono", titulo: "Su tarifa", ayuda: "Cuando está a punto de caducar o se le acaban las clases." },
-  { clave: "avisos_novedades", titulo: "Mensajes tuyos", ayuda: "Cuando lleva tiempo sin venir, aniversarios y novedades." },
-  { clave: "avisar_cumple", titulo: "Felicitación de cumpleaños", ayuda: "Un correo el día de su cumpleaños." },
+  { clave: "avisos_bono", titulo: "Su tarifa está a punto de caducar", ayuda: "Un aviso unos días antes de que caduque." },
+  { clave: "avisos_bono_clases", titulo: "Se le acaban las clases", ayuda: "Un aviso cuando se le agotan las clases de su tarifa." },
+  { clave: "avisos_inactividad", titulo: "Lleva tiempo sin venir", ayuda: "Un mensaje tuyo si pasa mucho tiempo sin venir." },
+  { clave: "avisos_cumpleanos", titulo: "Felicitación de cumpleaños", ayuda: "Un correo el día de su cumpleaños, con regalo." },
 ];
 
 function Interruptor({ activo, deshabilitado, alCambiar, titulo, ayuda }: { activo: boolean; deshabilitado: boolean; alCambiar: (v: boolean) => void; titulo: string; ayuda: string }) {

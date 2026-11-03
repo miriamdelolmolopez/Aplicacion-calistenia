@@ -179,7 +179,8 @@ export async function felicitarCumpleanos(): Promise<number> {
     const nacimiento = new Map(cumplen.map((c) => [c.id, c.fecha_nacimiento]));
 
     for (const p of lista) {
-      if (!enviable(p.email)) continue;
+      // Quien desactiva la felicitación de cumpleaños no recibe ni el correo ni el regalo.
+      if (!enviable(p.email) || !p.avisos_cumpleanos) continue;
       const ref = refCumple(p.id, hoy.anio);
       if (!(await reclamar("cumple" satisfies TipoAviso, ref, p.id))) continue;
 
@@ -270,7 +271,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
   const admin = createAdminClient();
   const ahora = Date.now();
   const hoy = claveDia(new Date(ahora).toISOString());
-  type Bruto = { userId: string; ref: string; valores: (p: Persona) => Record<string, string>; ruta: string; requiere?: "avisos_reserva" | "avisos_bono" | "avisos_recordatorio" | "avisos_novedades" };
+  type Bruto = { userId: string; ref: string; valores: (p: Persona) => Record<string, string>; ruta: string; requiere?: "avisos_reserva" | "avisos_bono" | "avisos_bono_clases" | "avisos_recordatorio" | "avisos_inactividad" };
   const brutos: Bruto[] = [];
 
   if (clave === "echamos_menos") {
@@ -302,7 +303,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
         if (t === undefined || futura.has(id)) continue;
         const pasados = Math.floor((ahora - t) / (24 * HORA));
         if (pasados < dias || pasados > 120) continue;
-        brutos.push({ userId: id, ref: refDe("menos", id, claveDia(new Date(t).toISOString())), valores: () => ({ dias: String(pasados) }), ruta: "/clases", requiere: "avisos_novedades" });
+        brutos.push({ userId: id, ref: refDe("menos", id, claveDia(new Date(t).toISOString())), valores: () => ({ dias: String(pasados) }), ruta: "/clases", requiere: "avisos_inactividad" });
       }
     }
   }
@@ -342,7 +343,7 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
     if (bonoIds.length > 0) {
       const { data: bonos } = await admin.from("bonos").select("id, user_id, estado, tipos_bono(nombre)").in("id", bonoIds).eq("estado", "agotado");
       for (const b of (bonos ?? []) as unknown as { id: string; user_id: string; tipos_bono: { nombre: string } | null }[]) {
-        brutos.push({ userId: b.user_id, ref: b.id, valores: (p) => ({ bono: b.tipos_bono?.nombre ?? (p.idioma === "en" ? "pass" : "bono") }), ruta: "/tarifas", requiere: "avisos_bono" });
+        brutos.push({ userId: b.user_id, ref: b.id, valores: (p) => ({ bono: b.tipos_bono?.nombre ?? (p.idioma === "en" ? "pass" : "bono") }), ruta: "/tarifas", requiere: "avisos_bono_clases" });
       }
     }
   }
@@ -364,7 +365,6 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
           ref: refDe("aniversario", c.id, String(anio)),
           valores: (p) => ({ tiempo: p.idioma === "en" ? `${n} ${n === 1 ? "year" : "years"}` : `${n} ${n === 1 ? "año" : "años"}` }),
           ruta: "/inicio",
-          requiere: "avisos_novedades",
         });
       }
     }

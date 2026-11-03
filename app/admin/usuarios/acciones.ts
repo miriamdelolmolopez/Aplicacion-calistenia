@@ -539,7 +539,7 @@ export async function cambiarSinCorreos(userId: string, valor: boolean): Promise
 }
 
 // Un aviso por correo de una persona (confirmaciones, recordatorios, tarifa, mensajes, cumpleaños).
-const AVISOS = ["avisos_reserva", "avisos_recordatorio", "avisos_bono", "avisos_novedades", "avisar_cumple"];
+const AVISOS = ["avisos_reserva", "avisos_recordatorio", "avisos_bono", "avisos_novedades", "avisar_cumple", "avisos_cancelacion", "avisos_bono_clases", "avisos_inactividad", "avisos_cumpleanos"];
 export async function cambiarAvisoPersona(userId: string, clave: string, valor: boolean): Promise<Estado> {
   await requireAdmin("usuarios");
   if (!UUID.test(userId) || !AVISOS.includes(clave)) return { error: "No se ha podido identificar a la persona." };

@@ -7,11 +7,22 @@ import estilos from "../../perfil/perfil.module.css";
 import { useIdioma } from "../../useIdioma";
 import { usePreferencias, type Clave } from "../usePreferencias";
 
+// Cada tipo de correo tiene su propio interruptor.
 const OPCIONES: { clave: Clave; es: [string, string]; en: [string, string] }[] = [
-  { clave: "avisos_reserva", es: ["Confirmación de reservas", "Un correo cada vez que reservas o cancelas una clase."], en: ["Booking confirmations", "An email each time you book or cancel a class."] },
+  { clave: "avisos_reserva", es: ["Confirmación de reserva", "Un correo cada vez que reservas una clase."], en: ["Booking confirmation", "An email each time you book a class."] },
+  { clave: "avisos_cancelacion", es: ["Cancelación de reserva", "Un correo cada vez que cancelas una reserva, diciéndote si se te devuelve la clase."], en: ["Booking cancellation", "An email each time you cancel a booking, telling you whether the class is returned to you."] },
   { clave: "avisos_recordatorio", es: ["Recordatorio de clase", "Un aviso el día antes de tu clase."], en: ["Class reminder", "A notice the day before your class."] },
-  { clave: "avisos_bono", es: ["Tu bono", "Cuando está a punto de caducar o se te acaban las clases."], en: ["Your pass", "When it is about to expire or you run out of classes."] },
-  { clave: "avisos_novedades", es: ["Mensajes de Miriam", "Cuando llevas tiempo sin venir, aniversarios y novedades."], en: ["Messages from Miriam", "When you have been away for a while, anniversaries and news."] },
+  { clave: "avisos_bono", es: ["Tu tarifa está a punto de caducar", "Un aviso unos días antes de que caduque."], en: ["Your pass is about to expire", "A notice a few days before it expires."] },
+  { clave: "avisos_bono_clases", es: ["Se te acaban las clases", "Un aviso cuando se te agotan las clases de tu tarifa."], en: ["You are running out of classes", "A notice when you use up the classes in your pass."] },
+  { clave: "avisos_inactividad", es: ["Llevas tiempo sin venir", "Un mensaje de Miriam si pasa mucho tiempo sin que vengas."], en: ["You have been away for a while", "A message from Miriam if you have not come in a long time."] },
+  { clave: "avisos_cumpleanos", es: ["Felicitación de cumpleaños", "Un correo el día de tu cumpleaños, con un regalo."], en: ["Birthday greeting", "An email on your birthday, with a gift."] },
+];
+
+// Estos se mandan siempre: son importantes y no se pueden desactivar.
+const OBLIGATORIAS: { es: [string, string]; en: [string, string] }[] = [
+  { es: ["Clase cancelada", "Si Miriam cancela una clase en la que estás apuntado/a."], en: ["Class cancelled", "If Miriam cancels a class you are signed up for."] },
+  { es: ["Plaza liberada", "Cuando se libera una plaza en una clase en la que estás en lista de espera."], en: ["Spot opened up", "When a spot opens in a class you are on the waiting list for."] },
+  { es: ["Aniversario", "Cuando cumples un tiempo con nosotras."], en: ["Anniversary", "When you reach a milestone with us."] },
 ];
 
 // Lo que recibe la administradora: no tiene reservas ni bono propios, así que sus avisos son otros.
@@ -26,7 +37,7 @@ const OPCIONES_ADMIN: { clave: Clave; es: [string, string]; en: [string, string]
 export default function Notificaciones() {
   const [idioma] = useIdioma();
   const en = idioma === "en";
-  const { pref, cambiar } = usePreferencias();
+  const { pref, cambiar, cambiarVarios } = usePreferencias();
   const esAdmin = pref?.rol === "admin";
   const opciones = esAdmin ? OPCIONES_ADMIN : OPCIONES;
 
@@ -39,6 +50,25 @@ export default function Notificaciones() {
         <Cargando />
       ) : (
         <section className={`${styles.tarjeta} ${estilos.seccion}`}>
+          {!esAdmin && (
+            <label className={estilos.interruptor}>
+              <input
+                type="checkbox"
+                checked={OPCIONES.every((o) => pref[o.clave])}
+                onChange={(e) =>
+                  cambiarVarios(
+                    OPCIONES.map((o) => o.clave),
+                    e.target.checked,
+                  )
+                }
+              />
+              <span>
+                <strong>{en ? "All optional emails" : "Todos los correos opcionales"}</strong>
+                <br />
+                <small>{en ? "Turn all the optional emails below on or off at once." : "Activa o desactiva de una vez todos los correos opcionales de abajo."}</small>
+              </span>
+            </label>
+          )}
           {opciones.map((o) => (
             <label key={o.clave} className={estilos.interruptor}>
               <input type="checkbox" checked={pref[o.clave]} onChange={(e) => cambiar(o.clave, e.target.checked)} />
@@ -50,9 +80,23 @@ export default function Notificaciones() {
             </label>
           ))}
           {!esAdmin && (
-            <p className={styles.ayuda}>
-              {en ? "Important notices (a spot opened up or a class cancelled) are always sent." : "Los avisos importantes (plaza liberada y clase cancelada) se envían siempre."}
-            </p>
+            <>
+              <p className={styles.ayuda} style={{ marginTop: 8 }}>
+                {en ? "Always sent (they cannot be turned off):" : "Se envían siempre (no se pueden desactivar):"}
+              </p>
+              {OBLIGATORIAS.map((o) => (
+                <label key={o.es[0]} className={estilos.interruptor}>
+                  <input type="checkbox" checked disabled readOnly />
+                  <span>
+                    <strong>
+                      {o[idioma][0]} · {en ? "required" : "obligatorio"}
+                    </strong>
+                    <br />
+                    <small>{o[idioma][1]}</small>
+                  </span>
+                </label>
+              ))}
+            </>
           )}
         </section>
       )}

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { avisarAdminCancelacion, avisarAdminReserva, avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
+import { avisarCancelacionAlumno, avisarAdminCancelacion, avisarAdminReserva, avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
 import { fechaCorta } from "@/lib/fechas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -135,7 +135,7 @@ export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
   });
   if (error) return { ok: false, codigo: codigoDe(error.message) };
   if (reserva) {
-    after(() => Promise.all([avisarPlazaLiberada(reserva.sesion_id), avisarAdminCancelacion(user.id, reserva.sesion_id, data === "devuelta")]));
+    after(() => Promise.all([avisarPlazaLiberada(reserva.sesion_id), avisarAdminCancelacion(user.id, reserva.sesion_id, data === "devuelta"), avisarCancelacionAlumno(user.id, reserva.sesion_id, data === "devuelta")]));
   }
   return { ok: true, devuelta: data === "devuelta" };
 }
