@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
 import CamaraCard from "../CamaraCard";
@@ -179,6 +179,15 @@ const LETRAS = {
 };
 
 export default function Clases() {
+  // useSearchParams necesita estar dentro de un Suspense.
+  return (
+    <Suspense fallback={<Cargando />}>
+      <PantallaClases />
+    </Suspense>
+  );
+}
+
+function PantallaClases() {
   const [idioma] = useIdioma();
   const tr = useNombresEn();
   const t = textos[idioma];
@@ -189,6 +198,8 @@ export default function Clases() {
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [trabajando, setTrabajando] = useState<string | null>(null);
   const [dia, setDia] = useState<string | null>(null);
+  // Si se llega desde «Mis reservas» pulsando un día del calendario (/clases?dia=2026-11-12), se abre ese día.
+  const diaPedido = useSearchParams().get("dia");
   const [semana, setSemana] = useState<number | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [extras, setExtras] = useState<Record<string, ExtraTaller>>({});
@@ -305,7 +316,7 @@ export default function Clases() {
   // Al entrar se enseña hoy; si hoy no hay clases, el primer día que sí tiene.
   const primerDiaConClases = datos && datos.lista.length > 0 ? claveDia(datos.lista[0].empieza_en) : hoy;
   const hayHoy = !!datos && datos.lista.some((c) => claveDia(c.empieza_en) === hoy);
-  const diaElegido = dia ?? (hayHoy ? hoy : primerDiaConClases);
+  const diaElegido = dia ?? (diaPedido && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(diaPedido) ? diaPedido : null) ?? (hayHoy ? hoy : primerDiaConClases);
   const semanaActual =
     semana ?? (datos ? Math.floor((new Date(`${diaElegido}T12:00:00Z`).getTime() - new Date(`${primerLunes}T12:00:00Z`).getTime()) / (7 * 86400000)) : 0);
   const diasSemana = datos ? Array.from({ length: 7 }, (_, i) => sumarDias(primerLunes, semanaActual * 7 + i)) : [];

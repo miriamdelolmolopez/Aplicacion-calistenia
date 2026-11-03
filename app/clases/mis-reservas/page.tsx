@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
 import { obtenerMisBonos, type MiBono } from "../../cuenta/acciones";
@@ -90,6 +91,7 @@ export default function MisReservas() {
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null>(null);
   const [mes, setMes] = useState<string | null>(null); // AAAA-MM
+  const router = useRouter();
   const [dia, setDia] = useState<string | null>(null);
   const [aviso, setAviso] = useState<{ ok: boolean; clave: ClaveTexto } | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -228,8 +230,11 @@ export default function MisReservas() {
                 key={d}
                 type="button"
                 className={`${estilos.dia} ${d === hoy ? estilos.hoy : ""} ${d === dia ? estilos.elegido : ""}`}
-                disabled={clases.length === 0}
+                // Desde hoy, cualquier día lleva a Reservar clases de ese día (donde salen sus reservas y las demás clases).
+                // Un día pasado solo se puede pulsar si tuvo reservas (para ver los detalles aquí).
+                disabled={clases.length === 0 && d < hoy}
                 onClick={() => {
+                  if (d >= hoy) return router.push(`/clases?dia=${d}`);
                   setDia(d === dia ? null : d);
                   setConfirmando(null);
                   setAlCalendario(null);
