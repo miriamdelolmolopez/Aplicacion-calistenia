@@ -822,3 +822,135 @@
 .confirmacion ul {
   margin: 0;
 }
+
+/* Pestaña «Actual» de la ficha: periodo, barra de progreso y tarjetas por servicio. */
+.periodoCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.periodoCabecera h2 {
+  margin: 0;
+}
+
+.periodoCaja {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+}
+
+.barraProgreso {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.barraProgreso > div {
+  height: 100%;
+  background: var(--acento, #70754b);
+  border-radius: 999px;
+}
+
+.tarjetaServicio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+.chipsClases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chipsClases span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 8px;
+}
+
+.numeroGrande {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 48px;
+  text-align: right;
+}
+
+/* Historial de reservas. */
+.filtrosHist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.listaHist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filaHist {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+}
+
+.filaCancelada {
+  opacity: 0.55;
+}
+
+.puntoClase {
+  flex: 0 0 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.histTexto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.histTexto small {
+  color: var(--secundario);
+}
+
+.histEstado {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--linea);
+  white-space: nowrap;
+}
+
+.histEstado_proxima {
+  border-color: var(--acento, #70754b);
+}
+
+.histEstado_asistio {
+  background: rgba(60, 160, 90, 0.15);
+}
+
+.histEstado_no_vino {
+  background: rgba(214, 69, 61, 0.15);
+}

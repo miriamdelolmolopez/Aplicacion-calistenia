@@ -8,7 +8,7 @@ import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
-import { IconoEuro, IconoLapiz } from "./IconosUsuario";
+import { IconoCalendario, IconoEuro, IconoLapiz } from "./IconosUsuario";
 
 export type Usuario = {
   id: string;
@@ -110,6 +110,11 @@ function Botones({ u, conPagos = true }: { u: Usuario; conPagos?: boolean }) {
       {conPagos && !soloAdmin(u) && (
         <Link href={`/admin/usuarios/${u.id}/pagos`} className={estilos.icono} aria-label="Pagos" title="Pagos">
           <IconoEuro />
+        </Link>
+      )}
+      {!soloAdmin(u) && (
+        <Link href={`/admin/usuarios/${u.id}?pestana=reservas`} className={estilos.icono} aria-label="Reservas" title="Reservas">
+          <IconoCalendario />
         </Link>
       )}
       <Link href={`/admin/usuarios/${u.id}?pestana=perfil`} className={estilos.icono} aria-label={u.rol === "admin" ? "Perfil" : "Editar"} title={u.rol === "admin" ? "Perfil" : "Editar"}>

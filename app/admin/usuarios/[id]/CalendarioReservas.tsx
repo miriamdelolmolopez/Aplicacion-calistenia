@@ -21,7 +21,7 @@ function tituloMes(mes: string): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-function Mes({ mes, eventos, userId, hoy }: { mes: string; eventos: EventoCalendario[]; userId: string; hoy: string }) {
+function Mes({ mes, eventos, userId, hoy, desde, hasta }: { mes: string; eventos: EventoCalendario[]; userId: string; hoy: string; desde?: string; hasta?: string }) {
   const [a, m] = mes.split("-").map(Number);
   const primero = (new Date(Date.UTC(a, m - 1, 1)).getUTCDay() + 6) % 7; // lunes = 0
   const diasMes = new Date(Date.UTC(a, m, 0)).getUTCDate();
@@ -38,6 +38,8 @@ function Mes({ mes, eventos, userId, hoy }: { mes: string; eventos: EventoCalend
         ))}
         {celdas.map((fecha, i) => {
           if (!fecha) return <span key={`v${i}`} />;
+          // Con un periodo, solo se dibujan sus días (los demás quedan en blanco).
+          if ((desde && fecha < desde) || (hasta && fecha > hasta)) return <span key={fecha} />;
           const delDia = eventos.filter((e) => e.dia === fecha).sort((x, y) => x.hora.localeCompare(y.hora));
           return (
             <Link
@@ -72,11 +74,11 @@ function Mes({ mes, eventos, userId, hoy }: { mes: string; eventos: EventoCalend
   );
 }
 
-export default function CalendarioReservas({ meses, eventos, userId, hoy }: { meses: string[]; eventos: EventoCalendario[]; userId: string; hoy: string }) {
+export default function CalendarioReservas({ meses, eventos, userId, hoy, desde, hasta }: { meses: string[]; eventos: EventoCalendario[]; userId: string; hoy: string; desde?: string; hasta?: string }) {
   return (
     <div className={estilos.calendario}>
       {meses.map((m) => (
-        <Mes key={m} mes={m} eventos={eventos} userId={userId} hoy={hoy} />
+        <Mes key={m} mes={m} eventos={eventos} userId={userId} hoy={hoy} desde={desde} hasta={hasta} />
       ))}
       <p className={estilos.leyenda}>Toca un día para reservar o anular clases como si fueras ella. ✕ = cancelada · ! = no vino.</p>
     </div>

@@ -24,6 +24,9 @@ import HistorialExamen, { type Intento } from "../../../aprende/examen/Historial
 import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
+import HistorialReservas from "./HistorialReservas";
+import PanelActual from "./PanelActual";
+import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
 import CabeceraAdmin from "../../CabeceraAdmin";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
@@ -75,7 +78,8 @@ type ReservaCalendario = {
   id: string;
   estado: string;
   asistencia: string | null;
-  sesiones_clase: { empieza_en: string; estado: string; tipos_clase: { nombre: string; color: string | null } | null } | null;
+  bono_id: string | null;
+  sesiones_clase: { empieza_en: string; estado: string; tipos_clase: { nombre: string; color: string | null; servicio: string } | null } | null;
 };
 
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -129,7 +133,7 @@ export default async function FichaUsuario({
     // Todas sus reservas, para el calendario (cada clase con el color de su tipo).
     admin
       .from("reservas")
-      .select("id, estado, asistencia, sesiones_clase(empieza_en, estado, tipos_clase(nombre, color))")
+      .select("id, estado, asistencia, bono_id, sesiones_clase(empieza_en, estado, tipos_clase(nombre, color, servicio))")
       .eq("user_id", id)
       .in("estado", ["reservada", "cancelada"])
       .limit(2000),
@@ -244,57 +248,60 @@ export default async function FichaUsuario({
   const activos = bonos.filter((b) => b.estado === "activo");
   const enEspera = bonos.filter((b) => b.estado === "en_cola");
   const sinPagar = [...activos, ...enEspera].some((b) => b.pagos.some((x) => x.estado === "pendiente"));
-  const pagadoHasta = activos
-    .filter((b) => b.pagos.some((x) => x.estado === "pagado") && b.caduca_en)
-    .map((b) => b.caduca_en as string)
-    .sort()
-    .pop();
+
+  // Los periodos (compras de tarifa) con sus fechas, para la pestaña «Actual» y los filtros de «Reservas».
+  const nombreDeBono = new Map(bonos.map((b) => [b.id, b.tipos_bono?.nombre ?? "Tarifa"]));
+  const compras = new Map<string, Bono[]>();
+  for (const b of bonos) {
+    if (b.estado === "anulado") continue;
+    const clave = `${b.tipo_bono_id}|${b.creado_en}`;
+    compras.set(clave, [...(compras.get(clave) ?? []), b]);
+  }
+  const periodos: Periodo[] = [...compras.entries()].map(([clave, bs]) => {
+    const desdes = bs.map((b) => b.activo_desde).filter((x): x is string => !!x);
+    const hastas = bs.map((b) => b.caduca_en).filter((x): x is string => !!x);
+    return {
+      id: clave,
+      nombre: bs[0].tipos_bono?.nombre ?? "Tarifa",
+      estado: bs.some((b) => b.estado === "activo") ? "activo" : bs.some((b) => b.estado === "en_cola") ? "en_cola" : "finalizado",
+      desde: desdes.length ? claveDia(desdes.sort()[0]) : null,
+      hasta: hastas.length ? claveDia(hastas.sort().reverse()[0]) : null,
+      pagado: bs.some((b) => b.pagos.some((x) => x.estado === "pagado")),
+      pendiente: bs.some((b) => b.pagos.some((x) => x.estado === "pendiente")),
+      bonos: bs.map((b) => ({ id: b.id, servicio: b.servicio, estado: b.estado, total: b.clases_total, restantes: b.clases_restantes })),
+    };
+  });
+  const reservasLista: ReservaFila[] = ((todasDatos ?? []) as unknown as ReservaCalendario[])
+    .filter((r) => r.sesiones_clase)
+    .map((r) => {
+      const s = r.sesiones_clase!;
+      const nombreTipo = s.tipos_clase?.nombre ?? "Clase";
+      return {
+        id: r.id,
+        dia: claveDia(s.empieza_en),
+        hora: textoHora(s.empieza_en),
+        nombre: nombreTipo,
+        color: colorDeTipo(s.tipos_clase?.color, nombreTipo),
+        servicio: s.tipos_clase?.servicio ?? "grupal",
+        estado: r.estado === "cancelada" || s.estado === "cancelada" ? "cancelada" : r.estado,
+        asistencia: r.asistencia,
+        bonoId: r.bono_id,
+        tarifa: r.bono_id ? (nombreDeBono.get(r.bono_id) ?? "—") : "—",
+      };
+    });
+  const { data: tiposDatos } = await admin.from("tipos_clase").select("nombre, color, color_texto, servicio").eq("activo", true).order("orden").order("nombre");
+  const tiposClase: TipoClaseChip[] = ((tiposDatos ?? []) as { nombre: string; color: string | null; color_texto: string | null; servicio: string }[]).map((x) => ({
+    nombre: x.nombre,
+    color: colorDeTipo(x.color, x.nombre),
+    colorTexto: x.color_texto ?? "#FFFFFF",
+    servicio: x.servicio,
+  }));
+  const ahoraMadrid = `${claveDia(ahora)}T${textoHora(ahora)}`;
 
   const mes = mesPedido && /^\d{4}-\d{2}$/.test(mesPedido) ? mesPedido : hoy.slice(0, 7);
   const aFicha = (pest: Pestana, extra = "") => `/admin/usuarios/${id}?pestana=${pest}${extra}`;
 
-  const panelActual = (
-        <>
-          <section className={styles.tarjeta}>
-            <h2>Tarifa actual</h2>
-            {activos.length === 0 && <p className={styles.ayuda}>No tiene ninguna tarifa activa.</p>}
-            {activos.map((b) => {
-              const pendiente = b.pagos.some((x) => x.estado === "pendiente");
-              return (
-                <div key={b.id} className={estilos.tarifaCaja}>
-                  <strong>{b.tipos_bono?.nombre}</strong>
-                  <span>
-                    {b.activo_desde ? `${fechaCorta(b.activo_desde)} – ` : "hasta "}
-                    {b.caduca_en ? fechaCorta(b.caduca_en) : ""}
-                  </span>
-                  <span>
-                    {b.servicio === "online" ? "Plan online" : `Ha reservado ${b.clases_total - b.clases_restantes} de ${b.clases_total} · le quedan ${b.clases_restantes}`}
-                  </span>
-                  {pendiente ? <span className={estilos.sinPagar}>Sin pagar</span> : <span className={estilos.activa}>Pagado</span>}
-                </div>
-              );
-            })}
-            {pagadoHasta && (
-              <p style={{ margin: 0 }}>
-                Pagado hasta: <strong>{fechaCorta(pagadoHasta)}</strong>
-              </p>
-            )}
-            {enEspera.length > 0 && (
-              <>
-                <h3 style={{ margin: "6px 0 0" }}>Próximas cuotas</h3>
-                <ul className={styles.lista}>
-                  {enEspera.map((b) => (
-                    <li key={b.id}>
-                      {b.tipos_bono?.nombre} · se activa cuando termine la actual
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </section>
-
-        </>
-  );
+  const panelActual = <PanelActual periodos={periodos} reservas={reservasLista} tipos={tiposClase} userId={id} hoy={hoy} />;
 
   const panelReservas = (
         <>
@@ -313,6 +320,8 @@ export default async function FichaUsuario({
             </div>
             <CalendarioReservas meses={[mes]} eventos={eventos} userId={id} hoy={hoy} />
           </section>
+
+          <HistorialReservas reservas={reservasLista} periodos={periodos} ahora={ahoraMadrid} />
 
         </>
   );
