@@ -11,6 +11,7 @@ import { guardarTipoBono } from "./acciones";
 export type TipoBono = {
   id: string;
   nombre: string;
+  nombre_en: string | null;
   servicio: string;
   clases: number;
   precio_centimos: number;
@@ -64,6 +65,12 @@ export default function FormularioTarifa({ tarifa, alTerminar }: { tarifa?: Tipo
       <div className={styles.campo}>
         <label htmlFor={`tf-n-${p}`}>Nombre <AyudaI texto="Cómo se llama el servicio o tarifa. Es lo que ves al cobrar y lo que ve la persona." /></label>
         <input id={`tf-n-${p}`} name="nombre" required maxLength={80} defaultValue={tarifa?.nombre ?? ""} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`tf-ne-${p}`}>
+          Nombre en inglés (opcional) <AyudaI texto="Cómo se llama esta tarifa cuando la app está en inglés. Si lo dejas vacío, sale el nombre en español." />
+        </label>
+        <input id={`tf-ne-${p}`} name="nombre_en" maxLength={100} defaultValue={tarifa?.nombre_en ?? ""} />
       </div>
       <div className={styles.campo}>
         <label htmlFor={`tf-o-${p}`}>Orden de aparición <AyudaI texto="Para decidir cuál sale antes en las listas. Los números más bajos salen primero (1 sale el primero)." /></label>

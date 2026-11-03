@@ -131,6 +131,7 @@ export function FormularioTipo({
     creditos: number;
     descripcion: string | null;
     descripcion_en: string | null;
+    nombre_en: string | null;
   };
 }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarTipo, {});
@@ -150,6 +151,10 @@ export function FormularioTipo({
       <div className={styles.campo}>
         <label htmlFor={`no-${tipo.id}`}>Nombre <AyudaI texto="Cómo se llama la clase. Es lo que ve cada persona al reservar y en el calendario." /></label>
         <input id={`no-${tipo.id}`} name="nombre" maxLength={60} defaultValue={tipo.nombre} />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor={`ne-${tipo.id}`}>Nombre en inglés (opcional) <AyudaI texto="Cómo se llama la clase cuando la app está en inglés. Si lo dejas vacío, sale el nombre en español." /></label>
+        <input id={`ne-${tipo.id}`} name="nombre_en" maxLength={80} defaultValue={tipo.nombre_en ?? ""} />
       </div>
       <div className={styles.campo}>
         <label htmlFor={`du-${tipo.id}`}>Duración (minutos) <AyudaI texto="Cuánto dura cada clase. Con esto se calcula la hora a la que termina." /></label>
@@ -274,6 +279,10 @@ export function NuevoTipo({ alTerminar }: { alTerminar?: () => void } = {}) {
       <div className={styles.campo}>
         <label htmlFor="nt-nombre">Nombre <AyudaI texto="Cómo se llama la clase. Es lo que ve cada persona al reservar." /></label>
         <input id="nt-nombre" name="nombre" maxLength={60} required />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="nt-nombre-en">Nombre en inglés (opcional) <AyudaI texto="Cómo se llama la clase cuando la app está en inglés. Si lo dejas vacío, sale el nombre en español." /></label>
+        <input id="nt-nombre-en" name="nombre_en" maxLength={80} />
       </div>
       <div className={styles.campo}>
         <label htmlFor="nt-servicio">Para quién es <AyudaI texto="Clase grupal: la reservan varias personas. Entrenamiento individual: es de una sola persona y solo lo ven los/las alumnos/as con ese servicio. Taller: es para gente externa; solo lo reservan las personas con el servicio Talleres." /></label>

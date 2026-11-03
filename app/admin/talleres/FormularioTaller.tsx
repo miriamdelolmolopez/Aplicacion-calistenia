@@ -10,6 +10,7 @@ import { crearTaller, editarTaller } from "./acciones";
 export type TallerForm = {
   sesionId: string;
   nombre: string;
+  nombreEn: string;
   fecha: string;
   hora: string;
   duracion: number;
@@ -44,6 +45,12 @@ export default function FormularioTaller({ taller, hoy, alTerminar }: { taller?:
           Nombre del taller <AyudaI texto="Cómo se llama el taller, por ejemplo «Taller de pino». Si repites el mismo nombre otro día, es el mismo taller en otra fecha." />
         </label>
         <input id="tl-nombre" name="nombre" maxLength={60} defaultValue={taller?.nombre} required />
+      </div>
+      <div className={styles.campo}>
+        <label htmlFor="tl-nombre-en">
+          Nombre en inglés (opcional) <AyudaI texto="Cómo se llama el taller cuando la app está en inglés. Si lo dejas vacío, sale el nombre en español." />
+        </label>
+        <input id="tl-nombre-en" name="nombre_en" maxLength={80} defaultValue={taller?.nombreEn ?? ""} />
       </div>
       <div className={styles.campo}>
         <label htmlFor="tl-fecha">Día</label>

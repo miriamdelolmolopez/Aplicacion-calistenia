@@ -9,6 +9,7 @@ import clay from "../../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../../ui/Mini";
 import Anillo from "../../ui/Anillo";
 import { useIdioma } from "../../useIdioma";
+import { useNombresEn } from "../../useNombresEn";
 import { cancelarMiReserva } from "../acciones";
 import estilos from "./mis-reservas.module.css";
 import { descargarIcs, enlaceGoogleCalendar, LUGAR_CLASES } from "@/lib/calendario";
@@ -85,6 +86,7 @@ const LETRAS = {
 // Mis reservas: resumen de su bono y calendario mensual con sus clases (hechas y próximas).
 export default function MisReservas() {
   const [idioma] = useIdioma();
+  const tr = useNombresEn();
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null>(null);
   const [mes, setMes] = useState<string | null>(null); // AAAA-MM
@@ -172,7 +174,7 @@ export default function MisReservas() {
           <section key={b.id} className={clay.tarjetaProgreso} style={{ marginBottom: 12 }}>
             <div className={clay.progresoInfo}>
               <span className={clay.eyebrow}>{nombreServicio(b.servicio)}</span>
-              <h3 className={clay.progresoNombre}>{b.nombre}</h3>
+              <h3 className={clay.progresoNombre}>{tr(b.nombre)}</h3>
               <div className={clay.metaFila}>
                 <span className={clay.metaChip}>
                   <IconoCorona />
@@ -239,10 +241,10 @@ export default function MisReservas() {
                     key={c.id}
                     className={`${estilos.etiquetaClase} ${c.empieza_en < ahoraIso ? estilos.pasada : ""}`}
                     style={{ background: c.color, color: c.colorTexto }}
-                    title={c.tipo}
+                    title={tr(c.tipo)}
                   >
                     {textoHora(c.empieza_en)}
-                    <b>{nombreCorto(c.tipo)}</b>
+                    <b>{nombreCorto(tr(c.tipo))}</b>
                   </i>
                 ))}
               </button>
@@ -253,7 +255,7 @@ export default function MisReservas() {
         <div className={estilos.leyenda}>
           {datos.tipos.map((tp) => (
             <span key={tp.nombre} style={{ background: tp.color, color: tp.colorTexto }}>
-              {tp.nombre}
+              {tr(tp.nombre)}
             </span>
           ))}
         </div>
@@ -271,7 +273,7 @@ export default function MisReservas() {
                 <div>
                   <strong>
                     {pasada && "✓ "}
-                    {r.tipo}
+                    {tr(r.tipo)}
                   </strong>
                   <span className={estilos.pequeno}>
                     {textoHora(r.empieza_en)} – {textoHora(new Date(new Date(r.empieza_en).getTime() + (r.duracion_min || 60) * 60000).toISOString())}

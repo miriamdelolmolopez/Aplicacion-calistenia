@@ -13,6 +13,7 @@ import { obtenerFotos, obtenerProfe } from "../perfil/acciones";
 import { textos, type ClaveTexto } from "../textos";
 import PanelFiltros from "../PanelFiltros";
 import { useIdioma } from "../useIdioma";
+import { useNombresEn } from "../useNombresEn";
 import estilos from "./clases.module.css";
 import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import CancelarClaseAdmin from "./CancelarClaseAdmin";
@@ -179,6 +180,7 @@ const LETRAS = {
 
 export default function Clases() {
   const [idioma] = useIdioma();
+  const tr = useNombresEn();
   const t = textos[idioma];
   const router = useRouter();
 
@@ -491,7 +493,7 @@ export default function Clases() {
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
                 <div className={estilos.titulo} style={estiloFoto(fotoDeClase(c.tipo), fotosCards[`clase:${c.tipo}`] ?? fotosTipos[c.tipo], !fotosListas)}>
-                  <h2>{c.tipo}</h2>
+                  <h2>{tr(c.tipo)}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
                   <CamaraCard clave={`clase:${c.tipo}`} />
                 </div>
@@ -505,7 +507,7 @@ export default function Clases() {
                 </div>
 
                 {c.servicio === "taller" && extras[c.id] && (
-                  <DatosTaller taller={{ nombre: c.tipo, empieza_en: c.empieza_en, duracion_min: c.duracion_min, ...extras[c.id] }} idioma={idioma} />
+                  <DatosTaller taller={{ nombre: tr(c.tipo), empieza_en: c.empieza_en, duracion_min: c.duracion_min, ...extras[c.id] }} idioma={idioma} />
                 )}
 
                 {!cancelada && personal && (

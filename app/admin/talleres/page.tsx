@@ -16,7 +16,7 @@ type Fila = {
   modalidad: "presencial" | "online";
   ubicacion: string | null;
   enlace: string | null;
-  tipos_clase: { nombre: string; duracion_min: number; servicio: string };
+  tipos_clase: { nombre: string; nombre_en: string | null; duracion_min: number; servicio: string };
   reservas: { estado: string }[];
 };
 
@@ -25,7 +25,7 @@ export default async function Talleres() {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("sesiones_clase")
-    .select("id, empieza_en, plazas, estado, modalidad, ubicacion, enlace, tipos_clase!inner(nombre, duracion_min, servicio), reservas(estado)")
+    .select("id, empieza_en, plazas, estado, modalidad, ubicacion, enlace, tipos_clase!inner(nombre, nombre_en, duracion_min, servicio), reservas(estado)")
     .eq("tipos_clase.servicio", "taller")
     .order("empieza_en");
 
@@ -33,6 +33,7 @@ export default async function Talleres() {
   const filas: TallerFila[] = ((data ?? []) as unknown as Fila[]).map((s) => ({
     id: s.id,
     nombre: s.tipos_clase.nombre,
+    nombreEn: s.tipos_clase.nombre_en ?? "",
     empieza_en: s.empieza_en,
     dia: claveDia(s.empieza_en),
     duracion_min: s.tipos_clase.duracion_min,

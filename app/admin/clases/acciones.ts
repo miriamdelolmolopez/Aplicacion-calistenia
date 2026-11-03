@@ -191,6 +191,7 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
 
   const id = String(formData.get("tipoId") ?? "");
   const nombre = String(formData.get("nombre") ?? "").trim();
+  const nombreEn = String(formData.get("nombre_en") ?? "").trim().slice(0, 80);
   const plazas = entero(formData.get("plazas_max"));
   const minimo = entero(formData.get("minimo_alumnos"));
   const prueba = entero(formData.get("plazas_prueba"));
@@ -226,6 +227,7 @@ export async function cambiarTipo(_previo: Estado, formData: FormData): Promise<
     .from("tipos_clase")
     .update({
       nombre,
+      nombre_en: nombreEn || null,
       plazas_max: plazas,
       minimo_alumnos: minimo,
       plazas_prueba: prueba,
@@ -256,6 +258,7 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
   await requireAdmin("presenciales");
 
   const nombre = String(formData.get("nombre") ?? "").trim();
+  const nombreEn = String(formData.get("nombre_en") ?? "").trim().slice(0, 80);
   const servicio = String(formData.get("servicio") ?? "grupal");
   const plazas = entero(formData.get("plazas_max"));
   const minimo = entero(formData.get("minimo_alumnos"));
@@ -279,6 +282,7 @@ export async function crearTipo(_previo: Estado, formData: FormData): Promise<Es
   const { error } = await admin.from("tipos_clase").insert({
     color,
     nombre,
+    nombre_en: nombreEn || null,
     plazas_max: plazas,
     minimo_alumnos: minimo,
     plazas_prueba: prueba,
@@ -303,7 +307,7 @@ export async function duplicarTipo(tipoId: string): Promise<Estado> {
 
   const { data: origen } = await admin
     .from("tipos_clase")
-    .select("nombre, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, color, color_texto, lista_espera, reserva_dias_max, cancelacion_horas, creditos, descripcion, descripcion_en")
+    .select("nombre, nombre_en, plazas_max, minimo_alumnos, plazas_prueba, duracion_min, activo, servicio, color, color_texto, lista_espera, reserva_dias_max, cancelacion_horas, creditos, descripcion, descripcion_en")
     .eq("id", tipoId)
     .maybeSingle();
   if (!origen) return { error: "No se ha encontrado esa clase." };

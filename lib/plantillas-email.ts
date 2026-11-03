@@ -254,10 +254,12 @@ export function correoInvitacion(p: { para: string; alumno: boolean; ruta: strin
       ? [
           "Miriam del Olmo te ha dado de alta en CalisCoach, su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
           "Pulsa el botón para elegir tu contraseña y entrar. Si no esperabas este correo, puedes ignorarlo.",
+          "English: Miriam del Olmo has signed you up to CalisCoach, her calisthenics and handstand app. Press the button to choose your password and sign in. If you were not expecting this email, you can ignore it.",
         ]
       : [
           "Miriam del Olmo te invita a CalisCoach, su app de calistenia y pino. Crea tu cuenta para empezar.",
           "Pulsa el botón para crear tu cuenta. Si no esperabas este correo, puedes ignorarlo.",
+          "English: Miriam del Olmo invites you to CalisCoach, her calisthenics and handstand app. Press the button to create your account. If you were not expecting this email, you can ignore it.",
         ],
     boton: { texto: p.alumno ? "Elegir mi contraseña" : "Crear mi cuenta", ruta: p.ruta },
   });

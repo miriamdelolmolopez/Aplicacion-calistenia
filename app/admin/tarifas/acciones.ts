@@ -28,6 +28,7 @@ export async function guardarTipoBono(_previo: Estado, formData: FormData): Prom
 
   const id = texto(formData, "id");
   const nombre = texto(formData, "nombre");
+  const nombreEn = texto(formData, "nombre_en");
   const servicio = texto(formData, "servicio");
   const clases = servicioEsOnline(texto(formData, "servicio")) ? entero(texto(formData, "clases") || "1") : entero(texto(formData, "clases"));
   const precio = aCentimos(texto(formData, "precio"));
@@ -42,6 +43,7 @@ export async function guardarTipoBono(_previo: Estado, formData: FormData): Prom
   const validez2 = servicio2 && !misma ? entero(texto(formData, "validez_dias2")) : null;
 
   if (nombre.length < 2 || nombre.length > 80) return { error: "El nombre debe tener entre 2 y 80 letras." };
+  if (nombreEn.length > 100) return { error: "El nombre en inglés puede tener hasta 100 letras." };
   if (!SERVICIOS.includes(servicio)) return { error: "Elige el tipo de servicio." };
   if (!(clases >= 1 && clases <= 100)) return { error: "Los créditos (clases) van de 1 a 100." };
   if (Number.isNaN(precio) || precio > 100000) return { error: "Escribe un precio válido, por ejemplo 55 o 55,50." };
@@ -57,6 +59,7 @@ export async function guardarTipoBono(_previo: Estado, formData: FormData): Prom
 
   const datos = {
     nombre,
+    nombre_en: nombreEn || null,
     servicio,
     clases,
     precio_centimos: precio,
@@ -89,7 +92,7 @@ export async function duplicarTarifa(id: string): Promise<Estado> {
 
   const { data: origen } = await admin
     .from("tipos_bono")
-    .select("nombre, servicio, clases, precio_centimos, validez_dias, activo, requiere_pago, servicio2, clases2, iva_porcentaje, validez_dias2")
+    .select("nombre, nombre_en, servicio, clases, precio_centimos, validez_dias, activo, requiere_pago, servicio2, clases2, iva_porcentaje, validez_dias2")
     .eq("id", id)
     .maybeSingle();
   if (!origen) return { error: "No se ha encontrado esa tarifa." };

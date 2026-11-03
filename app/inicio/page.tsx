@@ -13,6 +13,7 @@ import styles from "../formularios.module.css";
 import Icono, { type NombreIcono } from "../Icono";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
+import { useNombresEn } from "../useNombresEn";
 import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
@@ -123,6 +124,7 @@ type Acceso = { href: string; icono: NombreIcono; texto: ClaveTexto; extra?: Cla
 
 export default function Inicio() {
   const [idioma] = useIdioma();
+  const tr = useNombresEn();
   const t = textos[idioma];
   const router = useRouter();
   const perfil = useMiPerfil();
@@ -295,7 +297,7 @@ export default function Inicio() {
             <section key={b.id} className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
                 <span className={clay.eyebrow}>{t.tuBono}</span>
-                <h3 className={clay.progresoNombre}>{b.nombre}</h3>
+                <h3 className={clay.progresoNombre}>{tr(b.nombre)}</h3>
                 <div className={clay.metaFila}>
                   <span className={clay.metaChip}>
                     <IconoCorona />
@@ -336,7 +338,7 @@ export default function Inicio() {
             <section className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
                 <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
-                <h3 className={clay.progresoNombre}>{planOnlineBono.nombre}</h3>
+                <h3 className={clay.progresoNombre}>{tr(planOnlineBono.nombre)}</h3>
                 <div className={clay.metaFila}>
                   {porEntrenos && (
                     <span className={clay.metaChip}>
@@ -380,7 +382,7 @@ export default function Inicio() {
                 style={{ backgroundImage: fondoFoto(fotoDeClase(r.nombre), fotosTipos[r.nombre], !fotosListas) }}
               />
               <span className={estilos.entrenoTexto}>
-                <strong>{r.nombre}</strong>
+                <strong>{tr(r.nombre)}</strong>
                 <span>
                   {textoDia(r.empieza_en, idioma)} · {textoHora(r.empieza_en)}
                 </span>

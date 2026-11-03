@@ -7,6 +7,7 @@ import styles from "../formularios.module.css";
 import estilos from "../perfil/perfil.module.css";
 import { textos, type ClaveTexto } from "../textos";
 import { useIdioma } from "../useIdioma";
+import { useNombresEn } from "../useNombresEn";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
@@ -25,6 +26,7 @@ type Pago = {
 
 export default function MisPagos() {
   const [idioma] = useIdioma();
+  const tr = useNombresEn();
   const t = textos[idioma];
   const [pagos, setPagos] = useState<Pago[] | null>(null);
 
@@ -53,7 +55,7 @@ export default function MisPagos() {
         {pagos?.map((p) => (
           <li key={p.id} className={estilos.pago}>
             <div>
-              <strong>{p.bonos?.tipos_bono?.nombre ?? t.pagoSinBono}</strong>
+              <strong>{p.bonos?.tipos_bono?.nombre ? tr(p.bonos.tipos_bono.nombre) : t.pagoSinBono}</strong>
               <small>
                 {fechaCorta(p.pagado_en ?? p.creado_en, idioma)} · {t[`metodo_${p.metodo}` as ClaveTexto]}
               </small>

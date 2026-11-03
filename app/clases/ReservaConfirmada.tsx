@@ -1,5 +1,6 @@
 "use client";
 
+import { useNombresEn } from "../useNombresEn";
 import { useState } from "react";
 import estilos from "./confirmada.module.css";
 import clay from "../ui/clay.module.css";
@@ -23,13 +24,14 @@ export default function ReservaConfirmada({
   alVolver: () => void;
 }) {
   const t = textos[idioma];
+  const tr = useNombresEn();
   const [eligiendo, setEligiendo] = useState(false);
 
   const duracion = clase.duracion_min || 60;
   const fin = new Date(new Date(clase.empieza_en).getTime() + duracion * 60000).toISOString();
   const evento = {
     id: clase.id,
-    titulo: `${clase.tipo} · CalisCoach`,
+    titulo: `${tr(clase.tipo)} · CalisCoach`,
     inicioIso: clase.empieza_en,
     duracionMin: duracion,
     descripcion: `${t.recuerdaLlegar} ${t.traeAgua}`,
@@ -49,7 +51,7 @@ export default function ReservaConfirmada({
         <h1>{t.reservaConfirmada}</h1>
 
         <div className={estilos.datos}>
-          <strong>{clase.tipo}</strong>
+          <strong>{tr(clase.tipo)}</strong>
           <span>
             {textoDia(clase.empieza_en, idioma)} · {textoHora(clase.empieza_en)} – {textoHora(fin)}
           </span>

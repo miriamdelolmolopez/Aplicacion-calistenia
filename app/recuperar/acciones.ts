@@ -18,11 +18,11 @@ export async function pedirRecuperacion(correo: string, idioma: "es" | "en"): Pr
 
   try {
     const admin = createAdminClient();
-    const { data: perfil } = await admin.from("profiles").select("rol").ilike("email", email).maybeSingle();
+    const { data: perfil } = await admin.from("profiles").select("rol, idioma").ilike("email", email).maybeSingle();
     if (!perfil || perfil.rol === "archivado") return { ok: true };
     const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email });
     if (error || !data?.properties?.hashed_token) return { ok: true };
-    await enviarCorreo(correoRecuperacion({ para: email, idioma: idioma === "en" ? "en" : "es", ruta: `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=recovery` }));
+    await enviarCorreo(correoRecuperacion({ para: email, idioma: (perfil.idioma ?? idioma) === "en" ? "en" : "es", ruta: `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=recovery` }));
   } catch {
     // Si falla, se contesta igual para no dar pistas.
   }

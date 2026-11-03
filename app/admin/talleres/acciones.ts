@@ -15,11 +15,12 @@ function refrescar() {
   revalidatePath("/clases");
 }
 
-type Campos = { nombre: string; empieza: Date; plazas: number; duracion: number; modalidad: "presencial" | "online"; ubicacion: string | null; enlace: string | null };
+type Campos = { nombre: string; nombreEn: string; empieza: Date; plazas: number; duracion: number; modalidad: "presencial" | "online"; ubicacion: string | null; enlace: string | null };
 
 // Lee y comprueba lo que llega del formulario (sirve para crear y para editar).
 function leer(formData: FormData): Campos | { error: string } {
   const nombre = String(formData.get("nombre") ?? "").trim();
+  const nombreEn = String(formData.get("nombre_en") ?? "").trim().slice(0, 80);
   const empieza = instanteMadrid(String(formData.get("fecha") ?? "").trim(), String(formData.get("hora") ?? "").trim());
   const plazas = Math.floor(Number(formData.get("plazas")));
   const duracion = Math.floor(Number(formData.get("duracion")));
@@ -32,7 +33,7 @@ function leer(formData: FormData): Campos | { error: string } {
   if (!(duracion >= 10 && duracion <= 240)) return { error: "La duración va de 10 a 240 minutos." };
   if (modalidad !== "presencial" && modalidad !== "online") return { error: "Elige si es presencial u online." };
   if (enlace && !/^https?:\/\//i.test(enlace)) return { error: "El enlace tiene que empezar por http:// o https://." };
-  return { nombre, empieza, plazas, duracion, modalidad, ubicacion: modalidad === "presencial" ? ubicacion : null, enlace };
+  return { nombre, nombreEn, empieza, plazas, duracion, modalidad, ubicacion: modalidad === "presencial" ? ubicacion : null, enlace };
 }
 
 // Crea un taller: un tipo «taller» (si no existe ya con ese nombre) y su clase con el día, la hora y el lugar.
@@ -48,13 +49,13 @@ export async function crearTaller(_previo: Estado, formData: FormData): Promise<
     const orden = Math.max(0, ...(existentes ?? []).map((e) => Number(e.orden) || 0)) + 10;
     const { data: nuevo, error } = await admin
       .from("tipos_clase")
-      .insert({ color: colorLibre((existentes ?? []).map((e) => e.color)), nombre: c.nombre, plazas_max: c.plazas, minimo_alumnos: 0, plazas_prueba: 0, duracion_min: c.duracion, servicio: "taller", orden, lista_espera: false })
+      .insert({ color: colorLibre((existentes ?? []).map((e) => e.color)), nombre: c.nombre, plazas_max: c.plazas, minimo_alumnos: 0, plazas_prueba: 0, duracion_min: c.duracion, servicio: "taller", orden, lista_espera: false, nombre_en: c.nombreEn || null })
       .select("id")
       .single();
     if (error || !nuevo) return { error: error?.code === "23505" ? "Ya existe un tipo de clase con ese nombre." : "No se ha podido crear el taller." };
     tipo = nuevo;
   } else {
-    await admin.from("tipos_clase").update({ duracion_min: c.duracion }).eq("id", tipo.id);
+    await admin.from("tipos_clase").update({ duracion_min: c.duracion, nombre_en: c.nombreEn || null }).eq("id", tipo.id);
   }
 
   const { error } = await admin
@@ -120,7 +121,7 @@ export async function editarTaller(_previo: Estado, formData: FormData): Promise
     .update({ empieza_en: c.empieza.toISOString(), plazas: c.plazas, modalidad: c.modalidad, ubicacion: c.ubicacion, enlace: c.enlace })
     .eq("id", id);
   if (error) return { error: error.code === "23505" ? "Ya hay un taller a esa hora." : "No se ha podido guardar." };
-  await admin.from("tipos_clase").update({ duracion_min: c.duracion }).eq("id", s.tipo_id);
+  await admin.from("tipos_clase").update({ duracion_min: c.duracion, nombre_en: c.nombreEn || null }).eq("id", s.tipo_id);
 
   refrescar();
   return { mensaje: "Taller guardado." };

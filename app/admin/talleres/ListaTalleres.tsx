@@ -18,6 +18,7 @@ import FormularioTaller, { type TallerForm } from "./FormularioTaller";
 export type TallerFila = {
   id: string;
   nombre: string;
+  nombreEn: string;
   empieza_en: string;
   dia: string; // AAAA-MM-DD
   duracion_min: number;
@@ -44,6 +45,7 @@ function Tarjeta({ t, hoy }: { t: TallerFila; hoy: string }) {
   const formulario: TallerForm = {
     sesionId: t.id,
     nombre: t.nombre,
+    nombreEn: t.nombreEn,
     fecha: t.dia,
     hora: textoHora(t.empieza_en),
     duracion: t.duracion_min,
