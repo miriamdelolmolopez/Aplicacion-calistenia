@@ -141,7 +141,7 @@ function Formulario({ userId, tarifas, hoy, cerrar }: { userId: string; tarifas:
       </div>
 
       <p className={styles.ayuda}>
-        Solo se puede usar un bono de cada servicio a la vez: si ya tiene una tarifa activa de ese servicio, este bono empieza cuando termine la actual (te lo diré al guardar).
+        Solo se usa un bono de cada servicio a la vez, primero los que caducan y después los que no: si ya tiene una tarifa activa, este bono empieza cuando termine; y si lo que añades caduca y ahora usa clases que no caducan, esas se ponen en pausa (conservan sus clases) y vuelven al terminar.
       </p>
       <label className={styles.casilla}>
         <input type="checkbox" name="sumar" />

@@ -581,7 +581,7 @@ export async function anadirSinCobrar(_previo: Estado, formData: FormData): Prom
   const etiqueta = que === "tarifa" ? "Tarifa sin cobro" : "Regalo";
   const { data: nuevos, error: falloInsert } = await admin
     .from("bonos")
-    .insert(items.map((i) => ({ user_id: userId, tipo_bono_id: i.tipoId, servicio: i.servicio, clases_total: i.clases, clases_restantes: i.clases, validez_dias: que === "tarifa" && termina === "tarifa" ? i.validez : validezDias, nota: etiqueta })))
+    .insert(items.map((i) => ({ user_id: userId, tipo_bono_id: i.tipoId, servicio: i.servicio, clases_total: i.clases, clases_restantes: i.clases, validez_dias: que === "tarifa" && termina === "tarifa" ? i.validez : validezDias, nota: etiqueta, sin_caducidad: nuncaCaduca })))
     .select("id, servicio");
   if (falloInsert || !nuevos) return { error: "No se ha podido crear. Inténtalo de nuevo." };
   for (let n = 0; n < nuevos.length; n++) {
