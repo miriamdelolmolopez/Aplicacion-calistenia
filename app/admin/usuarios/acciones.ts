@@ -224,7 +224,7 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
       avisos.push(`${f.nombre}: no se pudo registrar la tarifa, hazlo en Bonos y pagos.`);
       continue;
     }
-    if (f.inicio) await fijarInicioBono(admin, bonoNuevo as string, f.inicio);
+    if (f.inicio) await fijarInicioBono(admin, bonoNuevo as string, f.inicio, f.hastaFin);
     // La base de datos pone la fecha de ahora: se corrige con la elegida y se anota el mes al que corresponde.
     const periodo = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" }).format(f.instantePago).slice(0, 7);
     await admin
@@ -446,6 +446,17 @@ export async function cambiarTarifaYFechas(_previo: Estado, formData: FormData):
     p_admin: user.id,
   });
   if (error) return { error: error.message };
+
+  // En una tarifa combinada (dos bonos de la misma compra), las fechas se cambian también en el otro.
+  if (modo !== "ninguna" && (!tipo || tipo === bono.tipo_bono_id)) {
+    const { data: base } = await admin.from("bonos").select("creado_en").eq("id", bonoId).maybeSingle();
+    const { data: hermanos } = base
+      ? await admin.from("bonos").select("id").eq("user_id", userId).eq("tipo_bono_id", bono.tipo_bono_id).eq("creado_en", base.creado_en).neq("id", bonoId)
+      : { data: [] };
+    for (const h of hermanos ?? []) {
+      await admin.rpc("cambiar_bono", { p_bono: h.id, p_tipo: null, p_desde: desde ? desde.toISOString() : null, p_hasta: hasta ? hasta.toISOString() : null, p_nota: nota, p_admin: user.id });
+    }
+  }
 
   refrescarPantallas(userId);
   return { mensaje: "Cambios guardados." };

@@ -53,6 +53,11 @@ function diasDesde(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 }
 
+// Días que le quedan hasta una fecha (0 si ya ha pasado).
+function diasHasta(iso: string): number {
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000));
+}
+
 function hace(dias: number): string {
   return dias <= 0 ? "hoy" : dias === 1 ? "ayer" : `hace ${dias} días`;
 }
@@ -287,11 +292,14 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                   <>
                     <div className={estilos.creditos}>
                       <IconoMarcador />
-                      {u.clases_restantes === null && u.plan_online_hasta ? (
-                        <span>Plan online</span>
-                      ) : (
+                      {(u.servicios.includes("grupal") || u.servicios.includes("individual") || u.servicios.includes("taller")) && (
                         <span>
-                          <b>{u.clases_restantes ?? 0}</b> {u.clases_restantes === 1 ? "crédito" : "créditos"}
+                          <b>{u.clases_restantes ?? 0}</b> {u.clases_restantes === 1 ? "clase" : "clases"}
+                        </span>
+                      )}
+                      {u.servicios.includes("online") && (
+                        <span className={estilos.diasOnline}>
+                          <b>{u.plan_online_hasta ? diasHasta(u.plan_online_hasta) : 0}</b> {u.plan_online_hasta && diasHasta(u.plan_online_hasta) === 1 ? "día" : "días"} online
                         </span>
                       )}
                     </div>

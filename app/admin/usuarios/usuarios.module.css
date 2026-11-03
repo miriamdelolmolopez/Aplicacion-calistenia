@@ -804,3 +804,8 @@
   border-color: var(--acento, #70754b);
   color: #fff;
 }
+
+/* Días que le quedan del plan online: a la derecha de la misma línea que sus clases. */
+.diasOnline {
+  margin-left: auto;
+}

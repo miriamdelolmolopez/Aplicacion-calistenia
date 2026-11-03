@@ -89,7 +89,7 @@ export default async function AdminBonos() {
   // Historial: todos los pagos, del más reciente al más antiguo.
   const { data: historialDatos } = await supabase
     .from("pagos")
-    .select("id, importe_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, persona_nombre, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))")
+    .select("id, user_id, importe_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, persona_nombre, profiles(nombre, apellidos, email, telefono), bonos(tipos_bono(nombre))")
     .order("creado_en", { ascending: false })
     .limit(1000);
   // Facturas de esos pagos (FS la normal, FSR la rectificativa de un pago anulado).
@@ -103,7 +103,9 @@ export default async function AdminBonos() {
     const fila = { numero: `${rect ? "FSR" : "FS"}-${f.anio}-${String(f.numero).padStart(3, "0")}`, enlace: `/pagos/recibo/${f.pago_id}${rect ? "" : "?tipo=original"}` };
     facturasPorPago.set(f.pago_id, [...(facturasPorPago.get(f.pago_id) ?? []), fila]);
   }
-  const historial: FilaPago[] = ((historialDatos ?? []) as unknown as (PagoPendiente & {
+  const historial: FilaPago[] = ((historialDatos ?? []) as unknown as (Omit<PagoPendiente, "profiles"> & {
+    user_id: string | null;
+    profiles: { nombre: string | null; apellidos: string | null; email: string | null; telefono: string | null } | null;
     estado: string;
     pagado_en: string | null;
     persona_nombre: string | null;
@@ -111,6 +113,9 @@ export default async function AdminBonos() {
     .map((h) => ({
       id: h.id,
       persona: h.profiles ? nombreDe(h.profiles) : h.persona_nombre || "(persona borrada)",
+      userId: h.profiles ? h.user_id : null,
+      telefono: h.profiles?.telefono ?? null,
+      email: h.profiles?.email ?? null,
       tarifa: h.bonos?.tipos_bono?.nombre ?? "Pago suelto",
       importe: h.importe_centimos,
       descuento: h.descuento_centimos,

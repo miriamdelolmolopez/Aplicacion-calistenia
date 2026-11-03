@@ -331,12 +331,12 @@ function FormAnular({ userId, pagoId }: { userId: string; pagoId: string }) {
   );
 }
 
-export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId: string; pagos: FilaPagoPersona[]; formas: FormaOpcion[]; hoy: string; ahora: string }) {
+export function HistorialPersona({ userId, pagos, formas, hoy, ahora, abrirEditar }: { userId: string; pagos: FilaPagoPersona[]; formas: FormaOpcion[]; hoy: string; ahora: string; abrirEditar?: string }) {
   if (pagos.length === 0) return <p className={styles.ayuda}>Todavía no tiene ningún pago.</p>;
   return (
     <ul className={styles.lista}>
       {pagos.map((p) => (
-        <li key={p.id} className={styles.persona}>
+        <li key={p.id} id={`pago-${p.id}`} className={styles.persona}>
           <div className={styles.personaCabecera}>
             <div>
               <strong>{p.concepto}</strong>
@@ -376,7 +376,7 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora }: { userId
             </a>
           )}
           {p.estado === "pagado" && (
-            <details>
+            <details open={abrirEditar === p.id || undefined}>
               <summary className={styles.ayuda}>Editar</summary>
               <FormEditar userId={userId} pago={p} formas={formas} hoy={hoy} />
             </details>

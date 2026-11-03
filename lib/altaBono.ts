@@ -13,7 +13,8 @@ export function inicioAltaValido(fecha: string): boolean {
 }
 
 // Pone la fecha en que empezó el bono (y la de caducidad que le corresponde). Vale también para el segundo bono de un combo.
-export async function fijarInicioBono(admin: Admin, bonoId: string, fecha: string) {
+// Si se da una fecha de fin, se usa en lugar de la que saldría por la validez de la tarifa (y se pone antes de comprobar caducidades).
+export async function fijarInicioBono(admin: Admin, bonoId: string, fecha: string, hastaFin: Date | null = null) {
   const desde = instanteMadrid(fecha, "00:00");
   if (!desde) return;
   const { data: base } = await admin.from("bonos").select("user_id, tipo_bono_id, creado_en").eq("id", bonoId).maybeSingle();
@@ -21,7 +22,7 @@ export async function fijarInicioBono(admin: Admin, bonoId: string, fecha: strin
   const { data: bonos } = await admin.from("bonos").select("id, validez_dias").eq("user_id", base.user_id).eq("tipo_bono_id", base.tipo_bono_id).eq("creado_en", base.creado_en);
   for (const b of bonos ?? []) {
     // Se cuenta por días de calendario (en hora de Madrid), para que el cambio de hora no la mueva un día.
-    const caduca = instanteMadrid(sumarDias(fecha, b.validez_dias as number), "00:00") ?? desde;
+    const caduca = hastaFin ?? instanteMadrid(sumarDias(fecha, b.validez_dias as number), "00:00") ?? desde;
     await admin.from("bonos").update({ activo_desde: desde.toISOString(), caduca_en: caduca.toISOString() }).eq("id", b.id);
   }
   await admin.rpc("refrescar_bonos", { p_user: base.user_id });
@@ -53,7 +54,7 @@ export async function aplicarTarifa(admin: Admin, userId: string, adminId: strin
     p_precio: p.precioCentimos,
   });
   if (error || !bonoNuevo) return { ok: false };
-  if (p.inicio) await fijarInicioBono(admin, bonoNuevo as string, p.inicio);
+  if (p.inicio) await fijarInicioBono(admin, bonoNuevo as string, p.inicio, p.hastaFin);
   // La base de datos pone la fecha de ahora: se corrige con la elegida y se anota el mes al que corresponde.
   const periodo = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" }).format(p.instantePago).slice(0, 7);
   await admin

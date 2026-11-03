@@ -5,11 +5,16 @@ import PanelFiltros from "../../PanelFiltros";
 import { euros } from "@/lib/formato";
 import styles from "../admin.module.css";
 import Buscador from "../comunes/Buscador";
+import { IconoContacto, IconoEditar, IconoFactura, IconoPerfil } from "../comunes/iconos";
 import comunes from "../comunes/comunes.module.css";
+import Link from "next/link";
 
 export type FilaPago = {
   id: string;
   persona: string;
+  userId: string | null; // null si la persona ya no existe
+  telefono: string | null;
+  email: string | null;
   tarifa: string;
   importe: number; // céntimos
   descuento: number; // céntimos
@@ -24,6 +29,69 @@ const ESTADOS: Record<string, string> = { pagado: "Cobrado", pendiente: "Pendien
 
 function fechaHora(iso: string): string {
   return new Date(iso).toLocaleString("es-ES", { timeZone: "Europe/Madrid", dateStyle: "short", timeStyle: "short" });
+}
+
+// Teléfono para WhatsApp: solo cifras y con el prefijo de España si falta.
+function paraWhatsapp(tel: string): string {
+  const cifras = tel.replace(/\D/g, "");
+  return cifras.length === 9 ? `34${cifras}` : cifras;
+}
+
+// Un pago con sus iconos a la derecha: editar, perfil, factura o recibo y contactar.
+function FilaDePago({ p }: { p: FilaPago }) {
+  const [contactando, setContactando] = useState(false);
+  const factura = p.estado === "anulado" ? (p.facturas.find((f) => f.numero.startsWith("FSR")) ?? p.facturas[0]) : p.facturas[0];
+  const puedeContactar = !!p.userId && !!(p.telefono || p.email);
+  return (
+    <div className={comunes.fila}>
+      <div>
+        <strong>{p.persona}</strong>
+        <div className={styles.ayuda}>
+          {p.tarifa} · {p.metodoNombre} · {fechaHora(p.fecha)}
+          {p.descuento > 0 && ` · descuento −${euros(p.descuento)}`}
+        </div>
+        {contactando && (
+          <div className={comunes.contactoPago}>
+            {p.telefono && (
+              <a href={`https://wa.me/${paraWhatsapp(p.telefono)}`} target="_blank" rel="noopener noreferrer">
+                WhatsApp
+              </a>
+            )}
+            {p.email && <a href={`mailto:${p.email}`}>Correo</a>}
+            {p.telefono && <a href={`tel:${p.telefono.replace(/\s/g, "")}`}>Llamar</a>}
+          </div>
+        )}
+      </div>
+      <div style={{ textAlign: "right" }}>
+        <strong>{euros(p.importe)}</strong>
+        <div>
+          <span className={p.estado === "pagado" ? styles.etiquetaSuave : styles.etiqueta}>{ESTADOS[p.estado] ?? p.estado}</span>
+        </div>
+      </div>
+      <div className={comunes.accionesPago}>
+        {p.userId && p.estado === "pagado" && (
+          <Link href={`/admin/usuarios/${p.userId}/pagos?pestana=historial&editar=${p.id}#pago-${p.id}`} className={comunes.icono} aria-label="Editar el pago" title="Editar el pago">
+            <IconoEditar />
+          </Link>
+        )}
+        {p.userId && (
+          <Link href={`/admin/usuarios/${p.userId}`} className={comunes.icono} aria-label="Ver perfil" title="Ver perfil">
+            <IconoPerfil />
+          </Link>
+        )}
+        {factura && (
+          <a href={factura.enlace} download className={comunes.icono} aria-label={`Descargar ${factura.numero}`} title={`Descargar ${factura.numero}`}>
+            <IconoFactura />
+          </a>
+        )}
+        {puedeContactar && (
+          <button type="button" className={comunes.icono} aria-expanded={contactando} onClick={() => setContactando((c) => !c)} aria-label="Contactar" title="Contactar">
+            <IconoContacto />
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // Historial de todos los pagos. Arriba: buscar por persona o tarifa y filtrar con el embudo.
@@ -101,26 +169,7 @@ export default function HistorialPagos({ pagos }: { pagos: FilaPago[] }) {
       </p>
       {visibles.length === 0 && <p className={comunes.sinResultados}>No hay pagos con ese filtro.</p>}
       {visibles.map((p) => (
-        <div key={p.id} className={comunes.fila}>
-          <div>
-            <strong>{p.persona}</strong>
-            <div className={styles.ayuda}>
-              {p.tarifa} · {p.metodoNombre} · {fechaHora(p.fecha)}
-              {p.descuento > 0 && ` · descuento −${euros(p.descuento)}`}
-            </div>
-            {p.facturas.map((f) => (
-              <a key={f.numero} href={f.enlace} download className={styles.ayuda} style={{ display: "inline-flex", alignItems: "center", minHeight: 40, marginRight: 14, textDecoration: "underline" }}>
-                Descargar {f.numero}
-              </a>
-            ))}
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <strong>{euros(p.importe)}</strong>
-            <div>
-              <span className={p.estado === "pagado" ? styles.etiquetaSuave : styles.etiqueta}>{ESTADOS[p.estado] ?? p.estado}</span>
-            </div>
-          </div>
-        </div>
+        <FilaDePago key={p.id} p={p} />
       ))}
     </div>
   );

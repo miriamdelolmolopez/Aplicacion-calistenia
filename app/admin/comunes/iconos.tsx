@@ -28,3 +28,29 @@ export function IconoPapelera() {
     </svg>
   );
 }
+
+export function IconoPerfil() {
+  return (
+    <svg {...base}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  );
+}
+
+export function IconoFactura() {
+  return (
+    <svg {...base}>
+      <path d="M6 3h9l4 4v14H6z" />
+      <path d="M14 3v5h5M9 13h7M9 17h7" />
+    </svg>
+  );
+}
+
+export function IconoContacto() {
+  return (
+    <svg {...base}>
+      <path d="M4 5h16v11H9l-5 4z" />
+    </svg>
+  );
+}

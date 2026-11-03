@@ -16,7 +16,7 @@ export type BonoAsistente = {
   nombre: string;
   tipoId: string;
   servicio: string;
-  estado: string; // activo | en_cola
+  estado: string; // activo | en_cola | caducado | agotado
   clasesTotal: number;
   clasesRestantes: number;
   validez: number;
@@ -78,7 +78,7 @@ function FormularioCambiar({ userId, bono, tarifas, cerrar }: { userId: string; 
   const [fin, setFin] = useState(bono.hasta ?? "");
   const [aviso, setAviso] = useState("");
 
-  const conFechas = bono.estado === "activo";
+  const conFechas = bono.estado === "activo" || bono.estado === "caducado" || bono.estado === "agotado";
   const nueva = tarifas.find((t) => t.id === tipo);
   const cambiaTarifa = tipo !== bono.tipoId && !!nueva;
   const usadas = bono.clasesTotal - bono.clasesRestantes;

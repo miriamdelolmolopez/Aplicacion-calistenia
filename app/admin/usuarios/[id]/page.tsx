@@ -228,6 +228,8 @@ export default async function FichaUsuario({
 
   // Servicios que tiene ahora (en marcha o en espera) y el texto de cada uno.
   const contratados = bonos.filter((b) => b.estado === "activo" || b.estado === "en_cola");
+  // Los caducados y agotados también se pueden corregir (tarifa y fechas); si quedan en fecha, vuelven a estar activos.
+  const terminados = bonos.filter((b) => b.estado === "caducado" || b.estado === "agotado");
   const detalleBono = (b: Bono) =>
     [
       b.servicio === "online" ? "Plan online" : `${b.clases_restantes} de ${b.clases_total} clases`,
@@ -451,7 +453,8 @@ export default async function FichaUsuario({
               <details className={estilos.accionDespliega}>
                 <summary>Editar servicios contratados</summary>
                 <div className={estilos.serviciosContratados}>
-                  {contratados.length === 0 && <p className={styles.ayuda}>Ahora mismo no tiene ningún servicio contratado.</p>}
+                  {contratados.length === 0 && terminados.length === 0 && <p className={styles.ayuda}>Ahora mismo no tiene ningún servicio contratado.</p>}
+                  {contratados.length === 0 && terminados.length > 0 && <p className={styles.ayuda}>No tiene ninguna tarifa activa. Aquí abajo puedes corregir las que han caducado o se han agotado.</p>}
                   {contratados.map((b) => (
                     <article key={b.id} className={estilos.histCard}>
                       <div className={estilos.histCabecera}>
@@ -464,6 +467,18 @@ export default async function FichaUsuario({
                       {b.estado === "activo" && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
                       <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
                       <EditorBono bonoId={b.id} anulado={false} sinAnular />
+                    </article>
+                  ))}
+                  {terminados.map((b) => (
+                    <article key={b.id} className={estilos.histCard}>
+                      <div className={estilos.histCabecera}>
+                        <div>
+                          <strong>{b.tipos_bono?.nombre}</strong>
+                          <div className={styles.ayuda}>{detalleBono(b)}</div>
+                        </div>
+                        <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                      </div>
+                      <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
                     </article>
                   ))}
                   <EditorPersona

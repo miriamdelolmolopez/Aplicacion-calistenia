@@ -232,3 +232,45 @@
   border: 1px solid rgba(23, 24, 26, 0.14);
   border-radius: 9999px;
 }
+
+/* Iconos pequeños a la derecha de cada pago del historial. */
+.accionesPago {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+.accionesPago .icono {
+  width: 30px;
+  height: 30px;
+}
+
+.accionesPago .icono svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 600px) {
+  .accionesPago {
+    max-width: 72px;
+  }
+}
+
+.contactoPago {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.contactoPago a {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--acento);
+  color: var(--acento-texto, var(--acento));
+  text-decoration: none;
+}

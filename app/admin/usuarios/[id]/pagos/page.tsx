@@ -35,9 +35,9 @@ type PagoFila = {
 };
 type DescuentoFila = { id: string; nombre: string; tipo: string; valor: number; caduca_en: string | null; usos_max: number | null; pagos: { estado: string }[] };
 
-export default async function PagosPersona({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string }> }) {
+export default async function PagosPersona({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string; editar?: string }> }) {
   const { id } = await params;
-  const { pestana: pedida } = await searchParams;
+  const { pestana: pedida, editar } = await searchParams;
   const pestana: Pestana = PESTANAS.some((x) => x.id === pedida) ? (pedida as Pestana) : "nuevo";
   await requireAdmin("usuarios");
   const admin = createAdminClient();
@@ -144,7 +144,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
       {pestana === "historial" && (
         <section className={styles.tarjeta}>
           <h2>Historial de pagos</h2>
-          <HistorialPersona userId={id} pagos={filas} formas={formas} hoy={hoy} ahora={ahora} />
+          <HistorialPersona userId={id} pagos={filas} formas={formas} hoy={hoy} ahora={ahora} abrirEditar={editar} />
         </section>
       )}
 
