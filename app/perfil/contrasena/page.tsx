@@ -27,7 +27,7 @@ export default function CambiarContrasena() {
   async function mandarEnlace() {
     setEnviando(true);
     const { data: sesion } = await createClient().auth.getUser();
-    if (sesion.user?.email) await pedirRecuperacion(sesion.user.email, idioma);
+    if (sesion.user?.email) await pedirRecuperacion(sesion.user.email);
     setEnviando(false);
     setEnviado(true);
   }

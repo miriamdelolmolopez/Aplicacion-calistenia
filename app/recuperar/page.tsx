@@ -23,7 +23,7 @@ export default function Recuperar() {
     if (!emailValido(correo)) return setError(t.errorCampo);
 
     setCargando(true);
-    await pedirRecuperacion(correo, idioma);
+    await pedirRecuperacion(correo);
     setCargando(false);
     // Siempre se muestra el mismo mensaje, exista o no el correo.
     setEnviado(true);
