@@ -810,3 +810,15 @@
 .diasOnline {
   margin-left: auto;
 }
+
+/* Cuadros de confirmación (guardar, archivar, borrar): el texto, el campo y los botones separados entre sí. */
+.confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirmacion p,
+.confirmacion ul {
+  margin: 0;
+}

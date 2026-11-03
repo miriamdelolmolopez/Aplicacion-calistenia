@@ -175,7 +175,7 @@ export default function AccesosUsuario({
       )}
 
       {accion === "guardar" && (
-        <div role="alertdialog" aria-label="Confirmar guardar" className={styles.aviso}>
+        <div role="alertdialog" aria-label="Confirmar guardar" className={`${styles.aviso} ${estilos.confirmacion}`}>
           <p>
             ¿Guardar los cambios de accesos de <strong>{nombre}</strong>?
           </p>
@@ -204,7 +204,7 @@ export default function AccesosUsuario({
       )}
 
       {accion === "archivar" && (
-        <div role="alertdialog" aria-label="Confirmar archivar" className={styles.aviso}>
+        <div role="alertdialog" aria-label="Confirmar archivar" className={`${styles.aviso} ${estilos.confirmacion}`}>
           <p>
             Vas a archivar a <strong>{nombre}</strong>.
           </p>
@@ -225,7 +225,7 @@ export default function AccesosUsuario({
       )}
 
       {accion === "borrar" && (
-        <div role="alertdialog" aria-label="Confirmar borrado" className={styles.aviso}>
+        <div role="alertdialog" aria-label="Confirmar borrado" className={`${styles.aviso} ${estilos.confirmacion}`}>
           {archivado ? (
             <>
               <p className={styles.error}>
