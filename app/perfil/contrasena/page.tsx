@@ -22,6 +22,7 @@ export default function CambiarContrasena() {
   const [guardando, setGuardando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [abierto, setAbierto] = useState(false);
 
   // Para quien no tiene contraseña (entró por invitación o con Google) o no la recuerda: se le manda un enlace para elegir una nueva.
   async function mandarEnlace() {
@@ -95,6 +96,16 @@ export default function CambiarContrasena() {
           {guardando ? t.cargando : t.cambiarContrasena}
         </button>
       </form>
+      {!(abierto || enviado || mensaje?.clave === "claveErrorActual") && (
+        <button
+          type="button"
+          onClick={() => setAbierto(true)}
+          style={{ background: "none", border: 0, padding: "10px 0", minHeight: 44, color: "var(--oliva, #0aa8c0)", textDecoration: "underline", cursor: "pointer", font: "inherit", textAlign: "left" }}
+        >
+          {t.claveSinLink}
+        </button>
+      )}
+      {(abierto || enviado || mensaje?.clave === "claveErrorActual") && (
       <div className={`${styles.tarjeta} ${estilos.seccion}`}>
         {enviado ? (
           <p className={styles.aviso} role="status">
@@ -109,6 +120,7 @@ export default function CambiarContrasena() {
           </>
         )}
       </div>
+      )}
     </main>
   );
 }
