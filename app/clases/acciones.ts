@@ -3,12 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { avisarAdminCancelacion, avisarAdminReserva, avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
+import { fechaCorta } from "@/lib/fechas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type Resultado = {
   ok: boolean;
   codigo?: string; // para el error: se traduce en la pantalla
+  dato?: string; // un dato para completar el mensaje (una fecha, o «clases que gasta|clases que quedan»)
   devuelta?: boolean;
 };
 
@@ -30,9 +32,38 @@ const ERRORES: [string, string][] = [
   ["Ya tienes plaza", "yaTienes"],
   ["ningún bono activo", "sinBono"],
   ["caduca antes", "caduca"],
+  ["gasta", "pocosCreditos"],
+  ["Ya no tienes este servicio", "sinServicio"],
   ["no es tuya", "noTuya"],
   ["ya estaba cancelada", "yaCancelada"],
 ];
+
+// Cuando no se puede reservar por la tarifa, se mira qué le pasa exactamente (caducada, agotada, caduca antes de esa clase…)
+// para decírselo con claridad.
+async function motivoTarifa(userId: string, sesionId: string, codigo: string): Promise<{ codigo: string; dato?: string }> {
+  if (!["sinBono", "caduca", "pocosCreditos"].includes(codigo)) return { codigo };
+  const admin = createAdminClient();
+  const { data: s } = await admin.from("sesiones_clase").select("tipos_clase(servicio, creditos)").eq("id", sesionId).maybeSingle();
+  const tipo = (s as unknown as { tipos_clase: { servicio: string; creditos: number | null } | null } | null)?.tipos_clase;
+  if (!tipo) return { codigo };
+  const { data } = await admin
+    .from("bonos")
+    .select("estado, caduca_en, clases_restantes, creado_en")
+    .eq("user_id", userId)
+    .eq("servicio", tipo.servicio)
+    .order("creado_en", { ascending: false });
+  const bonos = (data ?? []) as { estado: string; caduca_en: string | null; clases_restantes: number }[];
+  const activo = bonos.find((b) => b.estado === "activo");
+  if (activo) {
+    if (codigo === "caduca" && activo.caduca_en) return { codigo, dato: fechaCorta(activo.caduca_en) };
+    if (codigo === "pocosCreditos") return { codigo, dato: `${Math.max(1, tipo.creditos ?? 1)}|${activo.clases_restantes}` };
+    return { codigo };
+  }
+  const ultimo = bonos[0];
+  if (ultimo?.estado === "caducado") return { codigo: "tarifaCaducada", dato: ultimo.caduca_en ? fechaCorta(ultimo.caduca_en) : undefined };
+  if (ultimo?.estado === "agotado") return { codigo: "tarifaAgotada" };
+  return { codigo: "sinBono" };
+}
 
 function codigoDe(mensaje: string): string {
   return ERRORES.find(([trozo]) => mensaje.includes(trozo))?.[1] ?? "general";
@@ -54,7 +85,7 @@ export async function reservarClase(sesionId: string): Promise<Resultado> {
     p_user: user.id,
     p_sesion: sesionId,
   });
-  if (error) return { ok: false, codigo: codigoDe(error.message) };
+  if (error) return { ok: false, ...(await motivoTarifa(user.id, sesionId, codigoDe(error.message))) };
   after(() => Promise.all([avisarReserva(user.id, sesionId), avisarAdminReserva(user.id, sesionId)]));
   return { ok: true };
 }

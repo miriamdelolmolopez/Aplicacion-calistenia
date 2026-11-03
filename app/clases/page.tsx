@@ -61,7 +61,7 @@ type Clase = {
   incluido: boolean; // puede reservarla según lo que tiene contratado
 };
 
-type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto; clase?: Clase };
+type Aviso = { tipo: "ok" | "error"; clave: ClaveTexto; clase?: Clase; dato?: string };
 
 type Datos = {
   sinEspera: string[]; // tipos de clase sin lista de espera
@@ -250,7 +250,7 @@ export default function Clases() {
 
   async function ejecutar(
     c: Clase,
-    accion: () => Promise<{ ok: boolean; codigo?: string; devuelta?: boolean }>,
+    accion: () => Promise<{ ok: boolean; codigo?: string; devuelta?: boolean; dato?: string }>,
     claveOk: (devuelta?: boolean) => ClaveTexto,
     conCalendario = false,
   ) {
@@ -265,11 +265,15 @@ export default function Clases() {
       setAviso(
         r.ok
           ? { tipo: "ok", clave: claveOk(r.devuelta) }
-          : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto },
+          : { tipo: "error", clave: `err_${r.codigo}` as ClaveTexto, dato: r.dato, clase: c },
       );
     }
     await cargar();
   }
+
+  // El texto de un aviso, con la fecha o los números que lleve («caduca el {x}»…).
+  const textoAviso = (a: Aviso) =>
+    a.dato ? t[a.clave].replace("{x}", a.dato.split("|")[0]).replace("{y}", a.dato.split("|")[1] ?? "") : t[a.clave].replace(" {x}", "");
 
   const reservar = (c: Clase) =>
     ejecutar(c, () => reservarClase(c.id), () => (esInvitado ? "okReservadaPrueba" : "okReservada"), true);
@@ -358,9 +362,9 @@ export default function Clases() {
       {datos && !esAlumno && !esInvitado && datos.rol !== "admin" && (
         <p className={styles.aviso}>{t.soloAlumnosInfo}</p>
       )}
-      {aviso && (
+      {aviso && !(aviso.tipo === "error" && aviso.clase) && (
         <div className={aviso.tipo === "error" ? styles.error : styles.aviso} role={aviso.tipo === "error" ? "alert" : "status"}>
-          {t[aviso.clave]}
+          {textoAviso(aviso)}
         </div>
       )}
 
@@ -657,6 +661,13 @@ export default function Clases() {
                         </>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {/* Si no se puede reservar o apuntarse, el motivo sale aquí, en la tarjeta de esa clase */}
+                {aviso?.tipo === "error" && aviso.clase?.id === c.id && (
+                  <div className={styles.error} role="alert" style={{ margin: "0 16px 14px", padding: "10px 12px", borderRadius: 10, background: "rgba(194, 54, 43, 0.1)" }}>
+                    {textoAviso(aviso)}
                   </div>
                 )}
 
