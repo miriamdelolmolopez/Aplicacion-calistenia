@@ -249,6 +249,26 @@ export default function Inicio() {
       </div>
 
       <div className={estilos.contenido}>
+        {esAdmin && cumplesAdmin.length > 0 && (
+          <div className={clay.consejoEnvoltura}>
+            <span className={clay.insignia} aria-hidden="true">
+              🎂
+            </span>
+            <section className={clay.consejo}>
+              <p className={clay.consejoTexto}>
+                <strong>{idioma === "en" ? "Birthdays" : "Cumpleaños"}</strong>
+              </p>
+              <div className={estilos.cumpleLista}>
+                {cumplesAdmin.map((c) => (
+                  <span key={c.id} className={estilos.cumpleItem}>
+                    {c.nombre} · {textoCuando(c)}
+                  </span>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
         {esAdmin && <ResumenAdminTarjetas />}
 
         {esAdmin && (
@@ -271,26 +291,6 @@ export default function Inicio() {
                 {a.extra && <span>{t[a.extra]}</span>}
               </Link>
             ))}
-          </div>
-        )}
-
-        {esAdmin && cumplesAdmin.length > 0 && (
-          <div className={clay.consejoEnvoltura}>
-            <span className={clay.insignia} aria-hidden="true">
-              🎂
-            </span>
-            <section className={clay.consejo}>
-              <p className={clay.consejoTexto}>
-                <strong>{idioma === "en" ? "Birthdays" : "Cumpleaños"}</strong>
-              </p>
-              <div className={estilos.cumpleLista}>
-                {cumplesAdmin.map((c) => (
-                  <span key={c.id} className={estilos.cumpleItem}>
-                    {c.nombre} · {textoCuando(c)}
-                  </span>
-                ))}
-              </div>
-            </section>
           </div>
         )}
 
