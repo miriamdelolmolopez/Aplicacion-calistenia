@@ -53,6 +53,7 @@ export default function AccesosUsuario({
   const [excluidos, setExcluidos] = useState<string[]>(excluidosIniciales);
   const [accion, setAccion] = useState<Accion>(null);
   const [texto, setTexto] = useState("");
+  const [guardarRegistro, setGuardarRegistro] = useState(false);
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
@@ -231,12 +232,16 @@ export default function AccesosUsuario({
               <p className={styles.error}>
                 Borrado definitivo, solo si la persona lo pide por ley. Se borran su cuenta, sus datos, reservas, bonos, entrenos, progreso, fotos y aceptaciones. No se puede deshacer. Los pagos se conservan (con su nombre y DNI) por obligación fiscal.
               </p>
+              <label className={styles.casilla}>
+                <input type="checkbox" checked={guardarRegistro} onChange={(e) => setGuardarRegistro(e.target.checked)} />
+                Antes de borrarla, guardar su correo, DNI y teléfono en «Exalumnos e invitados antiguos» (para que no repita la clase de prueba). Déjalo sin marcar si pide que se borre todo.
+              </label>
               <div className={styles.campo}>
                 <label htmlFor="confirmar-borrado">Para confirmar, escribe ELIMINAR</label>
                 <input id="confirmar-borrado" value={texto} autoComplete="off" onChange={(e) => setTexto(e.target.value)} />
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button type="button" className={styles.boton} disabled={trabajando || texto.trim().toUpperCase() !== "ELIMINAR"} onClick={() => ejecutar(() => eliminarUsuario(userId), "/admin/usuarios")}>
+                <button type="button" className={styles.boton} disabled={trabajando || texto.trim().toUpperCase() !== "ELIMINAR"} onClick={() => ejecutar(() => eliminarUsuario(userId, guardarRegistro), "/admin/usuarios")}>
                   {trabajando ? "Eliminando…" : "Eliminar para siempre"}
                 </button>
                 <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={trabajando} onClick={() => { setAccion(null); setTexto(""); }}>

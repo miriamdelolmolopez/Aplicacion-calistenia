@@ -378,7 +378,8 @@ export async function desarchivarUsuario(userId: string): Promise<{ ok: boolean;
 
 // Borrado definitivo: solo para cuando la persona lo pide por ley (derecho de supresión) y siempre después de archivarla.
 // Se borran su cuenta y sus datos; los pagos se conservan (la base de datos les guarda su nombre y DNI).
-export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; error?: string }> {
+// Si «guardar» está marcado, antes de borrarla se anota en «Exalumnos e invitados antiguos» (correo, DNI y teléfono) para que no repita la clase de prueba.
+export async function eliminarUsuario(userId: string, guardar = false): Promise<{ ok: boolean; error?: string }> {
   const { user } = await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "Persona no válida." };
   if (userId === user.id) return { ok: false, error: "No puedes eliminar tu propia cuenta." };
@@ -388,6 +389,34 @@ export async function eliminarUsuario(userId: string): Promise<{ ok: boolean; er
   if (!persona) return { ok: false, error: "No se ha encontrado a esa persona." };
   if (persona.rol === "admin") return { ok: false, error: "No se puede eliminar a una administradora." };
   if (persona.rol !== "archivado") return { ok: false, error: "Primero hay que archivar a la persona. El borrado definitivo es solo para peticiones legales." };
+
+  if (guardar) {
+    const { data: ficha } = await admin.from("profiles").select("nombre, apellidos, email, dni, telefono").eq("id", userId).maybeSingle();
+    const [{ data: servs }, { data: bonosDe }, { data: pruebas }] = await Promise.all([
+      admin.from("perfil_servicios").select("servicio").eq("user_id", userId),
+      admin.from("bonos").select("servicio").eq("user_id", userId),
+      admin.from("reservas").select("id").eq("user_id", userId).eq("es_prueba", true).limit(1),
+    ]);
+    const porServicio: Record<string, string> = { grupal: "exalumno_grupal", individual: "exalumno_individual", online: "exalumno_online", taller: "exalumno_taller" };
+    const tipos = [...new Set([...(servs ?? []), ...(bonosDe ?? [])].map((s) => porServicio[s.servicio as string]).filter(Boolean))];
+    if (tipos.length === 0) tipos.push((pruebas ?? []).length > 0 ? "invitado_probo" : "invitado_sin_probar");
+    const correo = String(ficha?.email ?? "").toLowerCase();
+    const yaEsta = correo ? (await admin.from("personas_registradas").select("id").ilike("correo", correo).limit(1)).data?.length : 0;
+    if (ficha && !yaEsta) {
+      await admin.from("personas_registradas").insert({
+        nombre: [ficha.nombre, ficha.apellidos].filter(Boolean).join(" ") || null,
+        correo: correo || null,
+        dni: ficha.dni || null,
+        telefono: ficha.telefono || null,
+        origen: "manual",
+        tipo: tipos[0],
+        tipos,
+        bloquea_prueba: !(tipos.length === 1 && tipos[0] === "invitado_sin_probar"),
+        nota: "Guardada al eliminar su cuenta",
+        creado_por: user.id,
+      });
+    }
+  }
 
   if (persona.foto_path) await admin.storage.from("avatares").remove([persona.foto_path as string]);
 
