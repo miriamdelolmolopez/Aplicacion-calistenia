@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "../../Avatar";
 import styles from "../admin.module.css";
 import { cancelarClase } from "../clases/acciones";
-import { marcarAsistencia, type Asistencia } from "./acciones";
+import { apuntarAtleta, listarAtletasParaApuntar, marcarAsistencia, type Asistencia, type Atleta } from "./acciones";
 import estilos from "./reservas.module.css";
 
 export type PersonaClase = {
@@ -175,6 +175,108 @@ function CancelarClase({ clase }: { clase: ClaseDelDia }) {
   );
 }
 
+// Elegir a quién apuntar a la clase: buscador y lista de personas que tienen ese servicio y aún no están apuntadas.
+function ApuntarAtleta({ clase, alCerrar }: { clase: ClaseDelDia; alCerrar: () => void }) {
+  const router = useRouter();
+  const [atletas, setAtletas] = useState<Atleta[] | null>(null);
+  const [busca, setBusca] = useState("");
+  const [trabajando, setTrabajando] = useState<string | null>(null);
+  const [mensaje, setMensaje] = useState<{ texto: string; error: boolean } | null>(null);
+
+  useEffect(() => {
+    let vigente = true;
+    listarAtletasParaApuntar(clase.id).then((r) => {
+      if (!vigente) return;
+      if (r.ok) setAtletas(r.atletas ?? []);
+      else {
+        setAtletas([]);
+        setMensaje({ texto: r.error ?? "No se ha podido cargar la lista.", error: true });
+      }
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [clase.id]);
+
+  async function apuntar(a: Atleta) {
+    setTrabajando(a.id);
+    setMensaje(null);
+    const r = await apuntarAtleta(a.id, clase.id);
+    setTrabajando(null);
+    if (!r.ok) return setMensaje({ texto: r.error ?? "No se ha podido apuntar.", error: true });
+    setAtletas((lista) => (lista ?? []).filter((x) => x.id !== a.id));
+    setMensaje({ texto: `${a.nombre} apuntada. ${r.mensaje ?? ""}`.trim(), error: false });
+    router.refresh();
+  }
+
+  const q = busca.trim().toLowerCase();
+  const visibles = (atletas ?? []).filter((a) => !q || a.nombre.toLowerCase().includes(q) || a.correo.toLowerCase().includes(q));
+
+  return (
+    <div className={estilos.fondo} onClick={alCerrar}>
+      <div className={estilos.hoja} role="dialog" aria-label="Apuntar a una atleta" onClick={(e) => e.stopPropagation()}>
+        <div className={estilos.hojaCabecera}>
+          <h2>
+            Apuntar a una atleta · {clase.hora} {clase.nombre}
+          </h2>
+          <button type="button" className={estilos.cierra} aria-label="Cerrar" onClick={alCerrar}>
+            ✕
+          </button>
+        </div>
+        <p className={styles.ayuda}>
+          {clase.personas.length}/{clase.plazas} plazas ocupadas.
+        </p>
+        <input type="search" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nombre o correo" aria-label="Buscar por nombre o correo" autoFocus />
+        {mensaje && (
+          <p className={mensaje.error ? styles.error : styles.aviso} role={mensaje.error ? "alert" : "status"}>
+            {mensaje.texto}
+          </p>
+        )}
+        {atletas === null && <p className={styles.ayuda}>Cargando…</p>}
+        {atletas !== null && visibles.length === 0 && <p className={styles.ayuda}>{q ? "Nadie coincide con esa búsqueda." : "No hay nadie más a quien apuntar."}</p>}
+        {visibles.map((a) => (
+          <button key={a.id} type="button" className={estilos.opcionAtleta} disabled={trabajando !== null} onClick={() => apuntar(a)}>
+            <strong>{a.nombre}</strong>
+            <small>{trabajando === a.id ? "Apuntando…" : a.correo}</small>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Tres puntitos abajo a la derecha de la clase: opciones de la clase. Una clase llena no deja apuntar a nadie más.
+function MenuClase({ clase }: { clase: ClaseDelDia }) {
+  const [menu, setMenu] = useState(false);
+  const [apuntando, setApuntando] = useState(false);
+  const llena = clase.personas.length >= clase.plazas;
+
+  return (
+    <div className={estilos.menuClase}>
+      <button type="button" className={estilos.tresPuntos} aria-label="Más opciones de la clase" aria-expanded={menu} onClick={() => setMenu((m) => !m)}>
+        ⋯
+      </button>
+      {menu && (
+        <div className={estilos.menuLista} role="menu">
+          <button
+            type="button"
+            role="menuitem"
+            disabled={llena}
+            onClick={() => {
+              setMenu(false);
+              setApuntando(true);
+            }}
+          >
+            Apuntar a una atleta
+            {llena && <small> · clase llena</small>}
+          </button>
+        </div>
+      )}
+      {apuntando && <ApuntarAtleta clase={clase} alCerrar={() => setApuntando(false)} />}
+    </div>
+  );
+}
+
 // Una clase del día: título, hora y plazas; abierta por defecto con las fotos de quien está apuntado.
 export function TarjetaClase({ clase }: { clase: ClaseDelDia }) {
   const [listado, setListado] = useState<string | null | undefined>(undefined); // undefined = cerrado
@@ -216,6 +318,7 @@ export function TarjetaClase({ clase }: { clase: ClaseDelDia }) {
       {clase.personas.length === 0 && <p className={styles.ayuda}>Nadie apuntado todavía.</p>}
 
       {!clase.cancelada && <CancelarClase clase={clase} />}
+      {!clase.cancelada && !clase.pasada && <MenuClase clase={clase} />}
 
       {listado !== undefined && <Listado clase={clase} elegida={listado} alCerrar={() => setListado(undefined)} />}
     </details>

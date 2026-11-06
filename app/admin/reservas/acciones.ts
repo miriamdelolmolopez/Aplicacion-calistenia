@@ -47,6 +47,46 @@ export async function reservarComo(userId: string, sesionId: string): Promise<Re
   return { ok: true, mensaje: "Reservada. Se ha descontado una clase de su bono." };
 }
 
+export type Atleta = { id: string; nombre: string; correo: string };
+
+// Personas a las que se puede apuntar a una clase: las que tienen ese servicio y todavía no están apuntadas.
+export async function listarAtletasParaApuntar(sesionId: string): Promise<{ ok: boolean; atletas?: Atleta[]; error?: string }> {
+  await requireAdmin("reservas");
+  if (!UUID.test(sesionId)) return { ok: false, error: "Clase no válida." };
+  const admin = createAdminClient();
+
+  const { data: sesion } = await admin.from("sesiones_clase").select("tipos_clase(servicio), reservas(user_id, estado)").eq("id", sesionId).maybeSingle();
+  if (!sesion) return { ok: false, error: "No se ha encontrado la clase." };
+  const servicio = (sesion.tipos_clase as unknown as { servicio: string } | null)?.servicio ?? "grupal";
+  const apuntadas = new Set(((sesion.reservas ?? []) as { user_id: string; estado: string }[]).filter((r) => r.estado === "reservada").map((r) => r.user_id));
+
+  const { data: conServicio } = await admin.from("perfil_servicios").select("user_id").eq("servicio", servicio);
+  const ids = (conServicio ?? []).map((x) => x.user_id as string).filter((id) => !apuntadas.has(id));
+  if (ids.length === 0) return { ok: true, atletas: [] };
+
+  const { data: perfiles } = await admin.from("profiles").select("id, nombre, apellidos, email, rol, tambien_alumno").in("id", ids);
+  const atletas = (perfiles ?? [])
+    .filter((p) => p.rol === "alumno" || p.rol === "invitado" || (p.rol === "admin" && p.tambien_alumno))
+    .map((p) => ({ id: p.id as string, nombre: [p.nombre, p.apellidos].filter(Boolean).join(" ") || (p.email as string) || "(sin nombre)", correo: (p.email as string) ?? "" }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  return { ok: true, atletas };
+}
+
+// Apunta a una persona a una clase desde la propia clase. Si ya está llena, no deja.
+export async function apuntarAtleta(userId: string, sesionId: string): Promise<Resultado> {
+  await requireAdmin("reservas");
+  if (!UUID.test(userId) || !UUID.test(sesionId)) return { ok: false, error: "Datos no válidos." };
+
+  const { data: sesion } = await createAdminClient().from("sesiones_clase").select("plazas, estado, empieza_en, reservas(estado)").eq("id", sesionId).maybeSingle();
+  if (!sesion) return { ok: false, error: "No se ha encontrado la clase." };
+  if (sesion.estado !== "programada") return { ok: false, error: "Esta clase está cancelada." };
+  if (new Date(sesion.empieza_en as string) <= new Date()) return { ok: false, error: "Esta clase ya ha empezado." };
+  const ocupadas = ((sesion.reservas ?? []) as { estado: string }[]).filter((r) => r.estado === "reservada").length;
+  if (ocupadas >= (sesion.plazas as number)) return { ok: false, error: "La clase está llena." };
+
+  return reservarComo(userId, sesionId);
+}
+
 // Cancela como si lo hiciera la persona: si está fuera del plazo de cancelación, la clase le cuenta.
 export async function cancelarComo(userId: string, reservaId: string): Promise<Resultado> {
   const { user } = await requireAdmin("reservas");
