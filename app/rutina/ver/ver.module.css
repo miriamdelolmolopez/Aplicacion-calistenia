@@ -116,6 +116,15 @@
   border-radius: 18px;
 }
 
+.sesionFoto {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  background-position: center;
+  background-size: cover;
+  border-radius: 12px;
+}
+
 .sesionHecha {
   background: #e8f5ee;
 }

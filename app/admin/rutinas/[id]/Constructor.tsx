@@ -28,7 +28,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { FotoRutina, IconoBoton, PreviaAlumno, ResumenRutina, VentanaMusculos } from "./PiezasEditor";
+import { FotoEditable, FotoRutina, IconoBoton, PreviaAlumno, ResumenRutina, VentanaMusculos } from "./PiezasEditor";
 import { minutosEstimados } from "@/lib/duracion";
 import type { Estado } from "../../acciones";
 import styles from "../../admin.module.css";
@@ -127,6 +127,7 @@ export type SesionRutina = {
   id: string;
   nombre: string;
   nota: string | null;
+  foto_url: string | null;
   orden: number;
   items: ItemRutina[];
 };
@@ -466,9 +467,16 @@ function TarjetaItem({
     <div className={`${styles.itemCaja} ${enSuper ? styles.itemSuper : ""}`}>
       <div className={styles.itemCabecera}>
         {asa}
-        {ejercicio?.foto_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={ejercicio.foto_url} alt="" style={{ width: 72, height: 72, flex: "none", objectFit: "contain", borderRadius: 12, background: "var(--relleno)" }} />
+        {ejercicio && (
+          <FotoEditable
+            destino="ejercicio"
+            id={item.ejercicio_id}
+            url={ejercicio.foto_url ?? null}
+            etiqueta="este ejercicio"
+            tamano={72}
+            ajuste="contain"
+            aviso="Esta foto es la del ejercicio: se verá igual en todas las rutinas."
+          />
         )}
         <div className={styles.itemTitulo} onClick={() => setAbierto((a) => !a)} style={{ cursor: "pointer" }}>
           <strong>
@@ -791,6 +799,7 @@ function TarjetaSesion({
     <section className={styles.sesionCaja}>
       <div className={styles.itemCabecera}>
         {asa}
+        <FotoEditable destino="sesion" id={sesion.id} url={sesion.foto_url} etiqueta="la sesión" tamano={56} />
         <button
           type="button"
           onClick={() => setAbierta((a) => !a)}

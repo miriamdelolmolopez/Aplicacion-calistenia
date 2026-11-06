@@ -39,19 +39,19 @@ type Item = {
   } | null;
 };
 
-type Datos = { nombre: string; rutina: string; items: Item[]; enCurso: string | null };
+type Datos = { nombre: string; foto: string | null; rutina: string; items: Item[]; enCurso: string | null };
 
 async function cargar(id: string): Promise<Datos | null> {
   const supabase = createClient();
   const { data } = await supabase
     .from("rutina_sesiones")
     .select(
-      "nombre, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))))",
+      "nombre, foto_url, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))))",
     )
     .eq("id", id)
     .maybeSingle();
   if (!data) return null;
-  const s = data as unknown as { nombre: string; rutinas: { nombre: string; publicada_en: string | null } | null; rutina_items: Item[] };
+  const s = data as unknown as { nombre: string; foto_url: string | null; rutinas: { nombre: string; publicada_en: string | null } | null; rutina_items: Item[] };
 
   // Si Miriam cambió algún ejercicio para esta semana, se enseña esa versión.
   type Cambio = { quitado: boolean; item_id: string; series: number | null; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicio_id: string | null; ejercicios: Item["ejercicios"] };
@@ -96,6 +96,7 @@ async function cargar(id: string): Promise<Datos | null> {
   const { data: curso } = await supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle();
   return {
     nombre: s.nombre,
+    foto: s.foto_url,
     rutina: s.rutinas?.nombre ?? "",
     items: [...items].sort((a, b) => a.orden - b.orden),
     enCurso: curso?.id ?? null,
@@ -158,6 +159,8 @@ export default function Sesion() {
         {datos.rutina && `${datos.rutina} · `}
         {t.minAprox.replace("{n}", String(minutosEstimados(datos.items)))}
       </p>
+
+      {datos.foto && <div style={{ height: 150, margin: "0 0 14px", borderRadius: 18, backgroundImage: `url("${datos.foto}")`, backgroundSize: "cover", backgroundPosition: "center" }} role="img" aria-label={datos.nombre} />}
 
       <ol className={estilos.lista}>
         {datos.items.map((it, pos) => {

@@ -36,7 +36,7 @@ type Item = {
   } | null;
 };
 
-type Sesion = { id: string; nombre: string; orden: number; rutina_items: Item[] };
+type Sesion = { id: string; nombre: string; orden: number; foto_url: string | null; rutina_items: Item[] };
 
 type Datos = {
   userId: string;
@@ -59,7 +59,7 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
     supabase
       .from("rutinas")
       .select(
-        "id, nombre, estado, semanas, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
+        "id, nombre, estado, semanas, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden, foto_url, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
       )
       .match(como ? { user_id: como } : {})
       .order("publicada_en", { ascending: false }),
@@ -230,6 +230,7 @@ export default function VerRutina() {
                           <span className={estilos.check} aria-label={completada ? t.completadaLabel : undefined}>
                             {completada ? "✓" : ""}
                           </span>
+                          {s.foto_url && <span className={estilos.sesionFoto} style={{ backgroundImage: `url("${s.foto_url}")` }} aria-hidden="true" />}
                           <Link href={`/rutina/sesion/${s.id}${como ? `?como=${como}` : ""}`} className={estilos.sesionTexto}>
                             <strong>{s.nombre}</strong>
                             <span>

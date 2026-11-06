@@ -102,6 +102,27 @@ export function VentanaMusculos({ titulo, items, catalogo, cerrar }: { titulo: s
 
 // Foto de la rutina: al pulsarla sale el menú de ver, tomar, subir o quitar.
 export function FotoRutina({ rutinaId, url }: { rutinaId: string; url: string | null }) {
+  return <FotoEditable destino="rutina" id={rutinaId} url={url} etiqueta="la rutina" />;
+}
+
+// Foto que se cambia ahí mismo: de la rutina, de una sesión o de un ejercicio.
+export function FotoEditable({
+  destino,
+  id,
+  url,
+  etiqueta,
+  tamano = 88,
+  ajuste = "cover",
+  aviso,
+}: {
+  destino: "rutina" | "sesion" | "ejercicio";
+  id: string;
+  url: string | null;
+  etiqueta: string;
+  tamano?: number;
+  ajuste?: "cover" | "contain";
+  aviso?: string;
+}) {
   const router = useRouter();
   const [menu, setMenu] = useState(false);
   const [viendo, setViendo] = useState(false);
@@ -120,8 +141,8 @@ export function FotoRutina({ rutinaId, url }: { rutinaId: string; url: string | 
     try {
       const f = new FormData();
       f.append("foto", new File([await prepararFoto(archivo)], "foto.jpg", { type: "image/jpeg" }));
-      f.append("destino", "rutina");
-      f.append("id", rutinaId);
+      f.append("destino", destino);
+      f.append("id", id);
       const r = await cambiarFotoApp(f);
       if (!r.ok) setError(r.error ?? "No se ha podido subir la foto.");
       else router.refresh();
@@ -133,9 +154,9 @@ export function FotoRutina({ rutinaId, url }: { rutinaId: string; url: string | 
 
   async function quitar() {
     setMenu(false);
-    if (!window.confirm("¿Quitar la foto de la rutina?")) return;
+    if (!window.confirm(`¿Quitar la foto de ${etiqueta}?`)) return;
     setTrabajando(true);
-    const r = await quitarFotoApp("rutina", rutinaId);
+    const r = await quitarFotoApp(destino, id);
     if (!r.ok) setError(r.error ?? "No se ha podido quitar.");
     else router.refresh();
     setTrabajando(false);
@@ -148,20 +169,20 @@ export function FotoRutina({ rutinaId, url }: { rutinaId: string; url: string | 
       <button
         type="button"
         onClick={() => setMenu((m) => !m)}
-        aria-label="Foto de la rutina"
+        aria-label={`Foto de ${etiqueta}`}
         aria-expanded={menu}
         style={{
-          width: 88,
-          height: 88,
+          width: tamano,
+          height: tamano,
           padding: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "1.8rem",
+          fontSize: tamano > 60 ? "1.8rem" : "1.2rem",
           color: "var(--blanco)",
-          background: url ? `url(${url}) center / cover` : "linear-gradient(160deg, #c9c5bd, #0aa8c0)",
+          background: url ? (ajuste === "contain" ? `url(${url}) center / contain no-repeat var(--relleno)` : `url(${url}) center / cover`) : "linear-gradient(160deg, #c9c5bd, #0aa8c0)",
           border: "1px solid var(--linea)",
-          borderRadius: 20,
+          borderRadius: tamano > 60 ? 20 : 12,
           cursor: "pointer",
           opacity: trabajando ? 0.5 : 1,
         }}
@@ -169,7 +190,8 @@ export function FotoRutina({ rutinaId, url }: { rutinaId: string; url: string | 
         <span style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{trabajando ? "…" : "📷"}</span>
       </button>
       {menu && (
-        <div style={{ position: "absolute", top: 96, left: 0, zIndex: 40, width: 210, padding: "6px 0", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.14)" }}>
+        <div style={{ position: "absolute", top: tamano + 8, left: 0, zIndex: 40, width: 210, padding: "6px 0", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.14)" }}>
+          {aviso && <p className={styles.ayuda} style={{ margin: "4px 14px 6px" }}>{aviso}</p>}
           {url && (
             <button type="button" style={opcion} onClick={() => { setMenu(false); setViendo(true); }}>
               <span aria-hidden="true">👁</span> Ver foto
@@ -193,9 +215,9 @@ export function FotoRutina({ rutinaId, url }: { rutinaId: string; url: string | 
       )}
       <input ref={tomar} type="file" accept="image/*" capture="environment" hidden onChange={elegir} />
       <input ref={subir} type="file" accept="image/*" hidden onChange={elegir} />
-      {error && <p className={styles.error} style={{ position: "absolute", top: 96, left: 0, width: 220, zIndex: 41 }}>{error}</p>}
+      {error && <p className={styles.error} style={{ position: "absolute", top: tamano + 8, left: 0, width: 220, zIndex: 41 }}>{error}</p>}
       {viendo && url && (
-        <Ventana titulo="Foto de la rutina" cerrar={() => setViendo(false)}>
+        <Ventana titulo={`Foto de ${etiqueta}`} cerrar={() => setViendo(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={url} alt="" style={{ width: "100%", borderRadius: 16 }} />
         </Ventana>
