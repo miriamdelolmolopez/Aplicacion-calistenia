@@ -322,3 +322,20 @@ export function correoAutomatico(p: {
   const m = marco({ idioma: p.idioma, titulo, parrafos, boton: { texto: abrir(p.idioma), ruta: p.ruta } });
   return { para: p.para, asunto: titulo.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"'), ...m };
 }
+
+// Anuncio del tablón (solo si Miriam marca «avisar por correo»).
+export function correoAnuncio(p: { para: string; idioma: Idioma; titulo: string; texto: string; enlace: string | null }): Correo {
+  const en = p.idioma === "en";
+  const parrafos = p.texto
+    .split(/\n\s*\n/)
+    .map((x) => escapar(x.trim()).replace(/\n/g, "<br>"))
+    .filter(Boolean);
+  if (p.enlace && /^https?:\/\//i.test(p.enlace)) parrafos.push(`<a href="${escapar(p.enlace)}">${escapar(p.enlace)}</a>`);
+  const m = marco({
+    idioma: p.idioma,
+    titulo: escapar(p.titulo),
+    parrafos,
+    boton: { texto: en ? "See the notice board" : "Ver el tablón", ruta: "/tablon" },
+  });
+  return { para: p.para, asunto: p.titulo, ...m };
+}

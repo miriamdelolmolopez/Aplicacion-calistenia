@@ -2,6 +2,7 @@
 
 import { administradoras } from "@/lib/avisos";
 import { enviarCorreo } from "@/lib/email";
+import { notificarApp } from "@/lib/notificaciones";
 import { correoSolicitudBorrado } from "@/lib/plantillas-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -126,6 +127,7 @@ export async function pedirBorradoCuenta(): Promise<Resultado> {
     administradoras("admin_avisa_borrado"),
   ]);
   const nombre = [yo?.nombre, yo?.apellidos].filter(Boolean).join(" ") || "(sin nombre)";
+  await notificarApp(admins.map((a) => a.id), { tipo: "admin_borrado", titulo: `Petición de borrado de cuenta: ${nombre}`, cuerpo: yo?.email ?? "", enlace: "/admin" });
   for (const a of admins) {
     await enviarCorreo(correoSolicitudBorrado({ para: a.email, nombre, correo: yo?.email ?? "" }));
   }

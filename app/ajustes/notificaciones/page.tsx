@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
+import { guardarPreferenciaApp, obtenerPreferenciasApp } from "../../notificaciones/acciones";
+import ActivarPush from "./ActivarPush";
 import Cargando from "../../Cargando";
 import styles from "../../formularios.module.css";
 import estilos from "../../perfil/perfil.module.css";
@@ -33,6 +36,65 @@ const OPCIONES_ADMIN: { clave: Clave; es: [string, string]; en: [string, string]
   { clave: "admin_avisa_regalos", es: ["Cumpleaños", "Un correo cada día que alguien cumple años: quién es, cuántos cumple y qué se le regala."], en: ["Birthdays", "An email each day someone has a birthday: who it is, how old they turn and what gift they get."] },
   { clave: "admin_avisa_borrado", es: ["Petición de borrado de cuenta", "Cuando una persona pide que se borre su cuenta."], en: ["Account deletion request", "When a person asks for their account to be deleted."] },
 ];
+
+// Los mismos avisos, pero dentro de la app y en el móvil (campana y notificaciones del teléfono). Se activan o desactivan aparte del correo.
+type OpcionApp = { clave: string; es: [string, string]; en: [string, string] };
+const APP_ALUMNA: OpcionApp[] = [
+  { clave: "reserva", es: ["Confirmación de reserva", "Cada vez que reservas una clase."], en: ["Booking confirmation", "Each time you book a class."] },
+  { clave: "cancelacion", es: ["Cancelación de reserva", "Cada vez que cancelas una reserva."], en: ["Booking cancellation", "Each time you cancel a booking."] },
+  { clave: "recordatorio", es: ["Recordatorio de clase", "El día antes de tu clase."], en: ["Class reminder", "The day before your class."] },
+  { clave: "bono", es: ["Tu tarifa está a punto de caducar", "Unos días antes de que caduque."], en: ["Your pass is about to expire", "A few days before it expires."] },
+  { clave: "bono_clases", es: ["Se te acaban las clases", "Cuando se te agotan las clases de tu tarifa."], en: ["You are running out of classes", "When you use up the classes in your pass."] },
+  { clave: "inactividad", es: ["Llevas tiempo sin venir", "Un mensaje si pasa mucho tiempo sin que vengas."], en: ["You have been away for a while", "A message if you have not come in a long time."] },
+  { clave: "cumpleanos", es: ["Felicitación de cumpleaños", "El día de tu cumpleaños."], en: ["Birthday greeting", "On your birthday."] },
+  { clave: "mensaje", es: ["Mensajes de Miriam", "Por ejemplo, después de tu clase de prueba."], en: ["Messages from Miriam", "For example, after your trial class."] },
+  { clave: "anuncio", es: ["Anuncios del tablón", "Cuando Miriam publica un anuncio nuevo."], en: ["Notice board", "When Miriam posts a new notice."] },
+];
+const APP_ADMIN: OpcionApp[] = [
+  { clave: "admin_reserva", es: ["Alguien reserva una clase", "Cada vez que una persona se apunta a una clase."], en: ["Someone books a class", "Each time a person signs up for a class."] },
+  { clave: "admin_cancelacion", es: ["Alguien cancela una reserva", "Cada vez que una persona cancela su reserva."], en: ["Someone cancels a booking", "Each time a person cancels."] },
+  { clave: "admin_minimo", es: ["Una clase no llega al mínimo", "24 horas antes, si hay menos personas que el mínimo."], en: ["A class is below the minimum", "24 hours before, if fewer people than the minimum."] },
+  { clave: "admin_regalos", es: ["Cumpleaños", "Cada día que alguien cumple años."], en: ["Birthdays", "Each day someone has a birthday."] },
+  { clave: "admin_borrado", es: ["Petición de borrado de cuenta", "Cuando una persona pide que se borre su cuenta."], en: ["Account deletion request", "When a person asks for their account to be deleted."] },
+];
+
+function AvisosApp({ esAdmin, en }: { esAdmin: boolean; en: boolean }) {
+  const [prefs, setPrefs] = useState<Record<string, boolean> | null>(null);
+  const idioma = en ? "en" : "es";
+  const lista = esAdmin ? APP_ADMIN : APP_ALUMNA;
+
+  useEffect(() => {
+    let vigente = true;
+    obtenerPreferenciasApp().then((p) => vigente && setPrefs(p));
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  async function cambiarApp(clave: string, valor: boolean) {
+    setPrefs((p) => ({ ...(p ?? {}), [clave]: valor }));
+    await guardarPreferenciaApp(clave, valor);
+  }
+
+  if (!prefs) return null;
+  return (
+    <section className={`${styles.tarjeta} ${estilos.seccion}`}>
+      <h2 style={{ margin: 0, fontSize: "1.2rem" }}>{en ? "In the app and on your phone" : "En la app y en el móvil"}</h2>
+      <p className={styles.ayuda}>{en ? "The same notices, as notifications in the app (bell) and on your phone. They do not depend on email." : "Los mismos avisos, como notificaciones dentro de la app (campana) y en el móvil. No dependen del correo."}</p>
+      <ActivarPush />
+      {lista.map((o) => (
+        <label key={o.clave} className={estilos.interruptor}>
+          <input type="checkbox" checked={prefs[o.clave] !== false} onChange={(e) => cambiarApp(o.clave, e.target.checked)} />
+          <span>
+            <strong>{o[idioma][0]}</strong>
+            <br />
+            <small>{o[idioma][1]}</small>
+          </span>
+        </label>
+      ))}
+    </section>
+  );
+}
 
 export default function Notificaciones() {
   const [idioma] = useIdioma();
@@ -100,6 +162,7 @@ export default function Notificaciones() {
           )}
         </section>
       )}
+      {pref && <AvisosApp esAdmin={esAdmin} en={en} />}
     </main>
   );
 }

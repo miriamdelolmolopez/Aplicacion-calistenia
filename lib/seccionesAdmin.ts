@@ -25,6 +25,7 @@ export const CLAVES_SECCIONES = SECCIONES_ADMIN.map((s) => s.clave);
 // A qué sección del panel pertenece una dirección (null = no es de ninguna sección que se pueda excluir).
 const PREFIJOS: [string, string][] = [
   ["/admin/usuarios", "usuarios"],
+  ["/admin/tablon", "contenido"],
   ["/admin/importar", "importar"],
   ["/admin/registro", "registro"],
   ["/admin/presenciales", "presenciales"],

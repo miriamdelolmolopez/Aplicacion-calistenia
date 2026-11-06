@@ -1,5 +1,6 @@
 import "server-only";
 import { enviarCorreo } from "./email";
+import { notificarApp } from "./notificaciones";
 import { correoCancelacionAlumno,
   correoCancelacionParaAdmin,
   correoClaseCancelada,
@@ -7,6 +8,7 @@ import { correoCancelacionAlumno,
   correoPlazaLiberada,
   correoReserva,
   correoReservaParaAdmin,
+  fechaHora,
   type Idioma,
 } from "./plantillas-email";
 import { createAdminClient } from "./supabase/admin";
@@ -81,7 +83,14 @@ export async function protegido(nombre: string, tarea: () => Promise<void>) {
 export function avisarReserva(userId: string, sesionId: string) {
   return protegido("reserva", async () => {
     const [[persona], c] = await Promise.all([personas([userId]), clase(sesionId)]);
-    if (!persona || !c || !enviable(persona.email) || !persona.avisos_reserva) return;
+    if (!persona || !c) return;
+    await notificarApp(userId, {
+      tipo: "reserva",
+      titulo: persona.idioma === "en" ? "Your spot is booked" : "Tu plaza está reservada",
+      cuerpo: `${info(c).nombre} · ${fechaHora(c.empieza_en, persona.idioma)}`,
+      enlace: "/clases/mis-reservas",
+    });
+    if (!enviable(persona.email) || !persona.avisos_reserva) return;
     await enviarCorreo(
       correoReserva({ para: persona.email, idioma: persona.idioma, nombrePersona: persona.nombre ?? "", clase: info(c) }),
     );
@@ -92,7 +101,16 @@ export function avisarReserva(userId: string, sesionId: string) {
 export function avisarCancelacionAlumno(userId: string, sesionId: string, devuelta: boolean) {
   return protegido("cancelación", async () => {
     const [[persona], c] = await Promise.all([personas([userId]), clase(sesionId)]);
-    if (!persona || !c || !enviable(persona.email) || !persona.avisos_cancelacion) return;
+    if (!persona || !c) return;
+    await notificarApp(userId, {
+      tipo: "cancelacion",
+      titulo: persona.idioma === "en" ? "Booking cancelled" : "Reserva cancelada",
+      cuerpo: `${info(c).nombre} · ${fechaHora(c.empieza_en, persona.idioma)} · ${
+        devuelta ? (persona.idioma === "en" ? "the class is returned to you" : "se te devuelve la clase") : persona.idioma === "en" ? "the class is not returned" : "la clase no se devuelve"
+      }`,
+      enlace: "/clases/mis-reservas",
+    });
+    if (!enviable(persona.email) || !persona.avisos_cancelacion) return;
     await enviarCorreo(
       correoCancelacionAlumno({ para: persona.email, idioma: persona.idioma, nombrePersona: persona.nombre ?? "", clase: info(c), devuelta }),
     );
@@ -133,6 +151,12 @@ export function avisarAdminReserva(userId: string, sesionId: string) {
   return protegido("reserva (admin)", async () => {
     const [admins, d] = await Promise.all([administradoras("admin_avisa_reserva"), datosParaAdmin(userId, sesionId)]);
     if (!d) return;
+    await notificarApp(admins.map((a) => a.id), {
+      tipo: "admin_reserva",
+      titulo: d.prueba ? `Clase de prueba: ${d.persona}` : `Nueva reserva: ${d.persona}`,
+      cuerpo: `${d.clase.nombre} · ${fechaHora(d.clase.empieza_en, "es")} · ${d.apuntados}/${d.plazas}`,
+      enlace: "/admin/reservas",
+    });
     for (const a of admins) {
       await enviarCorreo(correoReservaParaAdmin({ para: a.email, persona: d.persona, prueba: d.prueba, clase: d.clase, apuntados: d.apuntados, plazas: d.plazas }));
     }
@@ -144,6 +168,12 @@ export function avisarAdminCancelacion(userId: string, sesionId: string, devuelt
   return protegido("cancelación (admin)", async () => {
     const [admins, d] = await Promise.all([administradoras("admin_avisa_cancelacion"), datosParaAdmin(userId, sesionId)]);
     if (!d) return;
+    await notificarApp(admins.map((a) => a.id), {
+      tipo: "admin_cancelacion",
+      titulo: `Reserva cancelada: ${d.persona}`,
+      cuerpo: `${d.clase.nombre} · ${fechaHora(d.clase.empieza_en, "es")} · ${d.apuntados}/${d.plazas}`,
+      enlace: "/admin/reservas",
+    });
     for (const a of admins) {
       await enviarCorreo(correoCancelacionParaAdmin({ para: a.email, persona: d.persona, clase: d.clase, apuntados: d.apuntados, plazas: d.plazas, devuelta }));
     }
@@ -169,6 +199,13 @@ export function avisarPlazaLiberada(sesionId: string) {
     const horas = Number(ajuste?.valor ?? 2) || 2;
 
     for (const p of lista) {
+      await notificarApp(p.id, {
+        tipo: "plaza_liberada",
+        titulo: p.idioma === "en" ? "A spot has opened up" : "Se ha liberado una plaza",
+        cuerpo: `${info(c).nombre} · ${fechaHora(c.empieza_en, p.idioma)}`,
+        enlace: "/clases",
+        ref: `${sesionId}:${new Date().toISOString().slice(0, 13)}`,
+      });
       if (!enviable(p.email)) continue;
       await enviarCorreo(
         correoPlazaLiberada({ para: p.email, idioma: p.idioma, nombrePersona: p.nombre ?? "", clase: info(c), horasPrioridad: horas }),
@@ -203,6 +240,13 @@ export function avisarClaseCancelada(sesionId: string, dias: number, enEspera: s
     const ids = [...new Set([...devuelta.keys(), ...enEspera])];
 
     for (const p of await personas(ids)) {
+      await notificarApp(p.id, {
+        tipo: "clase_cancelada",
+        titulo: p.idioma === "en" ? "Class cancelled" : "Clase cancelada",
+        cuerpo: `${info(c).nombre} · ${fechaHora(c.empieza_en, p.idioma)}${c.motivo_cancelacion ? ` · ${c.motivo_cancelacion}` : ""}`,
+        enlace: "/clases/mis-reservas",
+        ref: `${sesionId}:cancelada`,
+      });
       if (!enviable(p.email)) continue;
       await enviarCorreo(
         correoClaseCancelada({
@@ -259,6 +303,13 @@ export async function avisarMinimos(): Promise<number> {
       const apuntados = count ?? 0;
       if (apuntados >= minimo) continue;
 
+      await notificarApp(admins.map((a) => a.id), {
+        tipo: "admin_minimo",
+        titulo: `Una clase no llega al mínimo: ${info(c).nombre}`,
+        cuerpo: `${fechaHora(c.empieza_en, "es")} · ${apuntados} de ${minimo} personas`,
+        enlace: "/admin/reservas",
+        ref: c.id,
+      });
       for (const a of admins) {
         if (!(await reclamar("minimo_clase", c.id, a.id))) continue;
         const ok = await enviarCorreo(correoMinimoNoAlcanzado({ para: a.email, clase: info(c), apuntados, minimo }));

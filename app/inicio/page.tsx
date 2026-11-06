@@ -19,6 +19,8 @@ import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
+import CampanaAvisos from "../ui/CampanaAvisos";
+import TablonAnuncios from "../ui/TablonAnuncios";
 import AvisoVistaAlumna from "../AvisoVistaAlumna";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import { obtenerCumpleanosAdmin } from "./accionesAdmin";
@@ -230,6 +232,7 @@ export default function Inicio() {
           <p className={clay.saludoSub}>{t.hola}</p>
           <h1 className={clay.saludoTitulo}>{perfil.nombre}</h1>
         </div>
+        <CampanaAvisos />
       </header>
 
       <div className={clay.apilada}>
@@ -435,6 +438,8 @@ export default function Inicio() {
             </Link>
           ))}
         </div>
+
+        {!esAdmin && <TablonAnuncios limite={3} />}
       </div>
     </main>
   );

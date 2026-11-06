@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { enviarCorreo } from "./email";
+import { notificarApp, type TipoNotificacion } from "./notificaciones";
 import { administradoras, enviable, HORA, personas, protegido, reclamar, soltar, type Persona, type TipoAviso } from "./avisos";
 import { correoAutomatico, fechaHora, soloFecha } from "./plantillas-email";
 import { claveDia, sumarDias } from "./fechas";
@@ -70,6 +71,11 @@ async function enviarPrueba(tipo: "prueba_recordatorio" | "prueba_despues", cuan
     const porId = new Map((await personas(reservas.map((r) => r.user_id))).map((p) => [p.id, p]));
     for (const r of reservas) {
       const p = porId.get(r.user_id);
+      if (p) {
+        const sp = r.sesiones_clase!;
+        const cr = correo(a, { ...p, email: p.email ?? "" } as Persona & { email: string }, { clase: sp.tipos_clase?.nombre ?? "Clase", fecha: fechaHora(sp.empieza_en, p.idioma) }, tipo === "prueba_despues" ? "/tarifas" : "/clases");
+        await notificarApp(p.id, { tipo: tipo === "prueba_recordatorio" ? "recordatorio" : "mensaje", titulo: cr.asunto, cuerpo: cuerpoCorto(cr.texto), enlace: tipo === "prueba_despues" ? "/tarifas" : "/clases", ref: `${tipo}:${r.id}` });
+      }
       if (!p || !enviable(p.email)) continue;
       if (!(await reclamar(tipo, r.id, p.id))) continue;
       const s = r.sesiones_clase!;
@@ -114,6 +120,15 @@ export async function bonoPorCaducar(): Promise<number> {
 
     for (const b of bonos) {
       const p = porId.get(b.user_id);
+      if (p) {
+        await notificarApp(p.id, {
+          tipo: "bono",
+          titulo: p.idioma === "en" ? "Your pass is about to expire" : "Tu tarifa está a punto de caducar",
+          cuerpo: `${b.tipos_bono?.nombre ?? (p.idioma === "en" ? "Pass" : "Bono")} · ${soloFecha(b.caduca_en, p.idioma)}`,
+          enlace: "/cuenta",
+          ref: b.id,
+        });
+      }
       if (!p || !enviable(p.email) || !p.avisos_bono) continue;
       if (!(await reclamar("bono_caduca", b.id, p.id))) continue;
       const n = b.clases_restantes;
@@ -209,6 +224,7 @@ export async function felicitarCumpleanos(): Promise<number> {
         if (!error) descuentoCreado = nombreDescuento;
       }
 
+      await notificarApp(p.id, { tipo: "cumpleanos", titulo: p.idioma === "en" ? "Happy birthday!" : "¡Feliz cumpleaños!", cuerpo: REGALO[regalo][p.idioma].slice(0, 140), enlace: "/inicio", ref });
       const ok = await enviarCorreo(correo(a, p as Persona & { email: string }, { regalo: REGALO[regalo][p.idioma] }, "/inicio"));
       if (ok) enviados++;
 
@@ -223,6 +239,7 @@ export async function felicitarCumpleanos(): Promise<number> {
             : descuentoCreado
               ? `Un 10 % de descuento en cualquier servicio, válido 30 días (no tiene ninguna tarifa activa). Ya lo he creado en Descuentos como «${descuentoCreado}»: elígelo al cobrarle.`
               : "Ninguno: no tiene tarifa activa y no se ha podido crear el descuento; créaselo tú en Descuentos.";
+      await notificarApp(admins.map((x) => x.id), { tipo: "admin_regalos", titulo: `Hoy cumple años ${nombre}`, cuerpo: `${edad} años · ${regaloAdmin}`.slice(0, 140), enlace: "/admin", ref: `${ref}:admin` });
       for (const ad of admins) {
         await enviarCorreo(
           correoAutomatico({
@@ -266,8 +283,15 @@ async function desdeDe(clave: ClavePlantilla): Promise<number | null> {
 
 const nombreVisible = (p: Persona) => p.nombre || p.email || "(sin nombre)";
 
+// Un resumen corto del correo para la notificación de la app.
+const cuerpoCorto = (texto: string) => texto.split("\n").slice(2).join(" ").replace(/\s+/g, " ").trim().slice(0, 140);
+
+// Qué tipo de aviso de la app corresponde a cada plantilla (la bienvenida no avisa: la persona aún no ha entrado).
+const TIPO_APP: Partial<Record<ClavePlantilla, TipoNotificacion>> = { echamos_menos: "inactividad", recordatorio_clase: "recordatorio", bono_agotado: "bono_clases", aniversario: "aniversario" };
+
 // Las personas que cumplen la plantilla ahora mismo (sin contar a quien ya se le envió).
-async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidato[]> {
+// Con «paraApp» no se filtra por el correo (ni por el correo de la persona ni por sus avisos por correo) ni se quitan los ya enviados: eso lo gestiona la notificación.
+async function candidatos(clave: ClavePlantilla, dias: number, paraApp = false): Promise<Candidato[]> {
   const admin = createAdminClient();
   const ahora = Date.now();
   const hoy = claveDia(new Date(ahora).toISOString());
@@ -375,10 +399,11 @@ async function candidatos(clave: ClavePlantilla, dias: number): Promise<Candidat
   const resultado: Candidato[] = [];
   for (const b of brutos) {
     const p = porId.get(b.userId);
-    if (!p || !enviable(p.email)) continue;
-    if (b.requiere && !p[b.requiere]) continue;
+    if (!p) continue;
+    if (!paraApp && (!enviable(p.email) || (b.requiere && !p[b.requiere]))) continue;
     resultado.push({ persona: p as Persona & { email: string }, ref: b.ref, valores: b.valores(p), ruta: b.ruta });
   }
+  if (paraApp) return resultado;
 
   // Sin repetir: se quita a quien ya se le envió este mismo correo.
   if (resultado.length === 0) return resultado;
@@ -412,6 +437,14 @@ async function enviarPlantilla(clave: ClavePlantilla): Promise<number> {
       const ok = await enviarCorreo(correo(a, c.persona, c.valores, c.ruta));
       if (ok) enviados++;
       else await soltar(clave, c.ref, c.persona.id);
+    }
+    // Lo mismo, dentro de la app y en el móvil (cada persona puede desactivarlo aparte del correo).
+    const tipoApp = TIPO_APP[clave];
+    if (tipoApp) {
+      for (const c of await candidatos(clave, a.dias, true)) {
+        const cr = correo(a, { ...c.persona, email: c.persona.email ?? "" }, c.valores, c.ruta);
+        await notificarApp(c.persona.id, { tipo: tipoApp, titulo: cr.asunto, cuerpo: cuerpoCorto(cr.texto), enlace: c.ruta, ref: `${clave}:${c.ref}` });
+      }
     }
   });
   return enviados;

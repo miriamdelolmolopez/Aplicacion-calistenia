@@ -89,6 +89,12 @@ const DIBUJOS = {
       <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01" />
     </>
   ),
+  tablon: (
+    <>
+      <rect x="3" y="4" width="18" height="15" rx="2" />
+      <path d="M7 9h6M7 13h10M12 19v2M8 21h8" />
+    </>
+  ),
   lupa: (
     <>
       <circle cx="11" cy="11" r="7" />

@@ -1,0 +1,103 @@
+/* Tablón de anuncios: un corcho con notas pegadas con chinchetas. */
+.corcho {
+  color-scheme: only light;
+  margin: 18px 0 8px;
+  padding: 16px 14px 18px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.07) 0, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(0, 0, 0, 0.12) 0, transparent 45%),
+    #7a5c43;
+  box-shadow: inset 0 0 0 4px #5e4532, 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.titulo {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+  color: #f4efe6;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.notas {
+  display: grid;
+  gap: 18px;
+}
+
+.nota {
+  position: relative;
+  padding: 22px 16px 14px;
+  border-radius: 6px;
+  color: #2b2b2a;
+  background: #f4efe6;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nota h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: #2b2b2a;
+}
+
+.nota p {
+  margin: 0 0 8px;
+  white-space: pre-line;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: #2b2b2a;
+}
+
+.giraIzq {
+  transform: rotate(-1.2deg);
+}
+
+.giraDer {
+  transform: rotate(1.1deg);
+}
+
+.chincheta {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d86a5c, #a8372b);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.fijado {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  color: #f4efe6;
+  background: #5a5e3b;
+  font-size: 0.7rem;
+}
+
+.enlace {
+  display: inline-block;
+  margin-right: 12px;
+  color: #5a5e3b;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.fecha {
+  color: #5a5e3b;
+  opacity: 0.85;
+}
+
+.verTodos {
+  display: inline-block;
+  margin-top: 14px;
+  color: #f4efe6;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.vacio {
+  color: var(--texto-suave, #888);
+}
