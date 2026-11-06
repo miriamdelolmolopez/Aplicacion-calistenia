@@ -1,7 +1,7 @@
 // Tipos compartidos entre la ficha (servidor) y sus paneles «Actual» y «Reservas» (cliente).
 
 // Un periodo es una compra de tarifa: sus bonos (uno por servicio) con las fechas en las que está activa.
-export type PeriodoBono = { id: string; servicio: string; estado: string; total: number; restantes: number };
+export type PeriodoBono = { id: string; servicio: string; estado: string; total: number; restantes: number; desde: string | null; hasta: string | null };
 
 export type Periodo = {
   id: string; // la compra (tipo + momento de alta)

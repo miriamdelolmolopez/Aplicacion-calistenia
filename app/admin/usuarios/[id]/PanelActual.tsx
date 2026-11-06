@@ -86,43 +86,21 @@ function Sueltas({ sueltos }: { sueltos: Periodo[] }) {
   );
 }
 
-export default function PanelActual({ periodos: todos, reservas, tipos, userId, hoy }: { periodos: Periodo[]; reservas: ReservaFila[]; tipos: TipoClaseChip[]; userId: string; hoy: string }) {
-  const periodos = todos.filter((x) => !x.suelto);
-  const sueltos = todos.filter((x) => x.suelto);
-  const ordenados = [...periodos].sort((a, b) => (b.desde ?? "").localeCompare(a.desde ?? ""));
-  const consulta = ordenados.filter((p) => p.estado !== "en_cola");
-  const proximas = ordenados.filter((p) => p.estado === "en_cola");
-  const [elegido, setElegido] = useState<string | null>(consulta.find((p) => p.estado === "activo")?.id ?? consulta[0]?.id ?? null);
-  const p = consulta.find((x) => x.id === elegido) ?? null;
-
-  if (!p) {
-    return (
-      <>
-      <section className={styles.tarjeta}>
-        <h2>Tarifa actual</h2>
-        <p className={styles.ayuda}>No tiene ninguna tarifa activa.</p>
-        {proximas.map((x) => (
-          <p key={x.id} className={styles.ayuda}>
-            Próxima cuota: {x.nombre} · se activa cuando termine la actual.
-          </p>
-        ))}
-      </section>
-      <Sueltas sueltos={sueltos} />
-      </>
-    );
-  }
-
+// Una tarifa (compra) con sus servicios: cada servicio lleva sus propias fechas y su propio gasto de clases.
+function BloquePeriodo({ p, titulo, selector, reservas, tipos, userId, hoy }: { p: Periodo; titulo: string; selector?: React.ReactNode; reservas: ReservaFila[]; tipos: TipoClaseChip[]; userId: string; hoy: string }) {
   const ids = new Set(p.bonos.map((b) => b.id));
   const eventos: EventoCalendario[] = reservas
     .filter((r) => r.bonoId && ids.has(r.bonoId))
     .map((r) => ({ dia: r.dia, hora: r.hora, nombre: r.nombre, color: r.color, estado: r.estado, asistencia: r.asistencia }));
   const total = p.desde && p.hasta ? diasEntre(p.desde, p.hasta) + 1 : 0;
   // Sin fecha de fin (un regalo que no caduca): el calendario llega hasta dentro de dos meses.
-  const hastaCalendario = p.hasta ?? (() => {
-    const d = new Date(`${hoy}T12:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + 60);
-    return d.toISOString().slice(0, 10);
-  })();
+  const hastaCalendario =
+    p.hasta ??
+    (() => {
+      const d = new Date(`${hoy}T12:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + 60);
+      return d.toISOString().slice(0, 10);
+    })();
   const llevados = p.desde && total ? Math.min(total, Math.max(0, diasEntre(p.desde, hoy) + 1)) : 0;
   const pct = total ? Math.round((llevados / total) * 100) : 0;
   const soloOnline = p.bonos.every((b) => b.servicio === "online");
@@ -131,21 +109,8 @@ export default function PanelActual({ periodos: todos, reservas, tipos, userId, 
     <>
       <section className={styles.tarjeta}>
         <div className={estilos.periodoCabecera}>
-          <h2>{p.estado === "activo" ? "Tarifa actual" : "Tarifa anterior"}</h2>
-          {consulta.length > 1 && (
-            <div className={styles.campo}>
-              <label htmlFor="periodo-elegido">Ver periodo</label>
-              <select id="periodo-elegido" value={p.id} onChange={(e) => setElegido(e.target.value)}>
-                {consulta.map((x) => (
-                  <option key={x.id} value={x.id}>
-                    {x.estado === "activo" ? "Actual · " : ""}
-                    {x.nombre}
-                    {x.desde && x.hasta ? ` · ${dmy(x.desde)} – ${dmy(x.hasta)}` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <h2>{titulo}</h2>
+          {selector}
         </div>
         <p style={{ margin: 0 }}>
           Tarifa: <strong>{p.nombre}</strong> {p.pendiente ? <span className={estilos.sinPagar}>Sin pagar</span> : p.pagado ? <span className={estilos.activa}>Pagado</span> : <span className={estilos.activa}>Sin cobro</span>}
@@ -170,9 +135,7 @@ export default function PanelActual({ periodos: todos, reservas, tipos, userId, 
             <div className={estilos.barraProgreso} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Días del periodo">
               <div style={{ width: `${pct}%` }} />
             </div>
-            <small>
-              {p.estado === "activo" ? `Día ${llevados} de ${total}` : `${total} días`}
-            </small>
+            <small>{p.estado === "activo" ? `Día ${llevados} de ${total}` : `${total} días`}</small>
           </div>
         )}
       </section>
@@ -180,31 +143,39 @@ export default function PanelActual({ periodos: todos, reservas, tipos, userId, 
       {p.bonos.map((b) => {
         const chips = tipos.filter((t) => t.servicio === b.servicio);
         const usadas = b.total - b.restantes;
-        const diasQuedan = p.hasta ? Math.max(0, diasEntre(hoy, p.hasta) + 1) : 0;
+        const hastaServicio = b.hasta ?? p.hasta;
+        const diasQuedan = hastaServicio ? Math.max(0, diasEntre(hoy, hastaServicio) + 1) : 0;
+        const empiezaDespues = !!b.desde && b.desde > hoy && b.estado === "en_cola";
         return (
           <section key={b.id} className={styles.tarjeta}>
-           <div className={estilos.tarjetaServicio}>
-            <div>
-              <h3 style={{ margin: "0 0 8px" }}>{NOMBRE_SERVICIO[b.servicio] ?? b.servicio}</h3>
-              {chips.length > 0 && (
-                <div className={estilos.chipsClases}>
-                  {chips.map((t) => (
-                    <span key={t.nombre} style={{ background: t.color, color: t.colorTexto }}>
-                      {t.nombre}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <p className={styles.ayuda} style={{ margin: "10px 0 0" }}>
-                {b.servicio === "online"
-                  ? p.estado === "activo"
-                    ? `Le quedan ${diasQuedan} ${diasQuedan === 1 ? "día" : "días"} de plan.`
-                    : "Plan online."
-                  : `Ha reservado ${usadas} de ${b.total} · le quedan ${b.restantes}`}
-              </p>
+            <div className={estilos.tarjetaServicio}>
+              <div>
+                <h3 style={{ margin: "0 0 8px" }}>{NOMBRE_SERVICIO[b.servicio] ?? b.servicio}</h3>
+                {chips.length > 0 && (
+                  <div className={estilos.chipsClases}>
+                    {chips.map((t) => (
+                      <span key={t.nombre} style={{ background: t.color, color: t.colorTexto }}>
+                        {t.nombre}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {b.desde && hastaServicio && (
+                  <p className={styles.ayuda} style={{ margin: "10px 0 0" }}>
+                    Del {dmy(b.desde)} al {dmy(hastaServicio)}
+                    {empiezaDespues ? " · todavía no ha empezado" : ""}
+                  </p>
+                )}
+                <p className={styles.ayuda} style={{ margin: "6px 0 0" }}>
+                  {b.servicio === "online"
+                    ? b.estado === "activo"
+                      ? `Le quedan ${diasQuedan} ${diasQuedan === 1 ? "día" : "días"} de plan.`
+                      : "Plan online."
+                    : `Ha reservado ${usadas} de ${b.total} · le quedan ${b.restantes}`}
+                </p>
+              </div>
+              {b.servicio !== "online" && <div className={estilos.numeroGrande}>{b.restantes}</div>}
             </div>
-            {b.servicio !== "online" && <div className={estilos.numeroGrande}>{b.restantes}</div>}
-           </div>
           </section>
         );
       })}
@@ -215,6 +186,61 @@ export default function PanelActual({ periodos: todos, reservas, tipos, userId, 
           <CalendarioReservas meses={mesesDe(p.desde, hastaCalendario)} eventos={eventos} userId={userId} hoy={hoy} desde={p.desde} hasta={hastaCalendario} />
         </section>
       )}
+    </>
+  );
+}
+
+// Pestaña «Actual»: todas las tarifas que tiene en marcha (cada servicio con sus fechas), las que empiezan más adelante y las anteriores.
+export default function PanelActual({ periodos: todos, reservas, tipos, userId, hoy }: { periodos: Periodo[]; reservas: ReservaFila[]; tipos: TipoClaseChip[]; userId: string; hoy: string }) {
+  const periodos = todos.filter((x) => !x.suelto);
+  const sueltos = todos.filter((x) => x.suelto);
+  const ordenados = [...periodos].sort((a, b) => (b.desde ?? "").localeCompare(a.desde ?? ""));
+  const consulta = ordenados.filter((p) => p.estado !== "en_cola");
+  const proximas = ordenados.filter((p) => p.estado === "en_cola");
+  const actuales = consulta.filter((p) => p.estado === "activo");
+  const anteriores = consulta.filter((p) => p.estado !== "activo");
+  const [elegido, setElegido] = useState<string>(actuales.length > 0 ? "actual" : (anteriores[0]?.id ?? "actual"));
+
+  const selector =
+    anteriores.length > 0 ? (
+      <div className={styles.campo}>
+        <label htmlFor="periodo-elegido">Ver</label>
+        <select id="periodo-elegido" value={elegido} onChange={(e) => setElegido(e.target.value)}>
+          {actuales.length > 0 && <option value="actual">{actuales.length === 1 ? "Tarifa actual" : "Tarifas actuales"}</option>}
+          {anteriores.map((x) => (
+            <option key={x.id} value={x.id}>
+              {x.nombre}
+              {x.desde && x.hasta ? ` · ${dmy(x.desde)} – ${dmy(x.hasta)}` : ""}
+            </option>
+          ))}
+        </select>
+      </div>
+    ) : undefined;
+
+  const mostrarAnterior = elegido !== "actual" ? anteriores.find((x) => x.id === elegido) : undefined;
+  const mostrados = mostrarAnterior ? [mostrarAnterior] : actuales;
+
+  return (
+    <>
+      {mostrados.length === 0 && (
+        <section className={styles.tarjeta}>
+          <h2>Tarifa actual</h2>
+          <p className={styles.ayuda}>No tiene ninguna tarifa activa.</p>
+          {selector}
+        </section>
+      )}
+      {mostrados.map((p, n) => (
+        <BloquePeriodo
+          key={p.id}
+          p={p}
+          titulo={mostrarAnterior ? "Tarifa anterior" : mostrados.length > 1 ? `Tarifa actual ${n + 1}` : "Tarifa actual"}
+          selector={n === 0 ? selector : undefined}
+          reservas={reservas}
+          tipos={tipos}
+          userId={userId}
+          hoy={hoy}
+        />
+      ))}
 
       <Sueltas sueltos={sueltos} />
 
@@ -222,9 +248,14 @@ export default function PanelActual({ periodos: todos, reservas, tipos, userId, 
         <section className={styles.tarjeta}>
           <h3 style={{ margin: 0 }}>Próximas cuotas</h3>
           <ul className={styles.lista}>
-            {proximas.map((x) => (
-              <li key={x.id}>{x.nombre} · se activa cuando termine la actual</li>
-            ))}
+            {proximas.map((x) => {
+              const empieza = x.bonos.map((b) => b.desde).filter((d): d is string => !!d && d > hoy).sort()[0];
+              return (
+                <li key={x.id}>
+                  {x.nombre} · {empieza ? `empieza el ${dmy(empieza)}` : "se activa cuando termine la actual"}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

@@ -97,6 +97,7 @@ function Formulario({ userId, tarifas, hoy, cerrar }: { userId: string; tarifas:
       <div className={styles.campo}>
         <label htmlFor="as-sc-inicio">Desde cuándo</label>
         <input id="as-sc-inicio" name="inicio" type="date" defaultValue={hoy} />
+        <small className={styles.ayuda}>Si pones un día que todavía no ha llegado, empieza ese día y no se puede usar antes.</small>
       </div>
 
       <fieldset className={styles.grupo}>

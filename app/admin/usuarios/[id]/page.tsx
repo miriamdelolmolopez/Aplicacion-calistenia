@@ -284,7 +284,7 @@ export default async function FichaUsuario({
       hasta: hastas.length ? claveDia(hastas.sort().reverse()[0]) : null,
       pagado: bs.some((b) => b.pagos.some((x) => x.estado === "pagado")),
       pendiente: bs.some((b) => b.pagos.some((x) => x.estado === "pendiente")),
-      bonos: bs.map((b) => ({ id: b.id, servicio: b.servicio, estado: b.estado, total: b.clases_total, restantes: b.clases_restantes })),
+      bonos: bs.map((b) => ({ id: b.id, servicio: b.servicio, estado: b.estado, total: b.clases_total, restantes: b.clases_restantes, desde: b.activo_desde ? claveDia(b.activo_desde) : null, hasta: b.caduca_en ? claveDia(b.caduca_en) : null })),
     };
   });
   const reservasLista: ReservaFila[] = ((todasDatos ?? []) as unknown as ReservaCalendario[])

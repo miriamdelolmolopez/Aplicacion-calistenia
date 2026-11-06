@@ -25,6 +25,12 @@ export async function fijarInicioBono(admin: Admin, bonoId: string, fecha: strin
     const caduca = hastaFin ?? instanteMadrid(sumarDias(fecha, b.validez_dias as number), "00:00") ?? desde;
     await admin.from("bonos").update({ activo_desde: desde.toISOString(), caduca_en: caduca.toISOString() }).eq("id", b.id);
   }
+  // Si empieza en el futuro, el bono espera (sin usar todavía) y se activa solo ese día.
+  if (desde.getTime() > Date.now()) {
+    const { data: grupo } = await admin.from("bonos").select("id, clases_total, clases_restantes, estado").eq("user_id", base.user_id).eq("tipo_bono_id", base.tipo_bono_id).eq("creado_en", base.creado_en);
+    const sinUsar = (grupo ?? []).filter((b) => b.estado === "activo" && b.clases_restantes === b.clases_total).map((b) => b.id as string);
+    if (sinUsar.length > 0) await admin.from("bonos").update({ estado: "en_cola" }).in("id", sinUsar);
+  }
   await admin.rpc("refrescar_bonos", { p_user: base.user_id });
 }
 

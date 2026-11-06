@@ -639,14 +639,20 @@ export async function anadirSinCobrar(_previo: Estado, formData: FormData): Prom
   const { data: despues } = await admin.from("bonos").select("id, estado, activo_desde, caduca_en").in("id", nuevos.map((n) => n.id));
   const activados = (despues ?? []).filter((b) => b.estado === "activo");
   const enCola = (despues ?? []).filter((b) => b.estado === "en_cola");
-  if (activados.length > 0) {
-    await fijarInicioBono(admin, activados[0].id as string, desdeDia, que === "tarifa" && termina === "tarifa" ? null : hastaFin);
-    if (nuncaCaduca) await admin.from("bonos").update({ caduca_en: null }).in("id", activados.map((b) => b.id));
+  // Con fecha de inicio en el futuro, el bono espera y se activa solo ese día (aunque la persona no tenga otra tarifa).
+  const futuro = desdeDia > hoyDia;
+  if (activados.length > 0 || (futuro && enCola.length > 0)) {
+    const base = activados.length > 0 ? activados : enCola;
+    await fijarInicioBono(admin, base[0].id as string, desdeDia, que === "tarifa" && termina === "tarifa" ? null : hastaFin);
+    if (nuncaCaduca) await admin.from("bonos").update({ caduca_en: null }).in("id", base.map((b) => b.id));
   }
+  const { data: finales } = await admin.from("bonos").select("estado").in("id", nuevos.map((n) => n.id));
+  const yaActivo = (finales ?? []).some((b) => b.estado === "activo");
 
   let mensaje = `${que === "tarifa" ? `Tarifa «${nombreTarifa}» añadida` : "Clases añadidas"} sin cobrar.`;
-  if (activados.length > 0) mensaje += " Ya puede usarlo.";
-  if (enCola.length > 0) mensaje += " Ya tenía una tarifa activa de ese servicio, así que empezará cuando termine la actual.";
+  if (futuro) mensaje += ` Empezará el ${desdeDia.slice(8, 10)}/${desdeDia.slice(5, 7)}/${desdeDia.slice(0, 4)}.`;
+  else if (yaActivo) mensaje += " Ya puede usarlo.";
+  else if (enCola.length > 0) mensaje += " Ya tenía una tarifa activa de ese servicio, así que empezará cuando termine la actual.";
   refrescarPantallas(userId);
   revalidatePath(`/admin/usuarios/${userId}/pagos`);
   return { mensaje };
