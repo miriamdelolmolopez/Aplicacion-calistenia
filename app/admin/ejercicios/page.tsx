@@ -182,6 +182,18 @@ export default async function Ejercicios({
                 return (
                   <li key={e.id} className={styles.persona}>
                     <div className={styles.personaCabecera}>
+                      <div style={{ display: "flex", gap: 12, minWidth: 0, flex: 1 }}>
+                      <span
+                        role="img"
+                        aria-label={fotos.get(e.id) ? `Foto de ${e.nombre}` : "Sin foto"}
+                        style={{
+                          flex: "none",
+                          width: 72,
+                          height: 72,
+                          borderRadius: 12,
+                          background: fotos.get(e.id) ? `url("${fotos.get(e.id)}") center / contain no-repeat var(--relleno)` : "var(--relleno)",
+                        }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <strong>{e.nombre}</strong>
                         {e.nombre_en && <div className={styles.ayuda}>{e.nombre_en}</div>}
@@ -206,6 +218,7 @@ export default async function Ejercicios({
                             <strong>Material:</strong> {e.materiales.map(nombreMaterial).join(", ")}
                           </div>
                         )}
+                      </div>
                       </div>
                       <AccionesEjercicio
                         id={e.id}
