@@ -33,6 +33,7 @@ import {
   obtenerCoachesClases,
   soyCoach,
   reservarClase,
+  obtenerAvisosApuntados,
   obtenerCanceladas,
   salirListaEspera,
   unirseListaEspera,
@@ -211,6 +212,8 @@ function PantallaClases() {
   const [yo, setYo] = useState<{ id: string; esCoach: boolean }>({ id: "", esCoach: false });
   // Quién ha cancelado cada clase (solo la ven la administradora y el coach de esa clase).
   const [canceladas, setCanceladas] = useState<Record<string, CanceladaClase[]>>({});
+  // Quién tiene un pago pendiente (rojo) o está probando como invitado/a (naranja); lo ven la administradora y el coach.
+  const [avisosApuntados, setAvisosApuntados] = useState<Record<string, "pendiente" | "prueba">>({});
 
   // (se pide cuando se sabe quién es la persona y las clases que se ven)
   const puedeVerCanceladas = datos?.rol === "admin" || yo.esCoach;
@@ -225,6 +228,17 @@ function PantallaClases() {
         const f = await obtenerFotos(ids);
         if (vigente) setFotos((previas) => ({ ...previas, ...f }));
       }
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [datos, puedeVerCanceladas]);
+
+  useEffect(() => {
+    if (!datos || !puedeVerCanceladas) return;
+    let vigente = true;
+    obtenerAvisosApuntados([...datos.pasadas, ...datos.lista].map((c) => c.id)).then((r) => {
+      if (vigente) setAvisosApuntados(r);
     });
     return () => {
       vigente = false;
@@ -591,7 +605,11 @@ function PantallaClases() {
                         if (veApuntados && c.apuntados_ids[i]) {
                           const id = c.apuntados_ids[i];
                           return (
-                            <span key={i} className={estilos.cuadrado} title={c.apuntados[i]}>
+                            <span
+                              key={i}
+                              className={`${estilos.cuadrado} ${avisosApuntados[id] === "pendiente" ? estilos.avisoPago : avisosApuntados[id] === "prueba" ? estilos.avisoPrueba : ""}`}
+                              title={`${c.apuntados[i]}${avisosApuntados[id] === "pendiente" ? " · pago pendiente" : avisosApuntados[id] === "prueba" ? " · invitado/a en prueba" : ""}`}
+                            >
                               {fotos[id] ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={fotos[id]} alt={c.apuntados[i]} />
@@ -609,6 +627,13 @@ function PantallaClases() {
                         );
                       })}
                     </button>
+
+                    {c.apuntados_ids.some((id) => avisosApuntados[id]) && (
+                      <p className={estilos.leyendaAvisos}>
+                        {c.apuntados_ids.some((id) => avisosApuntados[id] === "pendiente") && <span className={estilos.puntoRojo}>Pago pendiente</span>}
+                        {c.apuntados_ids.some((id) => avisosApuntados[id] === "prueba") && <span className={estilos.puntoNaranja}>Invitado/a en prueba</span>}
+                      </p>
+                    )}
 
                     {verNombres === c.id && veApuntados && (
                       <p className={estilos.nombres}>

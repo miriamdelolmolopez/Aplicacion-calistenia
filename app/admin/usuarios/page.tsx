@@ -5,8 +5,9 @@ import styles from "../admin.module.css";
 import ListaUsuarios, { type Usuario } from "./ListaUsuarios";
 import { formasActivas } from "@/lib/formasPago";
 import NuevoUsuario, { type DescuentoOpcion, type TarifaOpcion } from "./NuevoUsuario";
+import InvitacionesEnviadas, { type InvitacionFila } from "./InvitacionesEnviadas";
 import CabeceraAdmin from "../CabeceraAdmin";
-import { claveDia, textoHora } from "@/lib/fechas";
+import { claveDia, fechaCorta, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { esSuelto, nombreVisible } from "@/lib/regalos";
 
@@ -168,6 +169,13 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
     foto: foto_path ? (firmadas?.find((f) => f.path === foto_path)?.signedUrl ?? null) : null,
   }));
 
+  // Invitaciones por correo cuya persona todavía no tiene cuenta.
+  const { data: invitacionesDatos } = await createAdminClient().from("invitaciones").select("id, correo, enviado, creada_en").order("creada_en", { ascending: false }).limit(100);
+  const conCuenta = new Set(filas.map((f) => String(f.email ?? "").toLowerCase()));
+  const invitaciones: InvitacionFila[] = ((invitacionesDatos ?? []) as { id: string; correo: string; enviado: boolean; creada_en: string }[])
+    .filter((i) => !conCuenta.has(i.correo.toLowerCase()))
+    .map((i) => ({ id: i.id, correo: i.correo, enviado: i.enviado, creada: fechaCorta(i.creada_en) }));
+
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>
@@ -190,6 +198,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
           )
         )}
       </p>
+      {!verArchivadas && <InvitacionesEnviadas invitaciones={invitaciones} />}
       <ListaUsuarios usuarios={usuarios} />
     </main>
   );

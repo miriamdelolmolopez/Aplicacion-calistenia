@@ -199,6 +199,37 @@ export async function obtenerCanceladas(sesionIds: string[]): Promise<Record<str
   return salida;
 }
 
+// Quién de los apuntados tiene un pago pendiente («pendiente», rojo) o está probando como invitado/a («prueba», naranja).
+// Solo lo ve la administradora y, de sus propias clases, el coach.
+export async function obtenerAvisosApuntados(sesionIds: string[]): Promise<Record<string, "pendiente" | "prueba">> {
+  const user = await personaActual();
+  if (!user || sesionIds.length === 0) return {};
+  const admin = createAdminClient();
+  const { data: yo } = await admin.from("profiles").select("rol, es_coach").eq("id", user.id).maybeSingle();
+  if (yo?.rol !== "admin" && !yo?.es_coach) return {};
+
+  let consulta = admin.from("sesiones_clase").select("id").in("id", sesionIds.slice(0, 300)).eq("estado", "programada");
+  if (yo?.rol !== "admin") consulta = consulta.eq("coach_id", user.id);
+  const { data: sesiones } = await consulta;
+  const ids = (sesiones ?? []).map((s) => s.id as string);
+  if (ids.length === 0) return {};
+
+  const { data: reservas } = await admin.from("reservas").select("user_id, es_prueba").in("sesion_id", ids).eq("estado", "reservada");
+  const filas = (reservas ?? []) as { user_id: string; es_prueba: boolean | null }[];
+  const personas = [...new Set(filas.map((f) => f.user_id))];
+  if (personas.length === 0) return {};
+
+  const [{ data: pagos }, { data: invitados }] = await Promise.all([
+    admin.from("pagos").select("user_id").in("user_id", personas).eq("estado", "pendiente"),
+    admin.from("profiles").select("id").in("id", personas).eq("rol", "invitado"),
+  ]);
+  const salida: Record<string, "pendiente" | "prueba"> = {};
+  for (const f of filas) if (f.es_prueba) salida[f.user_id] = "prueba";
+  for (const i of invitados ?? []) salida[i.id as string] = "prueba";
+  for (const p of pagos ?? []) salida[p.user_id as string] = "pendiente";
+  return salida;
+}
+
 // Si la persona que llama es coach (y su id).
 export async function soyCoach(): Promise<{ id: string; esCoach: boolean }> {
   const user = await personaActual();

@@ -503,3 +503,35 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Para la administradora y el coach: borde rojo = pago pendiente, naranja = invitado/a en prueba. */
+.avisoPago {
+  box-shadow: 0 0 0 2px #d64545, 0 0 10px 2px rgba(214, 69, 69, 0.55);
+}
+
+.avisoPrueba {
+  box-shadow: 0 0 0 2px #e8912d, 0 0 10px 2px rgba(232, 145, 45, 0.55);
+}
+
+.leyendaAvisos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+}
+
+.puntoRojo::before,
+.puntoNaranja::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #d64545;
+}
+
+.puntoNaranja::before {
+  background: #e8912d;
+}

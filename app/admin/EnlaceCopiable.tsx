@@ -18,11 +18,16 @@ export default function EnlaceCopiable({ enlace }: { enlace: string }) {
   }
 
   return (
-    <div className={styles.enlaceCaja}>
-      <input readOnly value={enlace} aria-label="Enlace personal" />
-      <button type="button" className={styles.boton} onClick={copiar}>
-        {copiado ? "¡Copiado!" : "Copiar"}
-      </button>
-    </div>
+    <>
+      <div className={styles.enlaceCaja}>
+        <input readOnly value={enlace} aria-label="Enlace personal" />
+        <button type="button" className={styles.boton} onClick={copiar}>
+          {copiado ? "¡Copiado!" : "Copiar"}
+        </button>
+      </div>
+      <p className={styles.ayuda}>
+        <strong>No abras este enlace tú:</strong> inicia sesión como la persona que lo abra primero (y solo funciona una vez). Cópialo y mándaselo.
+      </p>
+    </>
   );
 }

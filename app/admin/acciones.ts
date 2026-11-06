@@ -119,6 +119,15 @@ export async function marcarBorradoAtendido(formData: FormData): Promise<void> {
   revalidatePath("/admin/personas");
 }
 
+// Con cuántos días de antelación se enseñan los cumpleaños en Administración (0 = solo el mismo día).
+export async function guardarAntelacionCumples(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const dias = Math.floor(Number(formData.get("dias")));
+  if (!(dias >= 0 && dias <= 60)) return;
+  await createAdminClient().from("ajustes").upsert({ clave: "cumple_aviso_dias", valor: String(dias), actualizado_en: new Date().toISOString() });
+  revalidatePath("/admin");
+}
+
 // Enlace nuevo para que una persona elija contraseña (alta caducada u olvido).
 export async function enlaceNuevo(_previo: Estado, formData: FormData): Promise<Estado> {
   await requireAdmin();

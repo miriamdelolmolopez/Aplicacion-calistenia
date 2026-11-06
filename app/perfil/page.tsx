@@ -1,5 +1,6 @@
 "use client";
 
+import { esSuelto, nombreVisible } from "@/lib/regalos";
 import Link from "next/link";
 import MenuFoto from "../MenuFoto";
 import { useEffect, useState } from "react";
@@ -150,7 +151,7 @@ export default function Perfil() {
             {!activo && `${t.siguiente}: `}
             {nombreServicio(b.servicio)}
           </span>
-          <h3 className={clay.progresoNombre}>{b.nombre ? tr(b.nombre) : nombreServicio(b.servicio)}</h3>
+          <h3 className={clay.progresoNombre}>{b.nombre ? (esSuelto(b.nombre) ? nombreVisible(b.nombre, idioma) : tr(b.nombre)) : nombreServicio(b.servicio)}</h3>
           <div className={clay.metaFila}>
             <span className={clay.metaChip}>
               <IconoCorona />

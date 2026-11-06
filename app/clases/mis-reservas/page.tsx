@@ -1,5 +1,6 @@
 "use client";
 
+import { esSuelto, nombreVisible } from "@/lib/regalos";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
@@ -176,7 +177,7 @@ export default function MisReservas() {
           <section key={b.id} className={clay.tarjetaProgreso} style={{ marginBottom: 12 }}>
             <div className={clay.progresoInfo}>
               <span className={clay.eyebrow}>{nombreServicio(b.servicio)}</span>
-              <h3 className={clay.progresoNombre}>{tr(b.nombre)}</h3>
+              <h3 className={clay.progresoNombre}>{esSuelto(b.nombre) ? nombreVisible(b.nombre, idioma) : tr(b.nombre)}</h3>
               <div className={clay.metaFila}>
                 <span className={clay.metaChip}>
                   <IconoCorona />

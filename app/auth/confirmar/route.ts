@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
   try {
     const { data } = await supabase.auth.getUser();
     const u = data.user;
-    if (u && Date.now() - new Date(u.created_at).getTime() < 2 * 60 * 1000 && !(await puedeRegistrarse(searchParams.get("c")))) {
+    // Solo para las cuentas que llegan por Google (código). Un enlace de alta que manda la administradora (token) nunca se borra.
+    if (codigo && u && Date.now() - new Date(u.created_at).getTime() < 2 * 60 * 1000 && !(await puedeRegistrarse(searchParams.get("c")))) {
       const admin = createAdminClient();
       const { data: perfil } = await admin.from("profiles").select("rol").eq("id", u.id).maybeSingle();
       if (!perfil || perfil.rol === "invitado") {

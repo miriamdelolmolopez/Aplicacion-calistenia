@@ -78,6 +78,28 @@ type FilaAlta = { servicio: string; tarifa: string; inicio: string; fin: string;
 type FilaPreparada = FilaAlta & { nombre: string; desde: Date | null; instantePago: Date; hastaFin: Date | null };
 
 // Crea a una persona nueva desde «+» en Usuarios.
+// Vuelve a mandar una invitación que no llegó (o que quieres repetir).
+export async function reenviarInvitacion(invitacionId: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin("usuarios");
+  if (!/^[0-9a-f-]{36}$/i.test(invitacionId)) return { ok: false, error: "Invitación no válida." };
+  const admin = createAdminClient();
+  const { data: inv } = await admin.from("invitaciones").select("correo, idioma").eq("id", invitacionId).maybeSingle();
+  if (!inv) return { ok: false, error: "No se ha encontrado la invitación." };
+  const enviado = await enviarCorreo(correoInvitacion({ para: inv.correo as string, alumno: false, ruta: "/registro", idioma: inv.idioma === "en" ? "en" : "es" }));
+  if (enviado) await admin.from("invitaciones").update({ enviado: true, creada_en: new Date().toISOString() }).eq("id", invitacionId);
+  revalidatePath("/admin/usuarios");
+  return enviado ? { ok: true } : { ok: false, error: "No se ha podido enviar el correo. Inténtalo más tarde." };
+}
+
+// Quita una invitación de la lista (no borra ninguna cuenta).
+export async function quitarInvitacion(invitacionId: string): Promise<{ ok: boolean }> {
+  await requireAdmin("usuarios");
+  if (!/^[0-9a-f-]{36}$/i.test(invitacionId)) return { ok: false };
+  await createAdminClient().from("invitaciones").delete().eq("id", invitacionId);
+  revalidatePath("/admin/usuarios");
+  return { ok: true };
+}
+
 // Invitada: se le manda un correo con el enlace para crear su cuenta.
 // Alumna: se crea su cuenta con sus servicios y, si se elige, su bono (con el pago hecho o pendiente);
 // se le manda el correo para elegir contraseña y también se devuelve el enlace (por si prefieres WhatsApp).
@@ -98,9 +120,12 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
     const prueba = String(formData.get("prueba") ?? "normal");
     if (prueba === "normal") {
       const enviado = await enviarCorreo(correoInvitacion({ para: correo, alumno: false, ruta: "/registro", idioma }));
+      // Se apunta en «Invitaciones enviadas» (aunque el correo falle) para poder reenviarla después.
+      await admin.from("invitaciones").insert({ correo, idioma, enviado, creada_por: user.id });
+      revalidatePath("/admin/usuarios");
       return enviado
-        ? { mensaje: `Invitación enviada a ${correo}. Cuando cree su cuenta aparecerá en la lista.` }
-        : { error: "No se ha podido enviar el correo. Inténtalo de nuevo." };
+        ? { mensaje: `Invitación enviada a ${correo}. Hasta que cree su cuenta la verás en «Invitaciones enviadas», en Usuarios.` }
+        : { error: "No se ha podido enviar el correo. Queda guardada en «Invitaciones enviadas», en Usuarios, para reenviarla cuando se pueda." };
     }
 
     // Prueba gratuita a medida: clases (presencial) o días de rutina (online), con sus fechas.
