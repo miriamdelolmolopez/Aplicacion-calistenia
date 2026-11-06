@@ -10,7 +10,7 @@ import { TEXTO_TIPO, TIPOS_PERSONA } from "./tipos";
 
 export const metadata = { title: "Exalumnos e invitados antiguos · Administración" };
 
-type Fila = { id: string; nombre: string | null; correo: string | null; dni: string | null; telefono: string | null; origen: string; tipo: string; bloquea_prueba: boolean; nota: string | null; creado_en: string };
+type Fila = { id: string; nombre: string | null; correo: string | null; dni: string | null; telefono: string | null; origen: string; tipos: string[] | null; tipo: string; bloquea_prueba: boolean; nota: string | null; creado_en: string };
 
 // Personas que no tienen cuenta en la app: exalumnos e invitados antiguos. También entran solas las personas que reservan su clase de prueba.
 export default async function Exalumnos({ searchParams }: { searchParams: Promise<{ tipo?: string }> }) {
@@ -18,12 +18,13 @@ export default async function Exalumnos({ searchParams }: { searchParams: Promis
   const { tipo: filtro } = await searchParams;
   const { data } = await createAdminClient()
     .from("personas_registradas")
-    .select("id, nombre, correo, dni, telefono, origen, tipo, bloquea_prueba, nota, creado_en")
+    .select("id, nombre, correo, dni, telefono, origen, tipo, tipos, bloquea_prueba, nota, creado_en")
     .order("creado_en", { ascending: false })
     .limit(1000);
   const todas = (data ?? []) as Fila[];
-  const cuenta = (t: string) => todas.filter((f) => f.tipo === t).length;
-  const filas = filtro && TEXTO_TIPO[filtro] ? todas.filter((f) => f.tipo === filtro) : todas;
+  const tiposDe = (f: Fila) => (f.tipos && f.tipos.length > 0 ? f.tipos : [f.tipo]);
+  const cuenta = (t: string) => todas.filter((f) => tiposDe(f).includes(t)).length;
+  const filas = filtro && TEXTO_TIPO[filtro] ? todas.filter((f) => tiposDe(f).includes(filtro)) : todas;
 
   return (
     <main className={styles.pagina}>
@@ -59,7 +60,7 @@ export default async function Exalumnos({ searchParams }: { searchParams: Promis
           {filas.map((f) => (
             <li key={f.id} style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <span>
-                <strong>{f.nombre ?? "Sin nombre"}</strong> · {TEXTO_TIPO[f.tipo] ?? f.tipo}
+                <strong>{f.nombre ?? "Sin nombre"}</strong> · {tiposDe(f).map((x) => TEXTO_TIPO[x] ?? x).join(" + ")}
                 <br />
                 <span className={styles.ayuda}>
                   {[f.correo, f.dni, f.telefono].filter(Boolean).join(" · ") || "—"} · {f.origen === "manual" ? "añadida a mano" : "reservó su clase de prueba"} · {fechaCorta(f.creado_en)}

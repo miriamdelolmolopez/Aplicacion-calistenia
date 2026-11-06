@@ -8,32 +8,42 @@ import { TIPOS_PERSONA } from "./tipos";
 
 export default function FormularioPersona() {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(anadirPersona, {});
-  const [tipo, setTipo] = useState<string>(TIPOS_PERSONA[0].valor);
-  const [bloquea, setBloquea] = useState<boolean>(TIPOS_PERSONA[0].bloquea);
+  const [tipos, setTipos] = useState<string[]>([]);
+  const [bloquea, setBloquea] = useState<boolean>(true);
   const formulario = useRef<HTMLFormElement>(null);
+  // Al guardar bien, el formulario se vacía (las casillas se reinician aquí y los campos de texto en el efecto).
+  const [visto, setVisto] = useState(estado);
+  if (estado !== visto) {
+    setVisto(estado);
+    if (estado.mensaje) {
+      setTipos([]);
+      setBloquea(true);
+    }
+  }
   useEffect(() => {
     if (estado.mensaje) formulario.current?.reset();
   }, [estado]);
 
-  function elegir(valor: string) {
-    setTipo(valor);
-    setBloquea(TIPOS_PERSONA.find((t) => t.valor === valor)?.bloquea ?? true);
+  function marcar(valor: string, puesto: boolean) {
+    const nuevos = puesto ? [...tipos, valor] : tipos.filter((x) => x !== valor);
+    setTipos(nuevos);
+    // Por defecto no puede hacer la prueba si alguno de sus tipos la bloquea.
+    if (nuevos.length > 0) setBloquea(nuevos.some((x) => TIPOS_PERSONA.find((p) => p.valor === x)?.bloquea ?? true));
   }
 
   return (
     <form ref={formulario} action={accion} className={styles.tarjeta}>
       <h2>Añadir persona</h2>
       <p className={styles.ayuda}>No se crea ninguna cuenta ni se le envía ningún correo. Basta con rellenar uno de los tres datos (cuantos más, mejor).</p>
-      <div className={styles.campo}>
-        <label htmlFor="pe-tipo">¿Qué era?</label>
-        <select id="pe-tipo" name="tipo" value={tipo} onChange={(e) => elegir(e.target.value)}>
-          {TIPOS_PERSONA.map((t) => (
-            <option key={t.valor} value={t.valor}>
-              {t.texto}
-            </option>
-          ))}
-        </select>
-      </div>
+      <fieldset className={styles.grupo}>
+        <legend>¿Qué era? (marca todas las que tuvo)</legend>
+        {TIPOS_PERSONA.map((p) => (
+          <label key={p.valor} className={styles.casilla}>
+            <input type="checkbox" name="tipos" value={p.valor} checked={tipos.includes(p.valor)} onChange={(ev) => marcar(p.valor, ev.target.checked)} />
+            {p.texto}
+          </label>
+        ))}
+      </fieldset>
       <div className={styles.campo}>
         <label htmlFor="pe-nombre">Nombre (opcional)</label>
         <input id="pe-nombre" name="nombre" maxLength={120} />
