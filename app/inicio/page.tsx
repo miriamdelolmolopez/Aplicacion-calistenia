@@ -21,6 +21,8 @@ import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
 import AvisoVistaAlumna from "../AvisoVistaAlumna";
 import ResumenAdminTarjetas from "./ResumenAdmin";
+import { obtenerCumpleanosAdmin } from "./accionesAdmin";
+import { textoCuando, type CumpleProximo } from "@/lib/cumpleanosTexto";
 import estilos from "./inicio.module.css";
 import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { estiloFoto, fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
@@ -136,6 +138,9 @@ export default function Inicio() {
   const [fotosListas, setFotosListas] = useState(false);
   const [miFoto, setMiFoto] = useState<string | null>(null);
   const [azar, setAzar] = useState<{ foto: FotoNombre; frase: number } | null>(null);
+  // La administradora ve los cumpleaños con los días de antelación que haya elegido.
+  const [cumplesAdmin, setCumplesAdmin] = useState<CumpleProximo[]>([]);
+  const esAdminReal = !!perfil && perfil !== "anonimo" && perfil.rol === "admin";
   const id = perfil && perfil !== "anonimo" ? perfil.id : null;
   const planOnline = !!perfil && perfil !== "anonimo" && perfil.planOnline;
 
@@ -166,6 +171,11 @@ export default function Inicio() {
       });
     });
   }, [id, planOnline]);
+
+  useEffect(() => {
+    if (!esAdminReal) return;
+    obtenerCumpleanosAdmin().then(setCumplesAdmin).catch(() => {});
+  }, [esAdminReal]);
 
   useEffect(() => {
     obtenerFotosAppCliente().then((f) => {
@@ -264,7 +274,27 @@ export default function Inicio() {
           </div>
         )}
 
-        {extra.cumples.length > 0 && (
+        {esAdmin && cumplesAdmin.length > 0 && (
+          <div className={clay.consejoEnvoltura}>
+            <span className={clay.insignia} aria-hidden="true">
+              🎂
+            </span>
+            <section className={clay.consejo}>
+              <p className={clay.consejoTexto}>
+                <strong>{idioma === "en" ? "Birthdays" : "Cumpleaños"}</strong>
+              </p>
+              <div className={estilos.cumpleLista}>
+                {cumplesAdmin.map((c) => (
+                  <span key={c.id} className={estilos.cumpleItem}>
+                    {c.nombre} · {textoCuando(c)}
+                  </span>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {!esAdmin && extra.cumples.length > 0 && (
           <div className={clay.consejoEnvoltura}>
             <span className={clay.insignia} aria-hidden="true">
               🎂

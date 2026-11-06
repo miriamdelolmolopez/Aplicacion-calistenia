@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { cumpleanosProximos } from "@/lib/cumpleanos";
+import { textoCuando } from "@/lib/cumpleanosTexto";
 import { guardarAntelacionCumples, marcarBorradoAtendido } from "./acciones";
 import styles from "./admin.module.css";
 import { Cuadricula, type Azulejo } from "./Hub";
@@ -57,33 +58,8 @@ export default async function Administracion() {
   const { supabase } = await requireAdmin();
   const excluidas = await seccionesExcluidas();
 
-  // Cumpleaños de hoy y de los próximos días (solo las personas que lo tienen activado en Ajustes).
-  // Los días de antelación los elige la administradora.
-  const admin = createAdminClient();
-  const { data: ajusteCumple } = await admin.from("ajustes").select("valor").eq("clave", "cumple_aviso_dias").maybeSingle();
-  const antelacion = Math.min(60, Math.max(0, Math.floor(Number(ajusteCumple?.valor ?? 0)) || 0));
-  const { data: nacidos } = await admin
-    .from("profiles")
-    .select("id, nombre, apellidos, fecha_nacimiento")
-    .eq("rol", "alumno")
-    .eq("avisar_cumple", true)
-    .not("fecha_nacimiento", "is", null);
-  const hoyMadrid = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
-  const [hy, hm, hd] = hoyMadrid.split("-").map(Number);
-  const diaInicio = Date.UTC(hy, hm - 1, hd);
-  const cumples = ((nacidos ?? []) as { id: string; nombre: string | null; apellidos: string | null; fecha_nacimiento: string }[])
-    .map((n) => {
-      const [, m, d] = n.fecha_nacimiento.split("-").map(Number);
-      let prox = Date.UTC(hy, m - 1, d);
-      // El 29 de febrero se celebra el 28 en los años que no son bisiestos.
-      if (m === 2 && d === 29 && new Date(Date.UTC(hy, 1, 29)).getUTCMonth() !== 1) prox = Date.UTC(hy, 1, 28);
-      if (prox < diaInicio) prox = Date.UTC(hy + 1, m - 1, d);
-      const faltan = Math.round((prox - diaInicio) / 86_400_000);
-      const fecha = new Date(prox);
-      return { id: n.id, nombre: [n.nombre, n.apellidos].filter(Boolean).join(" ") || "Sin nombre", faltan, dia: fecha.getUTCDate(), mes: fecha.getUTCMonth() + 1 };
-    })
-    .filter((c) => c.faltan <= antelacion)
-    .sort((a, b) => a.faltan - b.faltan || a.nombre.localeCompare(b.nombre, "es"));
+  // Cumpleaños de hoy y de los próximos días (con la antelación que elige la administradora).
+  const { lista: cumples, antelacion } = await cumpleanosProximos();
 
   const { data: peticiones } = await supabase
     .from("solicitudes_borrado")
@@ -116,7 +92,7 @@ export default async function Administracion() {
             {cumples.map((c) => (
               <li key={c.id}>
                 <strong>{c.nombre}</strong> ·{" "}
-                {c.faltan === 0 ? "hoy" : c.faltan === 1 ? "mañana" : `en ${c.faltan} días (${String(c.dia).padStart(2, "0")}/${String(c.mes).padStart(2, "0")})`}
+                {textoCuando(c)}
               </li>
             ))}
           </ul>

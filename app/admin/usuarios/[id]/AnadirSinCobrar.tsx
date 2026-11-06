@@ -41,7 +41,7 @@ function Formulario({ userId, tarifas, hoy, cerrar }: { userId: string; tarifas:
       <input type="hidden" name="que" value={que} />
       <input type="hidden" name="termina" value={terminaReal} />
 
-      <p className={styles.ayuda}>No se crea ningún pago ni factura: es un regalo o una tarifa sin cobro. Queda como un bono aparte en su ficha.</p>
+      <p className={styles.ayuda}>No se crea ningún pago ni factura: son clases o una tarifa sin cobro. Quedan como un bono aparte en su ficha.</p>
 
       <fieldset className={styles.grupo}>
         <legend>¿Qué le das?</legend>
@@ -170,10 +170,10 @@ export default function AnadirSinCobrar({ userId, tarifas, hoy }: { userId: stri
   return (
     <div className={estilos.botonesBono}>
       <button type="button" className={styles.boton} onClick={() => setAbierto(true)}>
-        + Añadir tarifa o regalo (sin cobrar)
+        + Añadir clases o tarifa (sin cobrar)
       </button>
       {abierto && (
-        <PanelCompleto titulo="Añadir tarifa o regalo" cerrar={() => setAbierto(false)}>
+        <PanelCompleto titulo="Añadir clases o tarifa" cerrar={() => setAbierto(false)}>
           <Formulario userId={userId} tarifas={tarifas} hoy={hoy} cerrar={() => setAbierto(false)} />
         </PanelCompleto>
       )}

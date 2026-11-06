@@ -167,7 +167,7 @@ export default async function FichaUsuario({
   const { data: altasSueltos } = idsSueltos.length
     ? await admin.from("movimientos_bono").select("bono_id, nota").eq("tipo", "alta").in("bono_id", idsSueltos)
     : { data: [] as { bono_id: string; nota: string | null }[] };
-  const motivoDe = new Map((altasSueltos ?? []).map((m) => [m.bono_id as string, String(m.nota ?? "").replace(/^Regalo:?\s*/, "").trim()]));
+  const motivoDe = new Map((altasSueltos ?? []).map((m) => [m.bono_id as string, String(m.nota ?? "").replace(/^Regalo([ ]*[:·][ ]*|$)/, "").trim()]));
 
   const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string }[];
 

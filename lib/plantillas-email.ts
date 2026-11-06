@@ -278,20 +278,20 @@ export function correoInvitacion(p: { para: string; alumno: boolean; ruta: strin
     parrafos: en
       ? p.alumno
         ? [
-            "Miriam del Olmo has signed you up to CalisCoach, her calisthenics and handstand app. There you book your classes and see your pass and progress.",
+            "Miriam del Olmo has signed you up to CalisCoach, There you book your classes and see your pass and progress.",
             "Press the button to choose your password and sign in. If you were not expecting this email, you can ignore it.",
           ]
         : [
-            "Miriam del Olmo invites you to CalisCoach, her calisthenics and handstand app. Create your account to get started.",
+            "Miriam del Olmo invites you to CalisCoach, Create your account to get started.",
             "Press the button to create your account. If you were not expecting this email, you can ignore it.",
           ]
       : p.alumno
         ? [
-            "Miriam del Olmo te ha dado de alta en CalisCoach, su app de calistenia y pino. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
+            "Miriam del Olmo te ha dado de alta en CalisCoach. Desde ahí reservas tus clases, ves tu bono y tu progreso.",
             "Pulsa el botón para elegir tu contraseña y entrar. Si no esperabas este correo, puedes ignorarlo.",
           ]
         : [
-            "Miriam del Olmo te invita a CalisCoach, su app de calistenia y pino. Crea tu cuenta para empezar.",
+            "Miriam del Olmo te invita a CalisCoach. Crea tu cuenta para empezar.",
             "Pulsa el botón para crear tu cuenta. Si no esperabas este correo, puedes ignorarlo.",
           ],
     boton: { texto: en ? (p.alumno ? "Choose my password" : "Create my account") : p.alumno ? "Elegir mi contraseña" : "Crear mi cuenta", ruta: p.ruta },

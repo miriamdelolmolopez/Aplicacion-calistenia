@@ -1,7 +1,15 @@
 "use server";
 
 import { requireAdmin } from "@/lib/admin";
+import { cumpleanosProximos } from "@/lib/cumpleanos";
+import type { CumpleProximo } from "@/lib/cumpleanosTexto";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+// Cumpleaños de hoy y de los próximos días para el inicio de la administradora.
+export async function obtenerCumpleanosAdmin(): Promise<CumpleProximo[]> {
+  await requireAdmin();
+  return (await cumpleanosProximos()).lista;
+}
 
 export type PersonaResumen = { id: string; nombre: string; detalle: string };
 

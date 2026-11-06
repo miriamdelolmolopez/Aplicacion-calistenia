@@ -3,6 +3,8 @@
 import { useState } from "react";
 import styles from "../../admin.module.css";
 import estilos from "../usuarios.module.css";
+import Anillo from "../../../ui/Anillo";
+import clay from "../../../ui/clay.module.css";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
 import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
 
@@ -37,11 +39,6 @@ function Sueltas({ sueltos }: { sueltos: Periodo[] }) {
   const vivos = sueltos.filter((s) => s.bonos.some((b) => b.restantes > 0 && b.estado !== "caducado"));
   const usados = sueltos.filter((s) => !vivos.includes(s));
   if (sueltos.length === 0) return null;
-  const texto = (s: Periodo) => {
-    const b = s.bonos[0];
-    const unidad = b.servicio === "online" ? "días" : b.total === 1 ? "clase" : "clases";
-    return `${b.restantes} de ${b.total} ${unidad}`;
-  };
   return (
     <section className={styles.tarjeta}>
       <h3 style={{ margin: 0 }}>Clases sueltas</h3>
@@ -49,12 +46,25 @@ function Sueltas({ sueltos }: { sueltos: Periodo[] }) {
       <ul className={styles.lista}>
         {vivos.map((s) => {
           const b = s.bonos[0];
+          const usadas = b.total - b.restantes;
+          const pct = b.total > 0 ? Math.round((usadas / b.total) * 100) : 0;
           return (
-            <li key={s.id}>
-              <strong>{NOMBRE_SERVICIO[b.servicio] ?? b.servicio}</strong> · le quedan {texto(s)}
-              {s.motivo ? ` · ${s.motivo}` : ""} · dadas el {dmy(s.dado)} ·{" "}
-              {s.sinCaducidad ? "no caducan" : s.hasta ? `hasta el ${dmy(s.hasta)}` : ""}{" "}
-              <span className={estilos.activa}>{b.estado === "activo" ? "En uso" : "Se usan cuando termine la tarifa"}</span>
+            <li key={s.id} style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "space-between" }}>
+              <div>
+                <strong>{NOMBRE_SERVICIO[b.servicio] ?? b.servicio}</strong>
+                <div className={styles.ayuda} style={{ margin: "4px 0 0" }}>
+                  Ha reservado {usadas} de {b.total} · le quedan {b.restantes}
+                </div>
+                <div className={styles.ayuda} style={{ margin: "2px 0 0" }}>
+                  {s.motivo ? `${s.motivo} · ` : ""}dadas el {dmy(s.dado)}
+                  {s.sinCaducidad ? " · no caducan" : s.hasta ? ` · hasta el ${dmy(s.hasta)}` : ""}
+                </div>
+                <span className={estilos.activa}>{b.estado === "activo" ? "En uso" : "Se usan cuando termine la tarifa"}</span>
+              </div>
+              <div className={clay.gaugeWrap}>
+                <Anillo porcentaje={pct} />
+                <span className={clay.gaugePct}>{pct}%</span>
+              </div>
             </li>
           );
         })}
