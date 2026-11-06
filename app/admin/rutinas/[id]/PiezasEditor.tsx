@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import MapaCorporal from "../../../MapaCorporal";
 import styles from "../../admin.module.css";
-import { cambiarFotoApp, quitarFotoApp } from "../../fotos/acciones";
+import Encuadrador from "../../../Encuadrador";
+import { cambiarFotoApp, guardarEncuadreFoto, quitarFotoApp } from "../../fotos/acciones";
 import { prepararFoto } from "../../fotos/prepararFoto";
 import ResumenIconos from "../../../rutina/ResumenIconos";
 import { minutosEstimados, textoObjetivo as textoObjetivoAlumno } from "@/lib/duracion";
 import { CATEGORIAS, intensidadesAgregadas } from "@/lib/ejercicios";
+import { fotoEncajada } from "@/lib/fotos";
 import type { CatalogoEjercicio, ItemRutina } from "./Constructor";
 
 // Botón redondo pequeño con un icono (lápiz, papelera, torso…).
@@ -112,7 +114,7 @@ export function FotoEditable({
   url,
   etiqueta,
   tamano = 88,
-  ajuste = "cover",
+  proporcion = 1,
   aviso,
 }: {
   destino: "rutina" | "sesion" | "ejercicio";
@@ -120,9 +122,10 @@ export function FotoEditable({
   url: string | null;
   etiqueta: string;
   tamano?: number;
-  ajuste?: "cover" | "contain";
+  proporcion?: number; // forma con la que se ve en la app (ancho / alto), para encuadrarla
   aviso?: string;
 }) {
+  const [encuadrando, setEncuadrando] = useState(false);
   const router = useRouter();
   const [menu, setMenu] = useState(false);
   const [viendo, setViendo] = useState(false);
@@ -180,7 +183,7 @@ export function FotoEditable({
           justifyContent: "center",
           fontSize: tamano > 60 ? "1.8rem" : "1.2rem",
           color: "var(--blanco)",
-          background: url ? (ajuste === "contain" ? `url(${url}) center / contain no-repeat var(--relleno)` : `url(${url}) center / cover`) : "linear-gradient(160deg, #c9c5bd, #0aa8c0)",
+          ...(url ? fotoEncajada(url) : { background: "linear-gradient(160deg, #c9c5bd, #0aa8c0)" }),
           border: "1px solid var(--linea)",
           borderRadius: tamano > 60 ? 20 : 12,
           cursor: "pointer",
@@ -195,6 +198,11 @@ export function FotoEditable({
           {url && (
             <button type="button" style={opcion} onClick={() => { setMenu(false); setViendo(true); }}>
               <span aria-hidden="true">👁</span> Ver foto
+            </button>
+          )}
+          {url && (
+            <button type="button" style={opcion} onClick={() => { setMenu(false); setEncuadrando(true); }}>
+              <span aria-hidden="true">✥</span> Encuadrar foto
             </button>
           )}
           <button type="button" style={opcion} onClick={() => tomar.current?.click()}>
@@ -216,6 +224,18 @@ export function FotoEditable({
       <input ref={tomar} type="file" accept="image/*" capture="environment" hidden onChange={elegir} />
       <input ref={subir} type="file" accept="image/*" hidden onChange={elegir} />
       {error && <p className={styles.error} style={{ position: "absolute", top: tamano + 8, left: 0, width: 220, zIndex: 41 }}>{error}</p>}
+      {encuadrando && url && (
+        <Encuadrador
+          url={url}
+          proporcion={proporcion}
+          guardar={async (x, y) => {
+            const r = await guardarEncuadreFoto(id, x, y, destino);
+            if (!r.ok) setError(r.error ?? "No se ha podido guardar el encuadre.");
+            else router.refresh();
+          }}
+          cerrar={() => setEncuadrando(false)}
+        />
+      )}
       {viendo && url && (
         <Ventana titulo={`Foto de ${etiqueta}`} cerrar={() => setViendo(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -341,7 +361,7 @@ export function PreviaAlumno({
               return (
                 <li key={i.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: 8, background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 14 }}>
                   <span style={{ width: 22, textAlign: "center", fontWeight: 700 }}>{n + 1}</span>
-                  <span style={{ flex: "none", width: 56, height: 56, borderRadius: 10, background: e?.foto_url ? `url(${e.foto_url}) center / contain no-repeat var(--relleno)` : "linear-gradient(160deg, #c9c5bd, #0aa8c0)" }} />
+                  <span style={{ flex: "none", width: 56, height: 56, borderRadius: 10, ...(e?.foto_url ? fotoEncajada(e.foto_url) : { background: "linear-gradient(160deg, #c9c5bd, #0aa8c0)" }) }} />
                   <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                     <strong>{e?.nombre ?? "Ejercicio"}</strong>
                     <small style={{ color: "var(--secundario)" }}>

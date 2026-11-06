@@ -45,6 +45,12 @@ export function conEncuadre(url: string, x: number, y: number): string {
   return x === 50 && y === 50 ? base : `${base}#e=${Math.round(x)},${Math.round(y)}`;
 }
 
+// Foto que rellena su caja (sin bordes) y se ve por la parte encuadrada: para ejercicios, sesiones y rutinas.
+export function fotoEncajada(url: string): CSSProperties {
+  const e = encuadreDeFoto(url);
+  return { backgroundImage: `url("${sinEncuadre(url)}")`, backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundPosition: `${e.x}% ${e.y}%` };
+}
+
 // Fondo de una tarjeta con su foto propia ya encuadrada (si se ha encuadrado).
 export function estiloFoto(nombre: FotoNombre, propia?: string | null, esperando = false): CSSProperties {
   const e = encuadreDeFoto(propia);

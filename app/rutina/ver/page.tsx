@@ -1,5 +1,6 @@
 "use client";
 
+import { fotoEncajada } from "@/lib/fotos";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
@@ -230,7 +231,7 @@ export default function VerRutina() {
                           <span className={estilos.check} aria-label={completada ? t.completadaLabel : undefined}>
                             {completada ? "✓" : ""}
                           </span>
-                          {s.foto_url && <span className={estilos.sesionFoto} style={{ backgroundImage: `url("${s.foto_url}")` }} aria-hidden="true" />}
+                          {s.foto_url && <span className={estilos.sesionFoto} style={fotoEncajada(s.foto_url)} aria-hidden="true" />}
                           <Link href={`/rutina/sesion/${s.id}${como ? `?como=${como}` : ""}`} className={estilos.sesionTexto}>
                             <strong>{s.nombre}</strong>
                             <span>

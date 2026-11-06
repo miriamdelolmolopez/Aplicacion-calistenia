@@ -1,5 +1,6 @@
 "use client";
 
+import { fotoEncajada } from "@/lib/fotos";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../../BarraSuperior";
@@ -160,7 +161,7 @@ export default function Sesion() {
         {t.minAprox.replace("{n}", String(minutosEstimados(datos.items)))}
       </p>
 
-      {datos.foto && <div style={{ height: 150, margin: "0 0 14px", borderRadius: 18, backgroundImage: `url("${datos.foto}")`, backgroundSize: "cover", backgroundPosition: "center" }} role="img" aria-label={datos.nombre} />}
+      {datos.foto && <div style={{ height: 150, margin: "0 0 14px", borderRadius: 18, ...fotoEncajada(datos.foto) }} role="img" aria-label={datos.nombre} />}
 
       <ol className={estilos.lista}>
         {datos.items.map((it, pos) => {
@@ -175,7 +176,7 @@ export default function Sesion() {
           return (
             <li key={it.id} className={estilos.fila}>
               <span className={estilos.numero}>{pos + 1}</span>
-              <span className={estilos.miniatura} style={e?.foto_url ? { backgroundImage: `url("${e.foto_url}")` } : undefined} />
+              <span className={estilos.miniatura} style={e?.foto_url ? fotoEncajada(e.foto_url) : undefined} />
               <span className={estilos.texto}>
                 <strong>
                   {etiqueta && <span className={styles.etiquetaSuper}>{etiqueta}</span>}

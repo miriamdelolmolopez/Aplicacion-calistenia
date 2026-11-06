@@ -12,7 +12,7 @@ import { useIdioma } from "../useIdioma";
 import estilos from "./entrenamiento.module.css";
 import CalendarioEntreno from "./CalendarioEntreno";
 import { claveDia } from "@/lib/fechas";
-import { fondoFoto } from "@/lib/fotos";
+import { estiloFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
@@ -159,7 +159,7 @@ export default function Entrenamiento() {
 
           {r ? (
             <section className={estilos.resumen}>
-              <div className={estilos.foto} style={{ backgroundImage: fondoFoto("online", r.fotoUrl) }} />
+              <div className={estilos.foto} style={estiloFoto("online", r.fotoUrl)} />
               <div className={estilos.resumenCuerpo}>
                 <h2>{r.nombre}</h2>
                 <p>

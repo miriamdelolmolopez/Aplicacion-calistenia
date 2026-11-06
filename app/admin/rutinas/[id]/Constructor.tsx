@@ -474,7 +474,6 @@ function TarjetaItem({
             url={ejercicio.foto_url ?? null}
             etiqueta="este ejercicio"
             tamano={72}
-            ajuste="contain"
             aviso="Esta foto es la del ejercicio: se verá igual en todas las rutinas."
           />
         )}
@@ -799,7 +798,7 @@ function TarjetaSesion({
     <section className={styles.sesionCaja}>
       <div className={styles.itemCabecera}>
         {asa}
-        <FotoEditable destino="sesion" id={sesion.id} url={sesion.foto_url} etiqueta="la sesión" tamano={56} />
+        <FotoEditable destino="sesion" id={sesion.id} url={sesion.foto_url} etiqueta="la sesión" tamano={56} proporcion={2.4} />
         <button
           type="button"
           onClick={() => setAbierta((a) => !a)}

@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 import { CATEGORIAS, nombreCategoria, nombreMusculo, nombreTipo } from "@/lib/ejercicios";
 import VideoEjercicio from "../../VideoEjercicio";
 import BotonFoto from "../fotos/BotonFoto";
+import { fotoEncajada } from "@/lib/fotos";
 import VideoRapido from "./VideoRapido";
 import styles from "../admin.module.css";
 import AccionesEjercicio from "./AccionesEjercicio";
@@ -191,7 +192,8 @@ export default async function Ejercicios({
                           width: 72,
                           height: 72,
                           borderRadius: 12,
-                          background: fotos.get(e.id) ? `url("${fotos.get(e.id)}") center / contain no-repeat var(--relleno)` : "var(--relleno)",
+                          background: "var(--relleno)",
+                          ...(fotos.get(e.id) ? fotoEncajada(fotos.get(e.id) as string) : {}),
                         }}
                       />
                       <div style={{ minWidth: 0 }}>

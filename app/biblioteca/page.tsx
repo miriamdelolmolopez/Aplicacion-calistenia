@@ -1,5 +1,6 @@
 "use client";
 
+import { fotoEncajada } from "@/lib/fotos";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../BarraSuperior";
@@ -80,7 +81,7 @@ export default function Biblioteca() {
           const materiales = e.ejercicio_materiales.map((m) => (en && m.materiales?.nombre_en) || m.materiales?.nombre).filter(Boolean);
           return (
             <Link key={e.id} href={`/biblioteca/${e.id}`} className={estilos.tarjeta}>
-              <span className={estilos.foto} style={e.foto_url ? { backgroundImage: `url("${e.foto_url}")` } : undefined} />
+              <span className={estilos.foto} style={e.foto_url ? fotoEncajada(e.foto_url) : undefined} />
               <span className={estilos.texto}>
                 <strong>{nombre(e)}</strong>
                 <small>

@@ -1,5 +1,6 @@
 "use client";
 
+import { encuadreDeFoto, sinEncuadre } from "@/lib/fotos";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -89,7 +90,7 @@ export default function FichaEjercicio() {
           <VideoEjercicio url={e.video_url} titulo={nombre} proporcion="1 / 1" redondeo={0} />
         ) : e.foto_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={e.foto_url} alt={nombre} className={estilos.heroFoto} />
+          <img src={sinEncuadre(e.foto_url)} alt={nombre} className={estilos.heroFoto} style={{ objectPosition: `${encuadreDeFoto(e.foto_url).x}% ${encuadreDeFoto(e.foto_url).y}%` }} />
         ) : (
           <div className={estilos.heroVacio} />
         )}

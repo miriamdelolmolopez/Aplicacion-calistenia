@@ -90,13 +90,13 @@ export async function cambiarFotoApp(formData: FormData): Promise<ResultadoFoto>
 }
 
 // Encuadre de la foto de una tarjeta: qué parte se ve (posición en % de ancho y alto). Se guarda junto a la foto.
-export async function guardarEncuadreFoto(id: string, x: number, y: number): Promise<ResultadoFoto> {
+export async function guardarEncuadreFoto(id: string, x: number, y: number, destino: string = "card"): Promise<ResultadoFoto> {
   await requireAdmin();
-  if (!id || !Number.isFinite(x) || !Number.isFinite(y)) return { ok: false, error: "Encuadre no válido." };
-  const actual = await urlActual("card", id);
-  if (!actual) return { ok: false, error: "Esta tarjeta no tiene foto propia." };
+  if (!id || !Number.isFinite(x) || !Number.isFinite(y) || !esDestino(destino)) return { ok: false, error: "Encuadre no válido." };
+  const actual = await urlActual(destino, id);
+  if (!actual) return { ok: false, error: "No tiene foto propia." };
   const url = conEncuadre(actual, Math.min(100, Math.max(0, x)), Math.min(100, Math.max(0, y)));
-  if (!(await guardarUrl("card", id, url))) return { ok: false, error: "No se ha podido guardar." };
+  if (!(await guardarUrl(destino, id, url))) return { ok: false, error: "No se ha podido guardar." };
   repasar();
   return { ok: true, url };
 }
