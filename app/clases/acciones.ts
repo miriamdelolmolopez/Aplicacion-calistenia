@@ -360,15 +360,19 @@ export async function obtenerClasesPasadas(semanas: number): Promise<ClasePasada
   const ids = lista.map((s) => s.id);
   const tandas: string[][] = [];
   for (let i = 0; i < ids.length; i += 40) tandas.push(ids.slice(i, i + 40));
-  const [respuestas, { data: perfiles }] = await Promise.all([
-    Promise.all(
-      tandas.map((t) =>
-        admin.from("reservas").select("sesion_id, user_id, es_prueba, creado_en").in("sesion_id", t).eq("estado", "reservada").order("creado_en"),
-      ),
+  const respuestas = await Promise.all(
+    tandas.map((t) =>
+      admin.from("reservas").select("sesion_id, user_id, es_prueba, creado_en").in("sesion_id", t).eq("estado", "reservada").order("creado_en"),
     ),
-    admin.from("profiles").select("id, nombre, apellidos").limit(5000),
-  ]);
+  );
   const reservas = respuestas.flatMap((r) => (r.data ?? []) as { sesion_id: string; user_id: string; es_prueba: boolean }[]);
+  // Solo se leen los perfiles de quien aparece en esas clases (no todos).
+  const personas = [...new Set(reservas.map((r) => r.user_id))];
+  const perfiles: { id: string; nombre: string | null; apellidos: string | null }[] = [];
+  for (let i = 0; i < personas.length; i += 150) {
+    const { data } = await admin.from("profiles").select("id, nombre, apellidos").in("id", personas.slice(i, i + 150));
+    perfiles.push(...((data ?? []) as typeof perfiles));
+  }
   const nombres = new Map(
     ((perfiles ?? []) as { id: string; nombre: string | null; apellidos: string | null }[]).map((p) => [
       p.id,

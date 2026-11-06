@@ -114,14 +114,16 @@ export async function datosPersonas(): Promise<DatosPersona[]> {
       const nombre = (b.tipos_bono as unknown as { nombre: string } | null)?.nombre ?? "";
       const suelto = esSuelto(nombre);
       const estado = b.estado as string;
-      if (estado === "activo" || estado === "en_cola") {
+      // Una tarifa sin clases pero dentro de sus fechas sigue siendo una tarifa en vigor.
+      const vigente = estado === "agotado" && !!b.caduca_en && Date.parse(b.caduca_en as string) > ahora;
+      if (estado === "activo" || estado === "en_cola" || vigente) {
         if (b.servicio !== "online") clasesRestantes += Number(b.clases_restantes) || 0;
         if (!suelto) {
           tarifaIds.push(b.tipo_bono_id as string);
           if (!tarifaNombres.includes(nombre)) tarifaNombres.push(nombre);
         }
       }
-      if (estado === "activo" && !suelto) {
+      if ((estado === "activo" || vigente) && !suelto) {
         tarifaActiva = true;
         if (b.caduca_en && Date.parse(b.caduca_en as string) > ahora) {
           const d = diasEntre(hoy, claveDia(b.caduca_en as string));
@@ -298,9 +300,9 @@ async function aplicar(regla: Regla, d: DatosPersona, ejecucionId: string): Prom
 export type ResultadoRegla = { aplicadas: number; omitidas: number; tareas: number };
 
 // Aplica una automatización a quien la cumple ahora y todavía no la ha recibido (o ya toca repetirla).
-export async function ejecutarRegla(regla: Regla): Promise<ResultadoRegla> {
+export async function ejecutarRegla(regla: Regla, datos?: DatosPersona[]): Promise<ResultadoRegla> {
   const admin = createAdminClient();
-  const coinciden = (await datosPersonas()).filter((d) => cumpleTodas(regla.condiciones, d));
+  const coinciden = (datos ?? (await datosPersonas())).filter((d) => cumpleTodas(regla.condiciones, d));
   if (coinciden.length === 0) return { aplicadas: 0, omitidas: 0, tareas: 0 };
 
   // Última vez que se aplicó a cada persona.
@@ -348,9 +350,12 @@ export async function ejecutarRegla(regla: Regla): Promise<ResultadoRegla> {
 export async function ejecutarReglas(): Promise<number> {
   const { data } = await createAdminClient().from("reglas_automaticas").select("*").eq("activa", true);
   let total = 0;
-  for (const r of (data ?? []) as Regla[]) {
+  const reglas = (data ?? []) as Regla[];
+  // Los datos de todas las personas se leen una sola vez para todas las automatizaciones.
+  const datos = reglas.length > 0 ? await datosPersonas() : [];
+  for (const r of reglas) {
     try {
-      total += (await ejecutarRegla(r)).aplicadas;
+      total += (await ejecutarRegla(r, datos)).aplicadas;
     } catch (e) {
       console.warn("[reglas] «%s»: %s", r.nombre, String(e));
     }

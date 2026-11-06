@@ -16,7 +16,7 @@ export async function obtenerAnuncios(limite = 50): Promise<AnuncioFila[]> {
 
   const [{ data: perfil }, { count: conBono }] = await Promise.all([
     admin.from("profiles").select("rol").eq("id", user.id).maybeSingle(),
-    admin.from("bonos").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("estado", "activo"),
+    admin.from("bonos").select("id", { count: "exact", head: true }).eq("user_id", user.id).in("estado", ["activo", "agotado"]).or(`estado.eq.activo,caduca_en.gt.${ahora}`),
   ]);
   if (!perfil) return [];
   const esActiva = perfil.rol === "admin" || (conBono ?? 0) > 0;

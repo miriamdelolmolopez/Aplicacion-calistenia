@@ -439,7 +439,7 @@ export default function Inicio() {
           ))}
         </div>
 
-        {!esAdmin && <TablonAnuncios limite={3} />}
+        <TablonAnuncios limite={3} />
       </div>
     </main>
   );

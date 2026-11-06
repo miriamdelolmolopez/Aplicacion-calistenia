@@ -108,7 +108,7 @@ export async function informeAtletas(rango: Rango): Promise<InformeAtletas> {
   for (const b of bonosVivos) porPersona.set(b.user_id, [...(porPersona.get(b.user_id) ?? []), b]);
   const perdidas: PersonaLinea[] = [];
   for (const [id, lista] of porPersona) {
-    if (lista.some((b) => b.estado === "activo" || b.estado === "en_cola")) continue;
+    if (lista.some((b) => b.estado === "activo" || b.estado === "en_cola" || (b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en) > ahora))) continue;
     const ultimo = [...lista].sort((a, b) => (b.caduca_en ?? b.creado_en).localeCompare(a.caduca_en ?? a.creado_en))[0];
     const fin = new Date(ultimo.caduca_en ?? ultimo.creado_en);
     const finReal = fin > ahora ? ahora : fin;
@@ -192,7 +192,7 @@ export async function filasAtletas(): Promise<{ columnas: string[]; filas: strin
     .filter((p) => p.rol !== "admin")
     .map((p) => {
       const mios = bonos.filter((b) => b.user_id === p.id && b.estado !== "anulado");
-      const activos = mios.filter((b) => b.estado === "activo");
+      const activos = mios.filter((b) => b.estado === "activo" || (b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en).getTime() > ahora));
       const misPagos = pagos.filter((x) => x.user_id === p.id);
       const gastado = misPagos.filter((x) => x.estado === "pagado").reduce((n, x) => n + x.importe_centimos, 0);
       const conDescuento = misPagos.some((x) => (x.descuento_centimos ?? 0) > 0);

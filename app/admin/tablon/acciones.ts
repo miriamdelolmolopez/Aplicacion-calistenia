@@ -22,7 +22,7 @@ export async function publicarAnuncio(_previo: Estado, formData: FormData): Prom
   const caduca = String(formData.get("caduca") ?? "").trim();
 
   if (!titulo || !texto) return { error: "Escribe el título y el texto del anuncio." };
-  if (enlace && !/^(https?:\/\/|\/)/i.test(enlace)) return { error: "El enlace tiene que empezar por https:// (o por / si es una página de la app)." };
+  if (enlace && !/^(https?:\/\/|\/(?!\/))/i.test(enlace)) return { error: "El enlace tiene que empezar por https:// (o por / si es una página de la app)." };
   if (!enlace) enlace = "";
   if (caduca && !/^\d{4}-\d{2}-\d{2}$/.test(caduca)) return { error: "La fecha en la que desaparece no es válida." };
 
@@ -51,7 +51,7 @@ export async function publicarAnuncio(_previo: Estado, formData: FormData): Prom
     const todas = (cuentas ?? []).map((c) => c.id as string);
     if (audiencia === "todos") destinatarios = todas;
     else {
-      const { data: conBono } = await admin.from("bonos").select("user_id").eq("estado", "activo").in("user_id", todas.length ? todas : ["00000000-0000-0000-0000-000000000000"]);
+      const { data: conBono } = await admin.from("bonos").select("user_id").in("estado", ["activo", "agotado"]).or(`estado.eq.activo,caduca_en.gt.${new Date().toISOString()}`).in("user_id", todas.length ? todas : ["00000000-0000-0000-0000-000000000000"]);
       destinatarios = [...new Set((conBono ?? []).map((b) => b.user_id as string))];
     }
   }

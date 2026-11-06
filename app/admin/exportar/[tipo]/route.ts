@@ -70,7 +70,7 @@ async function todoPorPersona(): Promise<string> {
     .filter((p) => p.rol !== "admin")
     .sort((x, y) => `${x.nombre ?? ""} ${x.apellidos ?? ""}`.localeCompare(`${y.nombre ?? ""} ${y.apellidos ?? ""}`, "es"))
     .map((p) => {
-      const activos = de(bonos, p.id).filter((b) => b.estado === "activo");
+      const activos = de(bonos, p.id).filter((b) => b.estado === "activo" || (b.estado === "agotado" && !!b.caduca_en && new Date(String(b.caduca_en)).getTime() > Date.now()));
       const misPagos = de(pagos, p.id);
       const cobrados = misPagos.filter((x) => x.estado === "pagado");
       const pendientes = misPagos.filter((x) => x.estado === "pendiente");
