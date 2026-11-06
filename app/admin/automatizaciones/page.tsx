@@ -3,6 +3,10 @@ import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import { marcarRegaloHecho } from "./acciones";
+import { marcarTareaHecha } from "./reglasAcciones";
+import ReglasPropias, { type ReglaConDatos } from "./ReglasPropias";
+import { esSuelto } from "@/lib/regalos";
+import type { Regla } from "@/lib/reglasCatalogo";
 import type { Auto } from "./Controles";
 import { vistaPrevia } from "@/lib/automatizaciones";
 import { CLAVES_NUEVAS, PLANTILLAS, type ClavePlantilla } from "@/lib/plantillasAutomatizacion";
@@ -53,13 +57,21 @@ for (const pl of PLANTILLAS) {
   INFO[pl.clave] = { titulo: pl.titulo, cuando: pl.cuando, aQuien: pl.aQuien, queHace: pl.queHace, variables: pl.variables, diasEtiqueta: pl.dias?.etiqueta, orden: pl.orden };
 }
 
+// Teléfono listo para WhatsApp (si tiene 9 cifras, se le pone el 34 de España).
+function paraWhatsapp(tel: string): string {
+  const cifras = tel.replace(/\D/g, "");
+  return cifras.length === 9 ? `34${cifras}` : cifras;
+}
+
+type TareaFila = { id: string; texto: string; creado_en: string; profiles: { nombre: string | null; apellidos: string | null; email: string | null; telefono: string | null } | null };
+
 type Regalo = { id: string; creado_en: string; profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null };
 
 export default async function Automatizaciones() {
   await requireAdmin("automatizaciones");
   const supabase = createAdminClient();
   const [{ data }, { data: regalos }, { data: enviadosDatos }] = await Promise.all([
-    supabase.from("automatizaciones").select("clave, activa, dias, asunto_es, mensaje_es, asunto_en, mensaje_en"),
+    supabase.from("automatizaciones").select("*"),
     supabase
       .from("regalos")
       .select("id, creado_en, profiles(nombre, apellidos, email)")
@@ -68,6 +80,21 @@ export default async function Automatizaciones() {
       .order("creado_en"),
     supabase.from("avisos_enviados").select("tipo, enviado_en").in("tipo", Object.keys(INFO)),
   ]);
+  // Las automatizaciones propias, sus tareas pendientes y a cuánta gente se ha aplicado cada una.
+  const [{ data: reglasDatos }, { data: tareasDatos }, { data: tiposDatos }] = await Promise.all([
+    supabase.from("reglas_automaticas").select("*").order("creado_en", { ascending: false }),
+    supabase.from("reglas_tareas").select("id, texto, creado_en, profiles(nombre, apellidos, email, telefono)").eq("estado", "pendiente").order("creado_en"),
+    supabase.from("tipos_bono").select("id, nombre").eq("activo", true).order("nombre"),
+  ]);
+  const tarifas = ((tiposDatos ?? []) as { id: string; nombre: string }[]).filter((t) => !esSuelto(t.nombre));
+  const reglas: ReglaConDatos[] = await Promise.all(
+    ((reglasDatos ?? []) as Regla[]).map(async (r) => {
+      const { count } = await supabase.from("reglas_ejecuciones").select("id", { count: "exact", head: true }).eq("regla_id", r.id);
+      return { ...r, aplicadas: count ?? 0 };
+    }),
+  );
+  const tareas = (tareasDatos ?? []) as unknown as TareaFila[];
+
   const envios: Record<string, Envios> = {};
   for (const e of (enviadosDatos ?? []) as { tipo: string; enviado_en: string }[]) {
     const actual = envios[e.tipo] ?? { total: 0, ultimo: null };
@@ -107,6 +134,42 @@ export default async function Automatizaciones() {
         cuentas de prueba no reciben nada.
       </p>
 
+      {tareas.length > 0 && (
+        <section className={styles.tarjeta}>
+          <h2>Tareas para ti ({tareas.length})</h2>
+          <p className={styles.ayuda}>Te las han dejado tus automatizaciones. Pulsa WhatsApp: se abre la conversación con el mensaje ya escrito, y solo tienes que enviarlo.</p>
+          {tareas.map((t) => {
+            const nombre = [t.profiles?.nombre, t.profiles?.apellidos].filter(Boolean).join(" ") || t.profiles?.email || "(sin nombre)";
+            const tel = t.profiles?.telefono ? paraWhatsapp(t.profiles.telefono) : "";
+            return (
+              <div key={t.id} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
+                <div style={{ flex: "1 1 220px" }}>
+                  <strong>{nombre}</strong>
+                  <div className={styles.ayuda}>{t.texto}</div>
+                </div>
+                {tel ? (
+                  <a className={`${styles.boton} ${styles.botonSecundario}`} href={`https://wa.me/${tel}?text=${encodeURIComponent(t.texto)}`} target="_blank" rel="noopener noreferrer">
+                    WhatsApp
+                  </a>
+                ) : (
+                  <span className={styles.ayuda}>Sin teléfono</span>
+                )}
+                <form action={marcarTareaHecha}>
+                  <input type="hidden" name="id" value={t.id} />
+                  <button type="submit" className={`${styles.boton} ${styles.botonSecundario}`}>
+                    Hecha
+                  </button>
+                </form>
+              </div>
+            );
+          })}
+        </section>
+      )}
+
+      <ReglasPropias reglas={reglas} tarifas={tarifas} />
+
+      <h2 style={{ margin: "8px 0 0" }}>Las de siempre</h2>
+      <p className={styles.ayuda}>Estas ya vienen preparadas. Puedes apagarlas, cambiar sus textos y elegir si avisan por correo, por la app o por los dos.</p>
       <NuevaAutomatizacion disponibles={disponibles} />
 
       {pendientes.length > 0 && (

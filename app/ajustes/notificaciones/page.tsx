@@ -56,6 +56,7 @@ const APP_ADMIN: OpcionApp[] = [
   { clave: "admin_minimo", es: ["Una clase no llega al mínimo", "24 horas antes, si hay menos personas que el mínimo."], en: ["A class is below the minimum", "24 hours before, if fewer people than the minimum."] },
   { clave: "admin_regalos", es: ["Cumpleaños", "Cada día que alguien cumple años."], en: ["Birthdays", "Each day someone has a birthday."] },
   { clave: "admin_borrado", es: ["Petición de borrado de cuenta", "Cuando una persona pide que se borre su cuenta."], en: ["Account deletion request", "When a person asks for their account to be deleted."] },
+  { clave: "admin_tarea", es: ["Tareas de tus automatizaciones", "Cuando una automatización te deja una tarea (por ejemplo, escribir a alguien)."], en: ["Tasks from your automations", "When an automation leaves you a task (for example, writing to someone)."] },
 ];
 
 function AvisosApp({ esAdmin, en }: { esAdmin: boolean; en: boolean }) {

@@ -1,3 +1,100 @@
+.cabeceraPropias {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cabeceraPropias h2 {
+  margin: 0;
+}
+
+.reglaCaja {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--linea);
+  border-radius: 18px;
+}
+
+.botonera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.paso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  font-size: 1.2rem;
+  border: 1.5px solid var(--acento);
+  border-radius: 10px;
+}
+
+.condicion,
+.accion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--acento) 5%, var(--blanco));
+  border: 1px solid var(--linea);
+  border-radius: 16px;
+}
+
+.variables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.variable {
+  min-height: 32px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--acento-oscuro);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.canales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+}
+
+.canales legend {
+  padding: 0 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .filtros {
   display: flex;
   flex-wrap: wrap;

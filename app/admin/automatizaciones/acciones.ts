@@ -28,7 +28,13 @@ export async function guardarAutomatizacion(_previo: Estado, formData: FormData)
   if (campos.asunto_es.length > 150 || campos.asunto_en.length > 150) return { error: "El asunto es demasiado largo (máximo 150 letras)." };
   if (campos.mensaje_es.length > 3000 || campos.mensaje_en.length > 3000) return { error: "El mensaje es demasiado largo." };
 
-  const cambios: Record<string, unknown> = { ...campos, activa: formData.get("activa") === "on", actualizado_en: new Date().toISOString() };
+  const cambios: Record<string, unknown> = {
+    ...campos,
+    activa: formData.get("activa") === "on",
+    canal_correo: formData.get("canal_correo") === "on",
+    canal_app: formData.get("canal_app") === "on",
+    actualizado_en: new Date().toISOString(),
+  };
   if (clave === "bono_caduca" || clave === "echamos_menos") {
     const dias = Number(texto(formData, "dias"));
     if (!Number.isInteger(dias) || dias < 1 || dias > 60) return { error: "Los días van de 1 a 60." };

@@ -28,7 +28,8 @@ export type TipoNotificacion =
   | "admin_cancelacion"
   | "admin_minimo"
   | "admin_regalos"
-  | "admin_borrado";
+  | "admin_borrado"
+  | "admin_tarea";
 
 // Se avisan siempre, la persona no los puede desactivar.
 const ESENCIALES = new Set<TipoNotificacion>(["clase_cancelada", "plaza_liberada", "aniversario"]);

@@ -17,6 +17,8 @@ export type Auto = {
   mensaje_es: string;
   asunto_en: string;
   mensaje_en: string;
+  canal_correo?: boolean;
+  canal_app?: boolean;
 };
 
 export function FormularioAutomatizacion({ auto, info, envios, previa }: { auto: Auto; info: Info; envios: Envios; previa?: Previa }) {
@@ -62,6 +64,18 @@ export function FormularioAutomatizacion({ auto, info, envios, previa }: { auto:
         <input type="checkbox" name="activa" defaultChecked={auto.activa} />
         <span>Activada <AyudaI texto="Si la desactivas, deja de enviarse este correo automático. Puedes volver a activarla cuando quieras." /></span>
       </label>
+
+      <fieldset className={estilos.canales}>
+        <legend>Cómo avisa</legend>
+        <label className={styles.casilla}>
+          <input type="checkbox" name="canal_correo" defaultChecked={auto.canal_correo !== false} />
+          <span>Correo <AyudaI texto="Le llega un correo con el texto de abajo." /></span>
+        </label>
+        <label className={styles.casilla}>
+          <input type="checkbox" name="canal_app" defaultChecked={auto.canal_app !== false} />
+          <span>Aviso en la app y en el móvil <AyudaI texto="Le llega una notificación (campana). Cada persona puede apagarla en sus ajustes." /></span>
+        </label>
+      </fieldset>
 
       {(auto.clave === "bono_caduca" || info.diasEtiqueta) && (
         <div className={styles.campo}>

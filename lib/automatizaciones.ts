@@ -22,6 +22,8 @@ export type Automatizacion = {
   mensaje_es: string;
   asunto_en: string;
   mensaje_en: string;
+  canal_correo?: boolean;
+  canal_app?: boolean;
 };
 
 async function cargar(clave: ClaveAutomatizacion): Promise<Automatizacion | null> {
@@ -74,9 +76,9 @@ async function enviarPrueba(tipo: "prueba_recordatorio" | "prueba_despues", cuan
       if (p) {
         const sp = r.sesiones_clase!;
         const cr = correo(a, { ...p, email: p.email ?? "" } as Persona & { email: string }, { clase: sp.tipos_clase?.nombre ?? "Clase", fecha: fechaHora(sp.empieza_en, p.idioma) }, tipo === "prueba_despues" ? "/tarifas" : "/clases");
-        await notificarApp(p.id, { tipo: tipo === "prueba_recordatorio" ? "recordatorio" : "mensaje", titulo: cr.asunto, cuerpo: cuerpoCorto(cr.texto), enlace: tipo === "prueba_despues" ? "/tarifas" : "/clases", ref: `${tipo}:${r.id}` });
+        if (a.canal_app !== false) await notificarApp(p.id, { tipo: tipo === "prueba_recordatorio" ? "recordatorio" : "mensaje", titulo: cr.asunto, cuerpo: cuerpoCorto(cr.texto), enlace: tipo === "prueba_despues" ? "/tarifas" : "/clases", ref: `${tipo}:${r.id}` });
       }
-      if (!p || !enviable(p.email)) continue;
+      if (!p || !enviable(p.email) || a.canal_correo === false) continue;
       if (!(await reclamar(tipo, r.id, p.id))) continue;
       const s = r.sesiones_clase!;
       const ok = await enviarCorreo(
@@ -120,7 +122,7 @@ export async function bonoPorCaducar(): Promise<number> {
 
     for (const b of bonos) {
       const p = porId.get(b.user_id);
-      if (p) {
+      if (p && a.canal_app !== false) {
         await notificarApp(p.id, {
           tipo: "bono",
           titulo: p.idioma === "en" ? "Your pass is about to expire" : "Tu tarifa está a punto de caducar",
@@ -129,7 +131,7 @@ export async function bonoPorCaducar(): Promise<number> {
           ref: b.id,
         });
       }
-      if (!p || !enviable(p.email) || !p.avisos_bono) continue;
+      if (!p || !enviable(p.email) || !p.avisos_bono || a.canal_correo === false) continue;
       if (!(await reclamar("bono_caduca", b.id, p.id))) continue;
       const n = b.clases_restantes;
       const en = p.idioma === "en";
@@ -224,9 +226,11 @@ export async function felicitarCumpleanos(): Promise<number> {
         if (!error) descuentoCreado = nombreDescuento;
       }
 
-      await notificarApp(p.id, { tipo: "cumpleanos", titulo: p.idioma === "en" ? "Happy birthday!" : "¡Feliz cumpleaños!", cuerpo: REGALO[regalo][p.idioma].slice(0, 140), enlace: "/inicio", ref });
-      const ok = await enviarCorreo(correo(a, p as Persona & { email: string }, { regalo: REGALO[regalo][p.idioma] }, "/inicio"));
-      if (ok) enviados++;
+      if (a.canal_app !== false) await notificarApp(p.id, { tipo: "cumpleanos", titulo: p.idioma === "en" ? "Happy birthday!" : "¡Feliz cumpleaños!", cuerpo: REGALO[regalo][p.idioma].slice(0, 140), enlace: "/inicio", ref });
+      if (a.canal_correo !== false) {
+        const ok = await enviarCorreo(correo(a, p as Persona & { email: string }, { regalo: REGALO[regalo][p.idioma] }, "/inicio"));
+        if (ok) enviados++;
+      }
 
       // Aviso para ti, cada vez que alguien cumple años: quién es, cuántos cumple y qué se le regala.
       const nombre = [p.nombre].filter(Boolean).join(" ") || p.email;
@@ -432,7 +436,7 @@ async function enviarPlantilla(clave: ClavePlantilla): Promise<number> {
   await protegido(clave, async () => {
     const a = await cargar(clave);
     if (!a) return;
-    for (const c of await candidatos(clave, a.dias)) {
+    for (const c of a.canal_correo === false ? [] : await candidatos(clave, a.dias)) {
       if (!(await reclamar(clave, c.ref, c.persona.id))) continue;
       const ok = await enviarCorreo(correo(a, c.persona, c.valores, c.ruta));
       if (ok) enviados++;
@@ -440,7 +444,7 @@ async function enviarPlantilla(clave: ClavePlantilla): Promise<number> {
     }
     // Lo mismo, dentro de la app y en el móvil (cada persona puede desactivarlo aparte del correo).
     const tipoApp = TIPO_APP[clave];
-    if (tipoApp) {
+    if (tipoApp && a.canal_app !== false) {
       for (const c of await candidatos(clave, a.dias, true)) {
         const cr = correo(a, { ...c.persona, email: c.persona.email ?? "" }, c.valores, c.ruta);
         await notificarApp(c.persona.id, { tipo: tipoApp, titulo: cr.asunto, cuerpo: cuerpoCorto(cr.texto), enlace: c.ruta, ref: `${clave}:${c.ref}` });
