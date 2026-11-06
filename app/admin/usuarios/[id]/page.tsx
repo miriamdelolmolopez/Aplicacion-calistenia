@@ -243,6 +243,20 @@ export default async function FichaUsuario({
   const contratados = bonos.filter((b) => b.estado === "activo" || b.estado === "en_cola");
   // Los caducados y agotados también se pueden corregir (tarifa y fechas); si quedan en fecha, vuelven a estar activos.
   const terminados = bonos.filter((b) => b.estado === "caducado" || b.estado === "agotado");
+  // Las dos tarifas de un combinado (misma compra) se enseñan juntas, en una sola tarjeta.
+  const enMarcha = (b: Bono) => b.estado === "activo" || b.estado === "en_cola";
+  const gruposServicios = (() => {
+    const grupos: Bono[][] = [];
+    for (const b of [...contratados, ...terminados]) {
+      const g = grupos.find((x) => x[0].tipo_bono_id === b.tipo_bono_id && x[0].creado_en === b.creado_en);
+      if (g) g.push(b);
+      else grupos.push([b]);
+    }
+    return grupos;
+  })();
+  const gruposContratados = gruposServicios.filter((g) => g.some(enMarcha));
+  const gruposTerminados = gruposServicios.filter((g) => !g.some(enMarcha));
+  const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Clases grupales", individual: "Clases individuales", online: "Plan online", taller: "Taller" };
   const detalleBono = (b: Bono) =>
     [
       b.servicio === "online" ? "Plan online" : `${b.clases_restantes} de ${b.clases_total} clases`,
@@ -481,32 +495,42 @@ export default async function FichaUsuario({
                   <AnadirSinCobrar userId={p.id} tarifas={tarifasOpciones} hoy={hoy} />
                   {contratados.length === 0 && terminados.length === 0 && <p className={styles.ayuda}>Ahora mismo no tiene ningún servicio contratado.</p>}
                   {contratados.length === 0 && terminados.length > 0 && <p className={styles.ayuda}>No tiene ninguna tarifa activa. Aquí abajo puedes corregir las que han caducado o se han agotado.</p>}
-                  {contratados.map((b) => (
-                    <article key={b.id} className={estilos.histCard}>
-                      <div className={estilos.histCabecera}>
-                        <div>
-                          <strong>{nombreVisible(b.tipos_bono?.nombre)}</strong>
-                          <div className={styles.ayuda}>{detalleBono(b)}</div>
-                        </div>
-                        <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
-                      </div>
-                      {b.estado === "activo" && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
-                      <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
-                      <EditorBono bonoId={b.id} anulado={false} sinAnular />
-                    </article>
-                  ))}
-                  {terminados.map((b) => (
-                    <article key={b.id} className={estilos.histCard}>
-                      <div className={estilos.histCabecera}>
-                        <div>
-                          <strong>{nombreVisible(b.tipos_bono?.nombre)}</strong>
-                          <div className={styles.ayuda}>{detalleBono(b)}</div>
-                        </div>
-                        <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
-                      </div>
-                      <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />
-                    </article>
-                  ))}
+                  {[...gruposContratados, ...gruposTerminados].map((g) => {
+                    const junto = g.length > 1;
+                    const cabecera = g[0];
+                    return (
+                      <article key={cabecera.id} className={estilos.histCard}>
+                        {junto ? (
+                          <div className={estilos.histCabecera}>
+                            <div>
+                              <strong>{nombreVisible(cabecera.tipos_bono?.nombre)}</strong>
+                              <div className={styles.ayuda}>Tarifa combinada: {g.map((b) => (NOMBRE_SERVICIO[b.servicio] ?? b.servicio).toLowerCase()).join(" + ")}</div>
+                            </div>
+                          </div>
+                        ) : null}
+                        {g.map((b) => (
+                          <div key={b.id} style={junto ? { borderTop: "1px solid rgba(43, 43, 42, 0.12)", marginTop: 10, paddingTop: 10 } : undefined}>
+                            <div className={estilos.histCabecera}>
+                              <div>
+                                <strong>{junto ? (NOMBRE_SERVICIO[b.servicio] ?? b.servicio) : nombreVisible(b.tipos_bono?.nombre)}</strong>
+                                <div className={styles.ayuda}>{detalleBono(b)}</div>
+                              </div>
+                              <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                            </div>
+                            {b.estado === "activo" && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
+                            {!junto && <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />}
+                            {enMarcha(b) && <EditorBono bonoId={b.id} anulado={false} sinAnular />}
+                          </div>
+                        ))}
+                        {junto && (
+                          <div style={{ borderTop: "1px solid rgba(43, 43, 42, 0.12)", marginTop: 10, paddingTop: 10 }}>
+                            <div className={styles.ayuda}>Las fechas se cambian a la vez en los dos servicios.</div>
+                            <TarifaAsistentes userId={p.id} bono={paraAsistente(cabecera)} tarifas={tarifasOpciones} />
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
                   <EditorPersona
                     persona={{
                       id: p.id,
