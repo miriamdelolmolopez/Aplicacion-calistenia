@@ -35,6 +35,7 @@ export type DatosPersona = {
   apellidos: string | null;
   telefono: string | null;
   idioma: "es" | "en";
+  admiteCorreos: boolean; // false si desactivó los avisos de novedades
   num: Record<string, number | null>;
   opc: Record<string, string>;
   tarifaIds: string[];
@@ -53,7 +54,7 @@ export async function datosPersonas(): Promise<DatosPersona[]> {
   const diaSemana = ((new Date(`${hoy}T12:00:00Z`).getUTCDay() + 6) % 7) + 1; // lunes = 1
 
   const [perfiles, bonos, reservas, entrenos, pagos, servicios] = await Promise.all([
-    leerTodo((a, b) => admin.from("profiles").select("id, email, nombre, apellidos, telefono, rol, idioma, creado_en, fecha_nacimiento").in("rol", ROLES).order("id").range(a, b)),
+    leerTodo((a, b) => admin.from("profiles").select("id, email, nombre, apellidos, telefono, rol, idioma, creado_en, fecha_nacimiento, avisos_novedades").in("rol", ROLES).order("id").range(a, b)),
     leerTodo((a, b) => admin.from("bonos").select("user_id, estado, servicio, clases_restantes, caduca_en, tipo_bono_id, tipos_bono(nombre)").order("id").range(a, b)),
     leerTodo((a, b) => admin.from("reservas").select("user_id, asistencia, sesiones_clase(empieza_en, estado)").eq("estado", "reservada").order("id").range(a, b)),
     leerTodo((a, b) => admin.from("entrenos").select("user_id, terminado_en").eq("estado", "terminado").order("id").range(a, b)),
@@ -159,6 +160,7 @@ export async function datosPersonas(): Promise<DatosPersona[]> {
       apellidos: (p.apellidos as string | null) ?? null,
       telefono: (p.telefono as string | null) ?? null,
       idioma: p.idioma === "en" ? "en" : "es",
+      admiteCorreos: p.avisos_novedades !== false,
       num: {
         dias_ultimo_entreno: ultima > 0 ? diasEntre(claveDia(new Date(ultima).toISOString()), hoy) : null,
         dias_proxima_reserva: proxima < Infinity ? diasEntre(hoy, claveDia(new Date(proxima).toISOString())) : null,
@@ -269,6 +271,10 @@ async function aplicar(regla: Regla, d: DatosPersona, ejecucionId: string): Prom
           hecho.push("correo no enviado (sin correo válido)");
           continue;
         }
+        if (!d.admiteCorreos) {
+          hecho.push("correo no enviado (tiene desactivados los avisos de novedades)");
+          continue;
+        }
         const en = d.idioma === "en" && !!a.asunto_en && !!a.mensaje_en;
         const ok = await enviarCorreo(correoAutomatico({ para: d.email, idioma: d.idioma, asunto: en ? a.asunto_en! : a.asunto, mensaje: en ? a.mensaje_en! : a.mensaje, valores, ruta: rutaInterna(a.enlace) }));
         hecho.push(ok ? "correo" : "correo fallido");
@@ -308,12 +314,14 @@ export async function ejecutarRegla(regla: Regla): Promise<ResultadoRegla> {
   let aplicadas = 0;
   let omitidas = 0;
   let tareas = 0;
-  for (const d of coinciden.slice(0, 300)) {
+  // Primero se separan las que ya la recibieron; el tope de 300 por día se aplica solo a las que tocan.
+  const pendientes: DatosPersona[] = [];
+  for (const d of coinciden) {
     const antes = ultima.get(d.id);
-    if (antes !== undefined && (regla.repeticion_dias === null || ahora - antes < regla.repeticion_dias * DIA)) {
-      omitidas++;
-      continue;
-    }
+    if (antes !== undefined && (regla.repeticion_dias === null || ahora - antes < regla.repeticion_dias * DIA)) omitidas++;
+    else pendientes.push(d);
+  }
+  for (const d of pendientes.slice(0, 300)) {
     // Se apunta primero, para que un fallo a mitad no repita regalos ni correos.
     const { data: ej, error } = await admin.from("reglas_ejecuciones").insert({ regla_id: regla.id, user_id: d.id }).select("id").single();
     if (error || !ej) continue;

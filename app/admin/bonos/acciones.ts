@@ -108,9 +108,10 @@ export async function ajustarBono(_previo: Estado, formData: FormData): Promise<
         .select("id")
         .single();
       if (falloAlta || !nuevo) return error(falloAlta?.message);
-      await admin.from("movimientos_bono").insert({ bono_id: nuevo.id, tipo: "alta", clases, nota: `Regalo${nota ? ": " + nota : ""}`, creado_por: user.id });
+      const { error: falloMov } = await admin.from("movimientos_bono").insert({ bono_id: nuevo.id, tipo: "alta", clases, nota: `Regalo${nota ? ": " + nota : ""}`, creado_por: user.id });
       await admin.rpc("refrescar_bonos", { p_user: bono.user_id });
-      await admin.from("bonos").update({ caduca_en: null }).eq("id", nuevo.id);
+      const { error: falloCaduca } = await admin.from("bonos").update({ caduca_en: null }).eq("id", nuevo.id);
+      if (falloMov || falloCaduca) return error(`Las clases se han añadido, pero no se ha podido guardar todo el detalle (${(falloMov ?? falloCaduca)?.message}). Revisa la ficha.`);
       sueltas = true;
       paraTarifa = 0;
     }
