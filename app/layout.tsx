@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   title: "CalisCoach",
   description: "Calistenia y pino · Fuengirola",
   appleWebApp: { capable: true, title: "CalisCoach" },
+  // Demuestra a Google Search Console que la página es de Miriam (verificación de la marca del inicio de sesión).
+  verification: { google: "ng6qurHBSBlnVr4Q7hCvbojrO7y7xfUnphpyztCoiII" },
 };
 
 export const viewport: Viewport = {
