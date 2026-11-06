@@ -182,6 +182,7 @@ function ApuntarAtleta({ clase, alCerrar }: { clase: ClaseDelDia; alCerrar: () =
   const [busca, setBusca] = useState("");
   const [trabajando, setTrabajando] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState<{ texto: string; error: boolean } | null>(null);
+  const [aunAsi, setAunAsi] = useState<Atleta | null>(null); // no puede por su tarifa: se pregunta si se apunta igualmente
 
   useEffect(() => {
     let vigente = true;
@@ -198,12 +199,17 @@ function ApuntarAtleta({ clase, alCerrar }: { clase: ClaseDelDia; alCerrar: () =
     };
   }, [clase.id]);
 
-  async function apuntar(a: Atleta) {
+  async function apuntar(a: Atleta, igualmente = false) {
     setTrabajando(a.id);
     setMensaje(null);
-    const r = await apuntarAtleta(a.id, clase.id);
+    setAunAsi(null);
+    const r = await apuntarAtleta(a.id, clase.id, igualmente);
     setTrabajando(null);
-    if (!r.ok) return setMensaje({ texto: r.error ?? "No se ha podido apuntar.", error: true });
+    if (!r.ok) {
+      setMensaje({ texto: r.error ?? "No se ha podido apuntar.", error: true });
+      if (r.permiteIgual) setAunAsi(a);
+      return;
+    }
     setAtletas((lista) => (lista ?? []).filter((x) => x.id !== a.id));
     setMensaje({ texto: `${a.nombre} apuntada. ${r.mensaje ?? ""}`.trim(), error: false });
     router.refresh();
@@ -231,6 +237,21 @@ function ApuntarAtleta({ clase, alCerrar }: { clase: ClaseDelDia; alCerrar: () =
           <p className={mensaje.error ? styles.error : styles.aviso} role={mensaje.error ? "alert" : "status"}>
             {mensaje.texto}
           </p>
+        )}
+        {aunAsi && (
+          <div className={styles.aviso} role="alert">
+            <p style={{ margin: "0 0 10px" }}>
+              ¿Quieres apuntar a {aunAsi.nombre} aun así? No se le descontará ninguna clase, y si luego se cancela no se le devolverá nada.
+            </p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button type="button" className={styles.boton} disabled={trabajando !== null} onClick={() => apuntar(aunAsi, true)}>
+                Apuntar aun así
+              </button>
+              <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={trabajando !== null} onClick={() => setAunAsi(null)}>
+                No apuntar
+              </button>
+            </div>
+          </div>
         )}
         {atletas === null && <p className={styles.ayuda}>Cargando…</p>}
         {atletas !== null && visibles.length === 0 && <p className={styles.ayuda}>{q ? "Nadie coincide con esa búsqueda." : "No hay nadie más a quien apuntar."}</p>}

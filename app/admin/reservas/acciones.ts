@@ -8,7 +8,7 @@ import { instanteMadrid } from "@/lib/fechas";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type Asistencia = "asistio" | "no_asistio" | null;
-export type Resultado = { ok: boolean; error?: string; mensaje?: string };
+export type Resultado = { ok: boolean; error?: string; mensaje?: string; permiteIgual?: boolean };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -73,18 +73,40 @@ export async function listarAtletasParaApuntar(sesionId: string): Promise<{ ok: 
 }
 
 // Apunta a una persona a una clase desde la propia clase. Si ya está llena, no deja.
-export async function apuntarAtleta(userId: string, sesionId: string): Promise<Resultado> {
+// Si no puede por su tarifa (sin tarifa, sin clases, caducada), avisa y deja elegir «apuntar aun así»:
+// entonces se apunta sin descontar ninguna clase (y si luego se cancela, no se devuelve nada).
+export async function apuntarAtleta(userId: string, sesionId: string, aunAsi = false): Promise<Resultado> {
   await requireAdmin("reservas");
   if (!UUID.test(userId) || !UUID.test(sesionId)) return { ok: false, error: "Datos no válidos." };
 
-  const { data: sesion } = await createAdminClient().from("sesiones_clase").select("plazas, estado, empieza_en, reservas(estado)").eq("id", sesionId).maybeSingle();
+  const admin = createAdminClient();
+  const { data: sesion } = await admin.from("sesiones_clase").select("plazas, estado, empieza_en, reservas(estado)").eq("id", sesionId).maybeSingle();
   if (!sesion) return { ok: false, error: "No se ha encontrado la clase." };
   if (sesion.estado !== "programada") return { ok: false, error: "Esta clase está cancelada." };
   if (new Date(sesion.empieza_en as string) <= new Date()) return { ok: false, error: "Esta clase ya ha empezado." };
   const ocupadas = ((sesion.reservas ?? []) as { estado: string }[]).filter((r) => r.estado === "reservada").length;
   if (ocupadas >= (sesion.plazas as number)) return { ok: false, error: "La clase está llena." };
 
-  return reservarComo(userId, sesionId);
+  if (!aunAsi) {
+    const r = await reservarComo(userId, sesionId);
+    // Los fallos por tarifa se pueden saltar a propósito; los demás (ya apuntada, etc.) no.
+    if (!r.ok && /bono|crédito|prueba/i.test(r.error ?? "")) return { ...r, permiteIgual: true };
+    return r;
+  }
+
+  const { data: perfil } = await admin.from("profiles").select("rol, tambien_alumno").eq("id", userId).maybeSingle();
+  if (!perfil || !(perfil.rol === "alumno" || perfil.rol === "invitado" || (perfil.rol === "admin" && perfil.tambien_alumno))) {
+    return { ok: false, error: "Esta persona no puede apuntarse a clases." };
+  }
+  const { data: yaEsta } = await admin.from("reservas").select("id").eq("sesion_id", sesionId).eq("user_id", userId).eq("estado", "reservada").maybeSingle();
+  if (yaEsta) return { ok: false, error: "Ya está apuntada a esta clase." };
+
+  const { error } = await admin.from("reservas").insert({ sesion_id: sesionId, user_id: userId, bono_id: null, creditos: 0, es_prueba: false });
+  if (error) return { ok: false, error: "No se ha podido apuntar." };
+  after(() => avisarReserva(userId, sesionId));
+
+  refrescar();
+  return { ok: true, mensaje: "Apuntada sin descontar ninguna clase." };
 }
 
 // Cancela como si lo hiciera la persona: si está fuera del plazo de cancelación, la clase le cuenta.
