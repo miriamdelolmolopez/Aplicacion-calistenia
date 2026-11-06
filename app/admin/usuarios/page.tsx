@@ -178,6 +178,9 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
       </CabeceraAdmin>
       <NuevoUsuario tarifas={tarifas} descuentos={descuentos} hoy={hoy} ahora={ahora} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
       <p style={{ margin: "0 0 12px" }}>
+        <Link href="/admin/usuarios/exalumnos" className={styles.enlaceBarra} style={{ marginRight: 14 }}>
+          Exalumnos e invitados antiguos
+        </Link>
         {verArchivadas ? (
           <Link href="/admin/usuarios" className={styles.enlaceBarra}>
             ← Volver a las personas activas
