@@ -28,7 +28,8 @@ export default function ReservaConfirmada({
   const [eligiendo, setEligiendo] = useState(false);
 
   const duracion = clase.duracion_min || 60;
-  const fin = new Date(new Date(clase.empieza_en).getTime() + duracion * 60000).toISOString();
+  const finMs = new Date(clase.empieza_en).getTime() + duracion * 60000;
+  const fin = Number.isNaN(finMs) ? clase.empieza_en : new Date(finMs).toISOString();
   const evento = {
     id: clase.id,
     titulo: `${tr(clase.tipo)} · CalisCoach`,

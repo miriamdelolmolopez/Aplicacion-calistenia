@@ -60,6 +60,7 @@ export function textoHora(iso: string): string {
 // Fecha AAAA-MM-DD sumándole días (solo calendario, sin horas).
 export function sumarDias(fecha: string, dias: number): string {
   const d = new Date(`${fecha}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return fecha;
   d.setUTCDate(d.getUTCDate() + dias);
   return d.toISOString().slice(0, 10);
 }

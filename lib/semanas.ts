@@ -2,6 +2,7 @@
 
 export function sumarDias(clave: string, dias: number): string {
   const d = new Date(`${clave}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return clave;
   d.setUTCDate(d.getUTCDate() + dias);
   return d.toISOString().slice(0, 10);
 }

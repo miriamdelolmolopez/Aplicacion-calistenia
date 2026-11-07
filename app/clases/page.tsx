@@ -174,6 +174,7 @@ async function extrasTallerDe(d: Datos): Promise<Record<string, ExtraTaller>> {
 // Suma días a una fecha AAAA-MM-DD (sin zonas horarias de por medio).
 function sumarDias(clave: string, dias: number): string {
   const d = new Date(`${clave}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return clave;
   d.setUTCDate(d.getUTCDate() + dias);
   return d.toISOString().slice(0, 10);
 }
