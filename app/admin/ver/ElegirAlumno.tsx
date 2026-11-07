@@ -61,7 +61,7 @@ export default function ElegirAlumno({
               key={a.id}
               type="button"
               onClick={() => alElegir(a.id)}
-              style={{ font: "inherit", textAlign: "left", minHeight: 44, padding: "6px 12px", borderRadius: 10, border: "1px solid var(--linea)", background: "var(--blanco)", cursor: "pointer", color: "inherit" }}
+              style={{ font: "inherit", textAlign: "left", flex: "none", minHeight: 56, lineHeight: 1.35, padding: "8px 12px", borderRadius: 10, border: "1px solid var(--linea)", background: "var(--blanco)", cursor: "pointer", color: "inherit" }}
             >
               <strong>{a.nombre}</strong>
               <br />

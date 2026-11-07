@@ -12,6 +12,7 @@ export default function TablonAnuncios({ limite }: { limite?: number }) {
   const [idioma] = useIdioma();
   const [anuncios, setAnuncios] = useState<AnuncioFila[] | null>(null);
   const [aviso, setAviso] = useState<{ id: string; texto: string } | null>(null);
+  const [pos, setPos] = useState(0); // qué anuncio se ve (se pasa de uno a otro con las flechas)
 
   useEffect(() => {
     let vigente = true;
@@ -40,12 +41,27 @@ export default function TablonAnuncios({ limite }: { limite?: number }) {
     return limite ? null : <p className={estilos.vacio}>{idioma === "en" ? "There are no notices right now." : "Ahora mismo no hay anuncios."}</p>;
   }
   const visibles = limite ? anuncios.slice(0, limite) : anuncios;
+  const actual = Math.min(pos, visibles.length - 1);
+  const en = idioma === "en";
 
   return (
     <section className={estilos.corcho} aria-label={idioma === "en" ? "Notice board" : "Tablón de anuncios"}>
       <h2 className={estilos.titulo}>{idioma === "en" ? "Notice board" : "Tablón de anuncios"}</h2>
+      {visibles.length > 1 && (
+        <div className={estilos.flechas}>
+          <button type="button" className={estilos.flecha} onClick={() => setPos(Math.max(0, actual - 1))} disabled={actual === 0} aria-label={en ? "Newer notice" : "Anuncio más reciente"}>
+            ‹
+          </button>
+          <span className={estilos.posicion}>
+            {fechaCorta(visibles[actual].publicado_en, en ? "en" : "es")} · {actual + 1}/{visibles.length}
+          </span>
+          <button type="button" className={estilos.flecha} onClick={() => setPos(Math.min(visibles.length - 1, actual + 1))} disabled={actual === visibles.length - 1} aria-label={en ? "Older notice" : "Anuncio anterior"}>
+            ›
+          </button>
+        </div>
+      )}
       <div className={estilos.notas}>
-        {visibles.map((a) => (
+        {visibles.filter((_, i) => i === actual).map((a) => (
           <article key={a.id} className={estilos.nota}>
             <span className={estilos.chincheta} aria-hidden="true" />
             {a.fijado && <small className={estilos.fijado}>{idioma === "en" ? "Pinned" : "Fijado"}</small>}

@@ -313,18 +313,12 @@ export default function Inicio() {
                 <div className={clay.metaFila}>
                   <span className={clay.metaChip}>
                     <IconoCorona />
-                    {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
+                    {Math.max(0, b.clasesTotal - b.clasesHechas)} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
                   </span>
-                  {b.activoDesde && b.caducaEn && (
-                    <span className={clay.metaChip}>
-                      <IconoReloj />
-                      {fechaCorta(b.activoDesde, idioma)} – {fechaCorta(b.caducaEn, idioma)}
-                    </span>
-                  )}
                   {b.caducaEn && (
                     <span className={clay.metaChip}>
                       <IconoReloj />
-                      {t.caducaEl} {fechaCorta(b.caducaEn, idioma)}
+                      {b.activoDesde ? `${fechaCorta(b.activoDesde, idioma)} – ${fechaCorta(b.caducaEn, idioma)}` : `${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
                     </span>
                   )}
                 </div>
@@ -373,7 +367,7 @@ export default function Inicio() {
                   {planOnlineBono.caducaEn && (
                     <span className={clay.metaChip}>
                       <IconoReloj />
-                      {t.caducaEl} {fechaCorta(planOnlineBono.caducaEn, idioma)}
+                      {planOnlineBono.activoDesde ? `${fechaCorta(planOnlineBono.activoDesde, idioma)} – ${fechaCorta(planOnlineBono.caducaEn, idioma)}` : `${t.caducaEl} ${fechaCorta(planOnlineBono.caducaEn, idioma)}`}
                     </span>
                   )}
                 </div>

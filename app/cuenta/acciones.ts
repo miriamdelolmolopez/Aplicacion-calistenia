@@ -84,7 +84,12 @@ async function bonosVigentesDe(userId: string, comoAdmin: boolean): Promise<MiBo
   const filas = ((data ?? []) as unknown as Fila[]).filter((b) => b.estado !== "agotado" || (b.caduca_en && b.caduca_en > ahora));
   // Primero los bonos que se están usando y luego los que esperan, por orden de compra.
   const rango = (e: string) => (e === "activo" ? 0 : e === "agotado" ? 1 : 2);
-  const ordenados = [...filas].sort((a, b) => rango(a.estado) - rango(b.estado));
+  const finDe = (b: { caduca_en: string | null }) => (b.caduca_en ? new Date(b.caduca_en).getTime() : Number.MAX_SAFE_INTEGER);
+  const ordenados = [...filas].sort((a, b) => {
+    const r = Math.min(rango(a.estado), 1) - Math.min(rango(b.estado), 1); // en marcha (activo o ya sin clases pero en fechas) antes que las que esperan
+    if (r !== 0) return r;
+    return finDe(a) - finDe(b);
+  });
 
   // Clases ya realizadas de cada bono: reservas cuya clase ya ha empezado.
   const hechas = new Map<string, number>();

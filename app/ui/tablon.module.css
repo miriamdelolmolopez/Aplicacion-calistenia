@@ -167,3 +167,35 @@
 .color1 { background: #ffb3c1; }
 .color2 { background: #a8e0b5; }
 .color3 { background: #a9d4f5; }
+
+/* Flechas para pasar de un anuncio a otro, con su fecha de publicación. */
+.flechas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.flecha {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #fffaf0;
+  background: rgba(60, 35, 12, 0.55);
+  color: #fffaf0;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.flecha:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.posicion {
+  color: #fffaf0;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(60, 35, 12, 0.7);
+}

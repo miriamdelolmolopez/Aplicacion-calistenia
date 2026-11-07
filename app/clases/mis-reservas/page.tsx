@@ -194,16 +194,10 @@ export default function MisReservas() {
                   {t.hasReservado.replace("{a}", String(usadas)).replace("{b}", String(b.clasesTotal))} ·{" "}
                   {b.clasesRestantes === 1 ? t.teQueda : t.teQuedan.replace("{n}", String(b.clasesRestantes))}
                 </span>
-                {b.activoDesde && b.caducaEn && (
-                  <span className={clay.metaChip}>
-                    <IconoReloj />
-                    {fechaCorta(b.activoDesde, idioma)} – {fechaCorta(b.caducaEn, idioma)}
-                  </span>
-                )}
                 {b.caducaEn && (
                   <span className={clay.metaChip}>
                     <IconoReloj />
-                    {t.caducaEl} {fechaCorta(b.caducaEn, idioma)}
+                    {b.activoDesde ? `${fechaCorta(b.activoDesde, idioma)} – ${fechaCorta(b.caducaEn, idioma)}` : `${t.caducaEl} ${fechaCorta(b.caducaEn, idioma)}`}
                   </span>
                 )}
               </div>
