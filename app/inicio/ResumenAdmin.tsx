@@ -5,7 +5,15 @@ import { useEffect, useState } from "react";
 import estilos from "./inicio.module.css";
 import { obtenerResumenAdmin, type PersonaResumen, type ResumenAdmin } from "./accionesAdmin";
 
-type Clave = "ingresos" | "activos" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos";
+type Servicio = "grupal" | "individual" | "online";
+type Clave = "ingresos" | "activos" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos" | `activos_${Servicio}` | `ingresos_${Servicio}`;
+
+const NOMBRE_SERVICIO: Record<Servicio, { plural: string; ingresos: string }> = {
+  grupal: { plural: "Alumnos/as grupales", ingresos: "Ingresos grupales" },
+  individual: { plural: "Alumnos/as individuales", ingresos: "Ingresos individuales" },
+  online: { plural: "Alumnos/as online", ingresos: "Ingresos online" },
+};
+const SERVICIOS: Servicio[] = ["grupal", "individual", "online"];
 
 function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + " €";
@@ -85,6 +93,21 @@ export default function ResumenAdminTarjetas() {
       tono: datos.perdidos.length > 0 ? "mal" : undefined,
     },
   ];
+  // Lo mismo, separado por tipo de servicio (grupal, individual y online).
+  const porServicio: Tarjeta[] = [
+    ...SERVICIOS.map((s): Tarjeta => ({
+      clave: `activos_${s}`,
+      titulo: NOMBRE_SERVICIO[s].plural,
+      valor: String(datos.activos[s]),
+      pie: <Comparacion actual={datos.activos[s]} anterior={datos.activosMesAnteriorServicio[s]} texto={String(datos.activosMesAnteriorServicio[s])} />,
+    })),
+    ...SERVICIOS.map((s): Tarjeta => ({
+      clave: `ingresos_${s}`,
+      titulo: NOMBRE_SERVICIO[s].ingresos,
+      valor: euros(datos.ingresosServicio[s].mes),
+      pie: <Comparacion actual={datos.ingresosServicio[s].mes} anterior={datos.ingresosServicio[s].anterior} texto={euros(datos.ingresosServicio[s].anterior)} />,
+    })),
+  ];
   const alertas: Tarjeta[] = [
     { clave: "caducan", titulo: "Caducan pronto", valor: String(datos.caducanPronto.length), pie: "En los próximos 7 días" },
     { clave: "renovar", titulo: "Bonos por renovar", valor: String(datos.porRenovar.length), pie: "Bono agotado, sin otro activo" },
@@ -118,6 +141,9 @@ export default function ResumenAdminTarjetas() {
     <section className={estilos.resumen} aria-label="Resumen del negocio">
       <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{principales.map(pinta)}</div>
 
+      <h2 className={estilos.resumenSeccion}>Por tipo de servicio</h2>
+      <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{porServicio.map(pinta)}</div>
+
       <h2 className={estilos.resumenSeccion}>Alertas</h2>
       <div className={`${estilos.resumenCuadricula} ${estilos.resumenAlertas}`}>{alertas.map(pinta)}</div>
 
@@ -147,6 +173,27 @@ export default function ResumenAdminTarjetas() {
               <Lista personas={datos.activosPorServicio.online} vacio="Nadie con plan online activo." />
               <Link href="/admin/usuarios">Ver todos los usuarios →</Link>
             </>
+          )}
+          {SERVICIOS.map((s) =>
+            abierta === `activos_${s}` ? (
+              <div key={s}>
+                <h3>{NOMBRE_SERVICIO[s].plural} ({datos.activos[s]})</h3>
+                <p className={estilos.resumenVacio}>
+                  Con una tarifa activa de este tipo (también si ya han reservado todas sus clases pero la tarifa sigue dentro de sus fechas). Al acabar el mes anterior había {datos.activosMesAnteriorServicio[s]}.
+                </p>
+                <Lista personas={datos.activosPorServicio[s]} vacio="Nadie con una tarifa activa de este tipo." />
+                <Link href="/admin/usuarios">Ver todos los usuarios →</Link>
+              </div>
+            ) : abierta === `ingresos_${s}` ? (
+              <div key={s}>
+                <h3>{NOMBRE_SERVICIO[s].ingresos}</h3>
+                <p>
+                  {euros(datos.ingresosServicio[s].mes)} cobrados este mes. Mes anterior: {euros(datos.ingresosServicio[s].anterior)}.
+                  {datos.ingresosServicio.otros.mes > 0 ? ` Además, ${euros(datos.ingresosServicio.otros.mes)} de pagos sin tipo de servicio (talleres, pagos sueltos).` : ""}
+                </p>
+                <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
+              </div>
+            ) : null,
           )}
           {abierta === "nuevos" && (
             <>

@@ -800,3 +800,19 @@
   font-weight: 600;
   opacity: 0.9;
 }
+
+.etiquetaVerde {
+  background: color-mix(in srgb, #2fb57a 18%, var(--blanco));
+  color: #1f7a52;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.etiquetaRoja {
+  background: color-mix(in srgb, #e5484d 16%, var(--blanco));
+  color: #b42318;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 99px;
+}

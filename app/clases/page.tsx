@@ -307,7 +307,16 @@ function PantallaClases() {
     setAviso(null);
     setConfirmando(null);
     setTrabajando(c.id);
-    const r = await accion();
+    let r: { ok: boolean; codigo?: string; devuelta?: boolean; dato?: string };
+    try {
+      r = await accion();
+    } catch {
+      // Casi siempre: la app instalada tiene una versión vieja. Se avisa y se recarga para que funcione al reintentar.
+      setTrabajando(null);
+      setAviso({ tipo: "error", clave: "err_version", clase: c });
+      setTimeout(() => location.reload(), 1800);
+      return;
+    }
     setTrabajando(null);
     if (r.ok && conCalendario) {
       setConfirmada({ id: c.id, tipo: c.tipo, empieza_en: c.empieza_en, duracion_min: c.duracion_min });

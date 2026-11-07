@@ -20,6 +20,8 @@ export type ResumenAdmin = {
   activos: { total: number; grupal: number; individual: number; online: number };
   activosMesAnterior: number; // personas con un bono en marcha al acabar el mes anterior
   activosPorServicio: { grupal: PersonaResumen[]; individual: PersonaResumen[]; online: PersonaResumen[] };
+  activosMesAnteriorServicio: { grupal: number; individual: number; online: number };
+  ingresosServicio: Record<"grupal" | "individual" | "online" | "otros", { mes: number; anterior: number }>;
   caducanPronto: PersonaResumen[];
   nuevos: PersonaResumen[];
   nuevosMesAnterior: PersonaResumen[];
@@ -83,7 +85,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
       .from("bonos")
       .select("id, user_id, servicio, estado, caduca_en, activo_desde, creado_en, clases_restantes, tipos_bono(nombre)")
       .neq("estado", "anulado"),
-    admin.from("pagos").select("user_id, importe_centimos, estado, pagado_en, creado_en, persona_nombre"),
+    admin.from("pagos").select("bono_id, user_id, importe_centimos, estado, pagado_en, creado_en, persona_nombre"),
     admin.from("movimientos_bono").select("bono_id, creado_en").in("tipo", ["agotado", "caducidad"]),
   ]);
 
@@ -96,6 +98,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
 
   const bonos = (bonosDatos ?? []) as unknown as BonoFila[];
   const pagos = (pagosDatos ?? []) as {
+    bono_id: string | null;
     user_id: string | null;
     importe_centimos: number;
     estado: string;
@@ -107,17 +110,28 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   // Ingresos: pagos cobrados este mes y el mes anterior.
   let ingresosMes = 0;
   let ingresosMesAnterior = 0;
+  const servicioDeBono = new Map(bonos.map((b) => [b.id, b.servicio]));
+  const ingresosServicio: ResumenAdmin["ingresosServicio"] = { grupal: { mes: 0, anterior: 0 }, individual: { mes: 0, anterior: 0 }, online: { mes: 0, anterior: 0 }, otros: { mes: 0, anterior: 0 } };
   for (const p of pagos) {
     if (p.estado !== "pagado") continue;
     const cuando = new Date(p.pagado_en ?? p.creado_en);
-    if (cuando >= desdeMes) ingresosMes += p.importe_centimos;
-    else if (cuando >= desdeMesAnterior) ingresosMesAnterior += p.importe_centimos;
+    const s = p.bono_id ? servicioDeBono.get(p.bono_id) : undefined;
+    const clave = s === "grupal" || s === "individual" || s === "online" ? s : "otros";
+    if (cuando >= desdeMes) {
+      ingresosMes += p.importe_centimos;
+      ingresosServicio[clave].mes += p.importe_centimos;
+    } else if (cuando >= desdeMesAnterior) {
+      ingresosMesAnterior += p.importe_centimos;
+      ingresosServicio[clave].anterior += p.importe_centimos;
+    }
   }
   const diferenciaPct =
     ingresosMesAnterior > 0 ? Math.round(((ingresosMes - ingresosMesAnterior) / ingresosMesAnterior) * 100) : null;
 
   // Alumnas activas: personas con un bono activo, por tipo de servicio.
-  const activosBonos = bonos.filter((b) => b.estado === "activo");
+  // Un bono sin clases pero dentro de sus fechas sigue siendo activo.
+  const vigente = (b: BonoFila) => b.estado === "activo" || (b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en) > ahora);
+  const activosBonos = bonos.filter(vigente);
   const porServicio = (servicio: string): PersonaResumen[] => {
     const vistos = new Set<string>();
     const lista: PersonaResumen[] = [];
@@ -164,10 +178,10 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     nuevosMesAnterior.length > 0 ? Math.round(((nuevos.length - nuevosMesAnterior.length) / nuevosMesAnterior.length) * 100) : null;
 
   // Bonos por renovar: bonos agotados de personas que no tienen otro bono activo o en cola de ese servicio.
-  const vigentes = new Set(bonos.filter((b) => b.estado === "activo" || b.estado === "en_cola").map((b) => `${b.user_id}:${b.servicio}`));
+  const vigentes = new Set(bonos.filter((b) => vigente(b) || b.estado === "en_cola").map((b) => `${b.user_id}:${b.servicio}`));
   const vistosRenovar = new Set<string>();
   const porRenovar: PersonaResumen[] = [];
-  for (const b of bonos.filter((x) => x.estado === "agotado")) {
+  for (const b of bonos.filter((x) => x.estado === "agotado" && !vigente(x))) {
     const clave = `${b.user_id}:${b.servicio}`;
     if (vigentes.has(clave) || vistosRenovar.has(clave)) continue;
     vistosRenovar.add(clave);
@@ -190,6 +204,8 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   };
   const conBonoAlAcabarMesAnterior = new Set(bonos.filter((b) => enMarchaEn(b, desdeMes)).map((b) => b.user_id));
   const activosMesAnterior = conBonoAlAcabarMesAnterior.size;
+  const anteriorDe = (servicio: string) => new Set(bonos.filter((b) => b.servicio === servicio && enMarchaEn(b, desdeMes)).map((b) => b.user_id)).size;
+  const activosMesAnteriorServicio = { grupal: anteriorDe("grupal"), individual: anteriorDe("individual"), online: anteriorDe("online") };
 
   // Alumnos perdidos: su bono terminó en el periodo y no tienen otro en marcha (ni esperando) al acabar.
   const perdidosEntre = (desde: Date, hasta: Date, sigueActiva: (id: string) => boolean): PersonaResumen[] => {
@@ -204,7 +220,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     }
     return lista.sort((a, c) => a.nombre.localeCompare(c.nombre, "es"));
   };
-  const conBonoAhora = new Set(bonos.filter((b) => b.estado === "activo" || b.estado === "en_cola").map((b) => b.user_id));
+  const conBonoAhora = new Set(bonos.filter((b) => vigente(b) || b.estado === "en_cola").map((b) => b.user_id));
   const perdidos = perdidosEntre(desdeMes, new Date(ahora.getTime() + 1), (id) => conBonoAhora.has(id));
   const perdidosMesAnterior = perdidosEntre(desdeMesAnterior, desdeMes, (id) => conBonoAlAcabarMesAnterior.has(id));
 
@@ -232,6 +248,8 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     activos: { total: totalActivos, grupal: grupal.length, individual: individual.length, online: online.length },
     activosMesAnterior,
     activosPorServicio: { grupal, individual, online },
+    activosMesAnteriorServicio,
+    ingresosServicio,
     caducanPronto,
     nuevos,
     nuevosMesAnterior,

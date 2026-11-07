@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // La versión publicada, para que la app instalada sepa si tiene que recargarse (ver ActualizadorApp).
+  env: { NEXT_PUBLIC_BUILD: process.env.VERCEL_GIT_COMMIT_SHA ?? "dev" },
   async headers() {
     return [
       {

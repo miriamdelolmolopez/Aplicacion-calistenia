@@ -321,7 +321,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     </div>
                     <div className={estilos.tarifaCab}>
                       <span>TARIFA</span>
-                      <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? (u.tarifa_sin_clases ? "Vigente · sin clases" : "Activa") : "Sin tarifa"}</span>
+                      <span className={u.tarifas.length > 0 ? estilos.activa : estilos.sinTarifa}>{u.tarifas.length > 0 ? ("Activa") : "Sin tarifa"}</span>
                       {u.pendiente_cobro > 0 && <span className={estilos.sinPagar}>Sin pagar · {euros(u.pendiente_cobro)}</span>}
                     </div>
                     <div className={estilos.tarifaCaja}>

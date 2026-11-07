@@ -252,6 +252,10 @@ export default function NuevoUsuario({
 
           {tipo === "alumno" && (
             <>
+              <div className={styles.campo}>
+                <label htmlFor="nu-desde">Alumno/a desde (opcional) <AyudaI texto="La fecha en que empezó con vosotras. Sirve para la automatización de aniversario y para tener la base de datos al día. Si la dejas vacía, cuenta desde hoy." /></label>
+                <input id="nu-desde" name="alumno_desde" type="date" />
+              </div>
               <input type="hidden" name="filas" value={filas.length} />
               {filas.map((f, i) => (
                 <TarjetaServicio

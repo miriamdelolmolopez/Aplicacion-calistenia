@@ -378,9 +378,10 @@ async function candidatos(clave: ClavePlantilla, dias: number, paraApp = false):
 
   if (clave === "aniversario") {
     const [anio, mes, dia] = hoy.split("-").map(Number);
-    const { data } = await admin.from("profiles").select("id, creado_en").eq("rol", "alumno");
-    const cumplen = ((data ?? []) as { id: string; creado_en: string }[])
-      .map((p) => ({ id: p.id, f: claveDia(p.creado_en).split("-").map(Number) }))
+    // Cuenta desde «alumno/a desde» (si Miriam lo ha puesto) o, si no, desde que creó la cuenta.
+    const { data } = await admin.from("profiles").select("id, creado_en, alumno_desde").eq("rol", "alumno");
+    const cumplen = ((data ?? []) as { id: string; creado_en: string; alumno_desde: string | null }[])
+      .map((p) => ({ id: p.id, f: (p.alumno_desde ?? claveDia(p.creado_en)).slice(0, 10).split("-").map(Number) }))
       .filter((p) => p.f[1] === mes && p.f[2] === dia && anio - p.f[0] >= 1);
     if (cumplen.length > 0) {
       const { data: bonos } = await admin.from("bonos").select("user_id").eq("estado", "activo").in("user_id", cumplen.map((c) => c.id));

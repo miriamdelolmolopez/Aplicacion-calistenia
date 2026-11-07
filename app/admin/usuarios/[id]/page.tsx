@@ -17,6 +17,7 @@ import AvancesSesion from "./AvancesSesion";
 import Logros from "../../../progreso/Logros";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
 import { AlargarCortesia } from "./CorreosYCortesia";
+import EditarDatos from "./EditarDatos";
 import CorreosPersona from "./CorreosPersona";
 import EditorPersona from "../../EditorPersona";
 import AccesosUsuario from "./AccesosUsuario";
@@ -43,6 +44,11 @@ const ESTADOS_BONO: Record<string, string> = {
   anulado: "Anulado",
 };
 
+// Un bono sin clases pero dentro de sus fechas sigue siendo activo (en verde); al pasarse la fecha, sale en rojo.
+const dentroDeFechas = (b: { estado: string; caduca_en: string | null }) => b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en).getTime() > Date.now();
+const textoEtiquetaBono = (b: { estado: string; caduca_en: string | null }) => (dentroDeFechas(b) ? "Activo" : (ESTADOS_BONO[b.estado] ?? b.estado));
+const claseEtiquetaBono = (b: { estado: string; caduca_en: string | null }) => (b.estado === "activo" || dentroDeFechas(b) ? styles.etiquetaVerde : b.estado === "agotado" || b.estado === "caducado" ? styles.etiquetaRoja : styles.etiquetaSuave);
+
 const PESTANAS = [
   { id: "actual", texto: "Actual" },
   { id: "reservas", texto: "Reservas" },
@@ -50,8 +56,9 @@ const PESTANAS = [
   { id: "perfil", texto: "Perfil" },
   { id: "acciones", texto: "Acciones" },
 ] as const;
-type Pestana = (typeof PESTANAS)[number]["id"] | "accesos";
+type Pestana = (typeof PESTANAS)[number]["id"] | "accesos" | "entrenos";
 const PESTANA_ACCESOS = { id: "accesos", texto: "Accesos" } as const;
+const PESTANA_ENTRENOS = { id: "entrenos", texto: "Entrenos" } as const;
 
 type Asistencia = {
   total_clases: number;
@@ -113,6 +120,9 @@ export default async function FichaUsuario({
   const ahora = new Date().toISOString();
   // Si todavía no está el archivo 066 en Supabase, la consulta falla y se usan valores por defecto.
   const { data: accesos } = await admin.from("profiles").select("es_coach, excluidos_admin, tambien_alumno, fue_alumno").eq("id", id).maybeSingle();
+  // Desde cuándo es alumno/a (archivo 087): aparte, para que la ficha siga funcionando si todavía no está en Supabase.
+  const { data: datosDesde } = await admin.from("profiles").select("alumno_desde").eq("id", id).maybeSingle();
+  const alumnoDesde = (datosDesde as { alumno_desde?: string | null } | null)?.alumno_desde ?? null;
 
   // Todo lo que no depende de otra consulta se pide a la vez.
   const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
@@ -149,9 +159,6 @@ export default async function FichaUsuario({
   // Una administradora tiene Perfil y Accesos; si además es alumna, también las pestañas de una alumna (tarifa, reservas, logros y acciones).
   const esAdmin = p.rol === "admin";
   const esAlumna = !esAdmin || !!accesos?.tambien_alumno;
-  const pestanas: readonly { id: string; texto: string }[] = !esAdmin ? PESTANAS : esAlumna ? [...PESTANAS, PESTANA_ACCESOS] : [PESTANAS[3], PESTANA_ACCESOS];
-  const pestana: Pestana = pestanas.some((x) => x.id === pedida) ? (pedida as Pestana) : (pestanas[0].id as Pestana);
-
   // Los bonos se leen cuando ya se han puesto al día.
   const { data: bonosDatos } = await supabase
     .from("bonos")
@@ -197,12 +204,29 @@ export default async function FichaUsuario({
   ];
   const presencial = servicios.includes("grupal") || servicios.includes("individual") || servicios.includes("taller") || asistencia.total_clases > 0;
   const online = servicios.includes("online");
+  // «Reservas» solo si tiene clases presenciales; «Entrenos» (su rutina y cuándo ha entrenado) si tiene plan online.
+  const pestanasAlumna = PESTANAS.filter((x) => x.id !== "reservas" || presencial || !online);
+  const iLogros = pestanasAlumna.findIndex((x) => x.id === "logros");
+  const conEntrenos: readonly { id: string; texto: string }[] = online ? [...pestanasAlumna.slice(0, iLogros), PESTANA_ENTRENOS, ...pestanasAlumna.slice(iLogros)] : pestanasAlumna;
+  const pestanas: readonly { id: string; texto: string }[] = !esAdmin ? conEntrenos : esAlumna ? [...conEntrenos, PESTANA_ACCESOS] : [PESTANAS[3], PESTANA_ACCESOS];
+  const pestana: Pestana = pestanas.some((x) => x.id === pedida) ? (pedida as Pestana) : (pestanas[0].id as Pestana);
   // Su rutina para el botón «Editar rutina»: la publicada, o si no hay, la última que tenga.
   const { data: rutinasPersona } = online
     ? await admin.from("rutinas").select("id, estado, actualizado_en").eq("user_id", id).order("actualizado_en", { ascending: false })
     : { data: [] };
   const rutinaDe = ((rutinasPersona ?? []) as { id: string; estado: string }[]).find((r) => r.estado === "publicada") ?? ((rutinasPersona ?? []) as { id: string }[])[0];
   const nombre = [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
+  // Para «Entrenos»: su rutina publicada (en resumen) y los últimos entrenos que ha terminado.
+  type RutinaResumen = { nombre: string; rutina_sesiones: { id: string; nombre: string; orden: number; rutina_items: { id: string }[] }[] };
+  type EntrenoFila = { id: string; nombre_sesion: string; empezado_en: string; duracion_seg: number | null };
+  const [{ data: rutinaPublicada }, { data: entrenosDatos }] = online
+    ? await Promise.all([
+        admin.from("rutinas").select("nombre, rutina_sesiones(id, nombre, orden, rutina_items(id))").eq("user_id", id).eq("estado", "publicada").maybeSingle(),
+        admin.from("entrenos").select("id, nombre_sesion, empezado_en, duracion_seg").eq("user_id", id).eq("estado", "terminado").order("empezado_en", { ascending: false }).limit(60),
+      ])
+    : [{ data: null }, { data: [] }];
+  const rutinaResumen = rutinaPublicada as unknown as RutinaResumen | null;
+  const entrenosHechos = ((entrenosDatos ?? []) as EntrenoFila[]);
 
   let foto: string | null = null;
   if (p.foto_path) {
@@ -356,6 +380,70 @@ export default async function FichaUsuario({
         </>
   );
 
+  const ahoraMs = new Date(ahora).getTime();
+  const hace30 = ahoraMs - 30 * 86_400_000;
+  const entrenos30 = entrenosHechos.filter((e) => new Date(e.empezado_en).getTime() >= hace30).length;
+  const diasSinEntrenar = entrenosHechos[0] ? Math.floor((ahoraMs - new Date(entrenosHechos[0].empezado_en).getTime()) / 86_400_000) : null;
+  const panelEntrenos = (
+    <>
+      <section className={styles.tarjeta}>
+        <h2>Su rutina</h2>
+        {rutinaResumen ? (
+          <>
+            <p>
+              <strong>{rutinaResumen.nombre}</strong>
+            </p>
+            <ul className={styles.lista}>
+              {[...rutinaResumen.rutina_sesiones]
+                .sort((a, b) => a.orden - b.orden)
+                .map((s) => (
+                  <li key={s.id}>
+                    {s.nombre} · <span className={styles.ayuda}>{s.rutina_items.length} {s.rutina_items.length === 1 ? "ejercicio" : "ejercicios"}</span>
+                  </li>
+                ))}
+            </ul>
+          </>
+        ) : (
+          <p className={styles.ayuda}>Todavía no tiene ninguna rutina publicada.</p>
+        )}
+        {rutinaDe && (
+          <Link href={`/admin/rutinas/${rutinaDe.id}`} className={styles.enlaceBarra}>
+            Editar rutina
+          </Link>
+        )}
+      </section>
+      <section className={styles.tarjeta}>
+        <h2>Cuándo ha entrenado</h2>
+        <div className={estilos.cifras}>
+          <div className={estilos.cifra}>
+            <strong>{entrenos30}</strong>
+            <span className={styles.ayuda}>entrenos en 30 días</span>
+          </div>
+          <div className={estilos.cifra}>
+            <strong>{diasSinEntrenar === null ? "—" : diasSinEntrenar}</strong>
+            <span className={styles.ayuda}>días sin entrenar</span>
+          </div>
+          <div className={estilos.cifra}>
+            <strong>{entrenosHechos.length}</strong>
+            <span className={styles.ayuda}>{entrenosHechos.length === 60 ? "últimos entrenos" : "entrenos en total"}</span>
+          </div>
+        </div>
+        {entrenosHechos.length === 0 ? (
+          <p className={styles.ayuda}>Todavía no ha terminado ningún entreno.</p>
+        ) : (
+          <ul className={styles.lista}>
+            {entrenosHechos.slice(0, 20).map((e) => (
+              <li key={e.id}>
+                {fechaCorta(e.empezado_en)} · {e.nombre_sesion}
+                {e.duracion_seg ? <span className={styles.ayuda}> · {Math.max(1, Math.round(e.duracion_seg / 60))} min</span> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  );
+
   const panelLogros = (
         <>
           {presencial ? (
@@ -449,7 +537,29 @@ export default async function FichaUsuario({
                 <dt>Idioma</dt>
                 <dd>{p.idioma === "en" ? "Inglés" : "Español"}</dd>
               </div>
+              {esAlumna && (
+                <div>
+                  <dt>Alumno/a desde</dt>
+                  <dd>{alumnoDesde ? fechaCorta(`${alumnoDesde}T12:00:00Z`) : "Sin indicar"}</dd>
+                </div>
+              )}
             </dl>
+            <EditarDatos
+              datos={{
+                id: p.id,
+                nombre: p.nombre,
+                apellidos: p.apellidos,
+                telefono: p.telefono,
+                dni: p.dni,
+                fecha_nacimiento: p.fecha_nacimiento,
+                sexo: p.sexo,
+                contacto_emergencia_nombre: p.contacto_emergencia_nombre,
+                contacto_emergencia_telefono: p.contacto_emergencia_telefono,
+                idioma: p.idioma,
+                alumno_desde: alumnoDesde,
+              }}
+              esAlumna={esAlumna}
+            />
           </section>
 
           {esAlumna && (
@@ -515,11 +625,11 @@ export default async function FichaUsuario({
                                 <strong>{junto ? (NOMBRE_SERVICIO[b.servicio] ?? b.servicio) : nombreVisible(b.tipos_bono?.nombre)}</strong>
                                 <div className={styles.ayuda}>{detalleBono(b)}</div>
                               </div>
-                              <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                              <span className={claseEtiquetaBono(b)}>{textoEtiquetaBono(b)}</span>
                             </div>
                             {b.estado === "activo" && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
                             {!junto && <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />}
-                            {enMarcha(b) && <EditorBono bonoId={b.id} anulado={false} sinAnular />}
+                            {enMarcha(b) && <EditorBono bonoId={b.id} anulado={false} sinAnular servicio={b.servicio} />}
                           </div>
                         ))}
                         {junto && (
@@ -568,7 +678,7 @@ export default async function FichaUsuario({
                         </div>
                       )}
                     </div>
-                    <span className={styles.etiquetaSuave}>{ESTADOS_BONO[b.estado] ?? b.estado}</span>
+                    <span className={claseEtiquetaBono(b)}>{textoEtiquetaBono(b)}</span>
                   </div>
                 </article>
               );
@@ -649,7 +759,7 @@ export default async function FichaUsuario({
               ))}
               {esAlumna && (
                 <span className={activos.length > 0 || vigentesSinClases.length > 0 ? estilos.activa : estilos.sinTarifa}>
-                  {activos.length > 0 ? "Tarifa activa" : vigentesSinClases.length > 0 ? "Vigente · sin clases" : "Sin tarifa"}
+                  {activos.length > 0 || vigentesSinClases.length > 0 ? "Tarifa activa" : "Sin tarifa"}
                 </span>
               )}
               {esAlumna && sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
@@ -684,7 +794,7 @@ export default async function FichaUsuario({
         id={id}
         inicial={pestana}
         pestanas={pestanas}
-        paneles={{ actual: panelActual, reservas: panelReservas, logros: panelLogros, perfil: panelPerfil, acciones: panelAcciones, accesos: panelAccesos }}
+        paneles={{ actual: panelActual, reservas: panelReservas, entrenos: panelEntrenos, logros: panelLogros, perfil: panelPerfil, acciones: panelAcciones, accesos: panelAccesos }}
       />
 
 

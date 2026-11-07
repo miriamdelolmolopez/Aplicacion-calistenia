@@ -91,3 +91,29 @@ export async function fijarAnuncio(id: string, fijado: boolean): Promise<{ ok: b
   revalidatePath("/tablon");
   return { ok: true };
 }
+
+// Cambia un anuncio ya publicado (no vuelve a avisar a nadie).
+export async function editarAnuncio(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin("contenido");
+  const id = String(formData.get("id") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "No se ha podido identificar el anuncio." };
+  const titulo = String(formData.get("titulo") ?? "").trim().slice(0, 120);
+  const texto = String(formData.get("texto") ?? "").trim().slice(0, 2000);
+  const enlace = String(formData.get("enlace") ?? "").trim().slice(0, 300);
+  const audiencia = String(formData.get("audiencia") ?? "activos") === "todos" ? "todos" : "activos";
+  const fijado = formData.get("fijado") === "on";
+  const caduca = String(formData.get("caduca") ?? "").trim();
+  if (!titulo || !texto) return { error: "Escribe el título y el texto del anuncio." };
+  if (enlace && !/^(https?:\/\/|\/(?!\/))/i.test(enlace)) return { error: "El enlace tiene que empezar por https:// (o por / si es una página de la app)." };
+  if (caduca && !/^\d{4}-\d{2}-\d{2}$/.test(caduca)) return { error: "La fecha en la que desaparece no es válida." };
+
+  const { error } = await createAdminClient()
+    .from("anuncios")
+    .update({ titulo, texto, enlace: enlace || null, audiencia, fijado, caduca_en: caduca ? new Date(`${caduca}T23:59:59+01:00`).toISOString() : null })
+    .eq("id", id);
+  if (error) return { error: "No se ha podido guardar." };
+  revalidatePath("/admin/tablon");
+  revalidatePath("/tablon");
+  revalidatePath("/inicio");
+  return { mensaje: "Anuncio guardado." };
+}

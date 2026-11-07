@@ -30,7 +30,7 @@ const PREGUNTAS: Record<"es" | "en", Pregunta[]> = {
     {
       s: "presenciales",
       p: "¿Cómo cancelo una reserva?",
-      r: "En «Reservar» o en «Mis reservas», pulsa «Cancelar» en la clase. Si cancelas con tiempo, la clase vuelve a tu bono. Si es demasiado tarde (grupales: menos de 2 horas antes; individuales: menos de 12 horas antes), la clase cuenta como dada. La app te avisa antes de confirmar.",
+      r: "En «Reservar» o en «Mis reservas», pulsa «Cancelar» en la clase. Si cancelas con tiempo, la clase vuelve a tu bono. Si es demasiado tarde (grupales: menos de 2 horas antes, o menos de 12 horas si la clase es por la mañana; individuales: menos de 12 horas antes), la clase cuenta como dada. La app te avisa antes de confirmar.",
     },
     {
       s: "presenciales",
@@ -50,7 +50,7 @@ const PREGUNTAS: Record<"es" | "en", Pregunta[]> = {
     {
       s: "bonos",
       p: "¿Cómo pago?",
-      r: "Se paga por adelantado en efectivo o por Bizum (los entrenamientos online también por transferencia). Cuando Miriam recibe el pago, activa tu bono y ya puedes reservar. Tus pagos están en «Pagos».",
+      r: "Se paga por adelantado, en efectivo, por Bizum o por transferencia. No se activa solo: cuando Miriam recibe el pago, activa tu bono y entonces ya puedes reservar. Tus pagos están en «Pagos».",
     },
     {
       s: "online",
@@ -97,7 +97,7 @@ const PREGUNTAS: Record<"es" | "en", Pregunta[]> = {
     {
       s: "presenciales",
       p: "How do I cancel a booking?",
-      r: "In “Book” or “My bookings”, tap “Cancel” on the class. If you cancel in time, the class goes back to your pass. If it is too late (group classes: less than 2 hours before; private sessions: less than 12 hours before), the class counts as taken. The app warns you before you confirm.",
+      r: "In “Book” or “My bookings”, tap “Cancel” on the class. If you cancel in time, the class goes back to your pass. If it is too late (group classes: less than 2 hours before, or less than 12 hours if the class is in the morning; private sessions: less than 12 hours before), the class counts as taken. The app warns you before you confirm.",
     },
     {
       s: "presenciales",
@@ -117,7 +117,7 @@ const PREGUNTAS: Record<"es" | "en", Pregunta[]> = {
     {
       s: "bonos",
       p: "How do I pay?",
-      r: "Payment is in advance, in cash or by Bizum (online coaching can also be paid by bank transfer). When Miriam receives the payment she activates your pass and you can book. Your payments are under “Payments”.",
+      r: "Payment is in advance, in cash, by Bizum or by bank transfer. It does not activate by itself: when Miriam receives the payment she activates your pass, and then you can book. Your payments are under “Payments”.",
     },
     {
       s: "online",

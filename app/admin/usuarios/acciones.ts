@@ -214,6 +214,9 @@ export async function crearUsuario(_previo: Estado, formData: FormData): Promise
 
   const { error: falloRol } = await admin.from("profiles").update({ rol: "alumno", fue_alumno: true, idioma }).eq("id", data.user.id);
   if (falloRol) return { error: "La cuenta se creó, pero no se pudo asignar el tipo." };
+  // Desde cuándo es alumno/a (opcional). Si falta el archivo 087 en Supabase, no se rompe el alta.
+  const alumnoDesde = String(formData.get("alumno_desde") ?? "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(alumnoDesde)) await admin.from("profiles").update({ alumno_desde: alumnoDesde }).eq("id", data.user.id);
 
   await admin.from("perfil_servicios").delete().eq("user_id", data.user.id);
   if (filas.length > 0) await admin.from("perfil_servicios").insert(filas.map((f) => ({ user_id: data.user!.id, servicio: f.servicio })));
@@ -768,4 +771,49 @@ export async function alargarCortesia(_previo: Estado, formData: FormData): Prom
 
   refrescarPantallas(userId);
   return { mensaje: `Alargada ${dias} ${dias === 1 ? "día" : "días"}.` };
+}
+
+// La administradora rellena o corrige los datos de una persona (por si no los ha puesto ella, o para tenerlos bien en la base de datos).
+export async function guardarDatosPersona(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin("usuarios");
+  const userId = String(formData.get("userId") ?? "");
+  if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
+  const texto = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max);
+  const fecha = (k: string) => {
+    const v = String(formData.get(k) ?? "").trim();
+    if (!v) return null;
+    return /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(`${v}T12:00:00Z`)) ? v : undefined;
+  };
+  const nacimiento = fecha("fecha_nacimiento");
+  const desde = fecha("alumno_desde");
+  if (nacimiento === undefined) return { error: "La fecha de nacimiento no es válida." };
+  if (desde === undefined) return { error: "La fecha de «alumno/a desde» no es válida." };
+  if (nacimiento && nacimiento > claveDia(new Date().toISOString())) return { error: "La fecha de nacimiento no puede ser futura." };
+  const sexo = texto("sexo", 10);
+  if (sexo && !["mujer", "hombre", "otro"].includes(sexo)) return { error: "El sexo no es válido." };
+  const idioma = texto("idioma", 2) === "en" ? "en" : "es";
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      nombre: texto("nombre", 80) || null,
+      apellidos: texto("apellidos", 120) || null,
+      telefono: texto("telefono", 30) || null,
+      dni: texto("dni", 20) || null,
+      fecha_nacimiento: nacimiento,
+      sexo: sexo || null,
+      contacto_emergencia_nombre: texto("em_nombre", 80) || null,
+      contacto_emergencia_telefono: texto("em_telefono", 30) || null,
+      idioma,
+    })
+    .eq("id", userId);
+  if (error) return { error: error.message.includes("dni") ? "Ese DNI ya lo tiene otra persona." : "No se ha podido guardar." };
+
+  // «Alumno/a desde» va aparte: si todavía no está el archivo 087 en Supabase, avisa en vez de romper todo lo demás.
+  const { error: falloDesde } = await admin.from("profiles").update({ alumno_desde: desde }).eq("id", userId);
+  if (falloDesde) return { error: "Los datos se han guardado, pero «alumno/a desde» no: falta ejecutar el archivo 087 en Supabase." };
+
+  refrescarPantallas(userId);
+  return { mensaje: "Datos guardados." };
 }

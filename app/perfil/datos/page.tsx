@@ -96,7 +96,8 @@ export default function MisDatos() {
       !valores.emNombre.trim() ||
       !telefonoValido(valores.telefono) ||
       !telefonoValido(valores.emTelefono) ||
-      !fechaNacimientoValida(valores.fecha)
+      !fechaNacimientoValida(valores.fecha) ||
+      (!datos!.esAdmin && valores.sexo === "")
     ) {
       return setMensaje({ ok: false, clave: "errorCampo" });
     }

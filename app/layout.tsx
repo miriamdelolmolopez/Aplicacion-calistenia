@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import ActualizadorApp from "./ActualizadorApp";
 import AvisoFoto from "./AvisoFoto";
 import MenuUsuario from "./MenuUsuario";
 import NavegacionInferior from "./NavegacionInferior";
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MenuUsuario />
         <VistaAlumnaFlotante />
         <AvisoFoto />
+        <ActualizadorApp />
       </body>
     </html>
   );

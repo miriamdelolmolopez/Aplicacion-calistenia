@@ -187,7 +187,8 @@ export function BotonPagado({ pagoId }: { pagoId: string }) {
   );
 }
 
-export function EditorBono({ bonoId, anulado, sinAnular = false }: { bonoId: string; anulado: boolean; sinAnular?: boolean }) {
+export function EditorBono({ bonoId, anulado, sinAnular = false, servicio }: { bonoId: string; anulado: boolean; sinAnular?: boolean; servicio?: string }) {
+  const online = servicio === "online"; // el plan online tiene días, no clases
   const [estadoAjuste, accionAjuste, pendienteAjuste] = useActionState<Estado, FormData>(
     ajustarBono,
     {},
@@ -200,17 +201,22 @@ export function EditorBono({ bonoId, anulado, sinAnular = false }: { bonoId: str
 
   return (
     <details className={styles.detalles}>
-      <summary>{sinAnular ? "Ajustar clases o días (avanzado)" : "Ajustar o quitar esta tarifa"}</summary>
+      <summary>{sinAnular ? (online ? "Ajustar días" : "Ajustar clases o días") : "Ajustar o quitar esta tarifa"}</summary>
       <form action={accionAjuste} className={styles.formularioInterno}>
         <input type="hidden" name="bonoId" value={bonoId} />
         <p className={styles.ayuda}>
-          Un número positivo añade clases sueltas aparte (sin caducidad), sin tocar esta tarifa; uno negativo quita
-          clases de esta tarifa. Déjalo en 0 si no cambia.
+          {online
+            ? "Un plan online tiene días, no clases. Pon los días que quieres alargar (positivo) o acortar (negativo). Déjalo en 0 si no cambia."
+            : "Un número positivo añade clases sueltas aparte (sin caducidad), sin tocar esta tarifa; uno negativo quita clases de esta tarifa. Déjalo en 0 si no cambia."}
         </p>
-        <div className={styles.campo}>
-          <label htmlFor={`cl-${bonoId}`}>Clases (+ o −) <AyudaI texto="Positivo: se añaden como clases sueltas aparte de la tarifa (por ejemplo, un regalo de cumpleaños). Negativo: se quitan de esta tarifa. Con 0 no cambia." /></label>
-          <input id={`cl-${bonoId}`} name="clases" type="number" step={1} defaultValue={0} />
-        </div>
+        {online ? (
+          <input type="hidden" name="clases" value={0} />
+        ) : (
+          <div className={styles.campo}>
+            <label htmlFor={`cl-${bonoId}`}>Clases (+ o −) <AyudaI texto="Positivo: se añaden como clases sueltas aparte de la tarifa (por ejemplo, un regalo de cumpleaños). Negativo: se quitan de esta tarifa. Con 0 no cambia." /></label>
+            <input id={`cl-${bonoId}`} name="clases" type="number" step={1} defaultValue={0} />
+          </div>
+        )}
         <div className={styles.campo}>
           <label htmlFor={`di-${bonoId}`}>Días de caducidad (+ o −) <AyudaI texto="Cuántos días alargar (positivo) o acortar (negativo) la caducidad del bono. Con 0 no cambia." /></label>
           <input id={`di-${bonoId}`} name="dias" type="number" step={1} defaultValue={0} />

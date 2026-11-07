@@ -24,6 +24,7 @@ type Campo =
   | "telefono"
   | "dni"
   | "fecha"
+  | "sexo"
   | "emNombre"
   | "emTelefono"
   | "privacidad"
@@ -35,6 +36,7 @@ const VACIO = {
   telefono: "",
   dni: "",
   fecha: "",
+  sexo: "",
   emNombre: "",
   emTelefono: "",
 };
@@ -67,7 +69,7 @@ export default function Datos() {
       const { data: perfil } = await supabase
         .from("profiles")
         .select(
-          "nombre, apellidos, telefono, dni, fecha_nacimiento, contacto_emergencia_nombre, contacto_emergencia_telefono",
+          "nombre, apellidos, telefono, dni, fecha_nacimiento, sexo, contacto_emergencia_nombre, contacto_emergencia_telefono",
         )
         .eq("id", sesion.user.id)
         .maybeSingle();
@@ -88,6 +90,7 @@ export default function Datos() {
           telefono: perfil.telefono ?? "",
           dni: perfil.dni ?? "",
           fecha: perfil.fecha_nacimiento ?? "",
+          sexo: perfil.sexo ?? "",
           emNombre: perfil.contacto_emergencia_nombre ?? "",
           emTelefono: perfil.contacto_emergencia_telefono ?? "",
         });
@@ -114,6 +117,7 @@ export default function Datos() {
     if (!telefonoValido(valores.telefono)) nuevos.telefono = "errorTelefono";
     if (!dniNieValido(valores.dni)) nuevos.dni = "errorDni";
     if (!fechaNacimientoValida(valores.fecha)) nuevos.fecha = "errorFecha";
+    if (!valores.sexo) nuevos.sexo = "errorSexo";
     if (!valores.emNombre.trim()) nuevos.emNombre = "errorCampo";
     if (!telefonoValido(valores.emTelefono)) nuevos.emTelefono = "errorTelefono";
     if (!yaAceptado && !desdeRegistro && !privacidad) nuevos.privacidad = "errorAceptar";
@@ -137,6 +141,7 @@ export default function Datos() {
         telefono: valores.telefono.trim(),
         dni: normalizarDni(valores.dni),
         fecha_nacimiento: valores.fecha,
+        sexo: valores.sexo,
         contacto_emergencia_nombre: valores.emNombre.trim(),
         contacto_emergencia_telefono: valores.emTelefono.trim(),
         idioma,
@@ -209,6 +214,21 @@ export default function Datos() {
           tipo: "date",
           autoComplete: "bday",
         })}
+
+        <div className={styles.campo}>
+          <label htmlFor="sexo">{t.sexoLabel}</label>
+          <select id="sexo" value={valores.sexo} onChange={(e) => cambiar("sexo", e.target.value)} aria-invalid={errores.sexo ? true : undefined}>
+            <option value="">{t.sexoNoIndicar}</option>
+            <option value="mujer">{t.sexoMujer}</option>
+            <option value="hombre">{t.sexoHombre}</option>
+            <option value="otro">{t.sexoOtro}</option>
+          </select>
+          {errores.sexo && (
+            <p className={styles.error} role="alert">
+              {t[errores.sexo]}
+            </p>
+          )}
+        </div>
 
         <fieldset className={styles.grupo}>
           <legend>{t.emergenciaTitulo}</legend>

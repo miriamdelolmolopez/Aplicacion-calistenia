@@ -77,3 +77,25 @@ export async function quitarSuscripcionPush(endpoint: string): Promise<void> {
   if (!id) return;
   await createAdminClient().from("push_suscripciones").delete().eq("endpoint", endpoint).eq("user_id", id);
 }
+
+// Los días de la semana en que la persona quiere entrenar online (1 = lunes ... 7 = domingo). Es opcional: con ellos la app le
+// avisa por la mañana de que «hoy toca entrenamiento».
+export async function obtenerDiasEntreno(): Promise<{ dias: number[]; online: boolean }> {
+  const id = await yo();
+  if (!id) return { dias: [], online: false };
+  const admin = createAdminClient();
+  const [{ data: perfil }, { data: plan }] = await Promise.all([
+    admin.from("profiles").select("dias_entreno").eq("id", id).maybeSingle(),
+    admin.from("bonos").select("id").eq("user_id", id).eq("servicio", "online").in("estado", ["activo", "agotado"]).gt("caduca_en", new Date().toISOString()).limit(1),
+  ]);
+  const dias = ((perfil as { dias_entreno?: number[] } | null)?.dias_entreno ?? []).filter((d) => Number.isInteger(d) && d >= 1 && d <= 7);
+  return { dias, online: (plan ?? []).length > 0 };
+}
+
+export async function guardarDiasEntreno(dias: number[]): Promise<{ ok: boolean }> {
+  const id = await yo();
+  if (!id) return { ok: false };
+  const limpios = [...new Set((Array.isArray(dias) ? dias : []).map(Number).filter((d) => Number.isInteger(d) && d >= 1 && d <= 7))].sort();
+  const { error } = await createAdminClient().from("profiles").update({ dias_entreno: limpios }).eq("id", id);
+  return { ok: !error };
+}

@@ -15,6 +15,7 @@ export type TipoNotificacion =
   | "reserva"
   | "cancelacion"
   | "recordatorio"
+  | "entreno_dia"
   | "bono"
   | "bono_clases"
   | "inactividad"

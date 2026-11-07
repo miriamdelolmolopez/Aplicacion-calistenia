@@ -11,11 +11,10 @@ import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import { obtenerFotos } from "../perfil/acciones";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
-import Icono, { type NombreIcono } from "../Icono";
-import { textos, type ClaveTexto } from "../textos";
+import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { useNombresEn } from "../useNombresEn";
-import { RUTAS, seccionesDe, useMiPerfil } from "../useMiPerfil";
+import { useMiPerfil } from "../useMiPerfil";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
@@ -26,8 +25,8 @@ import ResumenAdminTarjetas from "./ResumenAdmin";
 import { obtenerCumpleanosAdmin } from "./accionesAdmin";
 import { textoCuando, type CumpleProximo } from "@/lib/cumpleanosTexto";
 import estilos from "./inicio.module.css";
-import { fechaCorta, textoDia, textoHora } from "@/lib/fechas";
-import { estiloFoto, fondoFoto, fotoDeClase, type FotoNombre } from "@/lib/fotos";
+import { fechaCorta } from "@/lib/fechas";
+import { estiloFoto, type FotoNombre } from "@/lib/fotos";
 import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
@@ -125,8 +124,6 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
 // Fotos de ejemplo entre las que se elige una al azar cada vez que se abre la app.
 const FOTOS_INICIO: FotoNombre[] = ["inicio", "calistenia", "progreso", "personal"];
 
-type Acceso = { href: string; icono: NombreIcono; texto: ClaveTexto; extra?: ClaveTexto };
-
 export default function Inicio() {
   const [idioma] = useIdioma();
   const tr = useNombresEn();
@@ -136,7 +133,6 @@ export default function Inicio() {
   const [extra, setExtra] = useState<Extra | null>(null);
   const [propiaInicio, setPropiaInicio] = useState<string | null>(null);
   const fotoBannerInicio = useFotoCard("inicio:banner");
-  const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
   const [fotosListas, setFotosListas] = useState(false);
   const [miFoto, setMiFoto] = useState<string | null>(null);
   const [azar, setAzar] = useState<{ foto: FotoNombre; frase: number } | null>(null);
@@ -182,7 +178,6 @@ export default function Inicio() {
   useEffect(() => {
     obtenerFotosAppCliente().then((f) => {
       setPropiaInicio(f.inicio);
-      setFotosTipos(f.tipos);
       setFotosListas(true);
     });
   }, []);
@@ -203,21 +198,12 @@ export default function Inicio() {
     );
   }
 
-  const secciones = seccionesDe(perfil);
   const esAdmin = perfil.rol === "admin";
   const bonosClases = esAdmin ? [] : extra.bonos.filter((b) => b.servicio !== "online" && (b.estado === "activo" || b.estado === "agotado"));
   const planOnlineBono = esAdmin ? undefined : extra.bonos.find((b) => b.servicio === "online" && b.estado === "activo");
 
   const frase = extra.frases[azar?.frase ?? 0];
   const textoFrase = frase ? (idioma === "en" ? frase.texto_en : frase.texto_es) : "";
-
-  const accesos: Acceso[] = [];
-  if (secciones.includes("reservar")) accesos.push({ href: RUTAS.reservar, icono: "reservar", texto: "botonReservarClase" });
-  if (secciones.includes("reservas")) accesos.push({ href: RUTAS.reservas, icono: "reservas", texto: "misReservasTitulo" });
-  if (secciones.includes("rutina")) accesos.push({ href: RUTAS.rutina, icono: "rutina", texto: "botonEntrenoOnline" });
-  if (secciones.includes("progreso")) accesos.push({ href: RUTAS.progreso, icono: "progreso", texto: "miProgreso" });
-  accesos.push({ href: RUTAS.academia, icono: "academia", texto: "navAcademia" });
-  accesos.push({ href: "/aprende", icono: "saber", texto: "botonSaberMas", extra: "botonGlosario" });
 
   return (
     <main className={styles.pagina}>
@@ -282,18 +268,6 @@ export default function Inicio() {
               </span>
               <strong>Añadir alumno/a</strong>
             </Link>
-          </div>
-        )}
-
-        {!esAdmin && (
-          <div className={estilos.accesos}>
-            {accesos.map((a) => (
-              <Link key={a.href} href={a.href} className={estilos.acceso}>
-                <Icono nombre={a.icono} tamano={26} />
-                <strong>{t[a.texto]}</strong>
-                {a.extra && <span>{t[a.extra]}</span>}
-              </Link>
-            ))}
           </div>
         )}
 
@@ -403,41 +377,6 @@ export default function Inicio() {
             </section>
           );
         })()}
-
-        {!esAdmin && <h2 className={estilos.atajos}>{t.proximosEntrenos}</h2>}
-        {!esAdmin && extra.reservas.length === 0 && extra.sesionesOnline.length === 0 && (
-          <p className={styles.ayuda}>{t.sinProximosEntrenos}</p>
-        )}
-        <div className={estilos.entrenos}>
-          {extra.reservas.map((r) => (
-            <Link key={r.empieza_en + r.nombre} href={RUTAS.reservar} className={estilos.entreno}>
-              <span
-                className={estilos.miniatura}
-                style={{ backgroundImage: fondoFoto(fotoDeClase(r.nombre), fotosTipos[r.nombre], !fotosListas) }}
-              />
-              <span className={estilos.entrenoTexto}>
-                <strong>{tr(r.nombre)}</strong>
-                <span>
-                  {textoDia(r.empieza_en, idioma)} · {textoHora(r.empieza_en)}
-                </span>
-              </span>
-              <span aria-hidden="true">›</span>
-            </Link>
-          ))}
-          {extra.sesionesOnline.map((s) => (
-            <Link key={s.id} href={`/rutina/sesion/${s.id}`} className={estilos.entreno}>
-              <span className={estilos.miniatura} style={{ backgroundImage: fondoFoto("online") }} />
-              <span className={estilos.entrenoTexto}>
-                <strong>{s.nombre}</strong>
-                <span>
-                  {t.sesionDeTuRutina}
-                  {extra.rutinaNombre ? ` · ${extra.rutinaNombre}` : ""}
-                </span>
-              </span>
-              <span aria-hidden="true">›</span>
-            </Link>
-          ))}
-        </div>
 
         <TablonAnuncios limite={3} />
       </div>

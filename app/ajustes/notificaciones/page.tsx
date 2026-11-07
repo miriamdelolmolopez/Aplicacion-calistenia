@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
 import { guardarPreferenciaApp, obtenerPreferenciasApp } from "../../notificaciones/acciones";
 import ActivarPush from "./ActivarPush";
+import DiasEntreno from "./DiasEntreno";
 import Cargando from "../../Cargando";
 import styles from "../../formularios.module.css";
 import estilos from "../../perfil/perfil.module.css";
@@ -43,6 +44,7 @@ const APP_ALUMNA: OpcionApp[] = [
   { clave: "reserva", es: ["Confirmación de reserva", "Cada vez que reservas una clase."], en: ["Booking confirmation", "Each time you book a class."] },
   { clave: "cancelacion", es: ["Cancelación de reserva", "Cada vez que cancelas una reserva."], en: ["Booking cancellation", "Each time you cancel a booking."] },
   { clave: "recordatorio", es: ["Recordatorio de clase", "El día antes de tu clase."], en: ["Class reminder", "The day before your class."] },
+  { clave: "entreno_dia", es: ["Hoy toca entrenamiento", "Los días de entreno online que hayas elegido."], en: ["Today is a training day", "On the online training days you have chosen."] },
   { clave: "bono", es: ["Tu tarifa está a punto de caducar", "Unos días antes de que caduque."], en: ["Your pass is about to expire", "A few days before it expires."] },
   { clave: "bono_clases", es: ["Se te acaban las clases", "Cuando se te agotan las clases de tu tarifa."], en: ["You are running out of classes", "When you use up the classes in your pass."] },
   { clave: "inactividad", es: ["Llevas tiempo sin venir", "Un mensaje si pasa mucho tiempo sin que vengas."], en: ["You have been away for a while", "A message if you have not come in a long time."] },
@@ -164,6 +166,7 @@ export default function Notificaciones() {
         </section>
       )}
       {pref && <AvisosApp esAdmin={esAdmin} en={en} />}
+      {pref && !esAdmin && <DiasEntreno en={en} />}
     </main>
   );
 }
