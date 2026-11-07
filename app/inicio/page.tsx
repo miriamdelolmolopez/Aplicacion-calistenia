@@ -199,7 +199,9 @@ export default function Inicio() {
   }
 
   const esAdmin = perfil.rol === "admin";
-  const bonosClases = esAdmin ? [] : extra.bonos.filter((b) => b.servicio !== "online" && (b.estado === "activo" || b.estado === "agotado"));
+  const bonosClases = esAdmin ? [] : extra.bonos
+        .filter((b) => b.servicio !== "online" && (b.estado === "activo" || b.estado === "agotado"))
+        .sort((a, b) => (a.caducaEn ? new Date(a.caducaEn).getTime() : Infinity) - (b.caducaEn ? new Date(b.caducaEn).getTime() : Infinity)); // arriba la que caduca antes
   const planOnlineBono = esAdmin ? undefined : extra.bonos.find((b) => b.servicio === "online" && b.estado === "activo");
 
   const frase = extra.frases[azar?.frase ?? 0];
@@ -308,7 +310,7 @@ export default function Inicio() {
           return (
             <section key={b.id} className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
-                <span className={clay.eyebrow}>{t.tuBono}</span>
+                <span className={clay.eyebrow}>{b.servicio === "individual" ? (idioma === "en" ? "Personal training" : "Entrenamiento personal") : b.servicio === "taller" ? (idioma === "en" ? "Workshops" : "Talleres") : idioma === "en" ? "Group training" : "Entrenamiento grupal"}</span>
                 <h3 className={clay.progresoNombre}>{esSuelto(b.nombre) ? nombreVisible(b.nombre, idioma) : tr(b.nombre)}</h3>
                 <div className={clay.metaFila}>
                   <span className={clay.metaChip}>
@@ -349,7 +351,7 @@ export default function Inicio() {
           return (
             <section className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
-                <span className={clay.eyebrow}>{t.tuPlanOnlineTitulo}</span>
+                <span className={clay.eyebrow}>{idioma === "en" ? "Online training" : "Entrenamiento online"}</span>
                 <h3 className={clay.progresoNombre}>{esSuelto(planOnlineBono.nombre) ? nombreVisible(planOnlineBono.nombre, idioma) : tr(planOnlineBono.nombre)}</h3>
                 <div className={clay.metaFila}>
                   {porEntrenos && (
