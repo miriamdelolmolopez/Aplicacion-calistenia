@@ -17,12 +17,16 @@ const valida = (iso: string) => !Number.isNaN(new Date(iso).getTime());
 export function claveDia(iso: string): string {
   // Devuelve AAAA-MM-DD en hora de Madrid (sirve para agrupar clases por día).
   if (!valida(iso)) return "";
-  return new Intl.DateTimeFormat("en-CA", {
+  // Se arma con las partes (año, mes, día) y no con el texto ya formateado: en algunos móviles Android el formato «en-CA»
+  // sale con otro orden (por ejemplo 7/11/2026) y las pantallas que leen esta clave como fecha se rompían.
+  const partes = new Intl.DateTimeFormat("en-CA", {
     timeZone: ZONA,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date(iso));
+  }).formatToParts(new Date(iso));
+  const v = (tipo: string) => partes.find((p) => p.type === tipo)?.value ?? "";
+  return `${v("year")}-${v("month").padStart(2, "0")}-${v("day").padStart(2, "0")}`;
 }
 
 export function textoDia(iso: string, idioma: "es" | "en" = "es"): string {
