@@ -13,6 +13,7 @@ export type MiPerfil = {
   servicios: string[]; // los marcados en su perfil y los de sus bonos
   planOnline: boolean; // tiene un plan online activo ahora mismo
   datosCompletos: boolean;
+  sexoFalta: boolean; // ya rellenó sus datos, pero antes de que el sexo fuera obligatorio: hay que pedírselo
   legalAceptado: boolean; // ha aceptado la versión vigente de los textos legales
 };
 
@@ -66,7 +67,7 @@ async function cargarPerfil(): Promise<Estado> {
   const id = sesion.session.user.id;
 
   const [{ data: perfil }, { data: servicios }, { data: bonos }, { data: plan }, { data: aceptaciones }, versiones] = await Promise.all([
-    supabase.from("profiles").select("nombre, rol, datos_completos").eq("id", id).maybeSingle(),
+    supabase.from("profiles").select("nombre, rol, datos_completos, sexo").eq("id", id).maybeSingle(),
     supabase.from("perfil_servicios").select("servicio").eq("user_id", id),
     supabase.from("bonos").select("servicio").in("estado", ["activo", "en_cola"]),
     supabase.rpc("mi_plan_online"),
@@ -83,6 +84,7 @@ async function cargarPerfil(): Promise<Estado> {
     servicios: [...new Set([...(servicios ?? []).map((s) => s.servicio), ...(bonos ?? []).map((b) => b.servicio)])],
     planOnline: plan === true,
     datosCompletos: !!perfil.datos_completos,
+    sexoFalta: !!perfil.datos_completos && !perfil.sexo,
     legalAceptado: aceptadoVigente(aceptaciones, versiones),
   };
 }
@@ -125,13 +127,13 @@ export function useMiPerfil(recargarCon?: string): Estado {
   // el de hace un momento (antes de guardar los datos y aceptar los textos) y, sin esta comprobación, se entraba en bucle.
   useEffect(() => {
     if (!actualizado) return;
-    if (perfil && perfil !== "anonimo" && perfil.rolReal !== "admin" && !perfil.legalAceptado) {
+    if (perfil && perfil !== "anonimo" && perfil.rolReal !== "admin" && (!perfil.legalAceptado || perfil.sexoFalta)) {
       if (ruta.startsWith("/datos") || ruta.startsWith("/legal") || ruta.startsWith("/crear-contrasena")) return;
       let vigente = true;
       olvidarPerfilCargado();
       cargarPerfilCompartido().then((p) => {
         if (!vigente) return;
-        if (p && p !== "anonimo" && p.rolReal !== "admin" && !p.legalAceptado) router.replace("/datos");
+        if (p && p !== "anonimo" && p.rolReal !== "admin" && (!p.legalAceptado || p.sexoFalta)) router.replace("/datos");
         else setLeido({ perfil: p, con: recargarCon });
       });
       return () => {

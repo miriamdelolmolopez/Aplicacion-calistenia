@@ -7,6 +7,16 @@ import Anillo from "../../../ui/Anillo";
 import clay from "../../../ui/clay.module.css";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
 import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
+import EtiquetaTarifa from "../../../EtiquetaTarifa";
+import { etiquetaPago, type EtiquetaT } from "@/lib/estadoTarifa";
+
+// El estado de una tarifa (periodo) para la ficha: activo, caduca dentro de poco o caducado.
+function etiquetaPeriodo(estado: string, hasta: string | null, hoy: string): EtiquetaT {
+  if (estado === "en_cola") return { texto: "Próxima", tono: "gris" };
+  if (estado !== "activo") return { texto: "Caducado", tono: "gris" };
+  if (hasta && diasEntre(hoy, hasta) <= 7) return { texto: "Caduca dentro de poco", tono: "naranja" };
+  return { texto: "Activo", tono: "verde" };
+}
 
 const NOMBRE_SERVICIO: Record<string, string> = { grupal: "Clases grupales", individual: "Entrenamiento personal", online: "Plan online", taller: "Talleres" };
 
@@ -113,7 +123,9 @@ function BloquePeriodo({ p, titulo, selector, reservas, tipos, userId, hoy }: { 
           {selector}
         </div>
         <p style={{ margin: 0 }}>
-          Tarifa: <strong>{p.nombre}</strong> {p.pendiente ? <span className={estilos.sinPagar}>Sin pagar</span> : p.pagado ? <span className={estilos.activa}>Pagado</span> : <span className={estilos.activa}>Sin cobro</span>}
+          Tarifa: <strong>{p.nombre}</strong>{" "}
+          <EtiquetaTarifa e={etiquetaPeriodo(p.estado, p.hasta, hoy)} />
+          <EtiquetaTarifa e={etiquetaPago(p.pendiente ? "pendiente" : p.pagado ? "pagado" : null, p.estado === "activo")} />
         </p>
         {p.pagado && p.hasta && (
           <p style={{ margin: 0 }}>

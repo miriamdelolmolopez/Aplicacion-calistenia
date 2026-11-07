@@ -148,7 +148,23 @@ export default function ResumenAdminTarjetas() {
       <div className={`${estilos.resumenCuadricula} ${estilos.resumenAlertas}`}>{alertas.map(pinta)}</div>
 
       {abierta && (
-        <div className={estilos.resumenDetalle}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Listado"
+          onClick={(e) => e.target === e.currentTarget && setAbierta(null)}
+          onKeyDown={(e) => e.key === "Escape" && setAbierta(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+        >
+        <div className={estilos.resumenDetalle} style={{ position: "relative", width: "min(560px, 100%)", maxHeight: "85vh", overflowY: "auto", margin: 0, background: "var(--blanco, #fff)", borderRadius: 16, padding: "20px 18px" }}>
+          <button
+            type="button"
+            onClick={() => setAbierta(null)}
+            aria-label="Cerrar"
+            style={{ position: "sticky", top: 0, float: "right", width: 36, height: 36, borderRadius: "50%", border: "1px solid var(--linea, #ddd)", background: "#fff", cursor: "pointer", fontSize: "1.1rem" }}
+          >
+            ✕
+          </button>
           {abierta === "ingresos" && (
             <>
               <h3>Ingresos del mes</h3>
@@ -238,6 +254,7 @@ export default function ResumenAdminTarjetas() {
               <Lista personas={datos.perdidosMesAnterior} vacio="Nadie el mes anterior." />
             </>
           )}
+        </div>
         </div>
       )}
     </section>

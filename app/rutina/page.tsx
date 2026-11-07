@@ -11,6 +11,7 @@ import { textos } from "../textos";
 import { useIdioma } from "../useIdioma";
 import estilos from "./entrenamiento.module.css";
 import CalendarioEntreno from "./CalendarioEntreno";
+import DiasEntreno from "../ajustes/notificaciones/DiasEntreno";
 import { claveDia } from "@/lib/fechas";
 import { estiloFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
@@ -202,6 +203,8 @@ export default function Entrenamiento() {
           <div style={{ marginTop: 14 }}>
             <CalendarioEntreno />
           </div>
+
+          <DiasEntreno en={idioma === "en"} />
         </>
       )}
     </main>

@@ -31,6 +31,8 @@ import AnadirSinCobrar from "./AnadirSinCobrar";
 import PanelActual from "./PanelActual";
 import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
 import CabeceraAdmin from "../../CabeceraAdmin";
+import EtiquetaTarifa from "../../../EtiquetaTarifa";
+import { etiquetaPago, etiquetaTarifa, tarifaVigente } from "@/lib/estadoTarifa";
 
 export const metadata = { title: "Ficha de usuario · Administración" };
 
@@ -46,8 +48,6 @@ const ESTADOS_BONO: Record<string, string> = {
 
 // Un bono sin clases pero dentro de sus fechas sigue siendo activo (en verde); al pasarse la fecha, sale en rojo.
 const dentroDeFechas = (b: { estado: string; caduca_en: string | null }) => b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en).getTime() > Date.now();
-const textoEtiquetaBono = (b: { estado: string; caduca_en: string | null }) => (dentroDeFechas(b) ? "Activo" : (ESTADOS_BONO[b.estado] ?? b.estado));
-const claseEtiquetaBono = (b: { estado: string; caduca_en: string | null }) => (b.estado === "activo" || dentroDeFechas(b) ? styles.etiquetaVerde : b.estado === "agotado" || b.estado === "caducado" ? styles.etiquetaRoja : styles.etiquetaSuave);
 
 const PESTANAS = [
   { id: "actual", texto: "Actual" },
@@ -268,7 +268,7 @@ export default async function FichaUsuario({
   // Los caducados y agotados también se pueden corregir (tarifa y fechas); si quedan en fecha, vuelven a estar activos.
   const terminados = bonos.filter((b) => b.estado === "caducado" || b.estado === "agotado");
   // Las dos tarifas de un combinado (misma compra) se enseñan juntas, en una sola tarjeta.
-  const enMarcha = (b: Bono) => b.estado === "activo" || b.estado === "en_cola";
+  const enMarcha = (b: Bono) => b.estado === "activo" || b.estado === "en_cola" || dentroDeFechas(b);
   const gruposServicios = (() => {
     const grupos: Bono[][] = [];
     for (const b of [...contratados, ...terminados]) {
@@ -625,9 +625,12 @@ export default async function FichaUsuario({
                                 <strong>{junto ? (NOMBRE_SERVICIO[b.servicio] ?? b.servicio) : nombreVisible(b.tipos_bono?.nombre)}</strong>
                                 <div className={styles.ayuda}>{detalleBono(b)}</div>
                               </div>
-                              <span className={claseEtiquetaBono(b)}>{textoEtiquetaBono(b)}</span>
+                              <span>
+                                <EtiquetaTarifa e={etiquetaTarifa(b)} />
+                                <EtiquetaTarifa e={etiquetaPago(b.pagos[0]?.estado, tarifaVigente(b))} />
+                              </span>
                             </div>
-                            {b.estado === "activo" && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
+                            {enMarcha(b) && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
                             {!junto && <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />}
                             {enMarcha(b) && <EditorBono bonoId={b.id} anulado={false} sinAnular servicio={b.servicio} />}
                           </div>
@@ -679,7 +682,10 @@ export default async function FichaUsuario({
                         </div>
                       )}
                     </div>
-                    <span className={claseEtiquetaBono(b)}>{textoEtiquetaBono(b)}</span>
+                    <span>
+                      <EtiquetaTarifa e={etiquetaTarifa(b)} />
+                      <EtiquetaTarifa e={etiquetaPago(pago?.estado, tarifaVigente(b))} />
+                    </span>
                   </div>
                 </article>
               );

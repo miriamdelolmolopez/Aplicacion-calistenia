@@ -47,7 +47,7 @@ export default function BarraComo() {
       <div
         style={{ position: "sticky", top: 0, zIndex: 95, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: "8px 12px", background: "#1f2023", color: "#fff", borderRadius: 12, margin: "0 0 10px" }}
       >
-        <span style={{ fontSize: "0.8rem", fontWeight: 700 }}>👁 Viendo como {nombre || "…"} · solo lectura</span>
+        <span style={{ fontSize: "0.8rem", fontWeight: 700 }}>👁 Estás viendo como {nombre || "…"} · solo lectura</span>
         {SECCIONES.map((s) => (
           <Link key={s.ruta} href={`${s.ruta}?como=${como}`} style={{ ...enlace, background: actual.startsWith(s.ruta) ? "rgba(255,255,255,0.25)" : "transparent" }}>
             {s.texto}

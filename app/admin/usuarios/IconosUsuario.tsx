@@ -13,6 +13,15 @@ export const IconoCalendario = () => (
     <path d="M8 3v4M16 3v4M3 10h18" />
   </svg>
 );
+// Barra de dominadas: dos postes, la barra arriba y una persona colgada.
+export const IconoBarra = () => (
+  <svg {...base}>
+    <path d="M3 21V4M21 21V4M3 5h18" />
+    <path d="M9 5v4M15 5v4" />
+    <circle cx="12" cy="11" r="2" />
+    <path d="M12 13v4M10 20l2-3 2 3" />
+  </svg>
+);
 export const IconoLapiz = () => (
   <svg {...base}>
     <path d="M12 20h9" />

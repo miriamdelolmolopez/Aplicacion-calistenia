@@ -1,13 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cambiarVistaAlumna } from "../useMiPerfil";
 import ElegirAlumno from "./ver/ElegirAlumno";
 
 // Botón con un ojo: abre la app tal y como la ve un/a alumno/a, directamente en la pantalla que se está editando.
 // Arriba sale un aviso para volver aquí.
-export default function VerComoAlumno({ destino }: { destino: string }) {
+export default function VerComoAlumno({ destino, porDefecto = false }: { destino: string; porDefecto?: boolean }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [oculto, setOculto] = useState(false);
+  // El ojo de la cabecera aparece solo si la pantalla no ha puesto ya el suyo (con su destino propio).
+  useEffect(() => {
+    if (!porDefecto) return;
+    const cab = ref.current?.closest("header");
+    if (cab && cab.querySelectorAll("[data-ojo=propio]").length > 0) setOculto(true);
+  }, [porDefecto]);
   const [eligiendo, setEligiendo] = useState(false);
   const router = useRouter();
   return (
@@ -21,11 +29,14 @@ export default function VerComoAlumno({ destino }: { destino: string }) {
     <button
       type="button"
       onClick={() => setEligiendo(true)}
+      ref={ref}
+      data-ojo={porDefecto ? "defecto" : "propio"}
+      hidden={oculto}
       title="Ver cómo lo ve un/a alumno/a (eliges quién)"
       aria-label="Ver como alumno/a"
       style={{
         marginLeft: "auto",
-        display: "inline-flex",
+        display: oculto ? "none" : "inline-flex",
         alignItems: "center",
         gap: 6,
         minHeight: 40,

@@ -8,7 +8,7 @@ import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
-import { IconoCalendario, IconoEuro, IconoLapiz } from "./IconosUsuario";
+import { IconoBarra, IconoCalendario, IconoEuro, IconoLapiz } from "./IconosUsuario";
 
 export type Usuario = {
   id: string;
@@ -114,9 +114,14 @@ function Botones({ u, conPagos = true }: { u: Usuario; conPagos?: boolean }) {
           <IconoEuro />
         </Link>
       )}
-      {!soloAdmin(u) && (
+      {!soloAdmin(u) && (!u.servicios.includes("online") || u.servicios.some((s) => s === "grupal" || s === "individual" || s === "taller")) && (
         <Link href={`/admin/usuarios/${u.id}?pestana=reservas`} className={estilos.icono} aria-label="Reservas" title="Reservas">
           <IconoCalendario />
+        </Link>
+      )}
+      {!soloAdmin(u) && u.servicios.includes("online") && (
+        <Link href={`/admin/usuarios/${u.id}?pestana=entrenos`} className={estilos.icono} aria-label="Entrenamiento" title="Entrenamiento">
+          <IconoBarra />
         </Link>
       )}
       <Link href={`/admin/usuarios/${u.id}?pestana=perfil`} className={estilos.icono} aria-label={u.rol === "admin" ? "Perfil" : "Editar"} title={u.rol === "admin" ? "Perfil" : "Editar"}>

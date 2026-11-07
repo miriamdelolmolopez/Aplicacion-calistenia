@@ -23,6 +23,8 @@ import { diaDeLaSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
 import { horasGeneralesCancelar } from "@/lib/plazoCancelar";
+import { etiquetaPago, etiquetaTarifa, tarifaVigente } from "@/lib/estadoTarifa";
+import EtiquetaTarifa from "../../EtiquetaTarifa";
 
 type Reserva = {
   id: string;
@@ -185,6 +187,10 @@ export default function MisReservas() {
             <div className={clay.progresoInfo}>
               <span className={clay.eyebrow}>{nombreServicio(b.servicio)}</span>
               <h3 className={clay.progresoNombre}>{esSuelto(b.nombre) ? nombreVisible(b.nombre, idioma) : tr(b.nombre)}</h3>
+              <div style={{ marginBottom: 6 }}>
+                <EtiquetaTarifa e={etiquetaTarifa({ estado: b.estado, caduca_en: b.caducaEn }, new Date().getTime(), idioma === "en")} />
+                <EtiquetaTarifa e={etiquetaPago(b.pagoPendiente ? "pendiente" : "pagado", tarifaVigente({ estado: b.estado, caduca_en: b.caducaEn }), idioma === "en")} />
+              </div>
               <div className={clay.metaFila}>
                 <span className={clay.metaChip}>
                   <IconoCorona />

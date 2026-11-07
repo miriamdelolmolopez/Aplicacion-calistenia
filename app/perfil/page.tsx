@@ -19,6 +19,8 @@ import estilos from "./perfil.module.css";
 import { obtenerFotos, quitarFoto, subirFoto } from "./acciones";
 import { textosPerfil } from "./textosPerfil";
 import { fechaCorta } from "@/lib/fechas";
+import { etiquetaPago, etiquetaTarifa, tarifaVigente } from "@/lib/estadoTarifa";
+import EtiquetaTarifa from "../EtiquetaTarifa";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
 
@@ -152,6 +154,10 @@ export default function Perfil() {
             {nombreServicio(b.servicio)}
           </span>
           <h3 className={clay.progresoNombre}>{b.nombre ? (esSuelto(b.nombre) ? nombreVisible(b.nombre, idioma) : tr(b.nombre)) : nombreServicio(b.servicio)}</h3>
+          <div style={{ marginBottom: 6 }}>
+            <EtiquetaTarifa e={etiquetaTarifa({ estado: b.estado, caduca_en: b.caducaEn }, ahora, idioma === "en")} />
+            <EtiquetaTarifa e={etiquetaPago(b.pagoPendiente ? "pendiente" : "pagado", tarifaVigente({ estado: b.estado, caduca_en: b.caducaEn }, ahora), idioma === "en")} />
+          </div>
           <div className={clay.metaFila}>
             <span className={clay.metaChip}>
               <IconoCorona />
