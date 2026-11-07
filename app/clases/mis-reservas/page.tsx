@@ -292,7 +292,10 @@ export default function MisReservas() {
                     {tr(r.tipo)}
                   </strong>
                   <span className={estilos.pequeno}>
-                    {textoHora(r.empieza_en)} – {textoHora(new Date(new Date(r.empieza_en).getTime() + (r.duracion_min || 60) * 60000).toISOString())}
+                    {textoHora(r.empieza_en)} – {(() => {
+                      const fin = new Date(r.empieza_en).getTime() + (r.duracion_min || 60) * 60000;
+                      return Number.isNaN(fin) ? "" : textoHora(new Date(fin).toISOString());
+                    })()}
                     {" · "}
                     {LUGAR_CLASES}
                   </span>

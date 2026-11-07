@@ -12,8 +12,11 @@ export function dentroDeHoras(iso: string, horas: number): boolean {
   return falta > 0 && falta <= horas * 3600 * 1000;
 }
 
+const valida = (iso: string) => !Number.isNaN(new Date(iso).getTime());
+
 export function claveDia(iso: string): string {
   // Devuelve AAAA-MM-DD en hora de Madrid (sirve para agrupar clases por día).
+  if (!valida(iso)) return "";
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: ZONA,
     year: "numeric",
@@ -23,6 +26,7 @@ export function claveDia(iso: string): string {
 }
 
 export function textoDia(iso: string, idioma: "es" | "en" = "es"): string {
+  if (!valida(iso)) return "";
   const texto = new Intl.DateTimeFormat(idioma === "es" ? "es-ES" : "en-GB", {
     timeZone: ZONA,
     weekday: "long",
@@ -34,6 +38,7 @@ export function textoDia(iso: string, idioma: "es" | "en" = "es"): string {
 
 // Fecha corta, por ejemplo "19 oct 2026".
 export function fechaCorta(iso: string, idioma: "es" | "en" = "es"): string {
+  if (!valida(iso)) return "";
   return new Intl.DateTimeFormat(idioma === "es" ? "es-ES" : "en-GB", {
     timeZone: ZONA,
     day: "numeric",
@@ -43,6 +48,7 @@ export function fechaCorta(iso: string, idioma: "es" | "en" = "es"): string {
 }
 
 export function textoHora(iso: string): string {
+  if (!valida(iso)) return "";
   return new Intl.DateTimeFormat("es-ES", {
     timeZone: ZONA,
     hour: "2-digit",

@@ -5,6 +5,7 @@ const HORA_FIN_MANANA = 14;
 const HORAS_MANANA = 12;
 
 export function esDeManana(empiezaEn: string): boolean {
+  if (Number.isNaN(new Date(empiezaEn).getTime())) return false;
   const hora = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", hour12: false }).format(new Date(empiezaEn)));
   return hora < HORA_FIN_MANANA;
 }

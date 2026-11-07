@@ -313,7 +313,7 @@ export default function Inicio() {
                 <div className={clay.metaFila}>
                   <span className={clay.metaChip}>
                     <IconoCorona />
-                    {Math.max(0, b.clasesTotal - b.clasesHechas)} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
+                    {b.clasesHechas} {t.clasesDeTotal} {b.clasesTotal} {idioma === "en" ? "classes done" : "clases realizadas"}
                   </span>
                   {b.caducaEn && (
                     <span className={clay.metaChip}>
