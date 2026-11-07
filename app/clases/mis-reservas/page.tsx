@@ -4,7 +4,6 @@ import { esSuelto, nombreVisible } from "@/lib/regalos";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
-import BarraComo from "../../BarraComo";
 import { obtenerBonosDe, obtenerMisBonos, type MiBono } from "../../cuenta/acciones";
 import { useComo } from "../../rutina/useComo";
 import styles from "../../formularios.module.css";
@@ -118,8 +117,6 @@ export default function MisReservas() {
   if (datos === null) {
     return (
       <main className={styles.pagina}>
-        <BarraComo />
-        <BarraComo />
       <BarraSuperior izquierda={{ href: "/clases", texto: "volver" }} />
         <Cargando />
       </main>

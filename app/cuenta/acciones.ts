@@ -1,11 +1,13 @@
 "use server";
 
+import { comoVisto, enSoloLectura } from "@/lib/como";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 // Activa o desactiva los avisos por email no esenciales de la persona que llama.
 export async function cambiarAvisosEmail(activar: boolean): Promise<boolean> {
+  if (await enSoloLectura()) return false;
   const supabase = await createClient();
   const {
     data: { user },
@@ -50,6 +52,9 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
   const { data: datosSesion } = await supabase.auth.getClaims();
   const userId = datosSesion?.claims?.sub;
   if (!userId) return [];
+  // «Ver como alumno/a»: la administradora ve los bonos de esa persona.
+  const como = await comoVisto();
+  if (como) return bonosVigentesDe(como, true);
   return bonosVigentesDe(userId, false);
 }
 

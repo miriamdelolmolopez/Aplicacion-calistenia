@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import BarraComo from "../BarraComo";
 import BarraSuperior from "../BarraSuperior";
 import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
@@ -52,7 +51,6 @@ export default function PaginaProgreso({ vista }: { vista: "evolucion" | "estadi
 
   return (
     <main className={styles.pagina}>
-      <BarraComo />
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto titulo={t.progresoTitulo} />
 

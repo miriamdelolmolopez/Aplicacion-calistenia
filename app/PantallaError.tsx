@@ -24,7 +24,7 @@ const TEXTOS = {
 };
 
 // Pantalla amable para errores y páginas que no existen (en vez del mensaje técnico).
-export default function PantallaError({ tipo, reintentar }: { tipo: "error" | "noEncontrado"; reintentar?: () => void }) {
+export default function PantallaError({ tipo, reintentar, detalle }: { tipo: "error" | "noEncontrado"; reintentar?: () => void; detalle?: string }) {
   const [idioma] = useIdioma();
   const t = TEXTOS[idioma];
   return (
@@ -42,6 +42,11 @@ export default function PantallaError({ tipo, reintentar }: { tipo: "error" | "n
         <Link href="/inicio" className={styles.boton} style={{ textAlign: "center", textDecoration: "none" }}>
           {t.ir}
         </Link>
+        {tipo === "error" && detalle && (
+          <p className={styles.ayuda} style={{ fontSize: "0.7rem", wordBreak: "break-word" }}>
+            {idioma === "en" ? "Technical code (send it to us):" : "Código técnico (envíanoslo):"} {detalle}
+          </p>
+        )}
       </div>
     </main>
   );

@@ -10,11 +10,10 @@ import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
-import AvisoVistaAlumna from "../AvisoVistaAlumna";
-import vistaEstilos from "../vistaAlumna.module.css";
+import VerComoAlumno from "../admin/VerComoAlumno";
 import { useIdioma } from "../useIdioma";
 import { useNombresEn } from "../useNombresEn";
-import { useMiPerfil, cambiarVistaAlumna } from "../useMiPerfil";
+import { useMiPerfil } from "../useMiPerfil";
 import estilos from "./perfil.module.css";
 import { obtenerFotos, quitarFoto, subirFoto } from "./acciones";
 import { textosPerfil } from "./textosPerfil";
@@ -22,6 +21,7 @@ import { fechaCorta } from "@/lib/fechas";
 import { etiquetaPago, etiquetaTarifa, tarifaVigente } from "@/lib/estadoTarifa";
 import EtiquetaTarifa from "../EtiquetaTarifa";
 import { createClient } from "@/lib/supabase/client";
+import { leerComo } from "../rutina/useComo";
 import Cargando from "../Cargando";
 
 type Resumen = { dias_activo: number; reservas_tarifa: number; sesiones_semana: number; objetivo_semana: number };
@@ -38,16 +38,17 @@ async function cargar(): Promise<Datos | null> {
   const supabase = createClient();
   const { data: sesion } = await supabase.auth.getUser();
   if (!sesion.user) return null;
+  const como = leerComo(); // «ver como»: el perfil de esa persona
   const { data: p } = await supabase
     .from("profiles")
     .select("id, email, nombre, apellidos")
-    .eq("id", sesion.user.id)
+    .eq("id", como ?? sesion.user.id)
     .maybeSingle();
   if (!p) return null;
   const [fotos, bonos, resumen] = await Promise.all([
     obtenerFotos([p.id]),
     obtenerMisBonos(),
-    supabase.rpc("resumen_perfil"),
+    como ? Promise.resolve({ data: null, error: null }) : supabase.rpc("resumen_perfil"),
   ]);
   return {
     nombre: [p.nombre, p.apellidos].filter(Boolean).join(" "),
@@ -223,11 +224,10 @@ export default function Perfil() {
         <p className={estilos.correo}>{datos.email}</p>
       </section>
 
-      <AvisoVistaAlumna perfil={mi} />
       {esAdmin && (
-        <button type="button" className={vistaEstilos.cambiar} onClick={() => cambiarVistaAlumna(true)}>
-          👁️ {idioma === "en" ? "Switch to student view" : "Cambiar a vista de alumno/a"}
-        </button>
+        <div style={{ display: "flex", justifyContent: "center", margin: "10px 0" }}>
+          <VerComoAlumno />
+        </div>
       )}
 
       {!esAdmin && (

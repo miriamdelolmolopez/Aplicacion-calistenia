@@ -10,7 +10,6 @@ import { useIdioma } from "../useIdioma";
 import { useNombresEn } from "../useNombresEn";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
-import BarraComo from "../BarraComo";
 import { useComo } from "../rutina/useComo";
 import Cargando from "../Cargando";
 
@@ -50,7 +49,6 @@ export default function MisPagos() {
 
   return (
     <main className={styles.pagina}>
-      <BarraComo />
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto titulo={t.navPagos} />
 

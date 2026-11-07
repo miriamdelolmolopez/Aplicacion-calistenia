@@ -1,5 +1,4 @@
 import Link from "next/link";
-import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { CATEGORIAS, nombreCategoria, nombreMusculo, nombreTipo } from "@/lib/ejercicios";
 import VideoEjercicio from "../../VideoEjercicio";
@@ -119,7 +118,6 @@ export default async function Ejercicios({
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Biblioteca</h1>
-        <VerComoAlumno destino="/biblioteca" />
         <Link href="/admin/online" className={styles.enlaceBarra}>
           ← Volver
         </Link>

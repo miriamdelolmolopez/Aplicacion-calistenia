@@ -39,6 +39,14 @@ export default function FormularioAnuncio() {
         <input id="an-caduca" name="caduca" type="date" />
       </div>
       <label className={styles.casilla}>
+        <input type="checkbox" name="admite_apuntados" />
+        Dejar que se apunten desde la app (Me apunto / No puedo ir / Necesito pensarlo)
+      </label>
+      <div className={styles.campo}>
+        <label htmlFor="an-max">Máximo de plazas (opcional)</label>
+        <input id="an-max" name="max_plazas" type="number" min={1} step={1} placeholder="Sin límite" />
+      </div>
+      <label className={styles.casilla}>
         <input type="checkbox" name="fijado" />
         Fijarlo arriba del tablón
       </label>

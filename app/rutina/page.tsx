@@ -16,6 +16,7 @@ import { claveDia } from "@/lib/fechas";
 import { estiloFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
+import { leerComo } from "./useComo";
 import Cargando from "../Cargando";
 
 type Resumen = {
@@ -26,18 +27,23 @@ type Resumen = {
 
 async function obtenerResumen(): Promise<Resumen> {
   const supabase = createClient();
-  const { data: plan } = await supabase.rpc("mi_plan_online");
+  const como = leerComo(); // «ver como»: se lee lo de esa persona
+  const { data: plan } = como ? { data: true } : await supabase.rpc("mi_plan_online");
   if (plan !== true) return { planActivo: false, rutina: null, enCurso: null };
+  const { data: yo } = await supabase.auth.getUser();
+  const userId = como ?? yo.user?.id ?? "";
 
   const { data: curso } = await supabase
     .from("entrenos")
     .select("id, nombre_sesion")
+    .eq("user_id", userId)
     .eq("estado", "en_curso")
     .maybeSingle();
 
   const { data } = await supabase
     .from("rutinas")
     .select("nombre, foto_url, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden)")
+    .eq("user_id", userId)
     .eq("estado", "publicada")
     .order("publicada_en", { ascending: false })
     .limit(1)
@@ -57,6 +63,7 @@ async function obtenerResumen(): Promise<Resumen> {
     const { data: recientes } = await supabase
       .from("entrenos")
       .select("terminado_en")
+      .eq("user_id", userId)
       .eq("estado", "terminado")
       .gte("terminado_en", new Date(Date.now() - 8 * 86400000).toISOString());
     const hechos = (recientes ?? []).filter((e) => e.terminado_en && claveDia(e.terminado_en) >= lunes).length;

@@ -5,10 +5,10 @@ import type { Estado } from "../acciones";
 import styles from "../admin.module.css";
 import { editarAnuncio } from "./acciones";
 
-export type AnuncioEditable = { id: string; titulo: string; texto: string; enlace: string | null; audiencia: string; fijado: boolean; caduca: string };
+export type AnuncioEditable = { id: string; titulo: string; texto: string; enlace: string | null; audiencia: string; fijado: boolean; caduca: string; admite: boolean; maxPlazas: number | null };
 
 // Formulario para cambiar un anuncio ya publicado. Va dentro del desplegable de cada anuncio.
-export default function EditarAnuncio({ a }: { a: AnuncioEditable }) {
+export default function EditarAnuncio({ a, conOpcion }: { a: AnuncioEditable; conOpcion: boolean }) {
   const [estado, accion, pendiente] = useActionState<Estado, FormData>(editarAnuncio, {});
   return (
     <form action={accion} className={styles.formularioInterno}>
@@ -36,6 +36,19 @@ export default function EditarAnuncio({ a }: { a: AnuncioEditable }) {
         <label htmlFor={`ec-${a.id}`}>Desaparece el (opcional)</label>
         <input id={`ec-${a.id}`} name="caduca" type="date" defaultValue={a.caduca} />
       </div>
+      {conOpcion && (
+        <>
+          <input type="hidden" name="opcion_apuntados" value="1" />
+          <label className={styles.casilla}>
+            <input type="checkbox" name="admite_apuntados" defaultChecked={a.admite} />
+            Dejar que se apunten desde la app
+          </label>
+          <div className={styles.campo}>
+            <label htmlFor={`em-${a.id}`}>Máximo de plazas (opcional)</label>
+            <input id={`em-${a.id}`} name="max_plazas" type="number" min={1} step={1} defaultValue={a.maxPlazas ?? ""} placeholder="Sin límite" />
+          </div>
+        </>
+      )}
       <label className={styles.casilla}>
         <input type="checkbox" name="fijado" defaultChecked={a.fijado} />
         Fijarlo arriba del tablón

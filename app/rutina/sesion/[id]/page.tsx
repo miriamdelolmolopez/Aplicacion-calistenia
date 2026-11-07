@@ -15,7 +15,6 @@ import { claveDia } from "@/lib/fechas";
 import { numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../../Cargando";
-import BarraComo from "../../../BarraComo";
 import { useComo } from "../../useComo";
 import ResumenIconos from "../../ResumenIconos";
 import { CATEGORIAS, intensidadesAgregadas } from "@/lib/ejercicios";
@@ -214,7 +213,6 @@ export default function Sesion() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <BarraComo />
       <div className={estilos.pie}>
         <button type="button" className={styles.boton} disabled={iniciando || datos.items.length === 0 || !!como} onClick={iniciar}>
           {datos.enCurso ? t.continuarRutina : t.iniciarRutina}

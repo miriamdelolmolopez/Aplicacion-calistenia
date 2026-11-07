@@ -1,5 +1,6 @@
 "use server";
 
+import { enSoloLectura } from "@/lib/como";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { avisarCancelacionAlumno, avisarAdminCancelacion, avisarAdminReserva, avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
@@ -80,6 +81,7 @@ async function personaActual() {
 }
 
 export async function reservarClase(sesionId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -93,6 +95,7 @@ export async function reservarClase(sesionId: string): Promise<Resultado> {
 }
 
 export async function unirseListaEspera(sesionId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -105,6 +108,7 @@ export async function unirseListaEspera(sesionId: string): Promise<Resultado> {
 }
 
 export async function salirListaEspera(sesionId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -117,6 +121,7 @@ export async function salirListaEspera(sesionId: string): Promise<Resultado> {
 }
 
 export async function cancelarMiReserva(reservaId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
 

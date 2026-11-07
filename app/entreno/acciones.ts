@@ -1,5 +1,6 @@
 "use server";
 
+import { enSoloLectura } from "@/lib/como";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -37,6 +38,7 @@ function numeroOpc(valor: number | null | undefined): number | null {
 }
 
 export async function iniciarEntreno(sesionId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -59,6 +61,7 @@ export type DatosSerie = {
 };
 
 export async function guardarSerie(serieId: string, d: DatosSerie): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -78,6 +81,7 @@ export async function guardarSerie(serieId: string, d: DatosSerie): Promise<Resu
 }
 
 export async function agregarSerie(entrenoId: string, ordenEjercicio: number): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -91,6 +95,7 @@ export async function agregarSerie(entrenoId: string, ordenEjercicio: number): P
 }
 
 export async function quitarSerie(serieId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -103,6 +108,7 @@ export async function quitarSerie(serieId: string): Promise<Resultado> {
 }
 
 export async function finalizarEntreno(entrenoId: string, duracionSeg?: number): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -116,6 +122,7 @@ export async function finalizarEntreno(entrenoId: string, duracionSeg?: number):
 }
 
 export async function descartarEntreno(entrenoId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -129,6 +136,7 @@ export async function descartarEntreno(entrenoId: string): Promise<Resultado> {
 
 // Borra un entreno ya terminado de la persona que llama (y sus series). No se puede deshacer.
 export async function borrarEntreno(entrenoId: string): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 

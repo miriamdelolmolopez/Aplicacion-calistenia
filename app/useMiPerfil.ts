@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
+import { fijarComo, leerComo } from "./rutina/useComo";
 
 export type MiPerfil = {
   id: string;
@@ -53,6 +54,7 @@ export function cambiarVistaAlumna(activar: boolean, destino?: string) {
 }
 
 export function olvidarVistaAlumna() {
+  fijarComo(null);
   try {
     localStorage.removeItem(CLAVE_VISTA_ALUMNA);
   } catch {
@@ -75,6 +77,29 @@ async function cargarPerfil(): Promise<Estado> {
     versionesVigentes(supabase),
   ]);
   if (!perfil) return "anonimo";
+
+  // «Ver como alumno/a»: solo si quien mira es la administradora. Se pinta la app con los servicios y el plan de esa persona.
+  const como = perfil.rol === "admin" ? leerComo() : null;
+  if (como) {
+    const [{ data: p }, { data: sv }, { data: bs }] = await Promise.all([
+      supabase.from("profiles").select("nombre").eq("id", como).maybeSingle(),
+      supabase.from("perfil_servicios").select("servicio").eq("user_id", como),
+      supabase.from("bonos").select("servicio, estado, caduca_en").eq("user_id", como).in("estado", ["activo", "en_cola", "agotado"]),
+    ]);
+    const ahora = new Date().getTime();
+    const vigentes = (bs ?? []).filter((b) => b.estado !== "agotado" || (!!b.caduca_en && new Date(b.caduca_en).getTime() > ahora));
+    return {
+      id: como,
+      nombre: p?.nombre ?? "",
+      rol: "alumno",
+      rolReal: "admin",
+      servicios: [...new Set([...(sv ?? []).map((s) => s.servicio), ...vigentes.map((b) => b.servicio)])],
+      planOnline: vigentes.some((b) => b.servicio === "online" && b.estado !== "en_cola"),
+      datosCompletos: true,
+      sexoFalta: false,
+      legalAceptado: true,
+    };
+  }
 
   return {
     id,

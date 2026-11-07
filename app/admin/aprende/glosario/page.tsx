@@ -1,5 +1,4 @@
 import Link from "next/link";
-import VerComoAlumno from "../../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import BotonFoto from "../../fotos/BotonFoto";
@@ -21,7 +20,6 @@ export default async function AdministrarGlosario() {
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Glosario</h1>
-        <VerComoAlumno destino="/aprende/glosario" />
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
           ← Volver
         </Link>

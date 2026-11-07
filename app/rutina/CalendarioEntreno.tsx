@@ -9,6 +9,7 @@ import { claveDia } from "@/lib/fechas";
 import { diaDeLaSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
+import { leerComo } from "./useComo";
 
 type Datos = {
   userId: string;
@@ -19,11 +20,12 @@ type Datos = {
 async function obtenerDatos(): Promise<Datos> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
-  const userId = auth.user?.id ?? "";
+  const userId = leerComo() ?? auth.user?.id ?? "";
   const [{ data: entrenos }, { data: dias }] = await Promise.all([
     supabase
       .from("entrenos")
       .select("terminado_en")
+      .eq("user_id", userId)
       .eq("estado", "terminado")
       .order("terminado_en", { ascending: false })
       .limit(500),

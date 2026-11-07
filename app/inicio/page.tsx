@@ -20,7 +20,7 @@ import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
 import CampanaAvisos from "../ui/CampanaAvisos";
 import TablonAnuncios from "../ui/TablonAnuncios";
-import AvisoVistaAlumna from "../AvisoVistaAlumna";
+import VerComoAlumno from "../admin/VerComoAlumno";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import { obtenerCumpleanosAdmin } from "./accionesAdmin";
 import { textoCuando, type CumpleProximo } from "@/lib/cumpleanosTexto";
@@ -72,7 +72,7 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
             .limit(1)
             .maybeSingle()
         : Promise.resolve({ data: null }),
-      supabase.from("entrenos").select("id").eq("estado", "en_curso").maybeSingle(),
+      supabase.from("entrenos").select("id").eq("user_id", userId).eq("estado", "en_curso").maybeSingle(),
       // Quién cumple años hoy (solo salen las personas que lo tienen activado en Ajustes).
       supabase.rpc("cumpleanos_hoy"),
       supabase.from("frases_inicio").select("texto_es, texto_en").eq("activa", true),
@@ -184,7 +184,7 @@ export default function Inicio() {
 
   // Hasta tener los datos y las aceptaciones no se puede avanzar.
   useEffect(() => {
-    if (perfil && perfil !== "anonimo" && extra && (!perfil.datosCompletos || !extra.completo)) {
+    if (perfil && perfil !== "anonimo" && perfil.rolReal !== "admin" && extra && (!perfil.datosCompletos || !extra.completo)) {
       router.replace("/datos");
     }
   }, [perfil, extra, router]);
@@ -209,7 +209,11 @@ export default function Inicio() {
     <main className={styles.pagina}>
       <BarraSuperior />
 
-      <AvisoVistaAlumna perfil={perfil} />
+      {esAdmin && perfil.rolReal === "admin" && (
+        <div style={{ display: "flex", justifyContent: "flex-end", margin: "6px 0 10px" }}>
+          <VerComoAlumno />
+        </div>
+      )}
       <header className={clay.cabecera}>
         <span className={clay.avatar}>
           <Avatar nombre={perfil.nombre} url={miFoto} tamano={40} />

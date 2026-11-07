@@ -1,5 +1,4 @@
 import Link from "next/link";
-import VerComoAlumno from "../../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import BotonFoto from "../../fotos/BotonFoto";
@@ -23,7 +22,6 @@ export default async function AdministrarHistoria() {
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Historia</h1>
-        <VerComoAlumno destino="/aprende/historia" />
         <Link href="/admin/aprende" className={styles.enlaceBarra}>
           ← Volver
         </Link>

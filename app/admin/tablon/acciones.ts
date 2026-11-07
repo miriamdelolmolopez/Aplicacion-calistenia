@@ -20,6 +20,8 @@ export async function publicarAnuncio(_previo: Estado, formData: FormData): Prom
   const avisarApp = formData.get("avisar_app") === "on";
   const avisarCorreo = formData.get("avisar_correo") === "on";
   const caduca = String(formData.get("caduca") ?? "").trim();
+  const admite = formData.get("admite_apuntados") === "on";
+  const maxPlazas = Number(String(formData.get("max_plazas") ?? "").trim());
 
   if (!titulo || !texto) return { error: "Escribe el título y el texto del anuncio." };
   if (enlace && !/^(https?:\/\/|\/(?!\/))/i.test(enlace)) return { error: "El enlace tiene que empezar por https:// (o por / si es una página de la app)." };
@@ -39,10 +41,11 @@ export async function publicarAnuncio(_previo: Estado, formData: FormData): Prom
       avisar_app: avisarApp,
       avisar_correo: avisarCorreo,
       creado_por: user.id,
+      ...(admite ? { admite_apuntados: true, max_plazas: Number.isInteger(maxPlazas) && maxPlazas > 0 ? maxPlazas : null } : {}),
     })
     .select("id")
     .single();
-  if (error || !nuevo) return { error: "No se ha podido publicar. Inténtalo de nuevo." };
+  if (error || !nuevo) return { error: admite ? "No se ha podido publicar con la opción de apuntarse. Puede que falte ejecutar el SQL 089 en Supabase." : "No se ha podido publicar. Inténtalo de nuevo." };
 
   // A quién le llega: alumnos con tarifa en marcha («activos») o todas las personas con cuenta que no son administradoras («todos»).
   let destinatarios: string[] = [];
@@ -103,17 +106,40 @@ export async function editarAnuncio(_previo: Estado, formData: FormData): Promis
   const audiencia = String(formData.get("audiencia") ?? "activos") === "todos" ? "todos" : "activos";
   const fijado = formData.get("fijado") === "on";
   const caduca = String(formData.get("caduca") ?? "").trim();
+  const conOpcion = formData.get("opcion_apuntados") === "1"; // el formulario trae la opción de apuntarse (ya existe en la base de datos)
+  const admite = formData.get("admite_apuntados") === "on";
+  const maxPlazas = Number(String(formData.get("max_plazas") ?? "").trim());
   if (!titulo || !texto) return { error: "Escribe el título y el texto del anuncio." };
   if (enlace && !/^(https?:\/\/|\/(?!\/))/i.test(enlace)) return { error: "El enlace tiene que empezar por https:// (o por / si es una página de la app)." };
   if (caduca && !/^\d{4}-\d{2}-\d{2}$/.test(caduca)) return { error: "La fecha en la que desaparece no es válida." };
 
   const { error } = await createAdminClient()
     .from("anuncios")
-    .update({ titulo, texto, enlace: enlace || null, audiencia, fijado, caduca_en: caduca ? new Date(`${caduca}T23:59:59+01:00`).toISOString() : null })
+    .update({
+      titulo,
+      texto,
+      enlace: enlace || null,
+      audiencia,
+      fijado,
+      caduca_en: caduca ? new Date(`${caduca}T23:59:59+01:00`).toISOString() : null,
+      ...(conOpcion ? { admite_apuntados: admite, max_plazas: admite && Number.isInteger(maxPlazas) && maxPlazas > 0 ? maxPlazas : null } : {}),
+    })
     .eq("id", id);
   if (error) return { error: "No se ha podido guardar." };
   revalidatePath("/admin/tablon");
   revalidatePath("/tablon");
   revalidatePath("/inicio");
   return { mensaje: "Anuncio guardado." };
+}
+
+// Quién ha contestado a un anuncio, con el nombre completo (solo lo ve la administradora).
+export type RespuestaAnuncio = { userId: string; nombre: string; respuesta: "voy" | "no_puedo" | "pensar"; cuando: string };
+
+export async function quitarRespuesta(anuncioId: string, userId: string): Promise<{ ok: boolean }> {
+  await requireAdmin("contenido");
+  if (!/^[0-9a-f-]{36}$/i.test(anuncioId) || !/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false };
+  const { error } = await createAdminClient().from("anuncio_respuestas").delete().eq("anuncio_id", anuncioId).eq("user_id", userId);
+  revalidatePath("/admin/tablon");
+  revalidatePath("/tablon");
+  return { ok: !error };
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { enSoloLectura } from "@/lib/como";
 import { administradoras } from "@/lib/avisos";
 import { enviarCorreo } from "@/lib/email";
 import { notificarApp } from "@/lib/notificaciones";
@@ -21,6 +22,7 @@ async function persona() {
 
 // Guarda la foto de la persona que llama (privada: solo se ve con enlaces temporales).
 export async function subirFoto(formData: FormData): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -48,6 +50,7 @@ export async function subirFoto(formData: FormData): Promise<Resultado> {
 }
 
 export async function quitarFoto(): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
@@ -115,6 +118,7 @@ export async function obtenerProfe(): Promise<{ nombre: string; foto: string | n
 
 // La persona pide que se borre su cuenta; Miriam recibe un aviso y lo gestiona.
 export async function pedirBorradoCuenta(): Promise<Resultado> {
+  if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 

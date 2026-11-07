@@ -26,6 +26,7 @@ import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { vistaAlumnaActiva } from "../useMiPerfil";
 import { estiloFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
+import { leerComo } from "../rutina/useComo";
 import {
   cancelarClaseCoach,
   cancelarMiReserva,
@@ -94,13 +95,14 @@ async function obtenerDatos(): Promise<Datos> {
   // Lo que no depende de otra consulta se pide a la vez (antes iba todo una consulta tras otra).
   const { data: datosSesion } = await supabase.auth.getSession();
   const usuario = datosSesion.session?.user ?? null;
+  const como = leerComo(); // «ver como»: la persona elegida en vez de quien llama
   const [{ data: ajustes }, { data: tiposDatos }, { data: perfil }, { data: gastada }, bonos] = await Promise.all([
     supabase.from("ajustes").select("clave, valor"),
     supabase.from("tipos_clase").select("nombre, lista_espera, cancelacion_horas, reserva_dias_max, creditos"),
     usuario
-      ? supabase.from("profiles").select("rol, datos_completos, tambien_alumno").eq("id", usuario.id).maybeSingle()
+      ? supabase.from("profiles").select("rol, datos_completos, tambien_alumno").eq("id", como ?? usuario.id).maybeSingle()
       : Promise.resolve({ data: null }),
-    supabase.rpc("mi_prueba_gastada"),
+    como ? Promise.resolve({ data: false }) : supabase.rpc("mi_prueba_gastada"),
     obtenerMisBonos(),
   ]);
   const valor = (clave: string, defecto: number) => Number(ajustes?.find((a) => a.clave === clave)?.valor ?? defecto);
@@ -114,7 +116,7 @@ async function obtenerDatos(): Promise<Datos> {
 
   // Si algún tipo de clase se puede reservar con más antelación que el ajuste general, se piden también esos días.
   const diasConsulta = Math.max(dias, ...[...tiposReglas.values()].map((t) => t.reserva_dias_max ?? 0));
-  const { data } = await supabase.rpc("clases_proximas", { p_dias: diasConsulta });
+  const { data } = await (como ? supabase.rpc("clases_proximas_como", { p_dias: diasConsulta, p_como: como }) : supabase.rpc("clases_proximas", { p_dias: diasConsulta }));
   const ahora = Date.now();
   const lista = ((data ?? []) as Omit<Clase, "tarde" | "horasCancelacion" | "creditos">[])
     .filter((c) => new Date(c.empieza_en).getTime() - ahora <= (tiposReglas.get(c.tipo)?.reserva_dias_max ?? dias) * 86400000)

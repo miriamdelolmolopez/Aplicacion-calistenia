@@ -1,5 +1,6 @@
 "use server";
 
+import { enSoloLectura } from "@/lib/como";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,6 +35,7 @@ export async function contarNoLeidas(): Promise<number> {
 
 // Marca como leídas las indicadas (o todas si no se indica ninguna).
 export async function marcarLeidas(ids?: string[]): Promise<void> {
+  if (await enSoloLectura()) return;
   const id = await yo();
   if (!id) return;
   let consulta = createAdminClient().from("notificaciones").update({ leida: true }).eq("user_id", id).eq("leida", false);
@@ -42,6 +44,7 @@ export async function marcarLeidas(ids?: string[]): Promise<void> {
 }
 
 export async function borrarNotificacion(notificacionId: string): Promise<void> {
+  if (await enSoloLectura()) return;
   const id = await yo();
   if (!id || !/^[0-9a-f-]{36}$/i.test(notificacionId)) return;
   await createAdminClient().from("notificaciones").delete().eq("id", notificacionId).eq("user_id", id);
@@ -56,6 +59,7 @@ export async function obtenerPreferenciasApp(): Promise<Record<string, boolean>>
 }
 
 export async function guardarPreferenciaApp(clave: string, valor: boolean): Promise<void> {
+  if (await enSoloLectura()) return;
   const id = await yo();
   if (!id || !/^[a-z_]{3,30}$/.test(clave)) return;
   const admin = createAdminClient();
@@ -66,6 +70,7 @@ export async function guardarPreferenciaApp(clave: string, valor: boolean): Prom
 
 // Notificaciones en el móvil: guarda (o quita) el aparato de la persona.
 export async function guardarSuscripcionPush(suscripcion: { endpoint: string; p256dh: string; auth: string }): Promise<{ ok: boolean }> {
+  if (await enSoloLectura()) return { ok: false };
   const id = await yo();
   if (!id || !suscripcion.endpoint.startsWith("https://") || !suscripcion.p256dh || !suscripcion.auth) return { ok: false };
   const { error } = await createAdminClient().from("push_suscripciones").upsert({ user_id: id, endpoint: suscripcion.endpoint, p256dh: suscripcion.p256dh, auth: suscripcion.auth }, { onConflict: "endpoint" });
@@ -73,6 +78,7 @@ export async function guardarSuscripcionPush(suscripcion: { endpoint: string; p2
 }
 
 export async function quitarSuscripcionPush(endpoint: string): Promise<void> {
+  if (await enSoloLectura()) return;
   const id = await yo();
   if (!id) return;
   await createAdminClient().from("push_suscripciones").delete().eq("endpoint", endpoint).eq("user_id", id);
@@ -93,6 +99,7 @@ export async function obtenerDiasEntreno(): Promise<{ dias: number[]; online: bo
 }
 
 export async function guardarDiasEntreno(dias: number[]): Promise<{ ok: boolean }> {
+  if (await enSoloLectura()) return { ok: false };
   const id = await yo();
   if (!id) return { ok: false };
   const limpios = [...new Set((Array.isArray(dias) ? dias : []).map(Number).filter((d) => Number.isInteger(d) && d >= 1 && d <= 7))].sort();

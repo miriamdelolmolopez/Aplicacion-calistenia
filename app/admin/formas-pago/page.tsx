@@ -1,5 +1,4 @@
 import Link from "next/link";
-import VerComoAlumno from "../VerComoAlumno";
 import { requireAdmin } from "@/lib/admin";
 import { todasLasFormas } from "@/lib/formasPago";
 import styles from "../admin.module.css";
@@ -16,7 +15,6 @@ export default async function FormasPago() {
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Formas de pago</h1>
-        <VerComoAlumno destino="/pagos" />
         <Link href="/admin" className={styles.enlaceBarra}>
           ← Volver
         </Link>
