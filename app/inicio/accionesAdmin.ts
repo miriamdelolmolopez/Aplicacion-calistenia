@@ -23,6 +23,7 @@ export type ResumenAdmin = {
   activosMesAnteriorServicio: { grupal: number; individual: number; online: number };
   ingresosServicio: Record<"grupal" | "individual" | "online" | "otros", { mes: number; anterior: number }>;
   caducanPronto: PersonaResumen[];
+  pagosMes: Record<"todos" | "grupal" | "individual" | "online" | "otros", PersonaResumen[]>; // quién ha pagado este mes y cuánto
   nuevos: PersonaResumen[];
   nuevosMesAnterior: PersonaResumen[];
   diferenciaNuevosPct: number | null; // este mes frente al anterior; null si el anterior fue 0
@@ -112,6 +113,8 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   let ingresosMesAnterior = 0;
   const servicioDeBono = new Map(bonos.map((b) => [b.id, b.servicio]));
   const ingresosServicio: ResumenAdmin["ingresosServicio"] = { grupal: { mes: 0, anterior: 0 }, individual: { mes: 0, anterior: 0 }, online: { mes: 0, anterior: 0 }, otros: { mes: 0, anterior: 0 } };
+  const tarifaDeBono = new Map(bonos.map((b) => [b.id, b.tipos_bono?.nombre ?? ""]));
+  const pagosMes: ResumenAdmin["pagosMes"] = { todos: [], grupal: [], individual: [], online: [], otros: [] };
   for (const p of pagos) {
     if (p.estado !== "pagado") continue;
     const cuando = new Date(p.pagado_en ?? p.creado_en);
@@ -120,6 +123,9 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     if (cuando >= desdeMes) {
       ingresosMes += p.importe_centimos;
       ingresosServicio[clave].mes += p.importe_centimos;
+      const fila = { id: p.user_id ?? "", nombre: nombre(p.user_id, p.persona_nombre), detalle: `${euros(p.importe_centimos)} · ${(p.bono_id && tarifaDeBono.get(p.bono_id)) || "Pago suelto"} · ${fechaCorta(cuando.toISOString())}` };
+      pagosMes.todos.push(fila);
+      pagosMes[clave].push(fila);
     } else if (cuando >= desdeMesAnterior) {
       ingresosMesAnterior += p.importe_centimos;
       ingresosServicio[clave].anterior += p.importe_centimos;
@@ -153,8 +159,17 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
 
   // Caducan pronto: bonos activos (de cualquier tipo) que caducan en los próximos días.
   const limite = new Date(ahora.getTime() + DIAS_AVISO * 24 * 3600 * 1000);
+  // No salen quienes ya han renovado: tienen otra tarifa del mismo servicio que dura más o que empieza después.
+  const yaRenovado = (b: BonoFila) =>
+    bonos.some(
+      (x) =>
+        x.id !== b.id &&
+        x.user_id === b.user_id &&
+        x.servicio === b.servicio &&
+        (x.estado === "en_cola" || (vigente(x) && !!x.caduca_en && new Date(x.caduca_en) > new Date(b.caduca_en as string))),
+    );
   const caducanPronto = activosBonos
-    .filter((b) => b.caduca_en && new Date(b.caduca_en) <= limite)
+    .filter((b) => b.caduca_en && new Date(b.caduca_en) <= limite && !yaRenovado(b))
     .sort((a, b) => (a.caduca_en ?? "").localeCompare(b.caduca_en ?? ""))
     .map((b) => ({
       id: b.user_id,
@@ -251,6 +266,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     activosMesAnteriorServicio,
     ingresosServicio,
     caducanPronto,
+    pagosMes,
     nuevos,
     nuevosMesAnterior,
     diferenciaNuevosPct,

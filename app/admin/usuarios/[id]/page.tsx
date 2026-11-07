@@ -616,6 +616,9 @@ export default async function FichaUsuario({
                               <strong>{nombreVisible(cabecera.tipos_bono?.nombre)}</strong>
                               <div className={styles.ayuda}>Tarifa combinada: {g.map((b) => (NOMBRE_SERVICIO[b.servicio] ?? b.servicio).toLowerCase()).join(" + ")}</div>
                             </div>
+                            <span>
+                              <EtiquetaTarifa e={etiquetaPago(g.map((x) => x.pagos[0]?.estado).find(Boolean), g.some((x) => tarifaVigente(x)))} />
+                            </span>
                           </div>
                         ) : null}
                         {g.map((b) => (
@@ -627,7 +630,7 @@ export default async function FichaUsuario({
                               </div>
                               <span>
                                 <EtiquetaTarifa e={etiquetaTarifa(b)} />
-                                <EtiquetaTarifa e={etiquetaPago(b.pagos[0]?.estado, tarifaVigente(b))} />
+                                {!junto && <EtiquetaTarifa e={etiquetaPago(b.pagos[0]?.estado, tarifaVigente(b))} />}
                               </span>
                             </div>
                             {enMarcha(b) && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}

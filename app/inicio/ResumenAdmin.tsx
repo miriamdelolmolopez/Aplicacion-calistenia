@@ -172,6 +172,7 @@ export default function ResumenAdminTarjetas() {
                 {euros(datos.ingresosMes)} cobrados este mes. Mes anterior: {euros(datos.ingresosMesAnterior)}
                 {dif === null ? "." : ` (${dif >= 0 ? "+" : ""}${dif}%).`}
               </p>
+              <Lista personas={datos.pagosMes.todos} vacio="Todavía no se ha cobrado nada este mes." />
               <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
             </>
           )}
@@ -207,6 +208,7 @@ export default function ResumenAdminTarjetas() {
                   {euros(datos.ingresosServicio[s].mes)} cobrados este mes. Mes anterior: {euros(datos.ingresosServicio[s].anterior)}.
                   {datos.ingresosServicio.otros.mes > 0 ? ` Además, ${euros(datos.ingresosServicio.otros.mes)} de pagos sin tipo de servicio (talleres, pagos sueltos).` : ""}
                 </p>
+                <Lista personas={datos.pagosMes[s]} vacio="No hay cobros de este tipo este mes." />
                 <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
               </div>
             ) : null,
