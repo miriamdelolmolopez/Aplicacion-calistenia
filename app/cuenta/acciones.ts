@@ -28,6 +28,7 @@ export type MiBono = {
   nombre: string;
   clasesRestantes: number;
   clasesTotal: number;
+  clasesHechas: number; // clases ya realizadas (la hora ya pasó); las reservadas para más adelante no cuentan
   activoDesde: string | null;
   caducaEn: string | null;
   pagoPendiente: boolean;
@@ -85,6 +86,20 @@ async function bonosVigentesDe(userId: string, comoAdmin: boolean): Promise<MiBo
   const rango = (e: string) => (e === "activo" ? 0 : e === "agotado" ? 1 : 2);
   const ordenados = [...filas].sort((a, b) => rango(a.estado) - rango(b.estado));
 
+  // Clases ya realizadas de cada bono: reservas cuya clase ya ha empezado.
+  const hechas = new Map<string, number>();
+  if (ordenados.length > 0) {
+    const { data: rs } = await admin
+      .from("reservas")
+      .select("bono_id, creditos, sesiones_clase!inner(empieza_en)")
+      .in("bono_id", ordenados.map((b) => b.id))
+      .eq("estado", "reservada")
+      .lt("sesiones_clase.empieza_en", ahora);
+    for (const r of (rs ?? []) as unknown as { bono_id: string; creditos: number | null }[]) {
+      hechas.set(r.bono_id, (hechas.get(r.bono_id) ?? 0) + (r.creditos ?? 1));
+    }
+  }
+
   return ordenados.map((b) => ({
     id: b.id,
     servicio: b.servicio,
@@ -92,6 +107,7 @@ async function bonosVigentesDe(userId: string, comoAdmin: boolean): Promise<MiBo
     nombre: b.tipos_bono?.nombre ?? "",
     clasesRestantes: b.clases_restantes,
     clasesTotal: b.clases_total,
+    clasesHechas: Math.min(b.clases_total, hechas.get(b.id) ?? 0),
     activoDesde: b.activo_desde,
     caducaEn: b.caduca_en,
     pagoPendiente: b.pagos.some((p) => p.estado === "pendiente"),

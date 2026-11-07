@@ -181,7 +181,7 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
   const lista: Seccion[] = ["inicio"];
   if (p.rol === "admin" || !soloOnline) lista.push("reservar");
   if (p.rol !== "admin" && !soloOnline) lista.push("reservas");
-  if (online && p.rol !== "admin") lista.push("rutina", "biblioteca");
+  if (online && p.rol !== "admin") lista.push("rutina");
   // El progreso tiene su propia sección para todas las alumnas (con online incluye las gráficas de ejercicios).
   if (p.rol !== "admin") lista.push("progreso");
   if (p.rol !== "admin") lista.push("pagos");

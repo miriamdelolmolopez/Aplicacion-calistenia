@@ -142,11 +142,14 @@ export default function Perfil() {
       texto = `${hecho}/${total} ${t.diasDeTotal}`;
     } else {
       total = b.clasesTotal;
-      hecho = total - b.clasesRestantes;
+      hecho = b.clasesHechas;
       texto = `${hecho}/${total} ${t.sesionesDeTotal}`;
     }
     const pct = total > 0 ? Math.round((hecho / total) * 100) : 0;
-    const aviso = activo ? (b.caducaEn ? `${t.caduca} ${fechaCorta(b.caducaEn, idioma)}` : "") : t.enEspera;
+    // «En espera» solo si todavía no ha empezado; una tarifa en marcha (aunque ya haya reservado todo) enseña cuándo caduca.
+    const enMarcha = b.estado !== "en_cola";
+    const aviso = enMarcha ? (b.caducaEn ? `${t.caduca} ${fechaCorta(b.caducaEn, idioma)}` : "") : t.enEspera;
+    const fechas = b.activoDesde && b.caducaEn ? `${fechaCorta(b.activoDesde, idioma)} – ${fechaCorta(b.caducaEn, idioma)}` : "";
     return (
       <div key={b.id} className={clay.tarjetaProgreso}>
         <div className={clay.progresoInfo}>
@@ -164,6 +167,12 @@ export default function Perfil() {
               <IconoCorona />
               {texto}
             </span>
+            {fechas && enMarcha && (
+              <span className={clay.metaChip}>
+                <IconoReloj />
+                {fechas}
+              </span>
+            )}
             {aviso && (
               <span className={clay.metaChip}>
                 <IconoReloj />

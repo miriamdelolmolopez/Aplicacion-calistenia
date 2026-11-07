@@ -178,7 +178,7 @@ export default function MisReservas() {
 
       {bonosClases.map((b) => {
         const usadas = b.clasesTotal - b.clasesRestantes;
-        const pct = b.clasesTotal > 0 ? Math.round((usadas / b.clasesTotal) * 100) : 0;
+        const pct = b.clasesTotal > 0 ? Math.round((b.clasesHechas / b.clasesTotal) * 100) : 0;
         return (
           <section key={b.id} className={clay.tarjetaProgreso} style={{ marginBottom: 12 }}>
             <div className={clay.progresoInfo}>
@@ -194,6 +194,12 @@ export default function MisReservas() {
                   {t.hasReservado.replace("{a}", String(usadas)).replace("{b}", String(b.clasesTotal))} ·{" "}
                   {b.clasesRestantes === 1 ? t.teQueda : t.teQuedan.replace("{n}", String(b.clasesRestantes))}
                 </span>
+                {b.activoDesde && b.caducaEn && (
+                  <span className={clay.metaChip}>
+                    <IconoReloj />
+                    {fechaCorta(b.activoDesde, idioma)} – {fechaCorta(b.caducaEn, idioma)}
+                  </span>
+                )}
                 {b.caducaEn && (
                   <span className={clay.metaChip}>
                     <IconoReloj />

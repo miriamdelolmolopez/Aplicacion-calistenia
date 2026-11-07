@@ -304,7 +304,7 @@ export default function Inicio() {
         )}
 
         {bonosClases.map((b) => {
-          const pct = b.clasesTotal > 0 ? Math.round((b.clasesRestantes / b.clasesTotal) * 100) : 0;
+          const pct = b.clasesTotal > 0 ? Math.round((b.clasesHechas / b.clasesTotal) * 100) : 0;
           return (
             <section key={b.id} className={clay.tarjetaProgreso}>
               <div className={clay.progresoInfo}>
@@ -315,6 +315,12 @@ export default function Inicio() {
                     <IconoCorona />
                     {b.clasesRestantes} {t.clasesDeTotal} {b.clasesTotal} {t.clasesRestantes}
                   </span>
+                  {b.activoDesde && b.caducaEn && (
+                    <span className={clay.metaChip}>
+                      <IconoReloj />
+                      {fechaCorta(b.activoDesde, idioma)} – {fechaCorta(b.caducaEn, idioma)}
+                    </span>
+                  )}
                   {b.caducaEn && (
                     <span className={clay.metaChip}>
                       <IconoReloj />

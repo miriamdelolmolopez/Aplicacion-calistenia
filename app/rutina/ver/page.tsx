@@ -42,7 +42,7 @@ type Datos = {
   userId: string;
   planActivo: boolean;
   rutina: { nombre: string; semanas: number; entrenosSemana: number | null; publicada: string; sesiones: Sesion[] } | null;
-  anteriores: { id: string; nombre: string; publicada_en: string | null }[];
+  anteriores: { id: string; nombre: string; publicada_en: string | null; sesiones: { id: string; nombre: string }[] }[];
   hechos: { sesionId: string | null; dia: string }[];
   dias: number[]; // 1 = lunes … 7 = domingo
 };
@@ -101,7 +101,12 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
       : null,
     anteriores: filas
       .filter((r) => r.estado === "historial")
-      .map((r) => ({ id: r.id, nombre: r.nombre, publicada_en: r.publicada_en })),
+      .map((r) => ({
+        id: r.id,
+        nombre: r.nombre,
+        publicada_en: r.publicada_en,
+        sesiones: [...r.rutina_sesiones].sort((a, b) => a.orden - b.orden).map((s) => ({ id: s.id, nombre: s.nombre })),
+      })),
     hechos: ((entrenos ?? []) as { sesion_id: string | null; terminado_en: string | null }[])
       .filter((e) => e.terminado_en)
       .map((e) => ({ sesionId: e.sesion_id, dia: claveDia(e.terminado_en as string) })),
@@ -260,11 +265,23 @@ export default function VerRutina() {
               <ul className={styles.lista} style={{ paddingLeft: 18 }}>
                 {datos.anteriores.map((r) => (
                   <li key={r.id}>
-                    {r.nombre}
-                    {r.publicada_en && ` · ${fechaCorta(r.publicada_en, idioma)}`}
+                    <details>
+                      <summary style={{ cursor: "pointer" }}>
+                        {r.nombre}
+                        {r.publicada_en && ` · ${fechaCorta(r.publicada_en, idioma)}`}
+                      </summary>
+                      <ul style={{ margin: "8px 0", paddingLeft: 18 }}>
+                        {r.sesiones.map((s) => (
+                          <li key={s.id}>
+                            <Link href={`/rutina/sesion/${s.id}`}>{s.nombre}</Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
                   </li>
                 ))}
               </ul>
+              <p className={styles.ayuda}>{idioma === "en" ? "Open a past routine to see its sessions and the exercise videos." : "Abre una rutina anterior para ver sus sesiones y los vídeos de los ejercicios."}</p>
             </section>
           )}
         </>
