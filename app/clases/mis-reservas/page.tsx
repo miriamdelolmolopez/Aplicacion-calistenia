@@ -4,7 +4,9 @@ import { esSuelto, nombreVisible } from "@/lib/regalos";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
-import { obtenerMisBonos, type MiBono } from "../../cuenta/acciones";
+import BarraComo from "../../BarraComo";
+import { obtenerBonosDe, obtenerMisBonos, type MiBono } from "../../cuenta/acciones";
+import { useComo } from "../../rutina/useComo";
 import styles from "../../formularios.module.css";
 import { textos, type ClaveTexto } from "../../textos";
 import clay from "../../ui/clay.module.css";
@@ -20,6 +22,7 @@ import { claveDia, fechaCorta, textoDia, textoHora } from "@/lib/fechas";
 import { diaDeLaSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
+import { horasGeneralesCancelar } from "@/lib/plazoCancelar";
 
 type Reserva = {
   id: string;
@@ -37,10 +40,11 @@ type TipoClase = { nombre: string; color: string; colorTexto: string };
 
 type Datos = { reservas: Reserva[]; bonos: MiBono[]; horas: number; horasIndividual: number; tipos: TipoClase[] };
 
-async function obtenerDatos(): Promise<Datos> {
+// «como»: Miriam mira las reservas de otra persona (solo lectura).
+async function obtenerDatos(como: string | null): Promise<Datos> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getSession();
-  const userId = auth.session?.user.id ?? "";
+  const userId = como ?? auth.session?.user.id ?? "";
 
   const [{ data }, bonos, { data: ajustes }, { data: tiposData }] = await Promise.all([
     supabase
@@ -51,7 +55,7 @@ async function obtenerDatos(): Promise<Datos> {
       .eq("sesiones_clase.estado", "programada")
       .order("sesiones_clase(empieza_en)", { ascending: true })
       .limit(1000),
-    obtenerMisBonos(),
+    como ? obtenerBonosDe(como) : obtenerMisBonos(),
     supabase.from("ajustes").select("clave, valor").in("clave", ["cancelacion_horas", "cancelacion_horas_individual"]),
     supabase.from("tipos_clase").select("nombre, color, color_texto, activo").eq("activo", true).order("orden").order("nombre"),
   ]);
@@ -99,9 +103,10 @@ export default function MisReservas() {
   const [trabajando, setTrabajando] = useState(false);
   const [alCalendario, setAlCalendario] = useState<string | null>(null);
 
+  const como = useComo();
   useEffect(() => {
-    obtenerDatos().then(setDatos);
-  }, []);
+    obtenerDatos(como).then(setDatos);
+  }, [como]);
 
   const ahoraIso = new Date().toISOString();
   const hoy = claveDia(ahoraIso);
@@ -111,7 +116,9 @@ export default function MisReservas() {
   if (datos === null) {
     return (
       <main className={styles.pagina}>
-        <BarraSuperior izquierda={{ href: "/clases", texto: "volver" }} />
+        <BarraComo />
+        <BarraComo />
+      <BarraSuperior izquierda={{ href: "/clases", texto: "volver" }} />
         <Cargando />
       </main>
     );
@@ -154,7 +161,7 @@ export default function MisReservas() {
         ? { ok: true, clave: res.devuelta ? "okDevuelta" : "okPerdida" }
         : { ok: false, clave: `err_${res.codigo}` as ClaveTexto },
     );
-    setDatos(await obtenerDatos());
+    setDatos(await obtenerDatos(como));
   }
 
   const evento = (r: Reserva) => ({
@@ -272,7 +279,7 @@ export default function MisReservas() {
           <h2>{textoDia(`${dia}T12:00:00Z`, idioma)}</h2>
           {delDia.map((r) => {
             const pasada = r.empieza_en < ahoraIso;
-            const horasLimite = r.horasCancelacion ?? (r.servicio === "individual" ? datos.horasIndividual : datos.horas);
+            const horasLimite = r.horasCancelacion ?? horasGeneralesCancelar(r.servicio, r.empieza_en, datos.horas, datos.horasIndividual);
             const tarde = new Date(r.empieza_en).getTime() - horasLimite * 3600 * 1000 < new Date(ahoraIso).getTime();
             return (
               <article key={r.id} className={estilos.clase} style={{ borderLeft: `6px solid ${r.color}` }}>
@@ -288,7 +295,7 @@ export default function MisReservas() {
                   </span>
                 </div>
 
-                {!pasada && confirmando !== r.id && (
+                {!pasada && !como && confirmando !== r.id && (
                   <div className={estilos.acciones}>
                     <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(r.id)}>
                       {t.cancelarReserva}

@@ -12,6 +12,7 @@ import { IconoArena, IconoProhibido, IconoUsuario } from "./iconos";
 import TarjetaClase from "./TarjetaClase";
 import estilos from "./horario.module.css";
 import CabeceraAdmin from "../CabeceraAdmin";
+import { horasGeneralesCancelar } from "@/lib/plazoCancelar";
 
 export const metadata = { title: "Horarios presenciales · Administración" };
 
@@ -173,7 +174,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
                       .filter((c) => textoHora(c.empieza_en) === hora)
                       .map((c) => {
                         const t = c.tipos_clase;
-                        const horasGenerales = t?.servicio === "individual" ? ajuste("cancelacion_horas_individual", 12) : ajuste("cancelacion_horas", 2);
+                        const horasGenerales = horasGeneralesCancelar(t?.servicio ?? "grupal", c.empieza_en, ajuste("cancelacion_horas", 2), ajuste("cancelacion_horas_individual", 12));
                         return (
                           <TarjetaClase
                             key={c.id}

@@ -16,7 +16,7 @@ import { claveDia, fechaCorta } from "@/lib/fechas";
 import { lunesDe, sumarDias } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
-import AvisoComo from "../AvisoComo";
+import BarraComo from "../../BarraComo";
 import { useComo } from "../useComo";
 import ResumenIconos from "../ResumenIconos";
 import { CATEGORIAS } from "@/lib/ejercicios";
@@ -177,7 +177,7 @@ export default function VerRutina() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
-      {como && <AvisoComo userId={como} />}
+      <BarraComo />
       <h1 className={estiloRutina.titulo}>{rutina?.nombre ?? t.opcionVerRutina}</h1>
 
       {!datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}

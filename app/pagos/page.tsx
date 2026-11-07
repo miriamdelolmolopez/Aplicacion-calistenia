@@ -10,6 +10,8 @@ import { useIdioma } from "../useIdioma";
 import { useNombresEn } from "../useNombresEn";
 import { fechaCorta } from "@/lib/fechas";
 import { createClient } from "@/lib/supabase/client";
+import BarraComo from "../BarraComo";
+import { useComo } from "../rutina/useComo";
 import Cargando from "../Cargando";
 
 type Pago = {
@@ -29,22 +31,26 @@ export default function MisPagos() {
   const tr = useNombresEn();
   const t = textos[idioma];
   const [pagos, setPagos] = useState<Pago[] | null>(null);
+  // «?como=»: Miriam mira los pagos de otra persona (solo lectura).
+  const como = useComo();
 
   useEffect(() => {
-    createClient()
+    let consulta = createClient()
       .from("pagos")
       .select(
         "id, importe_centimos, importe_original_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, bonos(tipos_bono(nombre))",
       )
-      .order("creado_en", { ascending: false })
-      .then(({ data }) => setPagos((data ?? []) as unknown as Pago[]));
-  }, []);
+      .order("creado_en", { ascending: false });
+    if (como) consulta = consulta.eq("user_id", como);
+    consulta.then(({ data }) => setPagos((data ?? []) as unknown as Pago[]));
+  }, [como]);
 
   const euros = (c: number) =>
     new Intl.NumberFormat(idioma === "en" ? "en-GB" : "es-ES", { style: "currency", currency: "EUR" }).format(c / 100);
 
   return (
     <main className={styles.pagina}>
+      <BarraComo />
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto titulo={t.navPagos} />
 

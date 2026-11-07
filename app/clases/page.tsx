@@ -40,6 +40,7 @@ import {
   type CanceladaClase,
 } from "./acciones";
 import Cargando from "../Cargando";
+import { horasGeneralesCancelar } from "@/lib/plazoCancelar";
 
 type Clase = {
   id: string;
@@ -118,7 +119,7 @@ async function obtenerDatos(): Promise<Datos> {
   const lista = ((data ?? []) as Omit<Clase, "tarde" | "horasCancelacion" | "creditos">[])
     .filter((c) => new Date(c.empieza_en).getTime() - ahora <= (tiposReglas.get(c.tipo)?.reserva_dias_max ?? dias) * 86400000)
     .map((c) => {
-      const horasC = tiposReglas.get(c.tipo)?.cancelacion_horas ?? (c.servicio === "individual" ? horasIndividual : horas);
+      const horasC = tiposReglas.get(c.tipo)?.cancelacion_horas ?? horasGeneralesCancelar(c.servicio, c.empieza_en, horas, horasIndividual);
       return {
         ...c,
         horasCancelacion: horasC,

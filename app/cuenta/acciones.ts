@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -49,14 +50,26 @@ export async function obtenerMisBonos(): Promise<MiBono[]> {
   const { data: datosSesion } = await supabase.auth.getClaims();
   const userId = datosSesion?.claims?.sub;
   if (!userId) return [];
+  return bonosVigentesDe(userId, false);
+}
 
-  await createAdminClient().rpc("refrescar_bonos", { p_user: userId });
+// Lo mismo para otra persona: solo la administradora (para «ver como alumno/a»).
+export async function obtenerBonosDe(userId: string): Promise<MiBono[]> {
+  await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return [];
+  return bonosVigentesDe(userId, true);
+}
 
-  const { data } = await supabase
+async function bonosVigentesDe(userId: string, comoAdmin: boolean): Promise<MiBono[]> {
+  const admin = createAdminClient();
+  await admin.rpc("refrescar_bonos", { p_user: userId });
+
+  const { data } = await (comoAdmin ? admin : await createClient())
     .from("bonos")
     .select(
-      "id, servicio, estado, clases_total, clases_restantes, activo_desde, caduca_en, tipos_bono(nombre), pagos(estado)",
+      "id, user_id, servicio, estado, clases_total, clases_restantes, activo_desde, caduca_en, tipos_bono(nombre), pagos(estado)",
     )
+    .eq("user_id", userId)
     .in("estado", ["activo", "en_cola", "agotado"])
     .order("creado_en");
 

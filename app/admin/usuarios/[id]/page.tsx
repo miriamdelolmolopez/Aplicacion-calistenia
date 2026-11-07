@@ -656,6 +656,7 @@ export default async function FichaUsuario({
               {presencial && <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>}
               {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
               {online && rutinaDe && <Link href={`/rutina/ver?como=${p.id}`}>Ver su rutina como alumno/a</Link>}
+              {esAlumna && <Link href={`/clases/mis-reservas?como=${p.id}`}>Ver la app como esta persona</Link>}
               <Link href={`/admin/usuarios/${p.id}/textos-legales`}>Textos legales</Link>
             </nav>
           </section>
