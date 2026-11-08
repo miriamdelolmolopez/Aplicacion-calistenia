@@ -243,13 +243,13 @@ export async function felicitarCumpleanos(): Promise<number> {
             : descuentoCreado
               ? `Un 10 % de descuento en cualquier servicio, válido 30 días (no tiene ninguna tarifa activa). Ya lo he creado en Descuentos como «${descuentoCreado}»: elígelo al cobrarle.`
               : "Ninguno: no tiene tarifa activa y no se ha podido crear el descuento; créaselo tú en Descuentos.";
-      await notificarApp(admins.map((x) => x.id), { tipo: "admin_regalos", titulo: `Hoy cumple años ${nombre}`, cuerpo: `${edad} años · ${regaloAdmin}`.slice(0, 140), enlace: "/admin", ref: `${ref}:admin` });
+      await notificarApp(admins.map((x) => x.id), { tipo: "admin_regalos", titulo: `Hoy cumple ${edad} años ${nombre}`, cuerpo: `${edad} años · ${regaloAdmin}`.slice(0, 140), enlace: "/admin", ref: `${ref}:admin` });
       for (const ad of admins) {
         await enviarCorreo(
           correoAutomatico({
             para: ad.email,
             idioma: "es",
-            asunto: `Hoy cumple años ${nombre}`,
+            asunto: `Hoy cumple ${edad} años ${nombre}`,
             mensaje: `${nombre} cumple ${edad} años hoy.
 
 Regalo: ${regaloAdmin}`,

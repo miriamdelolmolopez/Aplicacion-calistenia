@@ -33,6 +33,8 @@ export async function cumpleanosProximos(): Promise<{ lista: CumpleProximo[]; an
         faltan: Math.round((prox - diaInicio) / 86_400_000),
         dia: fecha.getUTCDate(),
         mes: fecha.getUTCMonth() + 1,
+        // Años que cumple en esa fecha.
+        edad: fecha.getUTCFullYear() - Number(n.fecha_nacimiento.split("-")[0]),
       };
     })
     .filter((c) => c.faltan <= antelacion)
