@@ -208,10 +208,21 @@ export async function felicitarCumpleanos(): Promise<number> {
       let regalo: "clase" | "videollamada" | "ninguno" = "ninguno";
       let descuentoCreado: string | null = null; // nombre del descuento de cumpleaños, si se crea
       if (presencial) {
-        const { error } = await admin.rpc("ajustar_bono", { p_bono: presencial.id, p_clases: 1, p_dias: 0, p_nota: "Regalo de cumpleaños", p_admin: null });
-        if (!error) {
-          regalo = "clase";
-          await admin.from("regalos").insert({ user_id: p.id, tipo: "clase", estado: "hecho" });
+        // La clase se crea como bono aparte («Regalo», sin caducidad) y la tarifa de la persona no se toca.
+        const { data: tipoRegalo } = await admin.from("tipos_bono").select("id").eq("nombre", `Regalo · ${presencial.servicio}`).maybeSingle();
+        if (tipoRegalo) {
+          const { data: nuevo, error } = await admin
+            .from("bonos")
+            .insert({ user_id: p.id, tipo_bono_id: tipoRegalo.id, servicio: presencial.servicio, clases_total: 1, clases_restantes: 1, validez_dias: 1095, nota: "Regalo", sin_caducidad: true })
+            .select("id")
+            .single();
+          if (!error && nuevo) {
+            await admin.from("movimientos_bono").insert({ bono_id: nuevo.id, tipo: "alta", clases: 1, nota: "Regalo de cumpleaños", creado_por: null });
+            await admin.rpc("refrescar_bonos", { p_user: p.id });
+            await admin.from("bonos").update({ caduca_en: null }).eq("id", nuevo.id);
+            regalo = "clase";
+            await admin.from("regalos").insert({ user_id: p.id, tipo: "clase", estado: "hecho" });
+          }
         }
       } else if (activos.length > 0) {
         const { error } = await admin.from("regalos").insert({ user_id: p.id, tipo: "videollamada" });
@@ -237,7 +248,7 @@ export async function felicitarCumpleanos(): Promise<number> {
       const edad = hoy.anio - Number((nacimiento.get(p.id) ?? "").split("-")[0]);
       const regaloAdmin =
         regalo === "clase"
-          ? "Una clase presencial gratis (ya se la he sumado a su bono)."
+          ? "Una clase presencial gratis (ya la tiene en su ficha como clase de regalo aparte, sin caducidad; su tarifa no cambia)."
           : regalo === "videollamada"
             ? "Una videollamada de 1 hora gratis (dudas o entrenamiento en directo). Quedad el día; después márcala como hecha en Automatizaciones."
             : descuentoCreado
