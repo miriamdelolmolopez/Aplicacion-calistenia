@@ -816,3 +816,44 @@
   padding: 4px 10px;
   border-radius: 99px;
 }
+
+/* Título de la pantalla con lápiz para cambiarle el nombre (el título original queda escondido). */
+.barraEditable > h1 {
+  display: none;
+}
+
+.tituloEditable {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.lapiz {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #8a8a86;
+  cursor: pointer;
+}
+
+.lapiz:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.entradaTitulo {
+  font: inherit;
+  font-size: 1.3rem;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--linea);
+  min-width: 0;
+  max-width: 100%;
+}

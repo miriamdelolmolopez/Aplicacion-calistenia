@@ -6,21 +6,24 @@ import { useFotoCard } from "../useFotosCards";
 import { estiloFoto, type FotoNombre } from "@/lib/fotos";
 import styles from "./admin.module.css";
 import CabeceraAdmin from "./CabeceraAdmin";
+import { useNombresAdmin } from "./NombresAdmin";
 
 export type Azulejo = { href?: string; titulo: string; foto: FotoNombre; proximamente?: boolean };
 
 function Tarjeta({ a }: { a: Azulejo }) {
   const clave = `azulejo:${a.titulo}`;
+  const nombres = useNombresAdmin();
+  const titulo = (a.href && nombres[a.href]) || a.titulo; // el nombre cambiado por la administradora (la foto sigue ligada al original)
   const fondo = estiloFoto(a.foto, useFotoCard(clave));
   return a.href && !a.proximamente ? (
     <Link href={a.href} className={styles.azulejo} style={fondo}>
-      <span>{a.titulo}</span>
+      <span>{titulo}</span>
       <CamaraCard clave={clave} />
     </Link>
   ) : (
     <div className={`${styles.azulejo} ${styles.azulejoApagado}`} style={fondo} aria-disabled="true">
       <span>
-        {a.titulo}
+        {titulo}
         <small>Próximamente</small>
       </span>
       <CamaraCard clave={clave} />

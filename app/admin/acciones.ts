@@ -119,6 +119,27 @@ export async function marcarBorradoAtendido(formData: FormData): Promise<void> {
   revalidatePath("/admin/personas");
 }
 
+// Cambia (o quita, si se deja vacío) el nombre de una tarjeta de Administración.
+export async function guardarNombreAdmin(ruta: string, nombre: string): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!/^\/admin\/[a-z0-9-]+$/.test(ruta)) return { error: "Esta pantalla no se puede renombrar." };
+  const limpio = String(nombre ?? "").trim().replace(/\s+/g, " ").slice(0, 60);
+  const admin = createAdminClient();
+  const { data } = await admin.from("ajustes").select("valor").eq("clave", "nombres_admin").maybeSingle();
+  let actual: Record<string, string> = {};
+  try {
+    actual = JSON.parse(String(data?.valor ?? "{}"));
+  } catch {
+    actual = {};
+  }
+  if (limpio) actual[ruta] = limpio;
+  else delete actual[ruta];
+  const { error } = await admin.from("ajustes").upsert({ clave: "nombres_admin", valor: JSON.stringify(actual), actualizado_en: new Date().toISOString() });
+  if (error) return { error: "No se ha podido guardar." };
+  revalidatePath("/admin", "layout");
+  return {};
+}
+
 // Con cuántos días de antelación se enseñan los cumpleaños en Administración (0 = solo el mismo día).
 export async function guardarAntelacionCumples(formData: FormData): Promise<void> {
   await requireAdmin();
