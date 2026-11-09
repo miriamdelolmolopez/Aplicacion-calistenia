@@ -50,9 +50,39 @@ from (values
   ('Elevación de piernas', 'Leg raises'),
   ('Elevación de rodillas', 'Knee raises'),
   ('Movilidad de muñeca', 'Wrist mobility'),
-  ('Movilidad de hombro', 'Shoulder mobility')
+  ('Movilidad de hombro', 'Shoulder mobility'),
+  ('Aguante Arriba en Dominadas en Anillas', 'Top hold ring pull-up'),
+  ('Apertura de Hombros en Pared', 'Wall shoulder opener'),
+  ('Colgado Activo en Anillas', 'Active hang on rings'),
+  ('Descompresión y Tracción Suave de Muñecas', 'Gentle wrist decompression and traction'),
+  ('Despegues en pino espalda a la pared', 'Back-to-wall handstand kick-ups'),
+  ('Despegues en pino pecho a la pared', 'Chest-to-wall handstand kick-ups'),
+  ('Dominada supina (chin up)', 'Chin-up'),
+  ('Dominadas en Anillas Asistidas con Pies', 'Foot-assisted ring pull-ups'),
+  ('Estiramiento de Dorsales y Bíceps', 'Lat and biceps stretch'),
+  ('Extensión Torácica sobre Bloque de Yoga', 'Thoracic extension over yoga block'),
+  ('Flexiones de pica', 'Pike push-ups'),
+  ('Flexiones escapulares', 'Scapular push-ups'),
+  ('Frogstand', 'Frogstand'),
+  ('Front lever tuck', 'Tuck front lever'),
+  ('High Knees', 'High knees'),
+  ('Hollow body con peso en las manos', 'Weighted hollow body'),
+  ('Inclinaciones En Pica', 'Pike leans'),
+  ('Jumping Jack', 'Jumping jacks'),
+  ('Lanzadas a pino espalda a la pared', 'Back-to-wall handstand kick-ups (swing)'),
+  ('Montar y desmontar pino pecho pared', 'Chest-to-wall handstand mount and dismount'),
+  ('Negativas de Dominada en Anillas', 'Negative ring pull-ups'),
+  ('Pistol squat asistida', 'Assisted pistol squat'),
+  ('Remo en Anillas', 'Ring row'),
+  ('Retracciones Escapulares en Anillas', 'Scapular retractions on rings'),
+  ('Ring Pull Up', 'Ring pull-up'),
+  ('Saltos a pino pecho a la pared extendiendo piernas', 'Chest-to-wall handstand jumps with leg extension'),
+  ('Saltos de pica sobre bloque', 'Pike jumps over block'),
+  ('Skin the cat', 'Skin the cat'),
+  ('Toes to bar', 'Toes to bar'),
+  ('Zancadas con rotación de torso', 'Lunges with torso rotation')
 ) as v(es, en)
-where lower(e.nombre) = lower(v.es)
+where btrim(lower(e.nombre)) = btrim(lower(v.es))
   and (e.nombre_en is null or btrim(e.nombre_en) = '');
 
 -- Los que quedan sin nombre en inglés (si sale alguno, pásamelo y lo añado).
