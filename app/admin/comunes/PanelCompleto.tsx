@@ -1,7 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import estilos from "./comunes.module.css";
+
+// Para que un formulario de dentro pueda cerrar la pantalla por sí solo al guardar (null = no hay pantalla que cerrar).
+export const CierrePanel = createContext<(() => void) | null>(null);
 
 // Pantalla completa para crear y para editar. Se guarda con el botón de Guardar del formulario; con Cancelar
 // (o Volver, o Escape) no se cambia nada, y si ya habías escrito algo, antes pregunta si quieres descartarlo.
@@ -61,7 +64,7 @@ export default function PanelCompleto({ titulo, cerrar, children }: { titulo: st
           <h2>{titulo}</h2>
         </div>
 
-        {children}
+        <CierrePanel.Provider value={cerrar}>{children}</CierrePanel.Provider>
 
         <div className={estilos.pie}>
           {preguntando && (

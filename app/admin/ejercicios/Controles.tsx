@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useContext, useEffect, useState } from "react";
+import { CierrePanel } from "../comunes/PanelCompleto";
 import MapaCorporal from "../../MapaCorporal";
 import MultiDesplegable from "../MultiDesplegable";
 import type { Estado } from "../acciones";
@@ -69,11 +70,14 @@ export function FormularioEjercicio({
   const p = ejercicio?.id ?? "nuevo";
   const { ref, alEnviar } = useEnvio(accion, estado, !ejercicio);
 
+  // Al guardar, la pantalla se cierra sola y se vuelve a la lista, justo donde estaba.
+  const cerrarPanel = useContext(CierrePanel);
   useEffect(() => {
-    if (!estado.mensaje || !alTerminar || ejercicio) return;
-    const t = setTimeout(alTerminar, 900);
+    const cerrar = ejercicio ? cerrarPanel : alTerminar;
+    if (!estado.mensaje || !cerrar) return;
+    const t = setTimeout(cerrar, ejercicio ? 700 : 900);
     return () => clearTimeout(t);
-  }, [estado, alTerminar, ejercicio]);
+  }, [estado, alTerminar, ejercicio, cerrarPanel]);
 
   // Músculos elegidos como principales y como secundarios (uno no puede estar en los dos).
   const [principales, setPrincipales] = useState<string[]>(
