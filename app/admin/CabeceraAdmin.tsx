@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import styles from "./admin.module.css";
 import { useNombresAdmin } from "./NombresAdmin";
 import { guardarNombreAdmin } from "./acciones";
+import { olvidarNombresMenu } from "../useMenuAdmin";
 
 // Cabecera de cada pantalla de Administración: el título y el botón de volver, sin foto.
 // En las pantallas a las que se llega desde una tarjeta, el título lleva un lápiz gris para cambiarle el nombre.
@@ -40,6 +41,7 @@ export default function CabeceraAdmin({ children }: { children: ReactNode }) {
       }
       setError("");
       setEditando(false);
+      olvidarNombresMenu();
       router.refresh();
     });
   }

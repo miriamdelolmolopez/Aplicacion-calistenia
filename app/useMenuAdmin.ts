@@ -36,6 +36,34 @@ function cargarExcluidas(): Promise<string[]> {
   return excluidasGuardadas.lista;
 }
 
+// Los nombres que la administradora ha puesto a las tarjetas de Administración (también salen en las barras).
+let nombresGuardados: { cuando: number; lista: Promise<Record<string, string>> } | null = null;
+function cargarNombres(): Promise<Record<string, string>> {
+  if (!nombresGuardados || new Date().getTime() - nombresGuardados.cuando > 60_000) {
+    nombresGuardados = {
+      cuando: new Date().getTime(),
+      lista: (async () => {
+        try {
+          const { data } = await createClient().from("ajustes").select("valor").eq("clave", "nombres_admin").maybeSingle();
+          const crudo = JSON.parse(String(data?.valor ?? "{}")) as Record<string, unknown>;
+          const limpio: Record<string, string> = {};
+          for (const [k, v] of Object.entries(crudo)) if (typeof v === "string" && v.trim()) limpio[k] = v;
+          return limpio;
+        } catch {
+          return {};
+        }
+      })(),
+    };
+  }
+  return nombresGuardados.lista;
+}
+
+// Se llama al cambiar un nombre: las barras lo vuelven a leer enseguida.
+export function olvidarNombresMenu() {
+  nombresGuardados = null;
+  window.dispatchEvent(new Event("nombres-menu-admin"));
+}
+
 function suscribir(avisar: () => void) {
   window.addEventListener(EVENTO, avisar);
   window.addEventListener("storage", avisar);
@@ -92,7 +120,18 @@ export function useMenuAdmin(): {
   const orden = useMemo(() => analizar<string[]>(crudoOrden, []), [crudoOrden]);
   const hrefsBarra = useMemo(() => analizar<string[]>(crudoBarra, BARRA_POR_DEFECTO), [crudoBarra]);
 
-  const porHref = useMemo(() => new Map(OPCIONES_MENU_ADMIN.map((o) => [o.href, o])), []);
+  const [nombres, setNombres] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let vigente = true;
+    const leerNombres = () => cargarNombres().then((n) => vigente && setNombres(n));
+    leerNombres();
+    window.addEventListener("nombres-menu-admin", leerNombres);
+    return () => {
+      vigente = false;
+      window.removeEventListener("nombres-menu-admin", leerNombres);
+    };
+  }, []);
+  const porHref = useMemo(() => new Map(OPCIONES_MENU_ADMIN.map((o) => [o.href, { ...o, texto: nombres[o.href] ?? o.texto }])), [nombres]);
 
   // Lo que esta administradora tiene excluido no sale en ningún menú.
   const [excluidas, setExcluidas] = useState<string[]>([]);
