@@ -121,7 +121,7 @@ export default function Entrenamiento() {
     const res = await iniciarEntreno(sesionId);
     if (res.ok) return router.push(`/entreno/${res.id}`);
     setIniciando(false);
-    setError(t.errorGeneral);
+    setError(res.codigo === "soloLectura" ? t.err_soloLectura : t.errorGeneral);
   }
 
   const r = datos?.rutina;
