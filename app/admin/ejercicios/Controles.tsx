@@ -230,7 +230,7 @@ export function FormularioEjercicio({
       </div>
 
       <fieldset className={styles.grupo}>
-        <legend>Qué trabaja (de 0 a 100) <AyudaI texto="Cuánto trabaja cada cualidad (fuerza, equilibrio, movilidad…), de 0 a 100. Sale en la pestaña «Trabajo» de la ficha." /></legend>
+        <legend>Qué trabaja (de 0 a 100) <AyudaI texto="Cuánto trabaja cada cualidad (fuerza, equilibrio, movilidad…), de 0 a 100. Cada una va por separado: no tienen que sumar 100 (puede haber un 100 en fuerza y otro 100 en resistencia). Sale en la pestaña «Trabajo» de la ficha." /></legend>
         <div className={styles.camposItem}>
           {TRABAJOS.map((t) => (
             <div key={t.clave} className={styles.campo}>

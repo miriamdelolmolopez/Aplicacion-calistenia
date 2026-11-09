@@ -73,7 +73,6 @@ export default function FichaEjercicio() {
   const categoria = CATEGORIAS.find((c) => c.valor === e.categoria)?.[idioma];
   const dificultad = DIFICULTADES.find((d) => d.valor === e.dificultad);
   const trabajo = TRABAJOS.filter((t) => (e.trabajo?.[t.clave] ?? 0) > 0);
-  const suma = Math.max(100, trabajo.reduce((n, t) => n + (e.trabajo?.[t.clave] ?? 0), 0));
 
   const nombreMusculo = (valor: string) => MUSCULOS.find((m) => m.valor === valor)?.[idioma] ?? valor;
   const pestanas: { id: Pestana; texto: string }[] = [
@@ -165,9 +164,9 @@ export default function FichaEjercicio() {
                   <div key={t.clave} className={estilos.fila}>
                     <span>{t[idioma]}</span>
                     <span className={estilos.pista}>
-                      <span className={estilos.relleno} style={{ display: "block", width: `${Math.round((valor / suma) * 100)}%`, background: t.color }} />
+                      <span className={estilos.relleno} style={{ display: "block", width: `${valor}%`, background: t.color }} />
                     </span>
-                    <strong>{Math.round((valor / suma) * 100)} %</strong>
+                    <strong>{valor} %</strong>
                   </div>
                 );
               })
