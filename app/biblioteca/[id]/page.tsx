@@ -2,7 +2,7 @@
 
 import { encuadreDeFoto, sinEncuadre } from "@/lib/fotos";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
 import Cargando from "../../Cargando";
@@ -35,6 +35,7 @@ type Pestana = "pasos" | "musculos" | "trabajo" | "material";
 
 export default function FichaEjercicio() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [idioma] = useIdioma();
   const en = idioma === "en";
   const [e, setE] = useState<Ejercicio | null | undefined>(undefined);
@@ -93,7 +94,18 @@ export default function FichaEjercicio() {
         ) : (
           <div className={estilos.heroVacio} />
         )}
-        <Link href="/biblioteca" className={estilos.atras} aria-label={en ? "Back" : "Volver"}>
+        <Link
+          href="/biblioteca"
+          className={estilos.atras}
+          aria-label={en ? "Back" : "Volver"}
+          onClick={(ev) => {
+            // Se vuelve a donde se estaba (la lista de Administración o la biblioteca), en el mismo sitio.
+            if (window.history.length > 1) {
+              ev.preventDefault();
+              router.back();
+            }
+          }}
+        >
           ‹
         </Link>
       </div>

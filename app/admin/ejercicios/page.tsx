@@ -181,7 +181,11 @@ export default async function Ejercicios({
                 return (
                   <li key={e.id} className={styles.persona}>
                     <div className={styles.personaCabecera}>
-                      <div style={{ display: "flex", gap: 12, minWidth: 0, flex: 1 }}>
+                      <Link
+                        href={`/biblioteca/${e.id}`}
+                        aria-label={`Ver resumen de ${e.nombre}`}
+                        style={{ display: "flex", gap: 12, minWidth: 0, flex: 1, color: "inherit", textDecoration: "none", cursor: "pointer" }}
+                      >
                       <span
                         role="img"
                         aria-label={fotos.get(e.id) ? `Foto de ${e.nombre}` : "Sin foto"}
@@ -219,7 +223,7 @@ export default async function Ejercicios({
                           </div>
                         )}
                       </div>
-                      </div>
+                      </Link>
                       <AccionesEjercicio
                         id={e.id}
                         nombre={e.nombre}
