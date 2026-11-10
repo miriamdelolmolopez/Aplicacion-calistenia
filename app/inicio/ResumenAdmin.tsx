@@ -109,7 +109,7 @@ export default function ResumenAdminTarjetas() {
     })),
   ];
   const alertas: Tarjeta[] = [
-    { clave: "caducan", titulo: "Caducan pronto", valor: String(datos.caducanPronto.length), pie: "En los próximos 7 días" },
+    { clave: "caducan", titulo: "Caducan pronto", valor: String(datos.caducanPronto.length), pie: `En los próximos ${datos.diasAvisoBonos} días` },
     { clave: "renovar", titulo: "Bonos por renovar", valor: String(datos.porRenovar.length), pie: "Bono agotado, sin otro activo" },
     {
       clave: "pendientes",
@@ -227,7 +227,7 @@ export default function ResumenAdminTarjetas() {
           {abierta === "caducan" && (
             <>
               <h3>Caducan pronto</h3>
-              <Lista personas={datos.caducanPronto} vacio="Ningún bono caduca en los próximos 7 días." />
+              <Lista personas={datos.caducanPronto} vacio={`Ningún bono caduca en los próximos ${datos.diasAvisoBonos} días.`} />
             </>
           )}
           {abierta === "renovar" && (

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 
-export type ClaveAdmin = "admin_avisa_reserva" | "admin_avisa_cancelacion" | "admin_avisa_minimo" | "admin_avisa_regalos" | "admin_avisa_borrado";
-export const CLAVES_ADMIN: ClaveAdmin[] = ["admin_avisa_reserva", "admin_avisa_cancelacion", "admin_avisa_minimo", "admin_avisa_regalos", "admin_avisa_borrado"];
+export type ClaveAdmin = "admin_avisa_reserva" | "admin_avisa_cancelacion" | "admin_avisa_minimo" | "admin_avisa_regalos" | "admin_avisa_borrado" | "admin_avisa_caducan";
+export const CLAVES_ADMIN: ClaveAdmin[] = ["admin_avisa_reserva", "admin_avisa_cancelacion", "admin_avisa_minimo", "admin_avisa_regalos", "admin_avisa_borrado", "admin_avisa_caducan"];
 
 export type Preferencias = {
   id: string;

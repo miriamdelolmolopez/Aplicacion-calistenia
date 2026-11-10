@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/admin";
 import { cumpleanosProximos } from "@/lib/cumpleanos";
+import { diasAvisoBonos } from "@/lib/bonosPorCaducar";
 import type { CumpleProximo } from "@/lib/cumpleanosTexto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -23,6 +24,7 @@ export type ResumenAdmin = {
   activosMesAnteriorServicio: { grupal: number; individual: number; online: number };
   ingresosServicio: Record<"grupal" | "individual" | "online" | "otros", { mes: number; anterior: number }>;
   caducanPronto: PersonaResumen[];
+  diasAvisoBonos: number;
   pagosMes: Record<"todos" | "grupal" | "individual" | "online" | "otros", PersonaResumen[]>; // quién ha pagado este mes y cuánto
   nuevos: PersonaResumen[];
   nuevosMesAnterior: PersonaResumen[];
@@ -34,7 +36,6 @@ export type ResumenAdmin = {
 };
 
 const ZONA = "Europe/Madrid";
-const DIAS_AVISO = 7;
 
 // Primer instante (UTC) de un mes, a las 00:00 en hora de Madrid.
 function inicioMes(año: number, mes: number): Date {
@@ -158,7 +159,8 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   const totalActivos = new Set(activosBonos.map((b) => b.user_id)).size;
 
   // Caducan pronto: bonos activos (de cualquier tipo) que caducan en los próximos días.
-  const limite = new Date(ahora.getTime() + DIAS_AVISO * 24 * 3600 * 1000);
+  const diasAvisoBonosElegidos = await diasAvisoBonos();
+  const limite = new Date(ahora.getTime() + diasAvisoBonosElegidos * 24 * 3600 * 1000);
   // No salen quienes ya han renovado: tienen otra tarifa del mismo servicio que dura más o que empieza después.
   const yaRenovado = (b: BonoFila) =>
     bonos.some(
@@ -266,6 +268,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     activosMesAnteriorServicio,
     ingresosServicio,
     caducanPronto,
+    diasAvisoBonos: diasAvisoBonosElegidos,
     pagosMes,
     nuevos,
     nuevosMesAnterior,

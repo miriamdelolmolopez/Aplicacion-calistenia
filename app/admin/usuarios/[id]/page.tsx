@@ -595,6 +595,50 @@ export default async function FichaUsuario({
         </>
   );
 
+  // Una tarjeta por tarifa (o por tarifa combinada). `resumido`: sin los formularios de editar (las que siguen en marcha se editan arriba, en «Editar servicios contratados»).
+  const tarjetaBono = (g: (typeof gruposContratados)[number], resumido = false) => {
+      const junto = g.length > 1;
+      const cabecera = g[0];
+      return (
+        <article key={cabecera.id} className={estilos.histCard}>
+          {junto ? (
+            <div className={estilos.histCabecera}>
+              <div>
+                <strong>{nombreVisible(cabecera.tipos_bono?.nombre)}</strong>
+                <div className={styles.ayuda}>Tarifa combinada: {g.map((b) => (NOMBRE_SERVICIO[b.servicio] ?? b.servicio).toLowerCase()).join(" + ")}</div>
+              </div>
+              <span>
+                <EtiquetaTarifa e={etiquetaPago(g.map((x) => x.pagos[0]?.estado).find(Boolean), g.some((x) => tarifaVigente(x)))} />
+              </span>
+            </div>
+          ) : null}
+          {g.map((b) => (
+            <div key={b.id} style={junto ? { borderTop: "1px solid rgba(43, 43, 42, 0.12)", marginTop: 10, paddingTop: 10 } : undefined}>
+              <div className={estilos.histCabecera}>
+                <div>
+                  <strong>{junto ? (NOMBRE_SERVICIO[b.servicio] ?? b.servicio) : nombreVisible(b.tipos_bono?.nombre)}</strong>
+                  <div className={styles.ayuda}>{detalleBono(b)}</div>
+                </div>
+                <span>
+                  <EtiquetaTarifa e={etiquetaTarifa(b)} />
+                  {!junto && <EtiquetaTarifa e={etiquetaPago(b.pagos[0]?.estado, tarifaVigente(b))} />}
+                </span>
+              </div>
+              {!resumido && enMarcha(b) && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
+              {!resumido && !junto && <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />}
+              {!resumido && enMarcha(b) && <EditorBono bonoId={b.id} anulado={false} sinAnular servicio={b.servicio} />}
+            </div>
+          ))}
+          {junto && !resumido && (
+            <div style={{ borderTop: "1px solid rgba(43, 43, 42, 0.12)", marginTop: 10, paddingTop: 10 }}>
+              <div className={styles.ayuda}>Las fechas se cambian a la vez en los dos servicios.</div>
+              <TarifaAsistentes userId={p.id} bono={paraAsistente(cabecera)} tarifas={tarifasOpciones} />
+            </div>
+          )}
+        </article>
+      );
+  };
+
   const panelAcciones = (
         <>
           <section className={styles.tarjeta}>
@@ -605,49 +649,8 @@ export default async function FichaUsuario({
                 <div className={estilos.serviciosContratados}>
                   <AnadirSinCobrar userId={p.id} tarifas={tarifasOpciones} hoy={hoy} />
                   {contratados.length === 0 && terminados.length === 0 && <p className={styles.ayuda}>Ahora mismo no tiene ningún servicio contratado.</p>}
-                  {contratados.length === 0 && terminados.length > 0 && <p className={styles.ayuda}>No tiene ninguna tarifa activa. Aquí abajo puedes corregir las que han caducado o se han agotado.</p>}
-                  {[...gruposContratados, ...gruposTerminados].map((g) => {
-                    const junto = g.length > 1;
-                    const cabecera = g[0];
-                    return (
-                      <article key={cabecera.id} className={estilos.histCard}>
-                        {junto ? (
-                          <div className={estilos.histCabecera}>
-                            <div>
-                              <strong>{nombreVisible(cabecera.tipos_bono?.nombre)}</strong>
-                              <div className={styles.ayuda}>Tarifa combinada: {g.map((b) => (NOMBRE_SERVICIO[b.servicio] ?? b.servicio).toLowerCase()).join(" + ")}</div>
-                            </div>
-                            <span>
-                              <EtiquetaTarifa e={etiquetaPago(g.map((x) => x.pagos[0]?.estado).find(Boolean), g.some((x) => tarifaVigente(x)))} />
-                            </span>
-                          </div>
-                        ) : null}
-                        {g.map((b) => (
-                          <div key={b.id} style={junto ? { borderTop: "1px solid rgba(43, 43, 42, 0.12)", marginTop: 10, paddingTop: 10 } : undefined}>
-                            <div className={estilos.histCabecera}>
-                              <div>
-                                <strong>{junto ? (NOMBRE_SERVICIO[b.servicio] ?? b.servicio) : nombreVisible(b.tipos_bono?.nombre)}</strong>
-                                <div className={styles.ayuda}>{detalleBono(b)}</div>
-                              </div>
-                              <span>
-                                <EtiquetaTarifa e={etiquetaTarifa(b)} />
-                                {!junto && <EtiquetaTarifa e={etiquetaPago(b.pagos[0]?.estado, tarifaVigente(b))} />}
-                              </span>
-                            </div>
-                            {enMarcha(b) && b.caduca_en && <AlargarCortesia userId={p.id} bonoId={b.id} hasta={claveDia(b.caduca_en)} />}
-                            {!junto && <TarifaAsistentes userId={p.id} bono={paraAsistente(b)} tarifas={tarifasOpciones} />}
-                            {enMarcha(b) && <EditorBono bonoId={b.id} anulado={false} sinAnular servicio={b.servicio} />}
-                          </div>
-                        ))}
-                        {junto && (
-                          <div style={{ borderTop: "1px solid rgba(43, 43, 42, 0.12)", marginTop: 10, paddingTop: 10 }}>
-                            <div className={styles.ayuda}>Las fechas se cambian a la vez en los dos servicios.</div>
-                            <TarifaAsistentes userId={p.id} bono={paraAsistente(cabecera)} tarifas={tarifasOpciones} />
-                          </div>
-                        )}
-                      </article>
-                    );
-                  })}
+                  {contratados.length === 0 && terminados.length > 0 && <p className={styles.ayuda}>No tiene ninguna tarifa activa. Las que han caducado o se han agotado están en «Historial de servicios contratados», y allí también se pueden corregir.</p>}
+                  {gruposContratados.map((g) => tarjetaBono(g))}
                   <EditorPersona
                     persona={{
                       id: p.id,
@@ -656,6 +659,14 @@ export default async function FichaUsuario({
                       servicios: (p.perfil_servicios as { servicio: string }[]).map((s) => s.servicio),
                     }}
                   />
+                </div>
+              </details>
+              <details className={estilos.accionDespliega}>
+                <summary>Historial de servicios contratados</summary>
+                <div className={estilos.serviciosContratados}>
+                  {gruposContratados.length === 0 && gruposTerminados.length === 0 && <p className={styles.ayuda}>Todavía no ha contratado ningún servicio.</p>}
+                  {gruposContratados.map((g) => tarjetaBono(g, true))}
+                  {gruposTerminados.map((g) => tarjetaBono(g))}
                 </div>
               </details>
               <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>

@@ -117,7 +117,7 @@ export function avisarCancelacionAlumno(userId: string, sesionId: string, devuel
   });
 }
 
-export type AvisoAdmin = "admin_avisa_reserva" | "admin_avisa_cancelacion" | "admin_avisa_minimo" | "admin_avisa_regalos" | "admin_avisa_borrado";
+export type AvisoAdmin = "admin_avisa_reserva" | "admin_avisa_cancelacion" | "admin_avisa_minimo" | "admin_avisa_regalos" | "admin_avisa_borrado" | "admin_avisa_caducan";
 
 // Las administradoras que quieren recibir un aviso concreto. Se leen todas las columnas y lo que no existe
 // (o no se ha tocado) cuenta como activado, así no se pierde ningún aviso si falta la columna.

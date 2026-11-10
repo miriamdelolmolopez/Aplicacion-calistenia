@@ -8,6 +8,7 @@ import { claveDia, sumarDias } from "./fechas";
 import type { ClavePlantilla } from "./plantillasAutomatizacion";
 import { PLANTILLAS } from "./plantillasAutomatizacion";
 import { createAdminClient } from "./supabase/admin";
+import { bonosPorCaducar, diasAvisoBonos } from "./bonosPorCaducar";
 
 // Automatizaciones: avisos y regalos que se revisan una vez al día (los lanza el cron).
 // Cada una se puede apagar y sus textos se editan en Administración → Automatizaciones.
@@ -269,6 +270,39 @@ Regalo: ${regaloAdmin}`,
           }),
         );
       }
+    }
+  });
+  return enviados;
+}
+
+// Aviso para ti: a quién se le acaba pronto la tarifa o el bono (con los días de antelación que elijas en Administración).
+export async function avisarAdminBonosPorCaducar(): Promise<number> {
+  let enviados = 0;
+  await protegido("bonos por caducar (admin)", async () => {
+    const lista = await bonosPorCaducar(await diasAvisoBonos());
+    if (lista.length === 0) return;
+    const admins = await administradoras("admin_avisa_caducan");
+    if (admins.length === 0) return;
+
+    const hoy = hoyMadrid();
+    const ref = `admin-caducan:${hoy.anio}-${String(hoy.mes).padStart(2, "0")}-${String(hoy.dia).padStart(2, "0")}`;
+    // Una sola vez al día: si ya se avisó hoy, no se repite (ni la campana ni el correo).
+    const { data: previa } = await createAdminClient().from("notificaciones").select("id").eq("tipo", "admin_caducan").eq("ref", ref).limit(1);
+    if ((previa ?? []).length > 0) return;
+
+    const titulo = lista.length === 1 ? "A una persona se le acaba pronto la tarifa" : `A ${lista.length} personas se les acaba pronto la tarifa`;
+    const resumen = lista
+      .slice(0, 4)
+      .map((l) => `${l.nombre} (${l.cuando})`)
+      .join(", ") + (lista.length > 4 ? `… y ${lista.length - 4} más` : "");
+    await notificarApp(admins.map((a) => a.id), { tipo: "admin_caducan", titulo, cuerpo: resumen.slice(0, 140), enlace: "/admin", ref });
+
+    const lineas = lista.map((l) => `• ${l.nombre} · ${l.tarifa} · caduca ${l.cuando}`).join("\n");
+    for (const ad of admins) {
+      const ok = await enviarCorreo(
+        correoAutomatico({ para: ad.email, idioma: "es", asunto: titulo, mensaje: `Estas tarifas o bonos caducan pronto:\n\n${lineas}`, valores: {}, ruta: "/admin" }),
+      );
+      if (ok) enviados++;
     }
   });
   return enviados;

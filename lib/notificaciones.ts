@@ -30,6 +30,7 @@ export type TipoNotificacion =
   | "admin_minimo"
   | "admin_regalos"
   | "admin_borrado"
+  | "admin_caducan"
   | "admin_tarea";
 
 // Se avisan siempre, la persona no los puede desactivar.

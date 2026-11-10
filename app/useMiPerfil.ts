@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
+import { planOnlineComo } from "./rutina/planComo";
 import { fijarComo, leerComo } from "./rutina/useComo";
 
 export type MiPerfil = {
@@ -94,7 +95,7 @@ async function cargarPerfil(): Promise<Estado> {
       rol: "alumno",
       rolReal: "admin",
       servicios: [...new Set([...(sv ?? []).map((s) => s.servicio), ...vigentes.map((b) => b.servicio)])],
-      planOnline: vigentes.some((b) => b.servicio === "online" && b.estado !== "en_cola"),
+      planOnline: await planOnlineComo(como),
       datosCompletos: true,
       sexoFalta: false,
       legalAceptado: true,

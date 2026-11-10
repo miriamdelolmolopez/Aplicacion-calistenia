@@ -17,6 +17,7 @@ import { lunesDe, sumarDias } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
 import { useComo } from "../useComo";
+import { planOnlineComo } from "../planComo";
 import ResumenIconos from "../ResumenIconos";
 import BotonDocumento from "../BotonDocumento";
 import { CATEGORIAS } from "@/lib/ejercicios";
@@ -53,7 +54,7 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
   const userId = como ?? auth.user?.id ?? "";
-  const { data: plan } = como ? { data: true } : await supabase.rpc("mi_plan_online");
+  const { data: plan } = como ? { data: await planOnlineComo(como) } : await supabase.rpc("mi_plan_online");
   if (plan !== true) return { userId, planActivo: false, rutina: null, anteriores: [], hechos: [], dias: [] };
 
   const [{ data: rutinas }, { data: entrenos }, { data: dias }] = await Promise.all([

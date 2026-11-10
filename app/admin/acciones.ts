@@ -141,6 +141,16 @@ export async function guardarNombreAdmin(ruta: string, nombre: string): Promise<
 }
 
 // Con cuántos días de antelación se enseñan los cumpleaños en Administración (0 = solo el mismo día).
+// Con cuántos días de antelación se avisa de que a alguien se le acaba la tarifa o el bono.
+export async function guardarAvisoBonos(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const dias = Math.floor(Number(formData.get("dias")));
+  if (!(dias >= 1 && dias <= 60)) return;
+  await createAdminClient().from("ajustes").upsert({ clave: "bonos_aviso_dias", valor: String(dias), actualizado_en: new Date().toISOString() });
+  revalidatePath("/admin");
+  revalidatePath("/inicio");
+}
+
 export async function guardarAntelacionCumples(formData: FormData): Promise<void> {
   await requireAdmin();
   const dias = Math.floor(Number(formData.get("dias")));

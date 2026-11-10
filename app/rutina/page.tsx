@@ -16,6 +16,7 @@ import { claveDia } from "@/lib/fechas";
 import { estiloFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
+import { planOnlineComo } from "./planComo";
 import { leerComo } from "./useComo";
 import Cargando from "../Cargando";
 
@@ -28,7 +29,7 @@ type Resumen = {
 async function obtenerResumen(): Promise<Resumen> {
   const supabase = createClient();
   const como = leerComo(); // «ver como»: se lee lo de esa persona
-  const { data: plan } = como ? { data: true } : await supabase.rpc("mi_plan_online");
+  const { data: plan } = como ? { data: await planOnlineComo(como) } : await supabase.rpc("mi_plan_online");
   if (plan !== true) return { planActivo: false, rutina: null, enCurso: null };
   const { data: yo } = await supabase.auth.getUser();
   const userId = como ?? yo.user?.id ?? "";
