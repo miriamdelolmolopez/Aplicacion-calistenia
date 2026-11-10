@@ -33,7 +33,7 @@ type Ejercicio = {
   ejercicio_materiales: { materiales: { nombre: string; nombre_en: string | null } | null }[];
 };
 
-type Pestana = "pasos" | "musculos" | "trabajo" | "material";
+type Pestana = "pasos" | "musculos" | "trabajo" | "material" | "videos";
 
 export default function FichaEjercicio() {
   const { id } = useParams<{ id: string }>();
@@ -88,12 +88,17 @@ export default function FichaEjercicio() {
     { id: "musculos", texto: en ? "Muscles" : "Músculos" },
     { id: "trabajo", texto: en ? "Work" : "Trabajo" },
     { id: "material", texto: en ? "Equipment" : "Material" },
+    // Dentro de una rutina, arriba va siempre la ilustración y los vídeos se ven en su propia pestaña.
+    ...(incrustado && videosDe(e).length > 0 ? [{ id: "videos" as Pestana, texto: en ? "Videos" : "Vídeos" }] : []),
   ];
 
   return (
     <main className={styles.pagina} style={{ paddingTop: 0 }}>
-      <div className={estilos.hero}>
-        {videosDe(e).length > 0 ? (
+      <div className={estilos.hero} style={incrustado && e.foto_url ? { background: "#fff", borderRadius: 0 } : undefined}>
+        {incrustado && e.foto_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={sinEncuadre(e.foto_url)} alt={nombre} className={estilos.heroFoto} style={{ aspectRatio: "1 / 1", width: "min(100%, 58dvh)", margin: "0 auto", objectFit: "cover" }} />
+        ) : videosDe(e).length > 0 ? (
           <VideosEjercicio videos={videosDe(e)} titulo={nombre} proporcion="1 / 1" redondeo={0} idioma={idioma} />
         ) : e.foto_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -190,6 +195,8 @@ export default function FichaEjercicio() {
                 );
               })
             ))}
+
+          {pestana === "videos" && <VideosEjercicio videos={videosDe(e)} titulo={nombre} proporcion="1 / 1" redondeo={16} idioma={idioma} />}
 
           {pestana === "material" &&
             (materiales.length === 0 ? (
