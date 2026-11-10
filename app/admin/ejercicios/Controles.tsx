@@ -197,7 +197,7 @@ export function FormularioEjercicio({
       </fieldset>
 
       <div className={styles.campo}>
-        <label htmlFor={`descripcion-${p}`}>Explicación <AyudaI texto="Los pasos para hacer bien el ejercicio. Sale en la pestaña «Pasos» de la ficha." /></label>
+        <label htmlFor={`descripcion-${p}`}>Explicación <AyudaI texto="Los pasos para hacer bien el ejercicio. Cada línea es un paso. Para poner algo en negrita, escríbelo entre dos asteriscos dobles: **así**. Sale en la pestaña «Pasos» de la ficha." /></label>
         <textarea
           id={`descripcion-${p}`}
           name="descripcion"

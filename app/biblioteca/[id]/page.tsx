@@ -69,7 +69,10 @@ export default function FichaEjercicio() {
 
   const nombre = (en && e.nombre_en) || e.nombre;
   const texto = (en && e.descripcion_en) || e.descripcion || "";
-  const pasos = texto.split(/\n+/).map((l) => l.replace(/^\s*(?:[-•*]|\d+[.)])\s*/, "").trim()).filter(Boolean);
+  const pasos = texto.split(/\n+/).map((l) => l.replace(/^\s*(?:[-•]|\*(?!\*)|\d+[.)])\s*/, "").trim()).filter(Boolean);
+  // Negritas: lo que va entre dos asteriscos dobles (**así**) se ve en negrita.
+  const conNegritas = (linea: string) =>
+    linea.split(/\*\*(.+?)\*\*/g).map((trozo, i) => (i % 2 === 1 ? <strong key={i}>{trozo}</strong> : trozo));
   const materiales = e.ejercicio_materiales.map((m) => (en && m.materiales?.nombre_en) || m.materiales?.nombre).filter((x): x is string => !!x);
   const categoria = CATEGORIAS.find((c) => c.valor === e.categoria)?.[idioma];
   const dificultad = DIFICULTADES.find((d) => d.valor === e.dificultad);
@@ -143,7 +146,7 @@ export default function FichaEjercicio() {
             ) : (
               <ul className={estilos.guiones}>
                 {pasos.map((p, i) => (
-                  <li key={i}>{p}</li>
+                  <li key={i}>{conNegritas(p)}</li>
                 ))}
               </ul>
             ))}
