@@ -6,7 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "../../formularios.module.css";
 import { textos } from "../../textos";
 import { useIdioma } from "../../useIdioma";
-import VideoEjercicio from "../../VideoEjercicio";
+import VideosEjercicio from "../../VideosEjercicio";
+import { videosDe, type VideoEjercicio as VideoEj } from "@/lib/videosEjercicio";
 import { agregarSerie, descartarEntreno, finalizarEntreno, guardarSerie, quitarSerie } from "../acciones";
 import Cronometro from "./Cronometro";
 import estilos from "./guiado.module.css";
@@ -65,7 +66,7 @@ type Datos = {
   entreno: Entreno;
   series: Serie[];
   anteriores: Anterior[];
-  ejercicios: Record<string, { video_url: string | null; nombre_en: string | null }>;
+  ejercicios: Record<string, { video_url: string | null; videos: VideoEj[]; nombre_en: string | null }>;
 };
 
 const CUATRO_HORAS = 4 * 3600;
@@ -93,11 +94,11 @@ async function cargar(id: string): Promise<Datos | null> {
   if (ids.length > 0 && entreno.estado === "en_curso") {
     const { data } = await supabase.rpc("ultima_vez", { p_ejercicios: ids });
     anteriores = (data ?? []) as Anterior[];
-    const { data: ejs } = await supabase.from("ejercicios").select("id, video_url, nombre_en").in("id", ids);
+    const { data: ejs } = await supabase.from("ejercicios").select("id, video_url, videos, nombre_en").in("id", ids);
     ejercicios = Object.fromEntries(
-      ((ejs ?? []) as { id: string; video_url: string | null; nombre_en: string | null }[]).map((e) => [
+      ((ejs ?? []) as { id: string; video_url: string | null; videos: unknown; nombre_en: string | null }[]).map((e) => [
         e.id,
-        { video_url: e.video_url, nombre_en: e.nombre_en },
+        { video_url: e.video_url, videos: videosDe(e), nombre_en: e.nombre_en },
       ]),
     );
   }
@@ -610,7 +611,7 @@ export default function PantallaEntreno() {
             </button>
           </div>
 
-          <VideoEjercicio url={info?.video_url ?? null} titulo={nombreActual} />
+          <VideosEjercicio videos={info?.videos ?? []} titulo={nombreActual} idioma={idioma} />
 
           <h1 className={estilos.nombre}>{nombreActual}</h1>
           {actual.nota_objetivo && <p className={styles.ayuda}>{actual.nota_objetivo}</p>}

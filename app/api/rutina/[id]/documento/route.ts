@@ -1,5 +1,6 @@
 import { Document, ExternalHyperlink, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { analizarVideo } from "@/lib/video";
+import { videosDe } from "@/lib/videosEjercicio";
 import { createClient } from "@/lib/supabase/server";
 
 type Item = {
@@ -13,7 +14,7 @@ type Item = {
   distancia_m: number | null;
   descanso_seg: number;
   nota: string | null;
-  ejercicios: { nombre: string; video_url: string | null } | null;
+  ejercicios: { nombre: string; video_url: string | null; videos?: unknown } | null;
 };
 type Sesion = { orden: number; nombre: string; nota: string | null; archivada?: boolean; rutina_items: Item[] };
 type Rutina = { nombre: string; nota: string | null; semanas: number; entrenos_semana: number | null; user_id: string; rutina_sesiones: Sesion[] };
@@ -43,7 +44,7 @@ export async function GET(_peticion: Request, { params }: { params: Promise<{ id
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "nombre, nota, semanas, entrenos_semana, user_id, rutina_sesiones(orden, nombre, nota, archivada, rutina_items(orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, ejercicios(nombre, video_url)))",
+      "nombre, nota, semanas, entrenos_semana, user_id, rutina_sesiones(orden, nombre, nota, archivada, rutina_items(orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, ejercicios(nombre, video_url, videos)))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -85,14 +86,16 @@ export async function GET(_peticion: Request, { params }: { params: Promise<{ id
         }),
       );
       if (i.nota?.trim()) parrafos.push(new Paragraph({ indent: { left: 360 }, children: [new TextRun({ text: `Nota: ${i.nota}`, italics: true })] }));
-      const enlace = i.ejercicios?.video_url ? (analizarVideo(i.ejercicios.video_url)?.enlace ?? i.ejercicios.video_url) : "";
-      if (enlace)
+      const videosEj = i.ejercicios ? videosDe(i.ejercicios) : [];
+      for (const v of videosEj) {
+        const enlace = analizarVideo(v.url)?.enlace ?? v.url;
         parrafos.push(
           new Paragraph({
             indent: { left: 360 },
-            children: [new TextRun("Vídeo: "), new ExternalHyperlink({ link: enlace, children: [new TextRun({ text: enlace, style: "Hyperlink", color: "0563C1", underline: {} })] })],
+            children: [new TextRun(`${v.nombre}: `), new ExternalHyperlink({ link: enlace, children: [new TextRun({ text: enlace, style: "Hyperlink", color: "0563C1", underline: {} })] })],
           }),
         );
+      }
     });
   });
 

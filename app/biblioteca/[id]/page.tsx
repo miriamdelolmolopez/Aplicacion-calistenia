@@ -9,7 +9,8 @@ import Cargando from "../../Cargando";
 import styles from "../../formularios.module.css";
 import MapaCorporal from "../../MapaCorporal";
 import { useIdioma } from "../../useIdioma";
-import VideoEjercicio from "../../VideoEjercicio";
+import VideosEjercicio from "../../VideosEjercicio";
+import { videosDe } from "@/lib/videosEjercicio";
 import estilos from "../biblioteca.module.css";
 import { CATEGORIAS, MUSCULOS, intensidadesDeEjercicio, nombreTipo } from "@/lib/ejercicios";
 import { DIFICULTADES, TRABAJOS, type Trabajo } from "@/lib/trabajoEjercicio";
@@ -24,6 +25,7 @@ type Ejercicio = {
   descripcion: string | null;
   descripcion_en: string | null;
   video_url: string | null;
+  videos?: unknown;
   foto_url: string | null;
   dificultad: string | null;
   trabajo: Trabajo | null;
@@ -46,7 +48,7 @@ export default function FichaEjercicio() {
     const supabase = createClient();
     supabase
       .from("ejercicios")
-      .select("id, nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, foto_url, dificultad, trabajo, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))")
+      .select("id, nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, videos, foto_url, dificultad, trabajo, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))")
       .eq("id", id)
       .maybeSingle()
       .then(({ data }) => setE((data as unknown as Ejercicio | null) ?? null));
@@ -89,8 +91,8 @@ export default function FichaEjercicio() {
   return (
     <main className={styles.pagina} style={{ paddingTop: 0 }}>
       <div className={estilos.hero}>
-        {e.video_url ? (
-          <VideoEjercicio url={e.video_url} titulo={nombre} proporcion="1 / 1" redondeo={0} />
+        {videosDe(e).length > 0 ? (
+          <VideosEjercicio videos={videosDe(e)} titulo={nombre} proporcion="1 / 1" redondeo={0} idioma={idioma} />
         ) : e.foto_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={sinEncuadre(e.foto_url)} alt={nombre} className={estilos.heroFoto} style={{ objectPosition: `${encuadreDeFoto(e.foto_url).x}% ${encuadreDeFoto(e.foto_url).y}%` }} />

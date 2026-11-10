@@ -6,6 +6,7 @@ import { CATEGORIAS, MUSCULOS, TIPOS } from "@/lib/ejercicios";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DIFICULTADES, TRABAJOS } from "@/lib/trabajoEjercicio";
 import { analizarVideo } from "@/lib/video";
+import { MAX_VIDEOS, videosDe, type VideoEjercicio } from "@/lib/videosEjercicio";
 import type { Estado } from "../acciones";
 
 type Campos = {
@@ -16,6 +17,7 @@ type Campos = {
   descripcion: string | null;
   descripcion_en: string | null;
   video_url: string | null;
+  videos: VideoEjercicio[];
   dificultad: string | null;
   trabajo: Record<string, number> | null;
 };
@@ -64,12 +66,28 @@ function leer(
     return { error: "Las explicaciones pueden tener como máximo 2000 letras." };
   }
 
-  let enlace: string | null = null;
-  if (video) {
-    const analizado = analizarVideo(video);
-    if (!analizado) return { error: "Pega un enlace de YouTube o de Google Drive." };
-    enlace = analizado.enlace;
+  // Vídeos: una lista con nombre y enlace. Si llega solo el enlace suelto (formulario antiguo), se usa como único vídeo.
+  let pedidos: { nombre?: unknown; url?: unknown }[] = [];
+  try {
+    const crudo = texto(formData, "videos");
+    pedidos = crudo ? JSON.parse(crudo) : video ? [{ nombre: "Vídeo", url: video }] : [];
+  } catch {
+    return { error: "Los vídeos no son válidos." };
   }
+  if (!Array.isArray(pedidos) || pedidos.length > MAX_VIDEOS) return { error: `Puedes poner hasta ${MAX_VIDEOS} vídeos.` };
+  const videos: VideoEjercicio[] = [];
+  for (const [i, p] of pedidos.entries()) {
+    const url = typeof p.url === "string" ? p.url.trim() : "";
+    const nombreVideo = (typeof p.nombre === "string" ? p.nombre.trim() : "").slice(0, 40);
+    if (!url) {
+      if (nombreVideo) return { error: `Al vídeo ${i + 1} («${nombreVideo}») le falta el enlace.` };
+      continue;
+    }
+    const analizado = analizarVideo(url);
+    if (!analizado) return { error: `El enlace del vídeo ${i + 1} no vale: pega un enlace de YouTube o de Google Drive.` };
+    videos.push({ nombre: nombreVideo || "Vídeo", url: analizado.enlace });
+  }
+  const enlace: string | null = videos[0]?.url ?? null;
 
   const musculos: { musculo: string; rol: string }[] = [];
   for (const m of MUSCULOS) {
@@ -96,6 +114,7 @@ function leer(
       descripcion: descripcion || null,
       descripcion_en: descripcionEn || null,
       video_url: enlace,
+      videos,
       dificultad: dificultad || null,
       trabajo: Object.keys(trabajo).length > 0 ? trabajo : null,
     },
@@ -244,8 +263,11 @@ export async function guardarVideoEjercicio(
   }
 
   const admin = createAdminClient();
-  const { data: antes } = await admin.from("ejercicios").select("video_url").eq("id", id).maybeSingle();
-  const { error } = await admin.from("ejercicios").update({ video_url: guardar }).eq("id", id);
+  const { data: antes } = await admin.from("ejercicios").select("video_url, videos").eq("id", id).maybeSingle();
+  const actuales = videosDe({ videos: antes?.videos, video_url: antes?.video_url });
+  const resto = actuales.slice(1);
+  const nuevos: VideoEjercicio[] = guardar ? [{ nombre: actuales[0]?.nombre ?? "Vídeo", url: guardar }, ...resto] : resto;
+  const { error } = await admin.from("ejercicios").update({ video_url: nuevos[0]?.url ?? null, videos: nuevos }).eq("id", id);
   if (error) return { ok: false, error: "No se ha podido guardar el vídeo." };
   if (antes?.video_url && antes.video_url !== guardar) await borrarVideoPropio(antes.video_url);
 
@@ -299,7 +321,7 @@ export async function duplicarEjercicio(id: string): Promise<Estado> {
 
   const { data: o } = await admin
     .from("ejercicios")
-    .select("nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)")
+    .select("nombre, nombre_en, categoria, tipo, descripcion, descripcion_en, video_url, videos, ejercicio_musculos(musculo, rol), ejercicio_materiales(material_id)")
     .eq("id", id)
     .maybeSingle();
   if (!o) return { error: "No se ha encontrado el ejercicio." };
@@ -311,7 +333,7 @@ export async function duplicarEjercicio(id: string): Promise<Estado> {
 
   const { data: nuevo, error } = await admin
     .from("ejercicios")
-    .insert({ nombre, nombre_en: o.nombre_en, categoria: o.categoria, tipo: o.tipo, descripcion: o.descripcion, descripcion_en: o.descripcion_en, video_url: o.video_url })
+    .insert({ nombre, nombre_en: o.nombre_en, categoria: o.categoria, tipo: o.tipo, descripcion: o.descripcion, descripcion_en: o.descripcion_en, video_url: o.video_url, videos: o.videos ?? [] })
     .select("id")
     .single();
   if (error || !nuevo) return { error: "No se ha podido duplicar el ejercicio." };

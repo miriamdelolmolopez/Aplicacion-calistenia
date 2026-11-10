@@ -2,6 +2,8 @@
 
 import { useActionState, useContext, useEffect, useState } from "react";
 import { CierrePanel } from "../comunes/PanelCompleto";
+import { videosDe, type VideoEjercicio } from "@/lib/videosEjercicio";
+import VideosEditor from "./VideosEditor";
 import MapaCorporal from "../../MapaCorporal";
 import MultiDesplegable from "../MultiDesplegable";
 import type { Estado } from "../acciones";
@@ -27,6 +29,7 @@ export type EjercicioForm = {
   descripcion: string | null;
   descripcion_en: string | null;
   video_url: string | null;
+  videos?: VideoEjercicio[];
   dificultad?: string | null;
   trabajo?: Trabajo | null;
   activo: boolean;
@@ -242,19 +245,7 @@ export function FormularioEjercicio({
         <span className={styles.ayuda}>Sale en la biblioteca de las alumnas como barras. Déjalo vacío si no quieres indicarlo.</span>
       </fieldset>
 
-      <div className={styles.campo}>
-        <label htmlFor={`video-${p}`}>Vídeo (enlace de YouTube o de Google Drive) <AyudaI texto="Pega el enlace del vídeo del ejercicio. También puedes subir un vídeo desde el móvil o el ordenador." /></label>
-        <input
-          id={`video-${p}`}
-          name="video_url"
-          inputMode="url"
-          placeholder="https://youtu.be/… o https://drive.google.com/file/d/…"
-          defaultValue={ejercicio?.video_url ?? ""}
-        />
-        <span className={styles.ayuda}>
-          En Drive, el archivo debe estar compartido con «cualquiera con el enlace».
-        </span>
-      </div>
+      <VideosEditor inicial={videosDe({ videos: ejercicio?.videos, video_url: ejercicio?.video_url })} />
 
       {ejercicio && (
         <label className={styles.casilla}>
