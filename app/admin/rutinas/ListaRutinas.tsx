@@ -12,6 +12,7 @@ import Nuevo from "../comunes/Nuevo";
 import PanelCompleto from "../comunes/PanelCompleto";
 import { crearCarpeta, duplicarRutinaLista, eliminarCarpeta, eliminarRutinaLista, moverRutina, renombrarCarpeta } from "./acciones";
 import { NuevaRutina, type OpcionAlumno, type OpcionRutina } from "./Nueva";
+import VistaRutina from "./VistaRutina";
 
 export type FilaRutina = { id: string; nombre: string; alumno: string; estado: string; resumen: string; carpetaId: string | null };
 export type FilaCarpeta = { id: string; nombre: string; padreId: string | null };
@@ -80,6 +81,7 @@ export default function ListaRutinas({
 }) {
   const router = useRouter();
   const [actual, setActual] = useState<string | null>(null);
+  const [viendo, setViendo] = useState<FilaRutina | null>(null); // rutina abierta para mirarla como la ve la alumna
   const [busqueda, setBusqueda] = useState("");
   const [estado, setEstado] = useState("todos");
   const [alumno, setAlumno] = useState("todos");
@@ -161,11 +163,18 @@ export default function ListaRutinas({
       }}
     >
       <div>
-        <strong>{r.nombre}</strong>
-        <div className={styles.ayuda}>
-          {r.alumno} · {r.resumen}
-          {buscando && modoDrive && r.carpetaId && ` · en ${nombreRuta(r.carpetaId)}`}
-        </div>
+        <button
+          type="button"
+          onClick={() => setViendo(r)}
+          aria-label={`Ver la rutina ${r.nombre} como la ve la alumna`}
+          style={{ all: "unset", cursor: "pointer", display: "block" }}
+        >
+          <strong>{r.nombre}</strong>
+          <div className={styles.ayuda}>
+            {r.alumno} · {r.resumen}
+            {buscando && modoDrive && r.carpetaId && ` · en ${nombreRuta(r.carpetaId)}`}
+          </div>
+        </button>
         <span className={`${styles.estadoChip} ${styles[ESTADOS[r.estado]?.clase ?? "estadoBorrador"]}`}>{ESTADOS[r.estado]?.texto ?? r.estado}</span>
         {hayCarpetas && carpetas.length > 0 && (
           <div style={{ marginTop: 8 }}>
@@ -306,6 +315,8 @@ export default function ListaRutinas({
           <FormularioCarpeta carpeta={abierta} padre={abierta.padreId} alTerminar={() => setRenombrando(null)} />
         </PanelCompleto>
       )}
+
+      {viendo && <VistaRutina id={viendo.id} nombre={viendo.nombre} alumno={viendo.alumno} cerrar={() => setViendo(null)} />}
     </div>
   );
 }
