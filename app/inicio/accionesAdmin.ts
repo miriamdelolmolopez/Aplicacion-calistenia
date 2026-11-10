@@ -2,7 +2,7 @@
 
 import { requireAdmin } from "@/lib/admin";
 import { cumpleanosProximos } from "@/lib/cumpleanos";
-import { diasAvisoBonos } from "@/lib/bonosPorCaducar";
+import { bonosPorCaducar, diasAvisoBonos } from "@/lib/bonosPorCaducar";
 import type { CumpleProximo } from "@/lib/cumpleanosTexto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -278,4 +278,29 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     perdidosMesAnterior,
     pendientes,
   };
+}
+
+// Los dos avisos de arriba del Inicio de la administradora: cumpleaños y tarifas a punto de caducar, con los días que haya elegido.
+export type AvisosInicio = {
+  cumples: CumpleProximo[];
+  antelacionCumples: number;
+  caducan: { userId: string; nombre: string; tarifa: string; cuando: string }[];
+  diasBonos: number;
+};
+
+export async function obtenerAvisosInicio(): Promise<AvisosInicio> {
+  await requireAdmin();
+  const { lista, antelacion } = await cumpleanosProximos();
+  const diasBonos = await diasAvisoBonos();
+  const caducan = (await bonosPorCaducar(diasBonos)).map((b) => ({ userId: b.userId, nombre: b.nombre, tarifa: b.tarifa, cuando: b.cuando }));
+  return { cumples: lista, antelacionCumples: antelacion, caducan, diasBonos };
+}
+
+export async function elegirDiasAvisoInicio(que: "cumples" | "bonos", dias: number): Promise<void> {
+  await requireAdmin();
+  const n = Math.floor(Number(dias));
+  const clave = que === "cumples" ? "cumple_aviso_dias" : "bonos_aviso_dias";
+  const min = que === "cumples" ? 0 : 1;
+  if (!(n >= min && n <= 60)) return;
+  await createAdminClient().from("ajustes").upsert({ clave, valor: String(n), actualizado_en: new Date().toISOString() });
 }

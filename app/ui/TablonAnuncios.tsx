@@ -12,6 +12,7 @@ export default function TablonAnuncios({ limite }: { limite?: number }) {
   const [idioma] = useIdioma();
   const [anuncios, setAnuncios] = useState<AnuncioFila[] | null>(null);
   const [aviso, setAviso] = useState<{ id: string; texto: string } | null>(null);
+  const [verQuien, setVerQuien] = useState<string | null>(null); // anuncio con la lista de nombres abierta
   const [pos, setPos] = useState(0); // qué anuncio se ve (se pasa de uno a otro con las flechas)
 
   useEffect(() => {
@@ -96,13 +97,20 @@ export default function TablonAnuncios({ limite }: { limite?: number }) {
                       : `${a.voy} ${a.voy === 1 ? "se apunta" : "se apuntan"}`}
                 </small>
                 {a.iniciales.length > 0 && (
-                  <div className={estilos.pegatinas} aria-label={idioma === "en" ? "People going" : "Quién se apunta"}>
+                  <button type="button" className={estilos.pegatinas} style={{ background: "none", border: 0, padding: 0, cursor: "pointer" }} aria-expanded={verQuien === a.id} aria-label={idioma === "en" ? "See who is going" : "Ver quién se apunta"} onClick={() => setVerQuien(verQuien === a.id ? null : a.id)}>
                     {a.iniciales.map((letra, i) => (
                       <span key={i} className={`${estilos.pegatina} ${estilos["color" + (i % 4)]}`}>
                         {letra}
                       </span>
                     ))}
-                  </div>
+                  </button>
+                )}
+                {verQuien === a.id && a.nombres.length > 0 && (
+                  <ul className={estilos.quienes}>
+                    {a.nombres.map((n, i) => (
+                      <li key={i}>{n}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             )}

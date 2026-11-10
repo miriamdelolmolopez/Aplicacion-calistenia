@@ -19,6 +19,7 @@ export type AnuncioFila = {
   miRespuesta: Respuesta | null;
   voy: number; // cuántas personas han dicho «me apunto»
   iniciales: string[]; // la inicial de cada una (para las pegatinas)
+  nombres: string[]; // el nombre de cada persona que se apunta (lo ve todo el mundo)
 };
 
 type FilaAnuncio = { id: string; titulo: string; texto: string; enlace: string | null; fijado: boolean; publicado_en: string; audiencia: string; caduca_en: string | null; admite_apuntados?: boolean; max_plazas?: number | null };
@@ -69,8 +70,8 @@ export async function obtenerAnuncios(limite = 50): Promise<AnuncioFila[]> {
     }
     const ids = [...new Set([...respuestas.values()].flat().filter((r) => r.respuesta === "voy").map((r) => r.user_id))];
     if (ids.length > 0) {
-      const { data: ps } = await admin.from("profiles").select("id, nombre").in("id", ids);
-      for (const p of (ps ?? []) as { id: string; nombre: string | null }[]) nombres.set(p.id, (p.nombre ?? "").trim());
+      const { data: ps } = await admin.from("profiles").select("id, nombre, apellidos").in("id", ids);
+      for (const p of (ps ?? []) as { id: string; nombre: string | null; apellidos: string | null }[]) nombres.set(p.id, [p.nombre, p.apellidos].filter(Boolean).join(" ").trim());
     }
   }
 
@@ -89,6 +90,7 @@ export async function obtenerAnuncios(limite = 50): Promise<AnuncioFila[]> {
       miRespuesta: rs.find((r) => r.user_id === quien)?.respuesta ?? null,
       voy: quienesVan.length,
       iniciales: quienesVan.map((r) => (nombres.get(r.user_id) || "?").charAt(0).toUpperCase()),
+      nombres: quienesVan.map((r) => nombres.get(r.user_id) || "?"),
     };
   });
 }
