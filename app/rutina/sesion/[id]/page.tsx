@@ -15,6 +15,7 @@ import { claveDia } from "@/lib/fechas";
 import { numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../../Cargando";
+import FichaIncrustada from "../../../ui/FichaIncrustada";
 import { useComo } from "../../useComo";
 import ResumenIconos from "../../ResumenIconos";
 import { CATEGORIAS, intensidadesAgregadas } from "@/lib/ejercicios";
@@ -30,6 +31,7 @@ type Item = {
   descanso_seg: number;
   grupo: number | null;
   ejercicios: {
+    id: string;
     nombre: string;
     nombre_en: string | null;
     foto_url: string | null;
@@ -46,7 +48,7 @@ async function cargar(id: string): Promise<Datos | null> {
   const { data } = await supabase
     .from("rutina_sesiones")
     .select(
-      "nombre, foto_url, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))))",
+      "nombre, foto_url, rutinas(nombre, publicada_en), rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, grupo, ejercicios(id, nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en))))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -58,7 +60,7 @@ async function cargar(id: string): Promise<Datos | null> {
   const semana = s.rutinas?.publicada_en ? numeroSemana(claveDia(s.rutinas.publicada_en), claveDia(new Date().toISOString())) : 1;
   const { data: cambiosDatos } = await supabase
     .from("rutina_cambios_semana")
-    .select("item_id, quitado, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
+    .select("item_id, quitado, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(id, nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
     .eq("semana", semana)
     .in("item_id", s.rutina_items.map((i) => i.id));
   const cambios = new Map(((cambiosDatos ?? []) as unknown as Cambio[]).map((c) => [c.item_id, c]));
@@ -84,7 +86,7 @@ async function cargar(id: string): Promise<Datos | null> {
   type Extra = { id: string; series: number; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicios: Item["ejercicios"] };
   const { data: extrasDatos } = await supabase
     .from("rutina_extras_semana")
-    .select("id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
+    .select("id, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(id, nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
     .eq("sesion_id", id)
     .eq("semana", semana)
     .order("orden")
@@ -113,6 +115,7 @@ export default function Sesion() {
   const [iniciando, setIniciando] = useState(false);
   const como = useComo();
   const [error, setError] = useState<string | null>(null);
+  const [ficha, setFicha] = useState<{ id: string; nombre: string } | null>(null); // ejercicio abierto
 
   useEffect(() => {
     cargar(id).then(setDatos);
@@ -175,16 +178,23 @@ export default function Sesion() {
           return (
             <li key={it.id} className={estilos.fila}>
               <span className={estilos.numero}>{pos + 1}</span>
-              <span className={estilos.miniatura} style={e?.foto_url ? fotoEncajada(e.foto_url) : undefined} />
-              <span className={estilos.texto}>
-                <strong>
-                  {etiqueta && <span className={styles.etiquetaSuper}>{etiqueta}</span>}
-                  {nombre}
-                </strong>
-                <span>
-                  {it.series} × {textoObjetivo(it, t.rep) || "—"} · {idioma === "en" ? "rest" : "descanso"} {it.descanso_seg} s
+              <button
+                type="button"
+                onClick={() => e?.id && setFicha({ id: e.id, nombre })}
+                aria-label={idioma === "en" ? `See the exercise ${nombre}` : `Ver el ejercicio ${nombre}`}
+                style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}
+              >
+                <span className={estilos.miniatura} style={e?.foto_url ? fotoEncajada(e.foto_url) : undefined} />
+                <span className={estilos.texto}>
+                  <strong>
+                    {etiqueta && <span className={styles.etiquetaSuper}>{etiqueta}</span>}
+                    {nombre}
+                  </strong>
+                  <span>
+                    {it.series} × {textoObjetivo(it, t.rep) || "—"} · {idioma === "en" ? "rest" : "descanso"} {it.descanso_seg} s
+                  </span>
                 </span>
-              </span>
+              </button>
             </li>
           );
         })}
@@ -218,6 +228,7 @@ export default function Sesion() {
           {datos.enCurso ? t.continuarRutina : t.iniciarRutina}
         </button>
       </div>
+      {ficha && <FichaIncrustada id={ficha.id} nombre={ficha.nombre} textoVolver={idioma === "en" ? "← Back to the routine" : "← Volver a la rutina"} cerrar={() => setFicha(null)} />}
     </main>
   );
 }

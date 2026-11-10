@@ -202,9 +202,9 @@ export default function ListaRutinas({
           </div>
         )}
       </div>
-      <BotonDocumento id={r.id} />
       <AccionesFila
         nombre={r.nombre}
+        extra={<BotonDocumento id={r.id} className={comunes.icono} />}
         ocupado={pendiente}
         alEditar={() => router.push(`/admin/rutinas/${r.id}`)}
         alDuplicar={() => ejecutar(() => duplicarRutinaLista(r.id))}

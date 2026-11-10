@@ -7,6 +7,7 @@ import MapaCorporal from "../../MapaCorporal";
 import styles from "../admin.module.css";
 import PanelCompleto from "../comunes/PanelCompleto";
 import BotonDocumento from "../../rutina/BotonDocumento";
+import FichaIncrustada from "../../ui/FichaIncrustada";
 
 type Item = {
   id: string;
@@ -20,6 +21,7 @@ type Item = {
   descanso_seg: number;
   nota: string | null;
   ejercicios: {
+    id: string;
     nombre: string;
     ejercicio_musculos: { musculo: string; rol: string }[];
     ejercicio_materiales: { materiales: { nombre: string } | null }[];
@@ -37,22 +39,24 @@ const rango = (min: number | null, max: number | null, unidad: string) => {
 // Resumen de una rutina tal y como la vería la alumna (solo para mirar).
 export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string; nombre: string; alumno: string; cerrar: () => void }) {
   const [rutina, setRutina] = useState<Rutina | null | undefined>(undefined);
+  const [ficha, setFicha] = useState<{ id: string; nombre: string } | null>(null); // ejercicio abierto
 
   useEffect(() => {
     createClient()
       .from("rutinas")
       .select(
-        "nombre, semanas, entrenos_semana, rutina_sesiones(id, nombre, orden, archivada, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, descanso_seg, nota, ejercicios(nombre, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre)))))",
+        "nombre, semanas, entrenos_semana, rutina_sesiones(id, nombre, orden, archivada, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, descanso_seg, nota, ejercicios(id, nombre, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre)))))",
       )
       .eq("id", id)
       .maybeSingle()
       .then(({ data }) => setRutina((data as unknown as Rutina | null) ?? null));
   }, [id]);
 
-  const sesiones = [...(rutina?.rutina_sesiones ?? [])]
-    .filter((s) => !s.archivada)
+  const todasSesiones = [...(rutina?.rutina_sesiones ?? [])]
     .sort((a, b) => a.orden - b.orden)
     .map((s) => ({ ...s, rutina_items: [...s.rutina_items].sort((a, b) => a.orden - b.orden) }));
+  // Los días archivados se enseñan aquí (marcados) para que la administradora los revise; la alumna no los ve y no cuentan en los totales.
+  const sesiones = todasSesiones.filter((s) => !s.archivada);
   const items = sesiones.flatMap((s) => s.rutina_items);
   const materiales = [...new Set(items.flatMap((i) => (i.ejercicios?.ejercicio_materiales ?? []).map((m) => m.materiales?.nombre ?? "").filter(Boolean)))].sort((a, b) => a.localeCompare(b, "es"));
   const intensidades = intensidadesAgregadas(items.map((i) => ({ series: i.series, musculos: i.ejercicios?.ejercicio_musculos ?? [] })));
@@ -85,16 +89,28 @@ export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string
               <MapaCorporal intensidades={intensidades} etiquetas={{ frente: "Frente", espalda: "Espalda" }} />
             </section>
 
-            {sesiones.map((s) => (
-              <section key={s.id} className={styles.tarjeta}>
+            {todasSesiones.map((s) => (
+              <section key={s.id} className={styles.tarjeta} style={s.archivada ? { opacity: 0.85, borderStyle: "dashed" } : undefined}>
                 <h2>{s.nombre}</h2>
+                {s.archivada && <p className={styles.ayuda}>Día archivado: {alumno} no lo ve todavía.</p>}
                 {s.rutina_items.length === 0 && <p className={styles.ayuda}>Sin ejercicios.</p>}
                 <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
                   {s.rutina_items.map((i) => {
                     const medida = [rango(i.reps_min, i.reps_max, " reps"), rango(i.segundos_min, i.segundos_max, " s"), i.peso_kg ? `${i.peso_kg} kg` : ""].filter(Boolean).join(" · ");
                     return (
                       <li key={i.id}>
-                        <strong>{i.ejercicios?.nombre ?? "Ejercicio"}</strong>
+                        {i.ejercicios ? (
+                          <button
+                            type="button"
+                            onClick={() => setFicha({ id: i.ejercicios!.id, nombre: i.ejercicios!.nombre })}
+                            aria-label={`Ver el ejercicio ${i.ejercicios.nombre}`}
+                            style={{ all: "unset", cursor: "pointer", fontWeight: 700, textDecoration: "underline", textDecorationColor: "rgba(0,0,0,0.25)", textUnderlineOffset: 3 }}
+                          >
+                            {i.ejercicios.nombre}
+                          </button>
+                        ) : (
+                          <strong>Ejercicio</strong>
+                        )}
                         <div className={styles.ayuda}>
                           {i.series} {i.series === 1 ? "serie" : "series"}
                           {medida && ` × ${medida}`} · descanso {i.descanso_seg} s
@@ -109,6 +125,7 @@ export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string
           </>
         )}
       </div>
+      {ficha && <FichaIncrustada id={ficha.id} nombre={ficha.nombre} cerrar={() => setFicha(null)} />}
     </PanelCompleto>
   );
 }

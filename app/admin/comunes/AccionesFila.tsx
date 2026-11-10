@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import estilos from "./comunes.module.css";
 import { IconoCopiar, IconoEditar, IconoPapelera } from "./iconos";
 
@@ -11,12 +11,14 @@ export default function AccionesFila({
   alEditar,
   alDuplicar,
   alEliminar,
+  extra,
   ocupado = false,
 }: {
   nombre: string;
   alEditar?: () => void;
   alDuplicar?: () => void;
   alEliminar?: () => void;
+  extra?: ReactNode; // otro botón redondo entre copiar y la papelera
   ocupado?: boolean;
 }) {
   const [confirmando, setConfirmando] = useState<"duplicar" | "eliminar" | null>(null);
@@ -56,6 +58,7 @@ export default function AccionesFila({
           <IconoCopiar />
         </button>
       )}
+      {extra}
       {alEliminar && (
         <button type="button" className={`${estilos.icono} ${estilos.peligro}`} onClick={() => setConfirmando("eliminar")} aria-label={`Eliminar ${nombre}`} title="Eliminar">
           <IconoPapelera />

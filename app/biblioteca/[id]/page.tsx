@@ -43,6 +43,8 @@ export default function FichaEjercicio() {
   const [e, setE] = useState<Ejercicio | null | undefined>(undefined);
   const [pestana, setPestana] = useState<Pestana>("pasos");
   const [tocado, setTocado] = useState<string | null>(null);
+  // Dentro del resumen de una rutina se abre incrustada: sin la flecha de volver.
+  const [incrustado] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("incrustado"));
 
   useEffect(() => {
     const supabase = createClient();
@@ -99,7 +101,7 @@ export default function FichaEjercicio() {
         ) : (
           <div className={estilos.heroVacio} />
         )}
-        <Link
+        {!incrustado && <Link
           href="/biblioteca"
           className={estilos.atras}
           aria-label={en ? "Back" : "Volver"}
@@ -112,7 +114,7 @@ export default function FichaEjercicio() {
           }}
         >
           ‹
-        </Link>
+        </Link>}
       </div>
 
       <div className={estilos.cuerpo}>
