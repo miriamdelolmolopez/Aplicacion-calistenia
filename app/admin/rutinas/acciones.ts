@@ -259,7 +259,7 @@ export async function quitarItem(rutinaId: string, itemId: string): Promise<Resu
 
   const { error } = await createAdminClient().rpc("quitar_item", { p_item: itemId });
   if (error) return { ok: false, error: mensajeDe(error) };
-  refrescar(rutinaId);
+  revalidatePath(`/admin/rutinas/${rutinaId}`); // solo esta rutina: las listas no cambian al quitar un ejercicio
   return { ok: true };
 }
 

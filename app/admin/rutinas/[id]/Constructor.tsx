@@ -462,6 +462,10 @@ function TarjetaItem({
   const enSuper = item.grupo !== null;
   const [abierto, setAbierto] = useState(false);
   const [musculos, setMusculos] = useState(false);
+  // Al quitar un ejercicio desaparece al momento; el servidor lo borra y recarga la rutina después (si falla, vuelve a salir).
+  const [quitado, setQuitado] = useState(false);
+
+  if (quitado) return null;
 
   return (
     <div className={`${styles.itemCaja} ${enSuper ? styles.itemSuper : ""}`}>
@@ -501,7 +505,13 @@ function TarjetaItem({
             peligro
             disabled={ocupado}
             onClick={() => {
-              if (window.confirm("¿Quitar este ejercicio de la rutina?")) ejecutar(() => quitarItem(rutinaId, item.id));
+              if (!window.confirm("¿Quitar este ejercicio de la rutina?")) return;
+              setQuitado(true);
+              ejecutar(async () => {
+                const r = await quitarItem(rutinaId, item.id);
+                if (!r.ok) setQuitado(false);
+                return r;
+              });
             }}
           >
             🗑
