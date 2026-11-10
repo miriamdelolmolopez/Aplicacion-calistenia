@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import MapaCorporal from "../../MapaCorporal";
 import styles from "../admin.module.css";
 import PanelCompleto from "../comunes/PanelCompleto";
+import BotonDocumento from "../../rutina/BotonDocumento";
 
 type Item = {
   id: string;
@@ -58,9 +59,12 @@ export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string
   return (
     <PanelCompleto titulo={nombre} cerrar={cerrar}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <p className={styles.ayuda} style={{ margin: 0 }}>
-          Así la ve {alumno}. Solo para mirar: para cambiar algo, usa el lápiz.
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <p className={styles.ayuda} style={{ margin: 0, flex: 1 }}>
+            Así la ve {alumno}. Solo para mirar: para cambiar algo, usa el lápiz.
+          </p>
+          <BotonDocumento id={id} />
+        </div>
         {rutina === undefined && <p className={styles.ayuda}>Cargando…</p>}
         {rutina === null && <p className={styles.error}>No se ha podido abrir la rutina.</p>}
         {rutina && (

@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
 import { useComo } from "../useComo";
 import ResumenIconos from "../ResumenIconos";
+import BotonDocumento from "../BotonDocumento";
 import { CATEGORIAS } from "@/lib/ejercicios";
 
 type Item = {
@@ -41,7 +42,7 @@ type Sesion = { id: string; nombre: string; orden: number; foto_url: string | nu
 type Datos = {
   userId: string;
   planActivo: boolean;
-  rutina: { nombre: string; semanas: number; entrenosSemana: number | null; publicada: string; sesiones: Sesion[] } | null;
+  rutina: { id: string; nombre: string; semanas: number; entrenosSemana: number | null; publicada: string; sesiones: Sesion[] } | null;
   anteriores: { id: string; nombre: string; publicada_en: string | null; sesiones: { id: string; nombre: string }[] }[];
   hechos: { sesionId: string | null; dia: string }[];
   dias: number[]; // 1 = lunes … 7 = domingo
@@ -90,6 +91,7 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
     planActivo: true,
     rutina: actual
       ? {
+          id: actual.id,
           nombre: actual.nombre,
           semanas: actual.semanas,
           entrenosSemana: actual.entrenos_semana,
@@ -181,7 +183,10 @@ export default function VerRutina() {
   return (
     <main className={styles.pagina}>
       <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
-      <h1 className={estiloRutina.titulo}>{rutina?.nombre ?? t.opcionVerRutina}</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <h1 className={estiloRutina.titulo} style={{ flex: 1 }}>{rutina?.nombre ?? t.opcionVerRutina}</h1>
+        {rutina && <BotonDocumento id={rutina.id} texto={idioma === "en" ? "Download as document" : "Descargar como documento"} />}
+      </div>
 
       {!datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}
       {datos.planActivo && !rutina && <p className={styles.aviso}>{t.preparandoRutina}</p>}

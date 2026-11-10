@@ -13,6 +13,7 @@ import PanelCompleto from "../comunes/PanelCompleto";
 import { crearCarpeta, duplicarRutinaLista, eliminarCarpeta, eliminarRutinaLista, moverRutina, renombrarCarpeta } from "./acciones";
 import { NuevaRutina, type OpcionAlumno, type OpcionRutina } from "./Nueva";
 import VistaRutina from "./VistaRutina";
+import BotonDocumento from "../../rutina/BotonDocumento";
 
 export type FilaRutina = { id: string; nombre: string; alumno: string; estado: string; resumen: string; carpetaId: string | null };
 export type FilaCarpeta = { id: string; nombre: string; padreId: string | null };
@@ -201,6 +202,7 @@ export default function ListaRutinas({
           </div>
         )}
       </div>
+      <BotonDocumento id={r.id} />
       <AccionesFila
         nombre={r.nombre}
         ocupado={pendiente}
