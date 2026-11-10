@@ -1,6 +1,9 @@
 import { Document, ExternalHyperlink, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { analizarVideo } from "@/lib/video";
 import { videosDe } from "@/lib/videosEjercicio";
+import { bloquesDeRutina } from "@/lib/rutinaDocumento";
+import { rutinaEnImagen } from "@/lib/rutinaImagen";
+import { rutinaEnPdf } from "@/lib/rutinaPdf";
 import { createClient } from "@/lib/supabase/server";
 
 type Item = {
@@ -35,7 +38,7 @@ const nombreArchivo = (texto: string) =>
 
 // Descarga la rutina como documento de Word (se abre también en Google Docs). La puede bajar la alumna dueña de la rutina o la administradora:
 // las reglas de acceso de la base de datos deciden quién puede leerla.
-export async function GET(_peticion: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(peticion: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: sesion } = await supabase.auth.getUser();
@@ -54,9 +57,26 @@ export async function GET(_peticion: Request, { params }: { params: Promise<{ id
   const { data: perfil } = await supabase.from("profiles").select("nombre, apellidos").eq("id", rutina.user_id).maybeSingle();
   const alumna = [perfil?.nombre, perfil?.apellidos].filter(Boolean).join(" ");
 
+  const sesiones = [...rutina.rutina_sesiones].filter((s) => !s.archivada).sort((a, b) => a.orden - b.orden);
+  const url = new URL(peticion.url);
+  const formato = url.searchParams.get("formato") ?? "docx";
+  const ver = url.searchParams.has("ver");
+  const base = nombreArchivo(rutina.nombre);
+
+  // PDF e imagen (el documento de Word se monta más abajo).
+  if (formato === "pdf" || formato === "png") {
+    const bloques = bloquesDeRutina(rutina, alumna, sesiones);
+    if (formato === "png") {
+      const imagen = rutinaEnImagen(bloques);
+      const cuerpo = await imagen.arrayBuffer();
+      return new Response(cuerpo, { headers: { "Content-Type": "image/png", "Content-Disposition": `${ver ? "inline" : "attachment"}; filename="${base}.png"`, "Cache-Control": "private, no-store" } });
+    }
+    const pdf = await rutinaEnPdf(rutina.nombre, bloques);
+    return new Response(new Uint8Array(pdf), { headers: { "Content-Type": "application/pdf", "Content-Disposition": `${ver ? "inline" : "attachment"}; filename="${base}.pdf"`, "Cache-Control": "private, no-store" } });
+  }
+
   const parrafos: Paragraph[] = [];
   parrafos.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: rutina.nombre, bold: true })] }));
-  const sesiones = [...rutina.rutina_sesiones].filter((s) => !s.archivada).sort((a, b) => a.orden - b.orden);
   const lineas = [alumna && `Alumno/a: ${alumna}`, `${rutina.semanas} ${rutina.semanas === 1 ? "semana" : "semanas"} · ${rutina.entrenos_semana ?? sesiones.length} entrenos por semana`].filter(Boolean) as string[];
   for (const l of lineas) parrafos.push(new Paragraph({ children: [new TextRun({ text: l, color: "555555" })] }));
   if (rutina.nota?.trim()) {

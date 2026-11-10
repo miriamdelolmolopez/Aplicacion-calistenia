@@ -187,7 +187,7 @@ export default function VerRutina() {
       <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <h1 className={estiloRutina.titulo} style={{ flex: 1 }}>{rutina?.nombre ?? t.opcionVerRutina}</h1>
-        {rutina && <BotonDocumento id={rutina.id} texto={idioma === "en" ? "Download as document" : "Descargar como documento"} />}
+        {rutina && <BotonDocumento id={rutina.id} />}
       </div>
 
       {!datos.planActivo && <p className={styles.aviso}>{t.planNoActivo}</p>}
