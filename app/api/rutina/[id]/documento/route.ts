@@ -15,7 +15,7 @@ type Item = {
   nota: string | null;
   ejercicios: { nombre: string; video_url: string | null } | null;
 };
-type Sesion = { orden: number; nombre: string; nota: string | null; rutina_items: Item[] };
+type Sesion = { orden: number; nombre: string; nota: string | null; archivada?: boolean; rutina_items: Item[] };
 type Rutina = { nombre: string; nota: string | null; semanas: number; entrenos_semana: number | null; user_id: string; rutina_sesiones: Sesion[] };
 
 const rango = (min: number | null, max: number | null, unidad: string) => {
@@ -43,7 +43,7 @@ export async function GET(_peticion: Request, { params }: { params: Promise<{ id
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "nombre, nota, semanas, entrenos_semana, user_id, rutina_sesiones(orden, nombre, nota, rutina_items(orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, ejercicios(nombre, video_url)))",
+      "nombre, nota, semanas, entrenos_semana, user_id, rutina_sesiones(orden, nombre, nota, archivada, rutina_items(orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, ejercicios(nombre, video_url)))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -55,7 +55,7 @@ export async function GET(_peticion: Request, { params }: { params: Promise<{ id
 
   const parrafos: Paragraph[] = [];
   parrafos.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: rutina.nombre, bold: true })] }));
-  const sesiones = [...rutina.rutina_sesiones].sort((a, b) => a.orden - b.orden);
+  const sesiones = [...rutina.rutina_sesiones].filter((s) => !s.archivada).sort((a, b) => a.orden - b.orden);
   const lineas = [alumna && `Alumno/a: ${alumna}`, `${rutina.semanas} ${rutina.semanas === 1 ? "semana" : "semanas"} · ${rutina.entrenos_semana ?? sesiones.length} entrenos por semana`].filter(Boolean) as string[];
   for (const l of lineas) parrafos.push(new Paragraph({ children: [new TextRun({ text: l, color: "555555" })] }));
   if (rutina.nota?.trim()) {

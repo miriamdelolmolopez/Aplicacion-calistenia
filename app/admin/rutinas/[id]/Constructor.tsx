@@ -55,6 +55,7 @@ import {
   quitarExtraSemana,
   quitarItem,
   quitarSesion,
+  archivarSesion,
   renombrarSesion,
   reordenarItems,
   reordenarSesiones,
@@ -129,6 +130,7 @@ export type SesionRutina = {
   nota: string | null;
   foto_url: string | null;
   orden: number;
+  archivada: boolean;
   items: ItemRutina[];
 };
 
@@ -805,7 +807,12 @@ function TarjetaSesion({
       : `${sesion.items.length} ${sesion.items.length === 1 ? "ejercicio" : "ejercicios"} · ~${minutosEstimados(sesion.items)} min`;
 
   return (
-    <section className={styles.sesionCaja}>
+    <section className={styles.sesionCaja} style={sesion.archivada ? { opacity: 0.65 } : undefined}>
+      {sesion.archivada && (
+        <p className={styles.ayuda} style={{ margin: "0 0 6px" }}>
+          <strong>📦 Archivado:</strong> la persona no ve este día ni sus ejercicios. Pulsa 📤 para desarchivarlo.
+        </p>
+      )}
       <div className={styles.itemCabecera}>
         {asa}
         <FotoEditable destino="sesion" id={sesion.id} url={sesion.foto_url} etiqueta="la sesión" tamano={56} proporcion={2.4} />
@@ -829,6 +836,13 @@ function TarjetaSesion({
           </IconoBoton>
           <IconoBoton titulo="Ver los músculos de la sesión" onClick={() => setMusculos(true)}>
             🧍
+          </IconoBoton>
+          <IconoBoton
+            titulo={sesion.archivada ? "Desarchivar el día: la persona volverá a verlo" : "Archivar el día: la persona dejará de verlo"}
+            disabled={pendiente}
+            onClick={() => ejecutar(() => archivarSesion(rutinaId, sesion.id, !sesion.archivada))}
+          >
+            {sesion.archivada ? "📤" : "📦"}
           </IconoBoton>
           <IconoBoton
             titulo="Quitar la sesión"
@@ -1156,7 +1170,7 @@ export function Constructor({
           👁 Ver como alumno/a
         </button>
       </div>
-      {previa && <PreviaAlumno nombre={rutina.nombre} nota={rutina.nota} sesiones={sesiones} semanas={rutina.semanas} entrenosSemana={rutina.entrenosSemana} catalogo={catalogo} cerrar={() => setPrevia(false)} />}
+      {previa && <PreviaAlumno nombre={rutina.nombre} nota={rutina.nota} sesiones={sesiones.filter((s) => !s.archivada)} semanas={rutina.semanas} entrenosSemana={rutina.entrenosSemana} catalogo={catalogo} cerrar={() => setPrevia(false)} />}
 
       <CabeceraRutina rutina={rutina} alumnos={alumnos} />
 

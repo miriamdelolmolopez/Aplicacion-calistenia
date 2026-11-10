@@ -25,7 +25,7 @@ type Item = {
     ejercicio_materiales: { materiales: { nombre: string } | null }[];
   } | null;
 };
-type Sesion = { id: string; nombre: string; orden: number; rutina_items: Item[] };
+type Sesion = { id: string; nombre: string; orden: number; archivada?: boolean; rutina_items: Item[] };
 type Rutina = { nombre: string; semanas: number; entrenos_semana: number | null; rutina_sesiones: Sesion[] };
 
 const rango = (min: number | null, max: number | null, unidad: string) => {
@@ -42,7 +42,7 @@ export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string
     createClient()
       .from("rutinas")
       .select(
-        "nombre, semanas, entrenos_semana, rutina_sesiones(id, nombre, orden, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, descanso_seg, nota, ejercicios(nombre, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre)))))",
+        "nombre, semanas, entrenos_semana, rutina_sesiones(id, nombre, orden, archivada, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, descanso_seg, nota, ejercicios(nombre, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre)))))",
       )
       .eq("id", id)
       .maybeSingle()
@@ -50,6 +50,7 @@ export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string
   }, [id]);
 
   const sesiones = [...(rutina?.rutina_sesiones ?? [])]
+    .filter((s) => !s.archivada)
     .sort((a, b) => a.orden - b.orden)
     .map((s) => ({ ...s, rutina_items: [...s.rutina_items].sort((a, b) => a.orden - b.orden) }));
   const items = sesiones.flatMap((s) => s.rutina_items);

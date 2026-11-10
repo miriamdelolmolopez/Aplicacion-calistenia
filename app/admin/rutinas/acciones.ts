@@ -228,6 +228,20 @@ export async function quitarSesion(rutinaId: string, sesionId: string): Promise<
   return { ok: true };
 }
 
+// Archivar un día: la persona deja de verlo (con sus ejercicios) hasta que se desarchive.
+export async function archivarSesion(rutinaId: string, sesionId: string, archivada: boolean): Promise<Resultado> {
+  await requireAdmin("online");
+  if (!UUID.test(rutinaId) || !UUID.test(sesionId)) return { ok: false, error: "Datos no válidos." };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("rutina_sesiones").update({ archivada }).eq("id", sesionId).eq("rutina_id", rutinaId);
+  if (error) return { ok: false, error: "No se ha podido cambiar el día." };
+  await admin.from("rutinas").update({ actualizado_en: new Date().toISOString() }).eq("id", rutinaId);
+  refrescar(rutinaId);
+  revalidatePath("/rutina");
+  return { ok: true };
+}
+
 export async function reordenarSesiones(rutinaId: string, ids: string[]): Promise<Resultado> {
   await requireAdmin("online");
   if (!UUID.test(rutinaId) || ids.some((i) => !UUID.test(i))) return { ok: false, error: "Datos no válidos." };

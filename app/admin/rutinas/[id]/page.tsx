@@ -55,7 +55,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "id, nombre, nota, estado, entrenos_semana, semanas, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, foto_url, orden, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
+      "id, nombre, nota, estado, entrenos_semana, semanas, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, foto_url, orden, archivada, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -70,6 +70,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
       nota: s.nota,
       foto_url: s.foto_url ?? null,
       orden: s.orden,
+      archivada: s.archivada ?? false,
       items: [...s.rutina_items]
         .sort((a, b) => a.orden - b.orden)
         .map((i) => ({ ...i, peso_kg: i.peso_kg === null ? null : Number(i.peso_kg) })),

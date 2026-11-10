@@ -62,6 +62,7 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
       .select(
         "id, nombre, estado, semanas, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden, foto_url, rutina_items(id, orden, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicios(categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))))",
       )
+      .eq("rutina_sesiones.archivada", false)
       .match(como ? { user_id: como } : {})
       .order("publicada_en", { ascending: false }),
     supabase

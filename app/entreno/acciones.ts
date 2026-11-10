@@ -42,6 +42,10 @@ export async function iniciarEntreno(sesionId: string): Promise<Resultado> {
   const user = await persona();
   if (!user) return { ok: false, codigo: "sesion" };
 
+  // Un día archivado no se puede empezar.
+  const { data: dia } = await createAdminClient().from("rutina_sesiones").select("archivada").eq("id", sesionId).maybeSingle();
+  if (dia?.archivada) return { ok: false, codigo: "noPublicada" };
+
   const { data, error } = await createAdminClient().rpc("iniciar_entreno", {
     p_user: user.id,
     p_sesion: sesionId,

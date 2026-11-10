@@ -43,6 +43,7 @@ async function obtenerResumen(): Promise<Resumen> {
   const { data } = await supabase
     .from("rutinas")
     .select("nombre, foto_url, entrenos_semana, publicada_en, rutina_sesiones(id, nombre, orden)")
+    .eq("rutina_sesiones.archivada", false)
     .eq("user_id", userId)
     .eq("estado", "publicada")
     .order("publicada_en", { ascending: false })

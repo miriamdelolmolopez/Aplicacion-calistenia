@@ -67,6 +67,7 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
         ? supabase
             .from("rutinas")
             .select("nombre, rutina_sesiones(id, nombre, orden)")
+            .eq("rutina_sesiones.archivada", false)
             .eq("user_id", userId)
             .eq("estado", "publicada")
             .limit(1)
