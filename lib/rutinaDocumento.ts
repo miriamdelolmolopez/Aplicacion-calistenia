@@ -16,9 +16,21 @@ type ItemDoc = {
   ejercicios: { nombre: string; video_url: string | null; videos?: unknown } | null;
 };
 export type SesionDoc = { orden: number; nombre: string; nota: string | null; rutina_items: ItemDoc[] };
-export type RutinaDoc = { nombre: string; nota: string | null; semanas: number; entrenos_semana: number | null };
+export type RutinaDoc = { nombre: string; nota: string | null; semanas: number; entrenos_semana: number | null; publicada_en?: string | null };
 
-export type Bloque = { tipo: "titulo" | "meta" | "h1" | "h2" | "texto" | "ejercicio" | "detalle" | "nota" | "enlace"; texto: string };
+export type Bloque = { tipo: "titulo" | "meta" | "h1" | "h2" | "texto" | "ejercicio" | "detalle" | "nota" | "enlace"; texto: string; url?: string };
+
+const ZONA = "Europe/Madrid";
+const largo = (d: Date) => new Intl.DateTimeFormat("es-ES", { timeZone: ZONA, day: "numeric", month: "long", year: "numeric" }).format(d);
+
+// Líneas de la cabecera sobre fechas: cuándo se publicó y de cuándo a cuándo dura (desde el día que se publica, las semanas que tenga).
+export function lineasFechas(rutina: { semanas: number; publicada_en?: string | null }): string[] {
+  if (!rutina.publicada_en) return ["Todavía no está publicada"];
+  const inicio = new Date(rutina.publicada_en);
+  if (Number.isNaN(inicio.getTime())) return [];
+  const fin = new Date(inicio.getTime() + (rutina.semanas * 7 - 1) * 86_400_000);
+  return [`Publicada el ${largo(inicio)}`, `Desde el ${largo(inicio)} hasta el ${largo(fin)}`];
+}
 
 const rango = (min: number | null, max: number | null, unidad: string) => {
   if (min == null && max == null) return "";
@@ -29,6 +41,7 @@ const rango = (min: number | null, max: number | null, unidad: string) => {
 export function bloquesDeRutina(rutina: RutinaDoc, alumna: string, sesiones: SesionDoc[]): Bloque[] {
   const b: Bloque[] = [{ tipo: "titulo", texto: rutina.nombre }];
   if (alumna) b.push({ tipo: "meta", texto: `Alumno/a: ${alumna}` });
+  for (const l of lineasFechas(rutina)) b.push({ tipo: "meta", texto: l });
   b.push({ tipo: "meta", texto: `${rutina.semanas} ${rutina.semanas === 1 ? "semana" : "semanas"} · ${rutina.entrenos_semana ?? sesiones.length} entrenos por semana` });
   if (rutina.nota?.trim()) {
     b.push({ tipo: "h2", texto: "Notas" });
@@ -44,7 +57,10 @@ export function bloquesDeRutina(rutina: RutinaDoc, alumna: string, sesiones: Ses
       b.push({ tipo: "ejercicio", texto: `${k + 1}. ${i.ejercicios?.nombre ?? "Ejercicio"}` });
       b.push({ tipo: "detalle", texto: `${i.series} ${i.series === 1 ? "serie" : "series"}${medida ? ` × ${medida}` : ""} · descanso ${i.descanso_seg} segundos` });
       if (i.nota?.trim()) b.push({ tipo: "nota", texto: `Nota: ${i.nota}` });
-      for (const v of i.ejercicios ? videosDe(i.ejercicios) : []) b.push({ tipo: "enlace", texto: `${v.nombre}: ${analizarVideo(v.url)?.enlace ?? v.url}` });
+      for (const v of i.ejercicios ? videosDe(i.ejercicios) : []) {
+        const enlace = analizarVideo(v.url)?.enlace ?? v.url;
+        b.push({ tipo: "enlace", texto: `${v.nombre}: ${enlace}`, url: enlace });
+      }
     });
   });
   return b;

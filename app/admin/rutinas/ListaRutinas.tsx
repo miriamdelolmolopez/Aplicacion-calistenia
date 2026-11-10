@@ -318,7 +318,26 @@ export default function ListaRutinas({
         </PanelCompleto>
       )}
 
-      {viendo && <VistaRutina id={viendo.id} nombre={viendo.nombre} alumno={viendo.alumno} cerrar={() => setViendo(null)} />}
+      {viendo && (
+        <VistaRutina
+          id={viendo.id}
+          nombre={viendo.nombre}
+          alumno={viendo.alumno}
+          cerrar={() => setViendo(null)}
+          acciones={{
+            ocupado: pendiente,
+            alEditar: () => router.push(`/admin/rutinas/${viendo.id}`),
+            alDuplicar: () => {
+              ejecutar(() => duplicarRutinaLista(viendo.id));
+              setViendo(null);
+            },
+            alEliminar: () => {
+              ejecutar(() => eliminarRutinaLista(viendo.id));
+              setViendo(null);
+            },
+          }}
+        />
+      )}
     </div>
   );
 }

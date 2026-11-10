@@ -133,7 +133,7 @@ export default function VerRutina() {
 
   if (datos === null) {
     return (
-      <main className={styles.pagina}>
+      <main className={`${styles.pagina} ${styles.paginaAncha}`}>
         <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
         <Cargando />
       </main>
@@ -183,7 +183,7 @@ export default function VerRutina() {
   };
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/rutina", texto: "volver" }} />
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <h1 className={estiloRutina.titulo} style={{ flex: 1 }}>{rutina?.nombre ?? t.opcionVerRutina}</h1>

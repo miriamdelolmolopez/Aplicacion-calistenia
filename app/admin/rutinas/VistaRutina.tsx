@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import MapaCorporal from "../../MapaCorporal";
 import styles from "../admin.module.css";
 import PanelCompleto from "../comunes/PanelCompleto";
+import AccionesFila from "../comunes/AccionesFila";
+import comunes from "../comunes/comunes.module.css";
 import BotonDocumento from "../../rutina/BotonDocumento";
 import FichaIncrustada from "../../ui/FichaIncrustada";
 
@@ -37,7 +39,20 @@ const rango = (min: number | null, max: number | null, unidad: string) => {
 };
 
 // Resumen de una rutina tal y como la vería la alumna (solo para mirar).
-export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string; nombre: string; alumno: string; cerrar: () => void }) {
+export default function VistaRutina({
+  id,
+  nombre,
+  alumno,
+  cerrar,
+  acciones,
+}: {
+  id: string;
+  nombre: string;
+  alumno: string;
+  cerrar: () => void;
+  // Los mismos botones que tiene la rutina en la lista: editar, copiar, documento y eliminar.
+  acciones?: { alEditar: () => void; alDuplicar: () => void; alEliminar: () => void; ocupado?: boolean };
+}) {
   const [rutina, setRutina] = useState<Rutina | null | undefined>(undefined);
   const [ficha, setFicha] = useState<{ id: string; nombre: string } | null>(null); // ejercicio abierto
 
@@ -68,7 +83,11 @@ export default function VistaRutina({ id, nombre, alumno, cerrar }: { id: string
           <p className={styles.ayuda} style={{ margin: 0, flex: 1 }}>
             Así la ve {alumno}. Solo para mirar: para cambiar algo, usa el lápiz.
           </p>
-          <BotonDocumento id={id} />
+          {acciones ? (
+            <AccionesFila nombre={nombre} ocupado={acciones.ocupado} alEditar={acciones.alEditar} alDuplicar={acciones.alDuplicar} alEliminar={acciones.alEliminar} extra={<BotonDocumento id={id} className={comunes.icono} />} />
+          ) : (
+            <BotonDocumento id={id} />
+          )}
         </div>
         {rutina === undefined && <p className={styles.ayuda}>Cargando…</p>}
         {rutina === null && <p className={styles.error}>No se ha podido abrir la rutina.</p>}

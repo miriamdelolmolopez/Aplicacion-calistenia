@@ -1,7 +1,7 @@
 import { Document, ExternalHyperlink, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { analizarVideo } from "@/lib/video";
 import { videosDe } from "@/lib/videosEjercicio";
-import { bloquesDeRutina } from "@/lib/rutinaDocumento";
+import { bloquesDeRutina, lineasFechas } from "@/lib/rutinaDocumento";
 import { rutinaEnImagen } from "@/lib/rutinaImagen";
 import { rutinaEnPdf } from "@/lib/rutinaPdf";
 import { createClient } from "@/lib/supabase/server";
@@ -20,7 +20,7 @@ type Item = {
   ejercicios: { nombre: string; video_url: string | null; videos?: unknown } | null;
 };
 type Sesion = { orden: number; nombre: string; nota: string | null; archivada?: boolean; rutina_items: Item[] };
-type Rutina = { nombre: string; nota: string | null; semanas: number; entrenos_semana: number | null; user_id: string; rutina_sesiones: Sesion[] };
+type Rutina = { nombre: string; nota: string | null; semanas: number; entrenos_semana: number | null; publicada_en: string | null; user_id: string; rutina_sesiones: Sesion[] };
 
 const rango = (min: number | null, max: number | null, unidad: string) => {
   if (min == null && max == null) return "";
@@ -47,7 +47,7 @@ export async function GET(peticion: Request, { params }: { params: Promise<{ id:
   const { data } = await supabase
     .from("rutinas")
     .select(
-      "nombre, nota, semanas, entrenos_semana, user_id, rutina_sesiones(orden, nombre, nota, archivada, rutina_items(orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, ejercicios(nombre, video_url, videos)))",
+      "nombre, nota, semanas, entrenos_semana, publicada_en, user_id, rutina_sesiones(orden, nombre, nota, archivada, rutina_items(orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, ejercicios(nombre, video_url, videos)))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -77,7 +77,7 @@ export async function GET(peticion: Request, { params }: { params: Promise<{ id:
 
   const parrafos: Paragraph[] = [];
   parrafos.push(new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: rutina.nombre, bold: true })] }));
-  const lineas = [alumna && `Alumno/a: ${alumna}`, `${rutina.semanas} ${rutina.semanas === 1 ? "semana" : "semanas"} · ${rutina.entrenos_semana ?? sesiones.length} entrenos por semana`].filter(Boolean) as string[];
+  const lineas = [alumna && `Alumno/a: ${alumna}`, ...lineasFechas(rutina), `${rutina.semanas} ${rutina.semanas === 1 ? "semana" : "semanas"} · ${rutina.entrenos_semana ?? sesiones.length} entrenos por semana`].filter(Boolean) as string[];
   for (const l of lineas) parrafos.push(new Paragraph({ children: [new TextRun({ text: l, color: "555555" })] }));
   if (rutina.nota?.trim()) {
     parrafos.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 240 }, children: [new TextRun("Notas")] }));

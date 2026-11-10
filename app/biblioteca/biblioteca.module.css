@@ -235,7 +235,7 @@
 
 .pestanasLinea {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   margin: 10px -20px 4px;
   padding: 0 20px;
   overflow-x: auto;
@@ -246,10 +246,17 @@
   display: none;
 }
 
+/* Un hueco al final para que la última pestaña no quede pegada al borde al deslizar. */
+.pestanasLinea::after {
+  content: "";
+  flex: none;
+  width: 16px;
+}
+
 .pestanasLinea button {
   flex: none;
   min-height: 44px;
-  padding: 0 18px;
+  padding: 0 13px;
   font: inherit;
   font-weight: 600;
   color: var(--carbon);
@@ -296,4 +303,34 @@
   height: 3px;
   background: var(--acento);
   border-radius: 2px;
+}
+
+/* Ficha del ejercicio en el ordenador: la imagen a un lado y el contenido al otro. */
+@media (min-width: 900px) {
+  .fichaAncha {
+    max-width: 1040px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    column-gap: 44px;
+    align-items: start;
+    padding-top: 24px !important;
+  }
+
+  .fichaAncha .hero {
+    position: sticky;
+    top: 24px;
+    width: 100%;
+    margin: 0;
+    border-radius: 24px;
+  }
+
+  .fichaAncha .cuerpo {
+    min-width: 0;
+  }
+
+  .fichaAncha .pestanasLinea {
+    margin: 10px 0 4px;
+    padding: 0;
+    flex-wrap: wrap;
+  }
 }

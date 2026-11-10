@@ -130,7 +130,7 @@ export default function Entrenamiento() {
   const porcentaje = r ? Math.min(100, Math.round((r.hechos / r.objetivo) * 100)) : 0;
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <h1 className={estilos.titulo}>{t.entrenamientoTitulo}</h1>
 

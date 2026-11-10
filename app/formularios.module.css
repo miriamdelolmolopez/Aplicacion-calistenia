@@ -341,3 +341,10 @@
     display: none;
   }
 }
+
+/* En el ordenador las pantallas de rutina aprovechan más ancho (en el móvil no cambia nada). */
+@media (min-width: 900px) {
+  .paginaAncha {
+    max-width: 960px;
+  }
+}

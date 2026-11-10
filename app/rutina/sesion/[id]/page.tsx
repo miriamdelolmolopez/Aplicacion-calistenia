@@ -134,7 +134,7 @@ export default function Sesion() {
 
   if (datos === undefined) {
     return (
-      <main className={styles.pagina}>
+      <main className={`${styles.pagina} ${styles.paginaAncha}`}>
         <BarraSuperior izquierda={{ href: "/rutina/ver", texto: "volver" }} />
         <Cargando />
       </main>
@@ -142,7 +142,7 @@ export default function Sesion() {
   }
   if (datos === null) {
     return (
-      <main className={styles.pagina}>
+      <main className={`${styles.pagina} ${styles.paginaAncha}`}>
         <BarraSuperior izquierda={{ href: "/rutina/ver", texto: "volver" }} />
         <p className={styles.aviso}>{t.sesionNoEncontrada}</p>
       </main>
@@ -153,7 +153,7 @@ export default function Sesion() {
   const dentro = new Map<number, number>();
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/rutina/ver", texto: "volver" }} />
       <h1 className={estiloRutina.titulo} style={{ marginBottom: 4 }}>
         {datos.nombre}

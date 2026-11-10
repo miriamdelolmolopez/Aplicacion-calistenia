@@ -10,6 +10,7 @@ import styles from "../../formularios.module.css";
 import MapaCorporal from "../../MapaCorporal";
 import { useIdioma } from "../../useIdioma";
 import VideosEjercicio from "../../VideosEjercicio";
+import VideosPestana from "../../VideosPestana";
 import { videosDe } from "@/lib/videosEjercicio";
 import estilos from "../biblioteca.module.css";
 import { CATEGORIAS, MUSCULOS, intensidadesDeEjercicio, nombreTipo } from "@/lib/ejercicios";
@@ -93,8 +94,8 @@ export default function FichaEjercicio() {
   ];
 
   return (
-    <main className={styles.pagina} style={{ paddingTop: 0 }}>
-      <div className={estilos.hero} style={incrustado && e.foto_url ? { background: "#fff", borderRadius: 0 } : undefined}>
+    <main className={`${styles.pagina} ${estilos.fichaAncha}`} style={{ paddingTop: 0 }}>
+      <div className={estilos.hero} style={incrustado && e.foto_url ? { background: "#fff" } : undefined}>
         {incrustado && e.foto_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={sinEncuadre(e.foto_url)} alt={nombre} className={estilos.heroFoto} style={{ aspectRatio: "1 / 1", width: "min(100%, 58dvh)", margin: "0 auto", objectFit: "cover" }} />
@@ -142,7 +143,18 @@ export default function FichaEjercicio() {
 
         <div className={estilos.pestanasLinea} role="tablist">
           {pestanas.map((p) => (
-            <button key={p.id} type="button" role="tab" aria-selected={pestana === p.id} className={pestana === p.id ? estilos.activaLinea : ""} onClick={() => setPestana(p.id)}>
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={pestana === p.id}
+              className={pestana === p.id ? estilos.activaLinea : ""}
+              onClick={(ev) => {
+                setPestana(p.id);
+                // La pestaña pulsada se centra para que se vean también las de los lados (en el móvil, la última).
+                ev.currentTarget.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+              }}
+            >
               {p.texto}
             </button>
           ))}
@@ -196,7 +208,7 @@ export default function FichaEjercicio() {
               })
             ))}
 
-          {pestana === "videos" && <VideosEjercicio videos={videosDe(e)} titulo={nombre} proporcion="1 / 1" redondeo={16} idioma={idioma} />}
+          {pestana === "videos" && <VideosPestana videos={videosDe(e)} titulo={nombre} idioma={idioma} />}
 
           {pestana === "material" &&
             (materiales.length === 0 ? (

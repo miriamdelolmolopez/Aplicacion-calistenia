@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
+import { PDFDocument, PDFString, StandardFonts, rgb, type PDFFont } from "pdf-lib";
 import type { Bloque } from "./rutinaDocumento";
 
 const ANCHO = 595;
@@ -85,6 +85,20 @@ export async function rutinaEnPdf(titulo: string, bloques: Bloque[]): Promise<Ui
       }
       y -= alto;
       pagina.drawText(linea, { x: MARGEN + e.sangria, y: y + e.tam * 0.25, size: e.tam, font: fuente, color: rgb(...e.color) });
+      if (bloque.url && bloque.url.startsWith("http")) {
+        // Cada línea del enlace (aunque se parta en dos) se puede pulsar.
+        const x = MARGEN + e.sangria;
+        const enlace = pdf.context.register(
+          pdf.context.obj({
+            Type: "Annot",
+            Subtype: "Link",
+            Rect: [x, y, x + fuente.widthOfTextAtSize(linea, e.tam), y + alto],
+            Border: [0, 0, 0],
+            A: { Type: "Action", S: "URI", URI: PDFString.of(bloque.url) },
+          }),
+        );
+        pagina.node.addAnnot(enlace);
+      }
     }
   }
   return pdf.save();
