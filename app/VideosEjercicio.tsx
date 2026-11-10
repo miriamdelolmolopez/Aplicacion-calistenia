@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { VideoEjercicio as Video } from "@/lib/videosEjercicio";
+import { analizarVideo } from "@/lib/video";
 import VideoEjercicio from "./VideoEjercicio";
 
 const flecha = (lado: "izquierda" | "derecha"): React.CSSProperties => ({
@@ -24,14 +25,19 @@ const flecha = (lado: "izquierda" | "derecha"): React.CSSProperties => ({
 // Los vídeos de un ejercicio: con más de uno salen dos flechas a los lados para pasar al siguiente o al anterior, y el nombre de cada vídeo.
 export default function VideosEjercicio({ videos, titulo, proporcion, redondeo, idioma = "es" }: { videos: Video[]; titulo: string; proporcion?: string; redondeo?: number; idioma?: "es" | "en" }) {
   const [pos, setPos] = useState(0);
+  // Sin proporción fija (el entreno en directo), cada vídeo se ve vertical u horizontal: los grabados con el móvil (Drive) empiezan en vertical y se puede cambiar.
+  const [formatos, setFormatos] = useState<Record<string, boolean>>({});
   if (videos.length === 0) return null;
   const actual = Math.min(pos, videos.length - 1);
   const v = videos[actual];
   const en = idioma === "en";
+  const adaptable = proporcion === undefined;
+  const vertical = adaptable ? (formatos[v.url] ?? analizarVideo(v.url)?.origen !== "youtube") : false;
 
   return (
-    <div style={{ position: "relative" }}>
-      <VideoEjercicio key={v.url} url={v.url} titulo={`${titulo} · ${v.nombre}`} proporcion={proporcion} redondeo={redondeo} />
+    <div style={adaptable ? { display: "flex", flexDirection: "column", alignItems: "center", gap: 8 } : undefined}>
+    <div style={{ position: "relative", ...(adaptable ? { width: vertical ? "min(100%, calc(56dvh * 9 / 16))" : "100%" } : null) }}>
+      <VideoEjercicio key={v.url} url={v.url} titulo={`${titulo} · ${v.nombre}`} proporcion={adaptable ? (vertical ? "9 / 16" : "16 / 9") : proporcion} redondeo={redondeo} />
       {videos.length > 1 && (
         <>
           <button type="button" style={flecha("izquierda")} onClick={() => setPos((actual - 1 + videos.length) % videos.length)} aria-label={en ? "Previous video" : "Vídeo anterior"}>
@@ -47,6 +53,16 @@ export default function VideosEjercicio({ videos, titulo, proporcion, redondeo, 
           </span>
         </>
       )}
+    </div>
+    {adaptable && (
+      <button
+        type="button"
+        onClick={() => setFormatos({ ...formatos, [v.url]: !vertical })}
+        style={{ cursor: "pointer", font: "inherit", fontSize: "0.78rem", padding: "6px 14px", borderRadius: 999, border: "1px solid rgba(128,128,128,0.4)", background: "transparent", color: "inherit", minHeight: 32 }}
+      >
+        {vertical ? (en ? "Switch to horizontal" : "Pasar a horizontal") : en ? "Switch to vertical" : "Pasar a vertical"}
+      </button>
+    )}
     </div>
   );
 }
