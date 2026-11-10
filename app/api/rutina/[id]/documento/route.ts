@@ -99,6 +99,15 @@ export async function GET(_peticion: Request, { params }: { params: Promise<{ id
   const documento = new Document({
     creator: "Miriam del Olmo",
     title: rutina.nombre,
+    // Letra de la marca: Montserrat para el texto y Cormorant Garamond para los títulos (ambas están en Google Docs).
+    styles: {
+      default: { document: { run: { font: "Montserrat", size: 22, color: "2B2B2A" } } },
+      paragraphStyles: [
+        { id: "Title", name: "Title", basedOn: "Normal", next: "Normal", quickFormat: true, run: { font: "Cormorant Garamond", size: 56, bold: true, color: "2B2B2A" } },
+        { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true, run: { font: "Cormorant Garamond", size: 40, bold: true, color: "5A5E3B" } },
+        { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true, run: { font: "Cormorant Garamond", size: 30, bold: true, color: "5A5E3B" } },
+      ],
+    },
     sections: [{ children: parrafos }],
   });
   const buffer = await Packer.toBuffer(documento);
