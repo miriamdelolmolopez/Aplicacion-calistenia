@@ -27,6 +27,8 @@ import {
   useTransition,
   type FormEvent,
   type ReactNode,
+  createContext,
+  useContext,
 } from "react";
 import { FotoEditable, FotoRutina, IconoBoton, PreviaAlumno, ResumenRutina, VentanaMusculos } from "./PiezasEditor";
 import { minutosEstimados } from "@/lib/duracion";
@@ -425,6 +427,9 @@ function CambiosSemana({
   );
 }
 
+// Qué ejercicio tiene abierto el desplegable de series y repeticiones: solo uno a la vez en toda la rutina (al abrir otro, el anterior se cierra).
+const ItemAbierto = createContext<{ id: string | null; poner: (id: string | null) => void }>({ id: null, poner: () => {} });
+
 function TarjetaItem({
   rutinaId,
   item,
@@ -462,7 +467,9 @@ function TarjetaItem({
   const campos: readonly Campo[] = tipo?.campos ?? [];
 
   const enSuper = item.grupo !== null;
-  const [abierto, setAbierto] = useState(false);
+  const abiertoCtx = useContext(ItemAbierto);
+  const abierto = abiertoCtx.id === item.id;
+  const alternarAbierto = () => abiertoCtx.poner(abierto ? null : item.id);
   const [musculos, setMusculos] = useState(false);
   // Al quitar un ejercicio desaparece al momento; el servidor lo borra y recarga la rutina después (si falla, vuelve a salir).
   const [quitado, setQuitado] = useState(false);
@@ -483,7 +490,7 @@ function TarjetaItem({
             aviso="Esta foto es la del ejercicio: se verá igual en todas las rutinas."
           />
         )}
-        <div className={styles.itemTitulo} onClick={() => setAbierto((a) => !a)} style={{ cursor: "pointer" }}>
+        <div className={styles.itemTitulo} onClick={() => alternarAbierto()} style={{ cursor: "pointer" }}>
           <strong>
             {etiquetaSuper && <span className={styles.etiquetaSuper}>{etiquetaSuper}</span>}
             {ejercicio?.nombre ?? "(ejercicio borrado)"}
@@ -496,7 +503,7 @@ function TarjetaItem({
           {item.nota && <div className={styles.ayuda}>📝 {item.nota}</div>}
         </div>
         <div style={{ display: "flex", gap: 6, flex: "none", marginLeft: "auto" }}>
-          <IconoBoton titulo={abierto ? "Cerrar" : "Editar el ejercicio"} onClick={() => setAbierto((a) => !a)}>
+          <IconoBoton titulo={abierto ? "Cerrar" : "Editar el ejercicio"} onClick={() => alternarAbierto()}>
             ✎
           </IconoBoton>
           <IconoBoton titulo="Ver los músculos" onClick={() => setMusculos(true)}>
@@ -1156,9 +1163,10 @@ export function Constructor({
   const [nueva, setNueva] = useState("");
   const [anadiendoSesion, setAnadiendoSesion] = useState(false);
   const [previa, setPrevia] = useState(false);
+  const [itemAbierto, setItemAbierto] = useState<string | null>(null);
 
   return (
-    <>
+    <ItemAbierto.Provider value={{ id: itemAbierto, poner: setItemAbierto }}>
       {aviso && (
         <p className={styles.error} role="alert" onClick={() => setAviso("")}>
           {aviso} (toca para cerrar)
@@ -1238,6 +1246,6 @@ export function Constructor({
         </ListaOrdenable>
 
       </section>
-    </>
+    </ItemAbierto.Provider>
   );
 }
