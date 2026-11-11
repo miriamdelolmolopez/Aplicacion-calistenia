@@ -53,7 +53,7 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   if (!UUID.test(id)) notFound();
 
   // Lo que no depende de lo demás (catálogo de ejercicios, personas y planes) se pide a la vez que la rutina.
-  const [{ data }, { data: ejerciciosDatos }, { data: alumnosDatos }, { data: planes }] = await Promise.all([
+  const [{ data }, ejerciciosRespuesta, { data: alumnosDatos }, { data: planes }] = await Promise.all([
     supabase
     .from("rutinas")
     .select(
@@ -69,6 +69,16 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
     supabase.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo"),
   ]);
   if (!data) notFound();
+  // Si el catálogo de ejercicios falla un instante, se vuelve a pedir; nunca se pinta una lista vacía (saldría «ejercicio borrado» en todos).
+  let ejerciciosDatos = ejerciciosRespuesta.data;
+  if (ejerciciosRespuesta.error || !ejerciciosDatos) {
+    const segundo = await supabase
+      .from("ejercicios")
+      .select("id, nombre, categoria, tipo, activo, foto_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))")
+      .order("nombre");
+    if (segundo.error || !segundo.data) throw new Error("No se han podido cargar los ejercicios.");
+    ejerciciosDatos = segundo.data;
+  }
   const r = data as unknown as FilaRutina;
 
   const sesiones: SesionRutina[] = [...r.rutina_sesiones]
