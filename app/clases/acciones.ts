@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { avisarCancelacionAlumno, avisarAdminCancelacion, avisarAdminReserva, avisarClaseCancelada, avisarPlazaLiberada, avisarReserva, personasEnEspera } from "@/lib/avisos";
 import { fechaCorta } from "@/lib/fechas";
+import { estaCongelado } from "@/lib/congelados";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -84,6 +85,8 @@ export async function reservarClase(sesionId: string): Promise<Resultado> {
   if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
+  // Con la tarifa congelada (lesión, etc.) no se puede reservar hasta que se descongele.
+  if (await estaCongelado(user.id)) return { ok: false, codigo: "congelado" };
 
   const { error } = await createAdminClient().rpc("reservar_clase", {
     p_user: user.id,
@@ -98,6 +101,7 @@ export async function unirseListaEspera(sesionId: string): Promise<Resultado> {
   if (await enSoloLectura()) return { ok: false, codigo: "soloLectura" };
   const user = await personaActual();
   if (!user) return { ok: false, codigo: "sesion" };
+  if (await estaCongelado(user.id)) return { ok: false, codigo: "congelado" };
 
   const { error } = await createAdminClient().rpc("unirse_lista_espera", {
     p_user: user.id,

@@ -26,7 +26,13 @@ export default function VideoEjercicio({ url, titulo, proporcion = "16 / 9", red
         allow="accelerometer; encrypted-media; picture-in-picture"
         allowFullScreen
         referrerPolicy="strict-origin-when-cross-origin"
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+        // El reproductor de Drive pinta unos controles enormes en el móvil que tapan el vídeo. Se pinta al doble de tamaño y se reduce a la mitad:
+        // así los controles se quedan pequeños y el vídeo se sigue viendo entero.
+        style={
+          video.origen === "drive"
+            ? { position: "absolute", top: 0, left: 0, width: "200%", height: "200%", transform: "scale(0.5)", transformOrigin: "0 0", border: 0 }
+            : { position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }
+        }
       />
       )}
     </div>

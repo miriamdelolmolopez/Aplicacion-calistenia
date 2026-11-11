@@ -13,6 +13,12 @@ export async function congeladosAhora(): Promise<Congelado[]> {
   return ((data ?? []) as { id: string; congelado_desde: string | null; congelado_hasta: string | null; congelado_motivo: string | null }[]).map((p) => ({ id: p.id, desde: p.congelado_desde, hasta: p.congelado_hasta, motivo: p.congelado_motivo }));
 }
 
+// ¿Está congelado/a ahora mismo? (Si todavía no está el archivo 096, nadie lo está.)
+export async function estaCongelado(userId: string): Promise<boolean> {
+  const { data, error } = await createAdminClient().from("profiles").select("congelado").eq("id", userId).maybeSingle();
+  return !error && (data as { congelado?: boolean } | null)?.congelado === true;
+}
+
 // Lo deja de nuevo como alumno/a normal y avisa a las administradoras para que decidan qué hacer con su tarifa
 // (nueva fecha de fin, clases, etc.). `causa`: «manual» (lo has hecho tú) o «fecha» (ha llegado la fecha que se puso).
 export async function descongelar(userId: string, causa: "manual" | "fecha"): Promise<{ error?: string }> {
