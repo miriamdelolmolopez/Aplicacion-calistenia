@@ -45,7 +45,6 @@ export default function VideoEjercicio({
           controls
           playsInline
           preload="metadata"
-          crossOrigin={video.origen === "drive" ? "anonymous" : undefined}
           aria-label={titulo}
           onLoadedMetadata={(e) => {
             const { videoWidth: w, videoHeight: h } = e.currentTarget;

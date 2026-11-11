@@ -63,7 +63,7 @@ export function analizarVideo(texto: string): Video | null {
       return {
         origen: "drive",
         embed: `https://drive.google.com/file/d/${idDrive}/preview`,
-        directo: `https://drive.usercontent.google.com/download?id=${idDrive}&export=download&confirm=t`,
+        directo: `/api/video/drive/${idDrive}`,
         enlace: `https://drive.google.com/file/d/${idDrive}/view`,
       };
     }
