@@ -53,12 +53,15 @@ export default function VideosEjercicio({ videos, titulo, proporcion, redondeo, 
           <button type="button" style={flecha("derecha")} onClick={() => setPos((actual + 1) % videos.length)} aria-label={en ? "Next video" : "Vídeo siguiente"}>
             ›
           </button>
-          <span
-            style={{ position: "absolute", left: "50%", bottom: 10, transform: "translateX(-50%)", zIndex: 3, maxWidth: "70%", padding: "4px 12px", borderRadius: 999, background: "rgba(23, 24, 26, 0.65)", color: "#fff", fontSize: "0.8rem", fontWeight: 600, textAlign: "center", pointerEvents: "none" }}
-          >
-            {v.nombre} · {actual + 1}/{videos.length}
-          </span>
         </>
+      )}
+      {/* El nombre del vídeo, siempre (arriba, para no tapar los controles de abajo). Con varios, también cuál es de cuántos. */}
+      {(v.nombre || videos.length > 1) && (
+        <span
+          style={{ position: "absolute", left: "50%", top: 10, transform: "translateX(-50%)", zIndex: 3, maxWidth: "70%", padding: "4px 12px", borderRadius: 999, background: "rgba(23, 24, 26, 0.65)", color: "#fff", fontSize: "0.8rem", fontWeight: 600, textAlign: "center", pointerEvents: "none" }}
+        >
+          {[v.nombre, videos.length > 1 ? `${actual + 1}/${videos.length}` : ""].filter(Boolean).join(" · ")}
+        </span>
       )}
     </div>
     {adaptable && (

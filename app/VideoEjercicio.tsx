@@ -32,7 +32,9 @@ export default function VideoEjercicio({
     <div
       style={{
         position: "relative",
-        width: "100%",
+        // Un vídeo vertical no puede ser más alto que la pantalla: se estrecha (y se centra) para verse entero.
+        width: nativo && forma ? `min(100%, calc(55dvh * ${forma}))` : "100%",
+        margin: nativo && forma ? "0 auto" : undefined,
         aspectRatio: nativo && forma ? forma : proporcion,
         borderRadius: redondeo,
         overflow: "hidden",
