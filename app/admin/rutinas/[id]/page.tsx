@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import styles from "../../admin.module.css";
@@ -48,31 +49,33 @@ function nombreDe(p: Persona | null) {
 }
 
 export default async function EditarRutina({ params }: { params: Promise<{ id: string }> }) {
-  const { supabase } = await requireAdmin("online");
+  await requireAdmin("online");
+  // La página es solo de la administradora (ya comprobado arriba): se lee con acceso directo, sin pasar por las reglas por fila, que con tantos ejercicios la hacían lenta y, con varios cambios seguidos, a veces fallaba.
+  const db = createAdminClient();
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
   // Lo que no depende de lo demás (catálogo de ejercicios, personas y planes) se pide a la vez que la rutina.
   const [{ data }, ejerciciosRespuesta, { data: alumnosDatos }, { data: planes }] = await Promise.all([
-    supabase
+    db
     .from("rutinas")
     .select(
       "id, nombre, nota, estado, entrenos_semana, semanas, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, foto_url, orden, archivada, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
     )
     .eq("id", id)
     .maybeSingle(),
-    supabase
+    db
       .from("ejercicios")
       .select("id, nombre, categoria, tipo, activo, foto_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))")
       .order("nombre"),
-    supabase.from("profiles").select("id, nombre, apellidos, email, rol").in("rol", ["alumno", "invitado"]).order("nombre"),
-    supabase.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo"),
+    db.from("profiles").select("id, nombre, apellidos, email, rol").in("rol", ["alumno", "invitado"]).order("nombre"),
+    db.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo"),
   ]);
   if (!data) notFound();
   // Si el catálogo de ejercicios falla un instante, se vuelve a pedir; nunca se pinta una lista vacía (saldría «ejercicio borrado» en todos).
   let ejerciciosDatos = ejerciciosRespuesta.data;
   if (ejerciciosRespuesta.error || !ejerciciosDatos) {
-    const segundo = await supabase
+    const segundo = await db
       .from("ejercicios")
       .select("id, nombre, categoria, tipo, activo, foto_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))")
       .order("nombre");
@@ -98,14 +101,14 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   const idsItems = sesiones.flatMap((s) => s.items.map((i) => i.id));
   const [{ data: cambiosDatos }, { data: extrasDatos }] = await Promise.all([
     idsItems.length
-    ? supabase
+    ? db
         .from("rutina_cambios_semana")
         .select("id, item_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, quitado")
         .in("item_id", idsItems)
         .order("semana")
     : Promise.resolve({ data: [] }),
     sesiones.length
-    ? supabase
+    ? db
         .from("rutina_extras_semana")
         .select("id, sesion_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota")
         .in("sesion_id", sesiones.map((s) => s.id))
