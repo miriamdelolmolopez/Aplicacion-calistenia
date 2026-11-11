@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useIdioma } from "../useIdioma";
 
 // Icono de documento: al pulsarlo se elige entre ver la rutina o descargarla (en PDF, documento de texto o imagen).
-export default function BotonDocumento({ id, texto, className }: { id: string; texto?: string; className?: string }) {
+// Con `base` se usa para otra cosa que una rutina (por ejemplo un entreno), y `excel` añade la opción de Excel.
+export default function BotonDocumento({ id, texto, className, base: rutaBase, excel = false }: { id: string; texto?: string; className?: string; base?: string; excel?: boolean }) {
   const [idioma] = useIdioma();
   const en = idioma === "en";
   const [abierto, setAbierto] = useState(false);
@@ -34,7 +35,7 @@ export default function BotonDocumento({ id, texto, className }: { id: string; t
     };
   }, [abierto]);
 
-  const base = `/api/rutina/${id}/documento`;
+  const base = rutaBase ?? `/api/rutina/${id}/documento`;
   const opcion: React.CSSProperties = { display: "block", width: "100%", textAlign: "left", padding: "10px 14px", font: "inherit", fontSize: "0.9rem", color: "#2B2B2A", background: "none", border: 0, cursor: "pointer", textDecoration: "none", whiteSpace: "nowrap" };
 
   return (
@@ -77,6 +78,11 @@ export default function BotonDocumento({ id, texto, className }: { id: string; t
               <a role="menuitem" href={`${base}?formato=docx`} download style={opcion} onClick={cerrar}>
                 {en ? "Text document (Word)" : "Documento de texto (Word)"}
               </a>
+              {excel && (
+                <a role="menuitem" href={`${base}?formato=xlsx`} download style={opcion} onClick={cerrar}>
+                  Excel
+                </a>
+              )}
               <a role="menuitem" href={`${base}?formato=png`} download style={opcion} onClick={cerrar}>
                 {en ? "Image (PNG)" : "Imagen (PNG)"}
               </a>

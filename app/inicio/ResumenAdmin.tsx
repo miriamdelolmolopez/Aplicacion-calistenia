@@ -6,7 +6,7 @@ import estilos from "./inicio.module.css";
 import { obtenerResumenAdmin, type PersonaResumen, type ResumenAdmin } from "./accionesAdmin";
 
 type Servicio = "grupal" | "individual" | "online";
-type Clave = "ingresos" | "activos" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos" | `activos_${Servicio}` | `ingresos_${Servicio}`;
+type Clave = "ingresos" | "activos" | "invitados" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos" | `activos_${Servicio}` | `ingresos_${Servicio}`;
 
 const NOMBRE_SERVICIO: Record<Servicio, { plural: string; ingresos: string }> = {
   grupal: { plural: "Alumnos/as grupales", ingresos: "Ingresos grupales" },
@@ -78,6 +78,12 @@ export default function ResumenAdminTarjetas() {
       titulo: "Alumnos/as activas",
       valor: String(datos.activos.total),
       pie: <Comparacion actual={datos.activos.total} anterior={datos.activosMesAnterior} texto={String(datos.activosMesAnterior)} />,
+    },
+    {
+      clave: "invitados",
+      titulo: "Invitados/as activos",
+      valor: String(datos.invitados.total),
+      pie: <Comparacion actual={datos.invitados.total} anterior={datos.invitadosMesAnterior} texto={String(datos.invitadosMesAnterior)} />,
     },
     {
       clave: "nuevos",
@@ -176,11 +182,26 @@ export default function ResumenAdminTarjetas() {
               <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
             </>
           )}
+          {abierta === "invitados" && (
+            <>
+              <h3>Invitados/as activos</h3>
+              <p className={estilos.resumenVacio}>
+                Personas con rol de invitado/a que tienen ahora una prueba o tarifa en marcha. No cuentan como alumnos/as. Al acabar el mes anterior había {datos.invitadosMesAnterior}.
+              </p>
+              <h4>Grupales ({datos.invitados.grupal})</h4>
+              <Lista personas={datos.invitadosActivos.grupal} vacio="Nadie." />
+              <h4>Individuales ({datos.invitados.individual})</h4>
+              <Lista personas={datos.invitadosActivos.individual} vacio="Nadie." />
+              <h4>Online ({datos.invitados.online})</h4>
+              <Lista personas={datos.invitadosActivos.online} vacio="Nadie." />
+              <Link href="/admin/usuarios">Ver todos los usuarios →</Link>
+            </>
+          )}
           {abierta === "activos" && (
             <>
               <h3>Alumnos/as activas por tipo</h3>
               <p className={estilos.resumenVacio}>
-                Al acabar el mes anterior había {datos.activosMesAnterior}. Una persona con varios servicios aparece en cada uno.
+                Solo cuentan los alumnos/as (quien paga); los invitados/as están aparte, en su propia tarjeta. Al acabar el mes anterior había {datos.activosMesAnterior}. Una persona con varios servicios aparece en cada uno.
               </p>
               <h4>Grupales ({datos.activos.grupal})</h4>
               <Lista personas={datos.activosPorServicio.grupal} vacio="Nadie con bono grupal activo." />

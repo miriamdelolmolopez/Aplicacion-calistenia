@@ -5,6 +5,7 @@ import { colorDeTipo } from "@/lib/colores";
 import { claveDia, instanteMadrid, sumarDias, textoDia, textoHora } from "@/lib/fechas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Avatar from "../../../../Avatar";
+import FotoAmpliable from "../../../../FotoAmpliable";
 import styles from "../../../admin.module.css";
 import estilos from "../../reservas.module.css";
 import TiraSemana from "../../TiraSemana";
@@ -113,7 +114,7 @@ export default async function ReservarComo({
       </CabeceraAdmin>
 
       <div className={estilos.cabeceraPersona}>
-        <Avatar nombre={nombre} url={foto} tamano={72} />
+        <FotoAmpliable nombre={nombre} url={foto} tamano={72} />
         <div>
           <strong>{nombre}</strong>
           <div>Tarifa: {tarifas.length > 0 ? tarifas.join(" + ") : "sin bono activo"}</div>

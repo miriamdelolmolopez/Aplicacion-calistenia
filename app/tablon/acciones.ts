@@ -71,7 +71,12 @@ export async function obtenerAnuncios(limite = 50): Promise<AnuncioFila[]> {
     const ids = [...new Set([...respuestas.values()].flat().filter((r) => r.respuesta === "voy").map((r) => r.user_id))];
     if (ids.length > 0) {
       const { data: ps } = await admin.from("profiles").select("id, nombre, apellidos").in("id", ids);
-      for (const p of (ps ?? []) as { id: string; nombre: string | null; apellidos: string | null }[]) nombres.set(p.id, [p.nombre, p.apellidos].filter(Boolean).join(" ").trim());
+      for (const p of (ps ?? []) as { id: string; nombre: string | null; apellidos: string | null }[]) {
+        // Las alumnas ven nombre e inicial del apellido («Ana G.»); la administradora, el nombre completo.
+        const completo = [p.nombre, p.apellidos].filter(Boolean).join(" ").trim();
+        const corto = (p.nombre?.trim().split(" ")[0] ?? "") + (p.apellidos?.trim() ? ` ${p.apellidos.trim().charAt(0).toUpperCase()}.` : "");
+        nombres.set(p.id, verTodo ? completo : corto.trim());
+      }
     }
   }
 

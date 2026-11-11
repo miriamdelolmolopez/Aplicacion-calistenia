@@ -19,7 +19,11 @@ export type ResumenAdmin = {
   ingresosMesAnterior: number;
   diferenciaPct: number | null; // null si el mes anterior fue 0
   activos: { total: number; grupal: number; individual: number; online: number };
-  activosMesAnterior: number; // personas con un bono en marcha al acabar el mes anterior
+  activosMesAnterior: number; // alumnos/as con un bono en marcha al acabar el mes anterior
+  // Los invitados no son alumnos (no pagan): se cuentan aparte.
+  invitados: { total: number; grupal: number; individual: number; online: number };
+  invitadosActivos: { grupal: PersonaResumen[]; individual: PersonaResumen[]; online: PersonaResumen[] };
+  invitadosMesAnterior: number;
   activosPorServicio: { grupal: PersonaResumen[]; individual: PersonaResumen[]; online: PersonaResumen[] };
   activosMesAnteriorServicio: { grupal: number; individual: number; online: number };
   ingresosServicio: Record<"grupal" | "individual" | "online" | "otros", { mes: number; anterior: number }>;
@@ -57,7 +61,7 @@ function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 }
 
-type Persona = { id: string; nombre: string | null; apellidos: string | null; email: string | null };
+type Persona = { id: string; nombre: string | null; apellidos: string | null; email: string | null; rol: string | null };
 type BonoFila = {
   id: string;
   user_id: string;
@@ -82,7 +86,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   const desdeMesAnterior = inicioMes(mes === 0 ? año - 1 : año, mes === 0 ? 11 : mes - 1);
 
   const [{ data: personasDatos }, { data: bonosDatos }, { data: pagosDatos }, { data: finesDatos }] = await Promise.all([
-    admin.from("profiles").select("id, nombre, apellidos, email"),
+    admin.from("profiles").select("id, nombre, apellidos, email, rol"),
     admin
       .from("bonos")
       .select("id, user_id, servicio, estado, caduca_en, activo_desde, creado_en, clases_restantes, tipos_bono(nombre)")
@@ -98,7 +102,12 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     return [p.nombre, p.apellidos].filter(Boolean).join(" ") || p.email || "(sin nombre)";
   };
 
-  const bonos = (bonosDatos ?? []) as unknown as BonoFila[];
+  const todosLosBonos = (bonosDatos ?? []) as unknown as BonoFila[];
+  // Alumno/a = tiene rol de alumno (paga). Invitado/a = rol invitado. Las cuentas de alumnos y de invitados nunca se mezclan en los contadores.
+  const esAlumno = (id: string) => personas.get(id)?.rol === "alumno";
+  const esInvitado = (id: string) => personas.get(id)?.rol === "invitado";
+  const bonos = todosLosBonos.filter((b) => esAlumno(b.user_id));
+  const bonosInvitados = todosLosBonos.filter((b) => esInvitado(b.user_id));
   const pagos = (pagosDatos ?? []) as {
     bono_id: string | null;
     user_id: string | null;
@@ -112,9 +121,9 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   // Ingresos: pagos cobrados este mes y el mes anterior.
   let ingresosMes = 0;
   let ingresosMesAnterior = 0;
-  const servicioDeBono = new Map(bonos.map((b) => [b.id, b.servicio]));
+  const servicioDeBono = new Map(todosLosBonos.map((b) => [b.id, b.servicio]));
   const ingresosServicio: ResumenAdmin["ingresosServicio"] = { grupal: { mes: 0, anterior: 0 }, individual: { mes: 0, anterior: 0 }, online: { mes: 0, anterior: 0 }, otros: { mes: 0, anterior: 0 } };
-  const tarifaDeBono = new Map(bonos.map((b) => [b.id, b.tipos_bono?.nombre ?? ""]));
+  const tarifaDeBono = new Map(todosLosBonos.map((b) => [b.id, b.tipos_bono?.nombre ?? ""]));
   const pagosMes: ResumenAdmin["pagosMes"] = { todos: [], grupal: [], individual: [], online: [], otros: [] };
   for (const p of pagos) {
     if (p.estado !== "pagado") continue;
@@ -139,10 +148,11 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   // Un bono sin clases pero dentro de sus fechas sigue siendo activo.
   const vigente = (b: BonoFila) => b.estado === "activo" || (b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en) > ahora);
   const activosBonos = bonos.filter(vigente);
-  const porServicio = (servicio: string): PersonaResumen[] => {
+  const activosInvitadosBonos = bonosInvitados.filter(vigente);
+  const porServicio = (servicio: string, origen: BonoFila[] = activosBonos): PersonaResumen[] => {
     const vistos = new Set<string>();
     const lista: PersonaResumen[] = [];
-    for (const b of activosBonos.filter((x) => x.servicio === servicio)) {
+    for (const b of origen.filter((x) => x.servicio === servicio)) {
       if (vistos.has(b.user_id)) continue;
       vistos.add(b.user_id);
       lista.push({
@@ -157,20 +167,25 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   const individual = porServicio("individual");
   const online = porServicio("online");
   const totalActivos = new Set(activosBonos.map((b) => b.user_id)).size;
+  const invGrupal = porServicio("grupal", activosInvitadosBonos);
+  const invIndividual = porServicio("individual", activosInvitadosBonos);
+  const invOnline = porServicio("online", activosInvitadosBonos);
+  const totalInvitados = new Set(activosInvitadosBonos.map((b) => b.user_id)).size;
 
   // Caducan pronto: bonos activos (de cualquier tipo) que caducan en los próximos días.
   const diasAvisoBonosElegidos = await diasAvisoBonos();
   const limite = new Date(ahora.getTime() + diasAvisoBonosElegidos * 24 * 3600 * 1000);
   // No salen quienes ya han renovado: tienen otra tarifa del mismo servicio que dura más o que empieza después.
+  const vigentesTodos = todosLosBonos.filter(vigente);
   const yaRenovado = (b: BonoFila) =>
-    bonos.some(
+    todosLosBonos.some(
       (x) =>
         x.id !== b.id &&
         x.user_id === b.user_id &&
         x.servicio === b.servicio &&
         (x.estado === "en_cola" || (vigente(x) && !!x.caduca_en && new Date(x.caduca_en) > new Date(b.caduca_en as string))),
     );
-  const caducanPronto = activosBonos
+  const caducanPronto = vigentesTodos
     .filter((b) => b.caduca_en && new Date(b.caduca_en) <= limite && !yaRenovado(b))
     .sort((a, b) => (a.caduca_en ?? "").localeCompare(b.caduca_en ?? ""))
     .map((b) => ({
@@ -222,6 +237,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   const conBonoAlAcabarMesAnterior = new Set(bonos.filter((b) => enMarchaEn(b, desdeMes)).map((b) => b.user_id));
   const activosMesAnterior = conBonoAlAcabarMesAnterior.size;
   const anteriorDe = (servicio: string) => new Set(bonos.filter((b) => b.servicio === servicio && enMarchaEn(b, desdeMes)).map((b) => b.user_id)).size;
+  const invitadosMesAnterior = new Set(bonosInvitados.filter((b) => enMarchaEn(b, desdeMes)).map((b) => b.user_id)).size;
   const activosMesAnteriorServicio = { grupal: anteriorDe("grupal"), individual: anteriorDe("individual"), online: anteriorDe("online") };
 
   // Alumnos perdidos: su bono terminó en el periodo y no tienen otro en marcha (ni esperando) al acabar.
@@ -264,6 +280,9 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     diferenciaPct,
     activos: { total: totalActivos, grupal: grupal.length, individual: individual.length, online: online.length },
     activosMesAnterior,
+    invitados: { total: totalInvitados, grupal: invGrupal.length, individual: invIndividual.length, online: invOnline.length },
+    invitadosActivos: { grupal: invGrupal, individual: invIndividual, online: invOnline },
+    invitadosMesAnterior,
     activosPorServicio: { grupal, individual, online },
     activosMesAnteriorServicio,
     ingresosServicio,

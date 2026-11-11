@@ -7,7 +7,7 @@ import { claveDia, fechaCorta, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
-import Avatar from "../../../Avatar";
+import FotoAmpliable from "../../../FotoAmpliable";
 import Medidas from "../../../perfil/Medidas";
 import Progreso from "../../../progreso/Progreso";
 import styles from "../../admin.module.css";
@@ -670,6 +670,7 @@ export default async function FichaUsuario({
                 </div>
               </details>
               <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>
+              {online && <Link href={`/admin/usuarios/${id}/entrenos`}>Historial de entrenamientos</Link>}
               <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
               {presencial && <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>}
               {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
@@ -769,7 +770,7 @@ export default async function FichaUsuario({
 
       <section className={styles.tarjeta}>
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-          <Avatar nombre={nombre} url={foto} tamano={72} />
+          <FotoAmpliable nombre={nombre} url={foto} tamano={72} />
           <div style={{ minWidth: 0 }}>
             <strong style={{ fontSize: "1.15rem" }}>{nombre}</strong>
             <div className={estilos.etiquetas} style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "4px 0" }}>

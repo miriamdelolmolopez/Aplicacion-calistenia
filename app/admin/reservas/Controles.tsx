@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "../../Avatar";
+import FotoAmpliable from "../../FotoAmpliable";
 import styles from "../admin.module.css";
 import { cancelarClase } from "../clases/acciones";
 import { apuntarAtleta, listarAtletasParaApuntar, marcarAsistencia, type Asistencia, type Atleta } from "./acciones";
@@ -73,7 +74,7 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
           .map((p) => (
             <div key={p.reservaId} className={`${estilos.tarjetaPersona} ${p.userId === elegida ? estilos.tarjetaElegida : ""}`}>
               <div className={estilos.personaCabecera}>
-                <Avatar nombre={p.nombre} url={p.foto} tamano={56} />
+                <FotoAmpliable nombre={p.nombre} url={p.foto} tamano={56} />
                 <div className={estilos.personaDatos}>
                   <strong>{p.nombre}</strong>
                   <span className={styles.ayuda}>{estadoTexto(p, clase.pasada)}</span>
