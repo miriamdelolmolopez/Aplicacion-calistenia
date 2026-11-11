@@ -52,13 +52,22 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
-  const { data } = await supabase
+  // Lo que no depende de lo demás (catálogo de ejercicios, personas y planes) se pide a la vez que la rutina.
+  const [{ data }, { data: ejerciciosDatos }, { data: alumnosDatos }, { data: planes }] = await Promise.all([
+    supabase
     .from("rutinas")
     .select(
       "id, nombre, nota, estado, entrenos_semana, semanas, foto_url, user_id, profiles(nombre, apellidos, email), rutina_sesiones(id, nombre, nota, foto_url, orden, archivada, rutina_items(id, ejercicio_id, orden, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, grupo))",
     )
     .eq("id", id)
-    .maybeSingle();
+    .maybeSingle(),
+    supabase
+      .from("ejercicios")
+      .select("id, nombre, categoria, tipo, activo, foto_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))")
+      .order("nombre"),
+    supabase.from("profiles").select("id, nombre, apellidos, email, rol").in("rol", ["alumno", "invitado"]).order("nombre"),
+    supabase.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo"),
+  ]);
   if (!data) notFound();
   const r = data as unknown as FilaRutina;
 
@@ -77,30 +86,26 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
     }));
 
   const idsItems = sesiones.flatMap((s) => s.items.map((i) => i.id));
-  const { data: cambiosDatos } = idsItems.length
-    ? await supabase
+  const [{ data: cambiosDatos }, { data: extrasDatos }] = await Promise.all([
+    idsItems.length
+    ? supabase
         .from("rutina_cambios_semana")
         .select("id, item_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota, quitado")
         .in("item_id", idsItems)
         .order("semana")
-    : { data: [] };
-  const cambios: CambioSemana[] = ((cambiosDatos ?? []) as CambioSemana[]).map((c) => ({ ...c, peso_kg: c.peso_kg === null ? null : Number(c.peso_kg) }));
-
-  const { data: extrasDatos } = sesiones.length
-    ? await supabase
+    : Promise.resolve({ data: [] }),
+    sesiones.length
+    ? supabase
         .from("rutina_extras_semana")
         .select("id, sesion_id, semana, ejercicio_id, series, reps_min, reps_max, segundos_min, segundos_max, peso_kg, distancia_m, descanso_seg, nota")
         .in("sesion_id", sesiones.map((s) => s.id))
         .order("semana")
-    : { data: [] };
+    : Promise.resolve({ data: [] }),
+  ]);
+  const cambios: CambioSemana[] = ((cambiosDatos ?? []) as CambioSemana[]).map((c) => ({ ...c, peso_kg: c.peso_kg === null ? null : Number(c.peso_kg) }));
+
   const extras: ExtraSemana[] = ((extrasDatos ?? []) as ExtraSemana[]).map((x) => ({ ...x, peso_kg: x.peso_kg === null ? null : Number(x.peso_kg) }));
 
-  const { data: ejerciciosDatos } = await supabase
-    .from("ejercicios")
-    .select(
-      "id, nombre, categoria, tipo, activo, foto_url, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre))",
-    )
-    .order("nombre");
   const catalogo: CatalogoEjercicio[] = ((ejerciciosDatos ?? []) as unknown as FilaEjercicio[]).map(
     (e) => ({
       id: e.id,
@@ -114,12 +119,6 @@ export default async function EditarRutina({ params }: { params: Promise<{ id: s
     }),
   );
 
-  const { data: alumnosDatos } = await supabase
-    .from("profiles")
-    .select("id, nombre, apellidos, email, rol")
-    .in("rol", ["alumno", "invitado"])
-    .order("nombre");
-  const { data: planes } = await supabase.from("bonos").select("user_id").eq("servicio", "online").eq("estado", "activo");
   const conPlan = new Set((planes ?? []).map((p) => p.user_id));
   // Los invitados solo salen si tienen una prueba online en marcha.
   const alumnos = ((alumnosDatos ?? []) as (Persona & { id: string; rol: string })[]).filter((a) => a.rol === "alumno" || conPlan.has(a.id)).map((a) => ({

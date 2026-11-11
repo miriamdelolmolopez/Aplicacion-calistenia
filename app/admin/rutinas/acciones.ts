@@ -33,6 +33,11 @@ function mensajeDe(error: { message: string } | null): string {
   return error?.message ?? "No se ha podido guardar.";
 }
 
+// Para los cambios dentro de una rutina que no se ven en las listas (guardar un ejercicio, unir, separar, reordenar): solo se vuelve a pintar esa rutina, que es más rápido.
+function refrescarRutina(rutinaId: string) {
+  revalidatePath(`/admin/rutinas/${rutinaId}`);
+}
+
 function refrescar(rutinaId?: string) {
   revalidatePath("/admin/rutinas");
   revalidatePath("/admin/plantillas-online");
@@ -283,7 +288,7 @@ export async function reordenarItems(rutinaId: string, sesionId: string, ids: st
 
   const { error } = await createAdminClient().rpc("reordenar_items", { p_sesion: sesionId, p_ids: ids });
   if (error) return { ok: false, error: mensajeDe(error) };
-  refrescar(rutinaId);
+  refrescarRutina(rutinaId);
   return { ok: true };
 }
 
@@ -293,7 +298,7 @@ export async function unirConAnterior(rutinaId: string, itemId: string): Promise
 
   const { error } = await createAdminClient().rpc("unir_con_anterior", { p_item: itemId });
   if (error) return { ok: false, error: mensajeDe(error) };
-  refrescar(rutinaId);
+  refrescarRutina(rutinaId);
   return { ok: true };
 }
 
@@ -303,7 +308,7 @@ export async function separarItem(rutinaId: string, itemId: string): Promise<Res
 
   const { error } = await createAdminClient().rpc("separar_item", { p_item: itemId });
   if (error) return { ok: false, error: mensajeDe(error) };
-  refrescar(rutinaId);
+  refrescarRutina(rutinaId);
   return { ok: true };
 }
 
@@ -384,7 +389,7 @@ export async function guardarItem(_previo: Estado, formData: FormData): Promise<
   const { error } = await admin.from("rutina_items").update(cambios).eq("id", id);
   if (error) return { error: "No se ha podido guardar. Revisa los números." };
 
-  refrescar(rutinaId);
+  refrescarRutina(rutinaId);
   return { mensaje: "Guardado." };
 }
 
