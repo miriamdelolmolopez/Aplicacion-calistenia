@@ -37,7 +37,14 @@ export default function VideosEjercicio({ videos, titulo, proporcion, redondeo, 
   return (
     <div style={adaptable ? { display: "flex", flexDirection: "column", alignItems: "center", gap: 8 } : undefined}>
     <div style={{ position: "relative", ...(adaptable ? { width: vertical ? "min(100%, calc(56dvh * 9 / 16))" : "100%" } : null) }}>
-      <VideoEjercicio key={v.url} url={v.url} titulo={`${titulo} · ${v.nombre}`} proporcion={adaptable ? (vertical ? "9 / 16" : "16 / 9") : proporcion} redondeo={redondeo} />
+      <VideoEjercicio
+        key={v.url}
+        url={v.url}
+        titulo={`${titulo} · ${v.nombre}`}
+        proporcion={adaptable ? (vertical ? "9 / 16" : "16 / 9") : proporcion}
+        redondeo={redondeo}
+        alConocerForma={adaptable ? (ancho, alto) => setFormatos((previo) => ({ ...previo, [v.url]: alto > ancho })) : undefined}
+      />
       {videos.length > 1 && (
         <>
           <button type="button" style={flecha("izquierda")} onClick={() => setPos((actual - 1 + videos.length) % videos.length)} aria-label={en ? "Previous video" : "Vídeo anterior"}>

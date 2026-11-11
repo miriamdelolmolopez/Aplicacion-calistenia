@@ -5,6 +5,7 @@ export type Video = {
   origen: "youtube" | "drive" | "archivo";
   embed: string; // dirección para mostrarlo dentro de la app
   enlace: string; // enlace limpio que se guarda
+  directo?: string; // en Drive: dirección del archivo para reproducirlo con el reproductor del móvil (sin los controles de Drive)
 };
 
 const ID_YOUTUBE = /^[\w-]{11}$/;
@@ -62,6 +63,7 @@ export function analizarVideo(texto: string): Video | null {
       return {
         origen: "drive",
         embed: `https://drive.google.com/file/d/${idDrive}/preview`,
+        directo: `https://drive.usercontent.google.com/download?id=${idDrive}&export=download&confirm=t`,
         enlace: `https://drive.google.com/file/d/${idDrive}/view`,
       };
     }

@@ -21,7 +21,8 @@ export default function BotonGoogle() {
     const codigo = parametros.get("c");
     const { error: fallo } = await createClient().auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${location.origin}/auth/confirmar?next=/inicio${desdePrueba ? "&origen=prueba" : ""}${codigo ? `&c=${encodeURIComponent(codigo)}` : ""}` },
+      // «select_account»: Google pregunta siempre con qué cuenta entrar (si no, entra solo con la última que se usó).
+      options: { queryParams: { prompt: "select_account" }, redirectTo: `${location.origin}/auth/confirmar?next=/inicio${desdePrueba ? "&origen=prueba" : ""}${codigo ? `&c=${encodeURIComponent(codigo)}` : ""}` },
     });
     if (fallo) {
       setError(true);
