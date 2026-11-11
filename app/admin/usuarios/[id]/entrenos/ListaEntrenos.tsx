@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { fechaCorta, textoHora } from "@/lib/fechas";
+import { claveDia, fechaCorta, textoHora } from "@/lib/fechas";
 import { nombreEstado, tiempo } from "@/lib/entrenoDocumento";
 import PanelFiltros from "../../../../PanelFiltros";
 import BotonDocumento from "../../../../rutina/BotonDocumento";
@@ -24,6 +24,10 @@ const ORDENES = [
   { v: "corto", t: "Más cortos primero" },
 ];
 
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const nombreMes = (clave: string) => `${MESES[Number(clave.slice(5, 7)) - 1]} ${clave.slice(0, 4)}`;
+const mesDe = (iso: string) => claveDia(iso).slice(0, 7); // AAAA-MM en hora de Madrid
+
 const sinTildes = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 // Tarjetas con todos los entrenos de una persona: buscador, filtros y orden; en cada una, ver, editar, descargar y eliminar.
@@ -32,6 +36,7 @@ export default function ListaEntrenos({ entrenos }: { userId: string; entrenos: 
   const [busqueda, setBusqueda] = useState("");
   const [estado, setEstado] = useState("todos");
   const [rutina, setRutina] = useState("todas");
+  const [mes, setMes] = useState("todos");
   const [orden, setOrden] = useState("reciente");
   const [viendo, setViendo] = useState<FilaEntreno | null>(null);
   const [editando, setEditando] = useState<FilaEntreno | null>(null);
@@ -40,9 +45,12 @@ export default function ListaEntrenos({ entrenos }: { userId: string; entrenos: 
 
   const rutinas = useMemo(() => [...new Set(entrenos.map((e) => e.rutina))].sort((a, b) => a.localeCompare(b, "es")), [entrenos]);
 
+  // Los meses en los que hay algún entreno (el más reciente primero).
+  const meses = useMemo(() => [...new Set(entrenos.map((e) => mesDe(e.empezado)))].sort().reverse(), [entrenos]);
+
   const visibles = useMemo(() => {
     const q = sinTildes(busqueda.trim());
-    const lista = entrenos.filter((e) => (estado === "todos" || e.estado === estado) && (rutina === "todas" || e.rutina === rutina) && (!q || sinTildes(`${e.sesion} ${e.rutina} ${fechaCorta(e.empezado)}`).includes(q)));
+    const lista = entrenos.filter((e) => (estado === "todos" || e.estado === estado) && (rutina === "todas" || e.rutina === rutina) && (mes === "todos" || mesDe(e.empezado) === mes) && (!q || sinTildes(`${e.sesion} ${e.rutina} ${fechaCorta(e.empezado)}`).includes(q)));
     const t = (e: FilaEntreno) => new Date(e.empezado).getTime();
     lista.sort((a, b) => {
       if (orden === "antiguo") return t(a) - t(b);
@@ -52,7 +60,7 @@ export default function ListaEntrenos({ entrenos }: { userId: string; entrenos: 
       return t(b) - t(a);
     });
     return lista;
-  }, [entrenos, busqueda, estado, rutina, orden]);
+  }, [entrenos, busqueda, estado, rutina, mes, orden]);
 
   function eliminar(id: string) {
     setAviso("");
@@ -66,7 +74,7 @@ export default function ListaEntrenos({ entrenos }: { userId: string; entrenos: 
   return (
     <div>
       <PanelFiltros
-        activos={(estado !== "todos" ? 1 : 0) + (rutina !== "todas" ? 1 : 0) + (orden !== "reciente" ? 1 : 0)}
+        activos={(estado !== "todos" ? 1 : 0) + (rutina !== "todas" ? 1 : 0) + (mes !== "todos" ? 1 : 0) + (orden !== "reciente" ? 1 : 0)}
         buscador={<Buscador valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar entrenamiento…" />}
       >
         <div className={styles.campo}>
@@ -76,6 +84,17 @@ export default function ListaEntrenos({ entrenos }: { userId: string; entrenos: 
             <option value="terminado">Terminados</option>
             <option value="descartado">Descartados</option>
             <option value="en_curso">En curso</option>
+          </select>
+        </div>
+        <div className={styles.campo}>
+          <label htmlFor="fe-mes">Mes</label>
+          <select id="fe-mes" value={mes} onChange={(e) => setMes(e.target.value)}>
+            <option value="todos">Todos los meses</option>
+            {meses.map((m) => (
+              <option key={m} value={m}>
+                {nombreMes(m)}
+              </option>
+            ))}
           </select>
         </div>
         <div className={styles.campo}>

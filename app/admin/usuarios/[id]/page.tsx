@@ -14,6 +14,7 @@ import styles from "../../admin.module.css";
 import estilos from "../usuarios.module.css";
 import { EditorBono } from "../../bonos/Controles";
 import AvancesSesion from "./AvancesSesion";
+import CongelarAlumno from "./CongelarAlumno";
 import Logros from "../../../progreso/Logros";
 import CalendarioReservas, { type EventoCalendario } from "./CalendarioReservas";
 import { AlargarCortesia } from "./CorreosYCortesia";
@@ -124,6 +125,11 @@ export default async function FichaUsuario({
   // Desde cuándo es alumno/a (archivo 087): aparte, para que la ficha siga funcionando si todavía no está en Supabase.
   const { data: datosDesde } = await admin.from("profiles").select("alumno_desde").eq("id", id).maybeSingle();
   const alumnoDesde = (datosDesde as { alumno_desde?: string | null } | null)?.alumno_desde ?? null;
+  // Congelado/a (archivo 096): aparte, para que la ficha siga funcionando si todavía no está en Supabase.
+  const { data: datosCongelado } = await admin.from("profiles").select("congelado, congelado_desde, congelado_hasta, congelado_motivo").eq("id", id).maybeSingle();
+  const congelado = (datosCongelado as { congelado?: boolean; congelado_desde?: string | null; congelado_hasta?: string | null; congelado_motivo?: string | null } | null)?.congelado
+    ? { desde: datosCongelado?.congelado_desde ?? null, hasta: datosCongelado?.congelado_hasta ?? null, motivo: datosCongelado?.congelado_motivo ?? null }
+    : null;
 
   // Todo lo que no depende de otra consulta se pide a la vez.
   const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
@@ -671,6 +677,12 @@ export default async function FichaUsuario({
               </details>
               <Link href={`/admin/usuarios/${id}/pagos`}>Marcar un pago</Link>
               {online && <Link href={`/admin/usuarios/${id}/entrenos`}>Historial de entrenamientos</Link>}
+              {p.rol === "alumno" && (
+                <details className={estilos.accionDespliega} open={!!congelado}>
+                  <summary>{congelado ? "❄ Congelado/a · ver o descongelar" : "Congelar alumno/a"}</summary>
+                  <CongelarAlumno userId={p.id} congelado={congelado} />
+                </details>
+              )}
               <Link href={`/admin/usuarios/${id}/pagos?pestana=historial`}>Historial de pagos</Link>
               {presencial && <Link href={`/admin/reservas/como/${id}`}>Reservar clases en su nombre</Link>}
               {online && <Link href={rutinaDe ? `/admin/rutinas/${rutinaDe.id}` : "/admin/rutinas"}>{rutinaDe ? "Editar rutina" : "Crear su rutina"}</Link>}
@@ -786,6 +798,7 @@ export default async function FichaUsuario({
                 </span>
               )}
               {esAlumna && sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
+              {congelado && <span className={estilos.sinPagar} style={{ background: "#e3f1f7", color: "#1f5f7a" }}>❄ Congelado/a{congelado.hasta ? ` hasta el ${congelado.hasta.split("-").reverse().join("/")}` : ""}</span>}
             </div>
             <div className={styles.ayuda} style={{ overflowWrap: "anywhere" }}>
               {p.email}

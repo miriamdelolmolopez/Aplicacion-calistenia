@@ -31,6 +31,7 @@ export type TipoNotificacion =
   | "admin_regalos"
   | "admin_borrado"
   | "admin_caducan"
+  | "admin_descongelado"
   | "admin_tarea";
 
 // Se avisan siempre, la persona no los puede desactivar.

@@ -6,7 +6,7 @@ import estilos from "./inicio.module.css";
 import { obtenerResumenAdmin, type PersonaResumen, type ResumenAdmin } from "./accionesAdmin";
 
 type Servicio = "grupal" | "individual" | "online";
-type Clave = "ingresos" | "activos" | "invitados" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos" | `activos_${Servicio}` | `ingresos_${Servicio}`;
+type Clave = "ingresos" | "activos" | "invitados" | "congelados" | "nuevos" | "caducan" | "renovar" | "pendientes" | "perdidos" | `activos_${Servicio}` | `ingresos_${Servicio}`;
 
 const NOMBRE_SERVICIO: Record<Servicio, { plural: string; ingresos: string }> = {
   grupal: { plural: "Alumnos/as grupales", ingresos: "Ingresos grupales" },
@@ -84,6 +84,12 @@ export default function ResumenAdminTarjetas() {
       titulo: "Invitados/as activos",
       valor: String(datos.invitados.total),
       pie: <Comparacion actual={datos.invitados.total} anterior={datos.invitadosMesAnterior} texto={String(datos.invitadosMesAnterior)} />,
+    },
+    {
+      clave: "congelados",
+      titulo: "Congelados/as",
+      valor: String(datos.congelados.length),
+      pie: "No cuentan como activos/as",
     },
     {
       clave: "nuevos",
@@ -180,6 +186,13 @@ export default function ResumenAdminTarjetas() {
               </p>
               <Lista personas={datos.pagosMes.todos} vacio="Todavía no se ha cobrado nada este mes." />
               <Link href="/admin/informes?vista=pagos">Ver informe de ingresos →</Link>
+            </>
+          )}
+          {abierta === "congelados" && (
+            <>
+              <h3>Congelados/as</h3>
+              <p className={estilos.resumenVacio}>Alumnos/as con la tarifa en pausa (lesión, viaje…). Mientras estén así no cuentan como activos/as. Se congela y se descongela desde su ficha, en Acciones.</p>
+              <Lista personas={datos.congelados} vacio="Ahora mismo no hay nadie congelado/a." />
             </>
           )}
           {abierta === "invitados" && (

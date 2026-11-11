@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { avisarMinimos } from "@/lib/avisos";
+import { descongelarVencidos } from "@/lib/congelados";
 import { avisarDiaDeEntreno } from "@/lib/diasEntreno";
 import { ejecutarReglas } from "@/lib/reglas";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +19,7 @@ export async function GET(request: Request) {
 
   const propias = await ejecutarReglas();
   const diasEntreno = await avisarDiaDeEntreno().catch(() => 0);
+  const descongelados = await descongelarVencidos().catch(() => 0);
   const [minimos, bonos, recordatorios, tras, cumples, menos, bienvenidas, recordatoriosClase, agotados, aniversarios, avisosCaducanAdmin] = await Promise.all([
     avisarMinimos(),
     bonoPorCaducar(),
@@ -45,5 +47,6 @@ export async function GET(request: Request) {
     avisosCaducanAdmin,
     automatizacionesPropias: propias,
     avisosDiaDeEntreno: diasEntreno,
+    descongelados,
   });
 }

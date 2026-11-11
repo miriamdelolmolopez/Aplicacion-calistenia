@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAdmin } from "@/lib/admin";
+import { congeladosAhora } from "@/lib/congelados";
 import { cumpleanosProximos } from "@/lib/cumpleanos";
 import { bonosPorCaducar, diasAvisoBonos } from "@/lib/bonosPorCaducar";
 import type { CumpleProximo } from "@/lib/cumpleanosTexto";
@@ -24,6 +25,7 @@ export type ResumenAdmin = {
   invitados: { total: number; grupal: number; individual: number; online: number };
   invitadosActivos: { grupal: PersonaResumen[]; individual: PersonaResumen[]; online: PersonaResumen[] };
   invitadosMesAnterior: number;
+  congelados: PersonaResumen[]; // alumnos/as congelados/as ahora (no cuentan como activos/as)
   activosPorServicio: { grupal: PersonaResumen[]; individual: PersonaResumen[]; online: PersonaResumen[] };
   activosMesAnteriorServicio: { grupal: number; individual: number; online: number };
   ingresosServicio: Record<"grupal" | "individual" | "online" | "otros", { mes: number; anterior: number }>;
@@ -147,7 +149,13 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
   // Alumnas activas: personas con un bono activo, por tipo de servicio.
   // Un bono sin clases pero dentro de sus fechas sigue siendo activo.
   const vigente = (b: BonoFila) => b.estado === "activo" || (b.estado === "agotado" && !!b.caduca_en && new Date(b.caduca_en) > ahora);
-  const activosBonos = bonos.filter(vigente);
+  // Los alumnos/as congelados/as (lesión, etc.) no cuentan como activos mientras estén así.
+  const listaCongelados = (await congeladosAhora()).filter((c) => esAlumno(c.id));
+  const idsCongelados = new Set(listaCongelados.map((c) => c.id));
+  const congelados: PersonaResumen[] = listaCongelados
+    .map((c) => ({ id: c.id, nombre: nombre(c.id), detalle: [c.hasta ? `hasta el ${c.hasta.split("-").reverse().join("/")}` : "sin fecha de fin", c.motivo].filter(Boolean).join(" · ") }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  const activosBonos = bonos.filter((b) => vigente(b) && !idsCongelados.has(b.user_id));
   const activosInvitadosBonos = bonosInvitados.filter(vigente);
   const porServicio = (servicio: string, origen: BonoFila[] = activosBonos): PersonaResumen[] => {
     const vistos = new Set<string>();
@@ -283,6 +291,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
     invitados: { total: totalInvitados, grupal: invGrupal.length, individual: invIndividual.length, online: invOnline.length },
     invitadosActivos: { grupal: invGrupal, individual: invIndividual, online: invOnline },
     invitadosMesAnterior,
+    congelados,
     activosPorServicio: { grupal, individual, online },
     activosMesAnteriorServicio,
     ingresosServicio,

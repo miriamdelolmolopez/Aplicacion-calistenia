@@ -523,6 +523,40 @@ export default function PantallaEntreno() {
   const porcentaje = series.length > 0 ? Math.round((hechas / series.length) * 100) : 0;
 
   const delEjercicio = actual ? series.filter((s) => s.orden_ejercicio === actual.orden_ejercicio) : [];
+
+  // Superserie: varios ejercicios seguidos, sin descansar entre ellos. Se avisa de en cuál estás y qué hacer al acabar.
+  const delGrupo = actual && actual.grupo !== null ? series.filter((s) => s.grupo === actual.grupo) : [];
+  const ordenesGrupo = [...new Set(delGrupo.map((s) => s.orden_ejercicio))].sort((a, b) => a - b);
+  const posicionGrupo = actual ? ordenesGrupo.indexOf(actual.orden_ejercicio) : -1;
+  const rondasGrupo = delGrupo.length > 0 ? Math.max(...delGrupo.map((s) => s.numero)) : 0;
+  const nombreDeOrden = (o: number): string => {
+    const s = series.find((x) => x.orden_ejercicio === o);
+    const inf = s?.ejercicio_id ? ejercicios[s.ejercicio_id] : undefined;
+    return (idioma === "en" && inf?.nombre_en) || s?.nombre_ejercicio || "";
+  };
+  let avisoSuperserie: { titulo: string; texto: string } | null = null;
+  if (actual && delGrupo.length > 0 && ordenesGrupo.length > 1 && posicionGrupo >= 0) {
+    const ultimo = posicionGrupo === ordenesGrupo.length - 1;
+    const descansoFinal = delGrupo.find((s) => s.orden_ejercicio === ordenesGrupo[ordenesGrupo.length - 1] && s.numero === actual.numero)?.descanso_seg ?? actual.descanso_seg;
+    const en = idioma === "en";
+    const titulo = en ? `Superset · exercise ${posicionGrupo + 1} of ${ordenesGrupo.length}` : `Superserie · ejercicio ${posicionGrupo + 1} de ${ordenesGrupo.length}`;
+    if (!ultimo) {
+      const sig = nombreDeOrden(ordenesGrupo[posicionGrupo + 1]);
+      avisoSuperserie = {
+        titulo,
+        texto: en ? `Don't rest after this set: go straight on to «${sig}». You rest after the last exercise of the superset.` : `Al acabar esta serie no descanses: pasa directamente a «${sig}». El descanso es al terminar el último ejercicio de la superserie.`,
+      };
+    } else {
+      const primero = nombreDeOrden(ordenesGrupo[0]);
+      const vuelve = actual.numero < rondasGrupo;
+      avisoSuperserie = {
+        titulo,
+        texto: en
+          ? `Last exercise of the superset: when you finish, rest ${descansoFinal} s${vuelve ? ` and start again with «${primero}»` : ""}.`
+          : `Último ejercicio de la superserie: al acabar, descansa ${descansoFinal} s${vuelve ? ` y vuelve a empezar con «${primero}»` : ""}.`,
+      };
+    }
+  }
   const info = actual?.ejercicio_id ? ejercicios[actual.ejercicio_id] : undefined;
   const nombreActual = actual ? (idioma === "en" && info?.nombre_en) || actual.nombre_ejercicio : "";
   const tipo = actual ? TIPOS.find((x) => x.valor === actual.tipo) : undefined;
@@ -614,6 +648,12 @@ export default function PantallaEntreno() {
           <VideosEjercicio videos={info?.videos ?? []} titulo={nombreActual} idioma={idioma} />
 
           <h1 className={estilos.nombre}>{nombreActual}</h1>
+          {avisoSuperserie && (
+            <div role="note" style={{ margin: "0 0 12px", padding: "10px 14px", borderRadius: 14, border: "1px solid rgba(10, 168, 192, 0.55)", background: "rgba(10, 168, 192, 0.14)", textAlign: "left", lineHeight: 1.4 }}>
+              <strong style={{ display: "block", fontSize: "0.85rem", letterSpacing: "0.03em", textTransform: "uppercase" }}>🔁 {avisoSuperserie.titulo}</strong>
+              <span style={{ fontSize: "0.92rem" }}>{avisoSuperserie.texto}</span>
+            </div>
+          )}
           {actual.nota_objetivo && <p className={styles.ayuda}>{actual.nota_objetivo}</p>}
 
           <div className={estilos.objetivo}>
