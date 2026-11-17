@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
-import { instanteMadrid } from "@/lib/fechas";
+import { claveDia, instanteMadrid } from "@/lib/fechas";
 import { aCentimos } from "@/lib/formato";
 import { formaActiva } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -59,8 +59,25 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
   if (hastaFin && hastaFin.getTime() <= c.instante.getTime()) return { error: "La fecha de fin tiene que ser posterior al día del pago." };
   const admin = createAdminClient();
 
-  const { data: tarifa } = await admin.from("tipos_bono").select("precio_centimos").eq("id", tipo).maybeSingle();
+  const { data: tarifa } = await admin.from("tipos_bono").select("precio_centimos, servicio, servicio2").eq("id", tipo).maybeSingle();
   if (!tarifa) return { error: "No se ha encontrado esa tarifa." };
+
+  // Si todavía es invitado/a (vino a probar), al añadirle un pago pasa a alumno/a con los servicios de esa tarifa:
+  // no hace falta cambiarlo a mano antes. Si el pago falla, se deja como estaba.
+  let ascendido = false;
+  const serviciosNuevos: string[] = [];
+  const { data: persona } = await admin.from("profiles").select("rol, alumno_desde").eq("id", userId).maybeSingle();
+  if (persona?.rol === "invitado") {
+    const { data: tiene } = await admin.from("perfil_servicios").select("servicio").eq("user_id", userId);
+    const ya = new Set((tiene ?? []).map((s) => s.servicio as string));
+    for (const s of [tarifa.servicio as string, tarifa.servicio2 as string | null]) if (s && !ya.has(s) && !serviciosNuevos.includes(s)) serviciosNuevos.push(s);
+    const cambios: Record<string, unknown> = { rol: "alumno", fue_alumno: true };
+    if (!persona.alumno_desde) cambios.alumno_desde = claveDia(new Date().toISOString());
+    const { error: falloRol } = await admin.from("profiles").update(cambios).eq("id", userId).eq("rol", "invitado");
+    if (falloRol) return { error: "No se ha podido pasar a alumno/a. Inténtalo de nuevo." };
+    if (serviciosNuevos.length > 0) await admin.from("perfil_servicios").insert(serviciosNuevos.map((servicio) => ({ user_id: userId, servicio })));
+    ascendido = true;
+  }
 
   const { data: bonoId, error } = await admin.rpc("crear_bono", {
     p_user: userId,
@@ -72,7 +89,14 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
     p_descuento: descuento || null,
     ...(importe !== (tarifa.precio_centimos as number) ? { p_precio: importe } : {}),
   });
-  if (error) return { error: error.message };
+  if (error) {
+    if (ascendido) {
+      // El pago no se ha podido crear: se deja a la persona como estaba (invitado/a y con sus servicios de antes).
+      await admin.from("profiles").update({ rol: "invitado", ...(persona?.alumno_desde ? {} : { alumno_desde: null }) }).eq("id", userId);
+      for (const s of serviciosNuevos) await admin.from("perfil_servicios").delete().eq("user_id", userId).eq("servicio", s);
+    }
+    return { error: error.message };
+  }
 
   // La base de datos pone la fecha de ahora; se corrige con la elegida y se anota el mes al que corresponde.
   if (bonoId) {
@@ -93,7 +117,8 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
   }
 
   refrescar(userId);
-  return { mensaje: sinCobrar ? "Tarifa asignada. El pago queda pendiente de cobrar." : "Pago registrado y cobrado." };
+  const pasoAAlumno = ascendido ? " Ahora es alumno/a (antes era invitado/a)." : "";
+  return { mensaje: (sinCobrar ? "Tarifa asignada. El pago queda pendiente de cobrar." : "Pago registrado y cobrado.") + pasoAAlumno };
 }
 
 // Cobrar un pago pendiente desde el historial, con la fecha, hora y forma que se elijan.
