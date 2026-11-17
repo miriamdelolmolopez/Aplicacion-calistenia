@@ -63,7 +63,7 @@ export function analizarVideo(texto: string): Video | null {
       return {
         origen: "drive",
         embed: `https://drive.google.com/file/d/${idDrive}/preview`,
-        directo: `/api/video/drive/${idDrive}`,
+        // Sin «directo»: los de Drive se ven con el reproductor de Drive (no pasan por nuestro servidor, que gastaba la cuota de Vercel).
         enlace: `https://drive.google.com/file/d/${idDrive}/view`,
       };
     }

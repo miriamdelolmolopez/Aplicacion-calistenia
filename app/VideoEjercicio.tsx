@@ -4,7 +4,9 @@ import { useState } from "react";
 import { analizarVideo } from "@/lib/video";
 
 // Muestra el vídeo de un ejercicio dentro de la app (YouTube, Google Drive o un archivo subido).
-// Los de Drive se reproducen con el reproductor normal del móvil, con la forma real del vídeo (vertical u horizontal) y sin los
+// (Desde noviembre de 2026 los de Drive usan el reproductor de Drive: reenviarlos por nuestro servidor gastaba la cuota de Vercel.
+// El código del reproductor del móvil sigue aquí por si algún día los vídeos se sirven desde un almacén propio.)
+// Los de Drive se reproducían con el reproductor normal del móvil, con la forma real del vídeo (vertical u horizontal) y sin los
 // controles gigantes de Drive; si Drive no deja (límite de descargas, por ejemplo), se vuelve a su reproductor de siempre.
 export default function VideoEjercicio({
   url,
