@@ -14,7 +14,7 @@ export default function Recuperar() {
 
   const [correo, setCorreo] = useState("");
   const [error, setError] = useState("");
-  const [enviado, setEnviado] = useState(false);
+  const [enviado, setEnviado] = useState<"enviado" | "espera" | "fallo" | null>(null);
   const [cargando, setCargando] = useState(false);
 
   async function enviar(e: FormEvent) {
@@ -23,10 +23,11 @@ export default function Recuperar() {
     if (!emailValido(correo)) return setError(t.errorCampo);
 
     setCargando(true);
-    await pedirRecuperacion(correo, idioma);
+    const r = await pedirRecuperacion(correo, idioma);
     setCargando(false);
-    // Siempre se muestra el mismo mensaje, exista o no el correo.
-    setEnviado(true);
+    // Si el correo no existe se muestra lo mismo que si existiera; solo se avisa de un fallo real o de pedirlo demasiado pronto.
+    if (r.estado === "enviado") setEnviado("enviado");
+    else setError(r.estado === "espera" ? t.recuperarEspera : t.recuperarFallo);
   }
 
   return (
@@ -37,7 +38,7 @@ export default function Recuperar() {
         <p>{t.recuperarIntro}</p>
       </div>
 
-      {enviado ? (
+      {enviado === "enviado" ? (
         <p className={styles.aviso} role="status">
           {t.recuperarEnviado}
         </p>

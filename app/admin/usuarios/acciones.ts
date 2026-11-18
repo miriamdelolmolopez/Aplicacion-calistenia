@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { invitar } from "@/lib/registro";
 import { enviarCorreo } from "@/lib/email";
-import { correoInvitacion } from "@/lib/plantillas-email";
+import { correoInvitacion, correoRecuperacion } from "@/lib/plantillas-email";
 import { fijarInicioBono, inicioAltaValido } from "@/lib/altaBono";
 import { claveDia, instanteMadrid, sumarDias } from "@/lib/fechas";
 import { formaActiva, formasActivas } from "@/lib/formasPago";
@@ -27,6 +27,31 @@ export async function guardarNota(_previo: Estado, formData: FormData): Promise<
 
   revalidatePath(`/admin/usuarios/${userId}`);
   return { mensaje: "Nota guardada." };
+}
+
+// Saca un enlace nuevo para que la persona elija su contraseña y entre (sirve para quien nunca ha entrado o no recuerda cómo).
+// Intenta mandárselo por correo y devuelve también el enlace, para pasárselo por WhatsApp si el correo no llega.
+export async function enviarEnlaceAcceso(userId: string): Promise<{ ok: boolean; error?: string; enlace?: string; enviado?: boolean; motivo?: string }> {
+  await requireAdmin("usuarios");
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { ok: false, error: "No se ha encontrado a la persona." };
+  const admin = createAdminClient();
+  const { data: persona } = await admin.from("profiles").select("email, rol, idioma, sin_correos").eq("id", userId).maybeSingle();
+  if (!persona?.email) return { ok: false, error: "Esta persona no tiene correo guardado." };
+  if (persona.rol === "archivado") return { ok: false, error: "Está archivada: recupérala primero para que pueda entrar." };
+
+  const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email: persona.email });
+  if (error || !data?.properties?.hashed_token) return { ok: false, error: "No se ha podido crear el enlace. Inténtalo de nuevo." };
+  const ruta = `/auth/confirmar?token_hash=${data.properties.hashed_token}&type=recovery`;
+
+  let enviado = false;
+  let motivo: string | undefined;
+  if (persona.sin_correos) motivo = "Tiene activado «No enviarle correos», así que no se le ha mandado nada.";
+  else enviado = await enviarCorreo(correoRecuperacion({ para: persona.email, idioma: persona.idioma === "en" ? "en" : "es", ruta }));
+
+  const h = await headers();
+  const host = h.get("host") ?? "localhost:3000";
+  const protocolo = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return { ok: true, enlace: `${protocolo}://${host}${ruta}`, enviado, motivo };
 }
 
 const SERVICIOS_VALIDOS = ["grupal", "individual", "online", "taller"];

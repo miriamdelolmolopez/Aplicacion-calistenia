@@ -51,7 +51,9 @@ export const textos = {
     recuperarIntro: "Te enviaremos un enlace para elegir una contraseña nueva.",
     recuperarBoton: "Enviar enlace",
     recuperarEnviado:
-      "Si el correo existe, recibirás un enlace en unos minutos.",
+      "Si ese correo está dado de alta, recibirás el enlace en unos minutos (mira también en spam o promociones). Si no llega, comprueba que es exactamente el correo que le diste a Miriam o escríbele por WhatsApp.",
+    recuperarEspera: "Acabas de pedir un enlace. Espera un minuto y vuelve a intentarlo; mira antes en spam o promociones.",
+    recuperarFallo: "No hemos podido enviar el correo ahora mismo. Inténtalo de nuevo en unos minutos o escríbele a Miriam por WhatsApp.",
 
     // Crear contraseña
     contrasenaTitulo: "Elige tu contraseña",
@@ -543,7 +545,9 @@ export const textos = {
     recuperarTitulo: "Reset password",
     recuperarIntro: "We'll send you a link to choose a new password.",
     recuperarBoton: "Send link",
-    recuperarEnviado: "If the email exists, you'll get a link in a few minutes.",
+    recuperarEnviado: "If that email is registered, you'll get the link in a few minutes (check spam or promotions too). If it doesn't arrive, make sure it's exactly the email you gave Miriam, or message her on WhatsApp.",
+    recuperarEspera: "You just asked for a link. Wait a minute and try again; check spam or promotions first.",
+    recuperarFallo: "We couldn't send the email right now. Try again in a few minutes or message Miriam on WhatsApp.",
 
     contrasenaTitulo: "Choose your password",
     contrasenaIntro: "You'll use it to log in from now on.",

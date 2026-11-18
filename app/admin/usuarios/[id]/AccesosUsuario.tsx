@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SECCIONES_ADMIN } from "@/lib/seccionesAdmin";
 import styles from "../../admin.module.css";
+import EnlaceCopiable from "../../EnlaceCopiable";
 import AyudaI from "../../comunes/AyudaI";
-import { archivarUsuario, desarchivarUsuario, eliminarUsuario, guardarAccesos } from "../acciones";
+import { archivarUsuario, desarchivarUsuario, eliminarUsuario, enviarEnlaceAcceso, guardarAccesos } from "../acciones";
 import estilos from "../usuarios.module.css";
 
 type Accion = "guardar" | "archivar" | "borrar" | null;
@@ -57,6 +58,19 @@ export default function AccesosUsuario({
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
+  const [acceso, setAcceso] = useState<{ enlace: string; enviado: boolean; motivo?: string } | null>(null);
+  const [generando, setGenerando] = useState(false);
+  const [errorAcceso, setErrorAcceso] = useState<string | null>(null);
+
+  async function sacarEnlaceAcceso() {
+    setGenerando(true);
+    setErrorAcceso(null);
+    setAcceso(null);
+    const r = await enviarEnlaceAcceso(userId);
+    setGenerando(false);
+    if (!r.ok || !r.enlace) return setErrorAcceso(r.error ?? "No se ha podido crear el enlace.");
+    setAcceso({ enlace: r.enlace, enviado: !!r.enviado, motivo: r.motivo });
+  }
 
   const cambiado = OPCIONES.some((o) => op[o.clave] !== inicial[o.clave]) || excluidos.slice().sort().join() !== excluidosIniciales.slice().sort().join();
   const asciende = op.admin && !inicial.admin;
@@ -125,6 +139,29 @@ export default function AccesosUsuario({
               {esMiCuenta && o.clave === "admin" && <span className={styles.ayuda}>Es tu cuenta: no puedes dejar de ser administradora.</span>}
             </div>
           ))}
+
+          <div className={styles.campo}>
+            <span>
+              Acceso a la app <AyudaI texto="Si no le llega el correo, o el enlace le sale caducado, saca uno nuevo aquí. Se le manda por correo y también lo ves para pasárselo por WhatsApp. Cada enlace sirve una sola vez y dura 24 horas." />
+            </span>
+            <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} disabled={generando} onClick={sacarEnlaceAcceso}>
+              {generando ? "Preparando…" : "Enviar enlace de acceso"}
+            </button>
+            {errorAcceso && (
+              <p className={styles.error} role="alert">
+                {errorAcceso}
+              </p>
+            )}
+            {acceso && (
+              <>
+                <p className={styles.aviso} role="status">
+                  {acceso.enviado ? `Le hemos mandado el correo a ${nombre}. ` : `${acceso.motivo ?? "No se ha podido enviar el correo."} `}
+                  Si no le llega, mándale este enlace por WhatsApp:
+                </p>
+                <EnlaceCopiable enlace={acceso.enlace} />
+              </>
+            )}
+          </div>
 
           {op.admin && (
             <div className={styles.campo}>
