@@ -27,6 +27,18 @@ export async function GET(request: NextRequest) {
   fallo.pathname = "/entrar";
   fallo.search = "?error=enlace";
 
+  // Enlaces de correo (token): los buzones suelen abrirlos solos para comprobarlos y así los gastan antes de que la persona los pulse.
+  // Por eso primero se enseña una pantalla con un botón «Continuar»; el enlace solo se usa al pulsarlo (entonces llega con ok=1).
+  if (tokenHash && !codigo && searchParams.get("ok") !== "1") {
+    const parada = request.nextUrl.clone();
+    parada.pathname = "/auth/continuar";
+    parada.search = "";
+    parada.searchParams.set("token_hash", tokenHash);
+    if (tipo) parada.searchParams.set("type", tipo);
+    if (siguiente) parada.searchParams.set("next", siguiente);
+    return NextResponse.redirect(parada);
+  }
+
   const supabase = await createClient();
   let correcto = false;
 

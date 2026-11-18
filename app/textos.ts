@@ -46,6 +46,11 @@ export const textos = {
     pedirEnlaceNuevo: "Pedir un enlace nuevo para elegir mi contraseña",
     errorCredenciales: "Correo o contraseña incorrectos.",
 
+    // Pantalla intermedia de los enlaces de correo
+    continuarTitulo: "Un paso más",
+    continuarIntro: "Pulsa el botón para continuar. El enlace solo se usa al pulsarlo.",
+    continuarBoton: "Continuar",
+
     // Recuperar
     recuperarTitulo: "Recuperar contraseña",
     recuperarIntro: "Te enviaremos un enlace para elegir una contraseña nueva.",
@@ -541,6 +546,10 @@ export const textos = {
     errorEnlace: "The link has expired or is not valid. Each link works only once.",
     pedirEnlaceNuevo: "Request a new link to choose my password",
     errorCredenciales: "Wrong email or password.",
+
+    continuarTitulo: "One more step",
+    continuarIntro: "Press the button to continue. The link is only used when you press it.",
+    continuarBoton: "Continue",
 
     recuperarTitulo: "Reset password",
     recuperarIntro: "We'll send you a link to choose a new password.",
