@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { TarjetaCifra } from "../admin/informes/GraficosPagos";
 import { useIdioma } from "../useIdioma";
-import { claveDia, lunesDe, sumarDias } from "@/lib/fechas";
+import { claveDia, inicioSemanaDe, sumarDias } from "@/lib/fechas";
+import { diaInicioSemana } from "@/lib/diaInicioSemana";
 import { createClient } from "@/lib/supabase/client";
 import estilos from "./logros.module.css";
 
@@ -13,11 +14,11 @@ const RACHA_META = [4, 8];
 type Datos = { total: number; mes: number; rachaActual: number; mejorRacha: number };
 
 // Logros del entrenamiento online: entrenos terminados y semanas seguidas entrenando.
-function calcular(fechas: string[], hoy: string): Datos {
+function calcular(fechas: string[], hoy: string, inicio: number): Datos {
   const dias = fechas.map((f) => claveDia(f));
-  const semanas = new Set(dias.map((d) => lunesDe(d)));
+  const semanas = new Set(dias.map((d) => inicioSemanaDe(d, inicio))); // semanas contadas desde el día que elige la persona
   let rachaActual = 0;
-  const lunesHoy = lunesDe(hoy);
+  const lunesHoy = inicioSemanaDe(hoy, inicio);
   for (let i = 0; i < 520; i++) {
     if (semanas.has(sumarDias(lunesHoy, -7 * i))) rachaActual++;
     else if (i > 0) break;
@@ -45,7 +46,10 @@ export default function LogrosOnline({ userId, admin = false }: { userId?: strin
       if (userId) consulta = consulta.eq("user_id", userId);
       const { data } = await consulta;
       const fechas = ((data ?? []) as { terminado_en: string }[]).map((e) => e.terminado_en);
-      if (vivo) setDatos(calcular(fechas, claveDia(new Date().toISOString())));
+      const supabase = createClient();
+      const { data: yo } = await supabase.auth.getUser();
+      const inicio = await diaInicioSemana(supabase, userId ?? yo.user?.id ?? "");
+      if (vivo) setDatos(calcular(fechas, claveDia(new Date().toISOString()), inicio));
     })();
     return () => {
       vivo = false;

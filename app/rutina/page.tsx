@@ -13,7 +13,9 @@ import estilos from "./entrenamiento.module.css";
 import CalendarioEntreno from "./CalendarioEntreno";
 import DiasEntreno from "../ajustes/notificaciones/DiasEntreno";
 import { claveDia } from "@/lib/fechas";
-import { lunesDe, numeroSemana } from "@/lib/semanas";
+import { inicioSemanaDe, numeroSemana } from "@/lib/semanas";
+import { diaInicioSemana } from "@/lib/diaInicioSemana";
+import DiaInicioSemana from "./DiaInicioSemana";
 import { createClient } from "@/lib/supabase/client";
 import { planOnlineComo } from "./planComo";
 import { leerComo } from "./useComo";
@@ -23,15 +25,17 @@ type Resumen = {
   planActivo: boolean;
   rutina: { nombre: string; fotoUrl: string | null; semana: number; objetivo: number; hechos: number; siguiente: { id: string; nombre: string } | null } | null;
   enCurso: { id: string; nombre_sesion: string } | null;
+  diaInicio: number; // día en que empieza su semana de entreno (0 = lunes … 6 = domingo)
+  comoOtra: boolean; // Miriam mirando a otra persona: solo lectura
 };
 
 async function obtenerResumen(): Promise<Resumen> {
   const supabase = createClient();
   const como = leerComo(); // «ver como»: se lee lo de esa persona
   const { data: plan } = como ? { data: await planOnlineComo(como) } : await supabase.rpc("mi_plan_online");
-  if (plan !== true) return { planActivo: false, rutina: null, enCurso: null };
-  const { data: yo } = await supabase.auth.getUser();
+  if (plan !== true) return { planActivo: false, rutina: null, enCurso: null, diaInicio: 0, comoOtra: !!como };  const { data: yo } = await supabase.auth.getUser();
   const userId = como ?? yo.user?.id ?? "";
+  const diaInicio = await diaInicioSemana(supabase, userId);
 
   const { data: curso } = await supabase
     .from("entrenos")
@@ -60,7 +64,7 @@ async function obtenerResumen(): Promise<Resumen> {
   let rutina: Resumen["rutina"] = null;
   if (r) {
     const hoy = claveDia(new Date().toISOString());
-    const lunes = lunesDe(hoy);
+    const lunes = inicioSemanaDe(hoy, diaInicio); // primer día de su semana de entreno
     const { data: recientes } = await supabase
       .from("entrenos")
       .select("terminado_en")
@@ -71,7 +75,7 @@ async function obtenerResumen(): Promise<Resumen> {
     rutina = {
       nombre: r.nombre,
       fotoUrl: r.foto_url,
-      semana: r.publicada_en ? numeroSemana(claveDia(r.publicada_en), hoy) : 1,
+      semana: r.publicada_en ? numeroSemana(claveDia(r.publicada_en), hoy, diaInicio) : 1,
       objetivo: r.entrenos_semana ?? Math.max(r.rutina_sesiones.length, 1),
       hechos,
       // La sesión que toca: se van haciendo en el orden de la rutina.
@@ -82,7 +86,7 @@ async function obtenerResumen(): Promise<Resumen> {
       })(),
     };
   }
-  return { planActivo: true, rutina, enCurso: (curso as Resumen["enCurso"]) ?? null };
+  return { planActivo: true, rutina, enCurso: (curso as Resumen["enCurso"]) ?? null, diaInicio, comoOtra: !!como };
 }
 
 const OPCIONES: { href: string; icono: NombreIcono; texto: "opcionVerRutina" | "opcionHistorial" | "opcionMetricas" }[] = [
@@ -212,6 +216,8 @@ export default function Entrenamiento() {
           </div>
 
           <DiasEntreno en={idioma === "en"} />
+
+          <DiaInicioSemana valor={datos.diaInicio} en={idioma === "en"} soloLectura={datos.comoOtra} alCambiar={() => obtenerResumen().then(setDatos)} />
         </>
       )}
     </main>

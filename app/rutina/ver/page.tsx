@@ -13,7 +13,8 @@ import estilos from "./ver.module.css";
 import { minutosEstimados } from "@/lib/duracion";
 import { intensidadesAgregadas } from "@/lib/ejercicios";
 import { claveDia, fechaCorta } from "@/lib/fechas";
-import { lunesDe, sumarDias } from "@/lib/semanas";
+import { inicioSemanaDe, sumarDias } from "@/lib/semanas";
+import { diaInicioSemana } from "@/lib/diaInicioSemana";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../Cargando";
 import { useComo } from "../useComo";
@@ -47,6 +48,7 @@ type Datos = {
   anteriores: { id: string; nombre: string; publicada_en: string | null; sesiones: { id: string; nombre: string }[] }[];
   hechos: { sesionId: string | null; dia: string }[];
   dias: number[]; // 1 = lunes … 7 = domingo
+  diaInicio: number; // día en que empieza su semana de entreno (0 = lunes … 6 = domingo)
 };
 
 // «como»: Miriam mira la rutina de otra persona tal y como la ve esa persona (las reglas de acceso solo se lo permiten a ella).
@@ -55,7 +57,8 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
   const { data: auth } = await supabase.auth.getUser();
   const userId = como ?? auth.user?.id ?? "";
   const { data: plan } = como ? { data: await planOnlineComo(como) } : await supabase.rpc("mi_plan_online");
-  if (plan !== true) return { userId, planActivo: false, rutina: null, anteriores: [], hechos: [], dias: [] };
+  if (plan !== true) return { userId, planActivo: false, rutina: null, anteriores: [], hechos: [], dias: [], diaInicio: 0 };
+  const diaInicio = await diaInicioSemana(supabase, userId);
 
   const [{ data: rutinas }, { data: entrenos }, { data: dias }] = await Promise.all([
     supabase
@@ -115,6 +118,7 @@ async function obtenerDatos(como: string | null): Promise<Datos> {
       .filter((e) => e.terminado_en)
       .map((e) => ({ sesionId: e.sesion_id, dia: claveDia(e.terminado_en as string) })),
     dias: ((dias as { dias: number[] } | null)?.dias ?? []).slice().sort(),
+    diaInicio,
   };
 }
 
@@ -143,9 +147,9 @@ export default function VerRutina() {
   const { rutina } = datos;
 
   // ---- Semanas de la rutina ----
-  const inicioRutina = rutina ? lunesDe(claveDia(rutina.publicada)) : "";
+  const inicioRutina = rutina ? inicioSemanaDe(claveDia(rutina.publicada), datos.diaInicio) : "";
   const semanasLista = rutina ? Array.from({ length: rutina.semanas }, (_, i) => sumarDias(inicioRutina, i * 7)) : [];
-  const lunesHoy = lunesDe(hoy);
+  const lunesHoy = inicioSemanaDe(hoy, datos.diaInicio); // primer día de la semana actual de esta persona
 
   const resumen = (items: Item[]) => {
     const materiales = [

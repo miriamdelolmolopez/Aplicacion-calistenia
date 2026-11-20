@@ -69,11 +69,16 @@ export function sumarDias(fecha: string, dias: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-// Lunes de la semana de una fecha AAAA-MM-DD.
-export function lunesDe(fecha: string): string {
+// Primer día de la semana de una fecha AAAA-MM-DD. «inicio» = día en que empieza la semana (0 = lunes … 6 = domingo; por defecto, lunes).
+export function inicioSemanaDe(fecha: string, inicio = 0): string {
   const d = new Date(`${fecha}T12:00:00Z`);
   const dia = (d.getUTCDay() + 6) % 7; // 0 = lunes
-  return sumarDias(fecha, -dia);
+  return sumarDias(fecha, -((dia - inicio + 7) % 7));
+}
+
+// Lunes de la semana de una fecha AAAA-MM-DD.
+export function lunesDe(fecha: string): string {
+  return inicioSemanaDe(fecha, 0);
 }
 
 // Instante (UTC) que corresponde a una fecha y hora escritas en hora de Madrid. null si no es válida.

@@ -13,6 +13,7 @@ import estilos from "./sesion.module.css";
 import { minutosEstimados, textoObjetivo } from "@/lib/duracion";
 import { claveDia } from "@/lib/fechas";
 import { numeroSemana } from "@/lib/semanas";
+import { diaInicioSemana } from "@/lib/diaInicioSemana";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../../../Cargando";
 import FichaIncrustada from "../../../ui/FichaIncrustada";
@@ -57,7 +58,9 @@ async function cargar(id: string): Promise<Datos | null> {
 
   // Si Miriam cambió algún ejercicio para esta semana, se enseña esa versión.
   type Cambio = { quitado: boolean; item_id: string; series: number | null; reps_min: number | null; reps_max: number | null; segundos_min: number | null; segundos_max: number | null; descanso_seg: number | null; ejercicio_id: string | null; ejercicios: Item["ejercicios"] };
-  const semana = s.rutinas?.publicada_en ? numeroSemana(claveDia(s.rutinas.publicada_en), claveDia(new Date().toISOString())) : 1;
+  const { data: yo } = await supabase.auth.getUser();
+  const diaInicio = await diaInicioSemana(supabase, yo.user?.id ?? "");
+  const semana = s.rutinas?.publicada_en ? numeroSemana(claveDia(s.rutinas.publicada_en), claveDia(new Date().toISOString()), diaInicio) : 1;
   const { data: cambiosDatos } = await supabase
     .from("rutina_cambios_semana")
     .select("item_id, quitado, series, reps_min, reps_max, segundos_min, segundos_max, descanso_seg, ejercicio_id, ejercicios(id, nombre, nombre_en, foto_url, categoria, ejercicio_musculos(musculo, rol), ejercicio_materiales(materiales(nombre, nombre_en)))")
