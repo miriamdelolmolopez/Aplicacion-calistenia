@@ -127,22 +127,3 @@
   opacity: 0.9;
 }
 
-/* Foto de fondo al 20 % de opacidad (el gris lo pone el html) */
-.fondo {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: url(/fotos/handstand-v1.webp) 55% 40% / cover no-repeat;
-  opacity: 0.2;
-}
-
-:global(body):has(.fondo) {
-  background: transparent;
-}
-
-/* Tema oscuro: la foto de fondo se ve con sus colores de siempre, no en negativo. */
-:global(html[data-tema="oscuro"]) .fondo {
-  filter: contrast(1.136) hue-rotate(180deg) invert(1);
-}
-

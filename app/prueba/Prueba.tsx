@@ -36,7 +36,6 @@ export default function Prueba({ disponible, codigo }: { disponible: boolean; co
 
   return (
     <main className={styles.pagina}>
-      <div className={styles.fondoEntrar} aria-hidden="true" />
       <BarraSuperior izquierda={{ href: "/", texto: "volver" }} />
       <div className={styles.cabecera}>
         <LogoMarca prioridad tamanos="240px" className={estilos.logo} />

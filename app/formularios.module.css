@@ -294,26 +294,6 @@
   }
 }
 
-/* Foto de fondo de la pantalla de inicio de sesión (20 % de opacidad) */
-.fondoEntrar {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: url(/fotos/handstand-v1.webp) 55% 40% / cover no-repeat;
-  opacity: 0.2;
-}
-
-/* El fondo del body se vuelve transparente para que se vea la foto (el gris lo pone el html) */
-:global(body):has(.fondoEntrar) {
-  background: transparent;
-}
-
-/* Tema oscuro: la foto de fondo se ve con sus colores de siempre, no en negativo. */
-:global(html[data-tema="oscuro"]) .fondoEntrar {
-  filter: contrast(1.136) hue-rotate(180deg) invert(1);
-}
-
 
 /* En el ordenador las pantallas de rutina aprovechan más ancho (en el móvil no cambia nada). */
 @media (min-width: 900px) {

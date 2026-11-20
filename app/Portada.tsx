@@ -13,7 +13,6 @@ export default function Portada() {
   const registroAbierto = useRegistroAbierto();
   return (
     <main className={styles.portada}>
-      <div className={styles.fondo} aria-hidden="true" />
       <header className={styles.arriba}>
         <span />
         <label className={styles.idioma}>
