@@ -21,6 +21,7 @@ import CampanaAvisos from "../ui/CampanaAvisos";
 import TablonAnuncios from "../ui/TablonAnuncios";
 import VerComoAlumno from "../admin/VerComoAlumno";
 import ResumenAdminTarjetas from "./ResumenAdmin";
+import GraficosInicio from "./GraficosInicio";
 import AvisosAdmin from "./AvisosAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta } from "@/lib/fechas";
@@ -195,27 +196,22 @@ export default function Inicio() {
           <Avatar nombre={perfil.nombre} url={miFoto} tamano={40} />
         </span>
         <div className={clay.saludo}>
-          <p className={clay.saludoSub}>{t.hola}</p>
+          <p className={clay.saludoSub}>
+            {t.hola}
+            <span className={clay.pildora}>{perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}</span>
+          </p>
           <h1 className={clay.saludoTitulo}>{perfil.nombre}</h1>
+          {textoFrase && <p className={clay.fraseSuave}>{textoFrase}</p>}
         </div>
         <CampanaAvisos />
       </header>
-
-      <div className={clay.apilada}>
-        <section className={clay.banner}>
-          <div className={clay.bannerArriba}>
-            <h2 className={clay.bannerTitulo}>{textoFrase}</h2>
-          </div>
-          <span className={clay.bannerEtiqueta}>
-            {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
-          </span>
-        </section>
-      </div>
 
       <div className={estilos.contenido}>
         {esAdmin && <AvisosAdmin />}
 
         {esAdmin && <ResumenAdminTarjetas />}
+
+        {esAdmin && <GraficosInicio />}
 
         {esAdmin && (
           <div className={estilos.accesos}>

@@ -578,11 +578,24 @@
   }
 }
 
-/* Tema oscuro: el texto del banner va sobre la foto, así que se vuelve a poner como era junto con ella. */
-:global(html[data-tema="oscuro"]) .banner {
-  filter: contrast(1.136) hue-rotate(180deg) invert(1);
-}
-
 :global(html[data-tema="oscuro"]) .bannerFoto {
   filter: none !important;
+}
+
+/* Saludo compacto: la frase pasa a ser una línea suave y la vista, una píldora pequeña */
+.pildora {
+  margin-left: 8px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--etq-azul);
+  background: var(--etq-azul-f);
+  border-radius: 999px;
+}
+
+.fraseSuave {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ui-secundario-texto);
 }

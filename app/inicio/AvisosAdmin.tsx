@@ -1,23 +1,34 @@
 "use client";
 
-import Icono from "../Icono";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { textoCuando } from "@/lib/cumpleanosTexto";
-import clay from "../ui/clay.module.css";
+import { obtenerFotos } from "../perfil/acciones";
+import Avatar from "../Avatar";
+import Icono from "../Icono";
+import etq from "../etiquetas.module.css";
 import { elegirDiasAvisoInicio, obtenerAvisosInicio, type AvisosInicio } from "./accionesAdmin";
+import estilos from "./inicio.module.css";
 
 const DIAS_CUMPLES = [0, 1, 2, 3, 5, 7, 10, 14, 21, 30];
 const DIAS_BONOS = [1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60];
+const VISIBLES = 4;
 
-// Cumpleaños y tarifas a punto de caducar, en el Inicio de la administradora: lista desplegable y días de antelación a elegir.
+const cuandoCorto = (n: number) => (n <= 0 ? "hoy" : n === 1 ? "mañana" : `en ${n} días`);
+
+// «Atención»: lo que pide una mirada hoy (cumpleaños y tarifas que se acaban) en una sola tarjeta, sin listas largas.
 export default function AvisosAdmin() {
   const [datos, setDatos] = useState<AvisosInicio | null>(null);
+  const [fotos, setFotos] = useState<Record<string, string>>({});
+  const [todas, setTodas] = useState(false);
 
   const cargar = () => obtenerAvisosInicio().then(setDatos).catch(() => {});
   useEffect(() => {
     cargar();
   }, []);
+  useEffect(() => {
+    if (!datos || datos.cumples.length === 0) return;
+    obtenerFotos(datos.cumples.map((c) => c.id)).then(setFotos).catch(() => {});
+  }, [datos]);
 
   if (!datos) return null;
 
@@ -28,81 +39,95 @@ export default function AvisosAdmin() {
 
   const dia = (n: number) => `${n} ${n === 1 ? "día" : "días"}`;
   const opciones = (base: number[], actual: number) => [...new Set([...base, actual])].sort((a, b) => a - b);
+  const etiquetaCaduca = (f: number) => (f <= 0 ? etq.rojo : f <= 3 ? etq.ambar : etq.gris);
+  const vistas = todas ? datos.caducan : datos.caducan.slice(0, VISIBLES);
+  const nada = datos.cumples.length === 0 && datos.caducan.length === 0;
 
   return (
-    <>
-      <div className={clay.consejoEnvoltura}>
-        <span className={clay.insignia} aria-hidden="true"><Icono nombre="regalo" tamano={18} /></span>
-        <section className={clay.consejo}>
-          <p className={clay.consejoTexto}>
-            <strong>Cumpleaños</strong>
-          </p>
-          {datos.cumples.length === 0 ? (
-            <p style={{ margin: "4px 0" }}>{datos.antelacionCumples === 0 ? "Hoy no cumple años nadie." : `No cumple años nadie en los próximos ${dia(datos.antelacionCumples)}.`}</p>
-          ) : (
-            <details open>
-              <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-                {datos.cumples.length} {datos.cumples.length === 1 ? "persona" : "personas"}
-              </summary>
-              <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
-                {datos.cumples.map((c) => (
-                  <li key={c.id}>
-                    <strong>{c.nombre}</strong> · {textoCuando(c)}
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
-          <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, fontSize: "0.9rem" }}>
-            Avisarme con
-            <select value={datos.antelacionCumples} onChange={(e) => elegir("cumples", Number(e.target.value))}>
-              {opciones(DIAS_CUMPLES, datos.antelacionCumples).map((n) => (
-                <option key={n} value={n}>
-                  {n === 0 ? "el mismo día" : `${dia(n)} de antelación`}
-                </option>
-              ))}
-            </select>
-          </label>
-        </section>
-      </div>
+    <section className={estilos.atencion} aria-label="Atención">
+      <h2 className={estilos.resumenSeccion} style={{ margin: 0 }}>Atención</h2>
 
-      <div className={clay.consejoEnvoltura}>
-        <span className={clay.insignia} aria-hidden="true"><Icono nombre="relojArena" tamano={18} /></span>
-        <section className={clay.consejo}>
-          <p className={clay.consejoTexto}>
-            <strong>Tarifas a punto de caducar</strong>
-          </p>
-          {datos.caducan.length === 0 ? (
-            <p style={{ margin: "4px 0" }}>A nadie se le acaba la tarifa en los próximos {dia(datos.diasBonos)}.</p>
-          ) : (
-            <details open>
-              <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-                {datos.caducan.length} {datos.caducan.length === 1 ? "persona" : "personas"}
-              </summary>
-              <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
-                {datos.caducan.map((b, i) => (
-                  <li key={`${b.userId}-${i}`}>
-                    <Link href={`/admin/usuarios/${b.userId}`}>
-                      <strong>{b.nombre}</strong>
-                    </Link>{" "}
-                    · {b.tarifa} · caduca {b.cuando}
-                  </li>
-                ))}
-              </ul>
-            </details>
+      {nada && (
+        <p className={estilos.atencionVacio}>
+          Todo al día: nadie cumple años ni se le acaba la tarifa en los próximos días.
+        </p>
+      )}
+
+      {datos.cumples.length > 0 && (
+        <div className={estilos.atencionBloque}>
+          <h3 className={estilos.atencionTitulo}>
+            <span className={`${estilos.atencionChip} ${estilos.chipRosa}`}><Icono nombre="regalo" tamano={15} /></span>
+            Cumpleaños
+          </h3>
+          <ul className={estilos.cumpleFila}>
+            {datos.cumples.map((c) => (
+              <li key={c.id} className={estilos.cumplePersona}>
+                <span className={estilos.cumpleAnillo}>
+                  <Avatar nombre={c.nombre} url={fotos[c.id]} tamano={48} />
+                </span>
+                <strong>{c.nombre.split(" ")[0]}</strong>
+                <small>
+                  {cuandoCorto(c.faltan)}
+                  {c.edad > 0 ? ` · ${c.edad}` : ""}
+                </small>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {datos.caducan.length > 0 && (
+        <div className={estilos.atencionBloque}>
+          <h3 className={estilos.atencionTitulo}>
+            <span className={`${estilos.atencionChip} ${estilos.chipAmbar}`}><Icono nombre="relojArena" tamano={15} /></span>
+            Tarifas que se acaban
+            <span className={`${etq.etq} ${etq.ambar}`} style={{ marginLeft: "auto" }}>{datos.caducan.length}</span>
+          </h3>
+          <ul className={estilos.caducaLista}>
+            {vistas.map((b, i) => (
+              <li key={`${b.userId}-${i}`}>
+                <Link href={`/admin/usuarios/${b.userId}`} className={estilos.caducaFila}>
+                  <Avatar nombre={b.nombre} url={null} tamano={32} />
+                  <span className={estilos.caducaTexto}>
+                    <strong>{b.nombre}</strong>
+                    <small>{b.tarifa}</small>
+                  </span>
+                  <span className={`${etq.etq} ${etiquetaCaduca(b.faltan)}`}>{cuandoCorto(b.faltan)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {datos.caducan.length > VISIBLES && (
+            <button type="button" className={estilos.verMas} onClick={() => setTodas(!todas)}>
+              {todas ? "Ver menos" : `Ver las ${datos.caducan.length}`}
+            </button>
           )}
-          <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, fontSize: "0.9rem" }}>
-            Avisarme con
-            <select value={datos.diasBonos} onChange={(e) => elegir("bonos", Number(e.target.value))}>
-              {opciones(DIAS_BONOS, datos.diasBonos).map((n) => (
-                <option key={n} value={n}>
-                  {dia(n)} de antelación
-                </option>
-              ))}
-            </select>
-          </label>
-        </section>
-      </div>
-    </>
+        </div>
+      )}
+
+      <details className={estilos.ajusteAvisos}>
+        <summary>Ajustar avisos</summary>
+        <label>
+          Cumpleaños con
+          <select value={datos.antelacionCumples} onChange={(e) => elegir("cumples", Number(e.target.value))}>
+            {opciones(DIAS_CUMPLES, datos.antelacionCumples).map((n) => (
+              <option key={n} value={n}>
+                {n === 0 ? "el mismo día" : `${dia(n)} de antelación`}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Tarifas con
+          <select value={datos.diasBonos} onChange={(e) => elegir("bonos", Number(e.target.value))}>
+            {opciones(DIAS_BONOS, datos.diasBonos).map((n) => (
+              <option key={n} value={n}>
+                {dia(n)} de antelación
+              </option>
+            ))}
+          </select>
+        </label>
+      </details>
+    </section>
   );
 }

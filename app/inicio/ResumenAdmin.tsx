@@ -15,6 +15,14 @@ const NOMBRE_SERVICIO: Record<Servicio, { plural: string; ingresos: string }> = 
 };
 const SERVICIOS: Servicio[] = ["grupal", "individual", "online"];
 
+// Color de cada tarjeta (el mismo que en Informes), para que se reconozcan de un vistazo.
+const TONO: Record<string, string> = {
+  ingresos: "#0aa8c0", activos: "#6d5efc", invitados: "#8b7cf6", congelados: "#94a3b8", nuevos: "#2fb57a", perdidos: "#ef5f8b",
+  caducan: "#f5a524", renovar: "#f5a524", pendientes: "#ef5f8b",
+  activos_grupal: "#0aa8c0", activos_individual: "#6d5efc", activos_online: "#f5a524",
+  ingresos_grupal: "#0aa8c0", ingresos_individual: "#6d5efc", ingresos_online: "#f5a524",
+};
+
 function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + " €";
 }
@@ -132,11 +140,12 @@ export default function ResumenAdminTarjetas() {
     },
   ];
 
-  const pinta = (t: Tarjeta) => (
+  const pinta = (t: Tarjeta, n: number, grande = false) => (
     <button
       key={t.clave}
       type="button"
-      className={`${estilos.resumenTarjeta} ${abierta === t.clave ? estilos.resumenActiva : ""}`}
+      style={{ "--tono": TONO[t.clave] ?? "#0aa8c0" } as React.CSSProperties}
+      className={`${estilos.resumenTarjeta} ${grande && n === 0 ? estilos.resumenDestacada : ""} ${abierta === t.clave ? estilos.resumenActiva : ""}`}
       aria-expanded={abierta === t.clave}
       onClick={() => setAbierta(abierta === t.clave ? null : t.clave)}
     >
@@ -151,13 +160,14 @@ export default function ResumenAdminTarjetas() {
 
   return (
     <section className={estilos.resumen} aria-label="Resumen del negocio">
-      <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{principales.map(pinta)}</div>
+      <h2 className={estilos.resumenSeccion}>Este mes</h2>
+      <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{principales.map((t, n) => pinta(t, n, true))}</div>
 
       <h2 className={estilos.resumenSeccion}>Por tipo de servicio</h2>
-      <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{porServicio.map(pinta)}</div>
+      <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{porServicio.map((t, n) => pinta(t, n))}</div>
 
       <h2 className={estilos.resumenSeccion}>Alertas</h2>
-      <div className={`${estilos.resumenCuadricula} ${estilos.resumenAlertas}`}>{alertas.map(pinta)}</div>
+      <div className={`${estilos.resumenCuadricula} ${estilos.resumenAlertas}`}>{alertas.map((t, n) => pinta(t, n))}</div>
 
       {abierta && (
         <div

@@ -312,7 +312,7 @@ export async function obtenerResumenAdmin(): Promise<ResumenAdmin> {
 export type AvisosInicio = {
   cumples: CumpleProximo[];
   antelacionCumples: number;
-  caducan: { userId: string; nombre: string; tarifa: string; cuando: string }[];
+  caducan: { userId: string; nombre: string; tarifa: string; cuando: string; faltan: number }[];
   diasBonos: number;
 };
 
@@ -320,7 +320,7 @@ export async function obtenerAvisosInicio(): Promise<AvisosInicio> {
   await requireAdmin();
   const { lista, antelacion } = await cumpleanosProximos();
   const diasBonos = await diasAvisoBonos();
-  const caducan = (await bonosPorCaducar(diasBonos)).map((b) => ({ userId: b.userId, nombre: b.nombre, tarifa: b.tarifa, cuando: b.cuando }));
+  const caducan = (await bonosPorCaducar(diasBonos)).map((b) => ({ userId: b.userId, nombre: b.nombre, tarifa: b.tarifa, cuando: b.cuando, faltan: b.faltan }));
   return { cumples: lista, antelacionCumples: antelacion, caducan, diasBonos };
 }
 
