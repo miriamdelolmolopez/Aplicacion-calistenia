@@ -16,7 +16,7 @@
     "@supabase/supabase-js": "^2.118.0",
     "docx": "^9.15.3",
     "fflate": "^0.8.3",
-    "next": "16.4.2",
+    "next": "^16.4.6",
     "pdf-lib": "^1.17.1",
     "react": "19.3.0",
     "react-body-highlighter": "^2.0.5",
@@ -31,7 +31,7 @@
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "^16.4.6",
     "typescript": "^5"
   }
 }
