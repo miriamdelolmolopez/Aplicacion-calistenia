@@ -809,3 +809,75 @@
   font-weight: 600;
   text-align: right;
 }
+
+/* Inicio de la administradora: en móvil todo en una columna (avisos primero); en ordenador, dos columnas */
+.columnasAdmin {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.colPrincipal,
+.colLateral {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.colLateral {
+  order: -1;
+}
+
+@media (min-width: 1024px) {
+  main.paginaAdmin {
+    max-width: 1240px;
+    padding-top: 12px;
+  }
+
+  .columnasAdmin {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .colLateral {
+    order: 0;
+    position: sticky;
+    top: 64px;
+  }
+
+  .colPrincipal .resumenPrincipal {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .colPrincipal .resumenDestacada {
+    grid-column: span 3;
+  }
+
+  .accesos {
+    grid-template-columns: 1fr;
+  }
+
+  .acceso {
+    flex-direction: row;
+    min-height: 56px;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .acceso strong {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1500px) {
+  .colPrincipal .resumenPrincipal {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .colPrincipal .resumenDestacada {
+    grid-column: span 4;
+  }
+}

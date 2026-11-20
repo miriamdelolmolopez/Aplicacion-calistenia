@@ -183,7 +183,7 @@ export default function Inicio() {
   const textoFrase = frase ? (idioma === "en" ? frase.texto_en : frase.texto_es) : "";
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${esAdmin ? estilos.paginaAdmin : ""}`}>
       <BarraSuperior />
 
       {esAdmin && perfil.rolReal === "admin" && (
@@ -203,24 +203,29 @@ export default function Inicio() {
           <h1 className={clay.saludoTitulo}>{perfil.nombre}</h1>
           {textoFrase && <p className={clay.fraseSuave}>{textoFrase}</p>}
         </div>
-        <CampanaAvisos />
+        <span className={clay.soloMovil}>
+          <CampanaAvisos />
+        </span>
       </header>
 
       <div className={estilos.contenido}>
-        {esAdmin && <AvisosAdmin />}
-
-        {esAdmin && <ResumenAdminTarjetas />}
-
-        {esAdmin && <GraficosInicio />}
-
         {esAdmin && (
-          <div className={estilos.accesos}>
-            <Link href="/admin/usuarios?nuevo=1" className={estilos.acceso}>
-              <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
-                +
-              </span>
-              <strong>Añadir alumno/a</strong>
-            </Link>
+          <div className={estilos.columnasAdmin}>
+            <div className={estilos.colPrincipal}>
+              <ResumenAdminTarjetas />
+              <GraficosInicio />
+            </div>
+            <aside className={estilos.colLateral}>
+              <AvisosAdmin />
+              <div className={estilos.accesos}>
+                <Link href="/admin/usuarios?nuevo=1" className={estilos.acceso}>
+                  <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
+                    +
+                  </span>
+                  <strong>Añadir alumno/a</strong>
+                </Link>
+              </div>
+            </aside>
           </div>
         )}
 

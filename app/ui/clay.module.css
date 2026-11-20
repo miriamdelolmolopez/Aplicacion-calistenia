@@ -599,3 +599,10 @@
   line-height: 1.35;
   color: var(--ui-secundario-texto);
 }
+
+/* La campana de la barra superior del ordenador ya está arriba: aquí solo se ve en el móvil */
+@media (min-width: 1024px) {
+  .soloMovil {
+    display: none;
+  }
+}
