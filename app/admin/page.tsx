@@ -1,10 +1,6 @@
-import Icono from "../Icono";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { cumpleanosProximos } from "@/lib/cumpleanos";
-import { textoCuando } from "@/lib/cumpleanosTexto";
-import { guardarAntelacionCumples, guardarAvisoBonos, marcarBorradoAtendido } from "./acciones";
-import { bonosPorCaducar, diasAvisoBonos } from "@/lib/bonosPorCaducar";
+import { marcarBorradoAtendido } from "./acciones";
 import styles from "./admin.module.css";
 import { Cuadricula, type Azulejo } from "./Hub";
 import CabeceraAdmin from "./CabeceraAdmin";
@@ -23,12 +19,6 @@ const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = GRUPOS_ADMIN.map((g) 
 export default async function Administracion() {
   const { supabase } = await requireAdmin();
   const excluidas = await seccionesExcluidas();
-
-  // Cumpleaños de hoy y de los próximos días (con la antelación que elige la administradora).
-  const { lista: cumples, antelacion } = await cumpleanosProximos();
-  // Tarifas y bonos que se acaban pronto (con los días que elige la administradora).
-  const diasBonos = await diasAvisoBonos();
-  const porCaducar = await bonosPorCaducar(diasBonos);
 
   const { data: peticiones } = await supabase
     .from("solicitudes_borrado")
@@ -49,78 +39,6 @@ export default async function Administracion() {
           Inicio
         </Link>
       </CabeceraAdmin>
-
-      <section className={styles.tarjeta}>
-        <h2><Icono nombre="regalo" tamano={16} /> Cumpleaños</h2>
-        {cumples.length === 0 ? (
-          <p className={styles.ayuda} style={{ margin: 0 }}>
-            {antelacion === 0 ? "Hoy no cumple años nadie." : `No cumple años nadie en los próximos ${antelacion} ${antelacion === 1 ? "día" : "días"}.`}
-          </p>
-        ) : (
-          <ul className={styles.lista}>
-            {cumples.map((c) => (
-              <li key={c.id}>
-                <strong>{c.nombre}</strong> ·{" "}
-                {textoCuando(c)}
-              </li>
-            ))}
-          </ul>
-        )}
-        <form action={guardarAntelacionCumples} className={styles.personaCabecera}>
-          <label htmlFor="cumple-dias">Avisarme con</label>
-          <select key={antelacion} id="cumple-dias" name="dias" defaultValue={String(antelacion)}>
-            {[0, 1, 2, 3, 5, 7, 10, 14, 21, 30].map((n) => (
-              <option key={n} value={n}>
-                {n === 0 ? "el mismo día" : `${n} ${n === 1 ? "día" : "días"} de antelación`}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className={styles.boton} style={{ whiteSpace: "nowrap" }}>
-            Guardar
-          </button>
-        </form>
-      </section>
-
-      <section className={styles.tarjeta}>
-        <h2><Icono nombre="relojArena" tamano={16} /> Tarifas a punto de caducar</h2>
-        {porCaducar.length === 0 ? (
-          <p className={styles.ayuda} style={{ margin: 0 }}>
-            A nadie se le acaba la tarifa en los próximos {diasBonos} {diasBonos === 1 ? "día" : "días"}.
-          </p>
-        ) : (
-          <details>
-            <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-              {porCaducar.length} {porCaducar.length === 1 ? "persona" : "personas"} en los próximos {diasBonos} {diasBonos === 1 ? "día" : "días"}
-            </summary>
-            <ul className={styles.lista} style={{ marginTop: 8 }}>
-              {porCaducar.map((b, i) => (
-                <li key={`${b.userId}-${i}`}>
-                  <Link href={`/admin/usuarios/${b.userId}`}>
-                    <strong>{b.nombre}</strong>
-                  </Link>{" "}
-                  · {b.tarifa} · caduca {b.cuando}
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
-        <form action={guardarAvisoBonos} className={styles.personaCabecera}>
-          <label htmlFor="bonos-dias">Avisarme con</label>
-          <select key={diasBonos} id="bonos-dias" name="dias" defaultValue={String(diasBonos)}>
-            {[...new Set([1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60, diasBonos])].sort((a, b) => a - b).map((n) => (
-              <option key={n} value={n}>
-                {n} {n === 1 ? "día" : "días"} de antelación
-              </option>
-            ))}
-          </select>
-          <button type="submit" className={styles.boton} style={{ whiteSpace: "nowrap" }}>
-            Guardar
-          </button>
-        </form>
-        <p className={styles.ayuda} style={{ margin: 0 }}>
-          Cada mañana te llega una notificación y un correo con esta lista (lo puedes quitar en Ajustes → Notificaciones).
-        </p>
-      </section>
 
       {pendientesBorrado.length > 0 && (
         <section className={styles.tarjeta}>

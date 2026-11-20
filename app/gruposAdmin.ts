@@ -62,7 +62,7 @@ export const GRUPOS_ADMIN: GrupoAdmin[] = [
       { href: "/admin/informes", texto: "Informes", descripcion: "Cifras y estadísticas", icono: "metricas" },
       { href: "/admin/aprende", texto: "Aprende", descripcion: "Contenido y exámenes", icono: "aprende" },
       { href: "/admin/tablon", texto: "Tablón de anuncios", descripcion: "Avisos para todas las personas", icono: "tablon" },
-      { href: "/admin/contenido", texto: "Fotos y frases", descripcion: "Frases y fotos del Inicio", icono: "admin" },
+      { href: "/admin/contenido", texto: "Frases", descripcion: "Frases que salen en el Inicio", icono: "admin" },
       { href: "/admin/automatizaciones", texto: "Automatizaciones", descripcion: "Correos y avisos automáticos", icono: "admin" },
       { href: "/admin/legal", texto: "Textos legales", descripcion: "Privacidad, términos y consentimientos", icono: "admin" },
       { href: "/admin/exportar", texto: "Descargar datos (CSV)", descripcion: "Copia de tus datos", icono: "metricas" },

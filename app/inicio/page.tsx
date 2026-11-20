@@ -21,7 +21,7 @@ import CampanaAvisos from "../ui/CampanaAvisos";
 import TablonAnuncios from "../ui/TablonAnuncios";
 import VerComoAlumno from "../admin/VerComoAlumno";
 import ResumenAdminTarjetas from "./ResumenAdmin";
-import GraficosInicio from "./GraficosInicio";
+import EstadisticasInicio from "./EstadisticasInicio";
 import AvisosAdmin from "./AvisosAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta } from "@/lib/fechas";
@@ -213,7 +213,7 @@ export default function Inicio() {
           <div className={estilos.columnasAdmin}>
             <div className={estilos.colPrincipal}>
               <ResumenAdminTarjetas />
-              <GraficosInicio />
+              <EstadisticasInicio />
             </div>
             <aside className={estilos.colLateral}>
               <AvisosAdmin />

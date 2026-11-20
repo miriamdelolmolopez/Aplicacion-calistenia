@@ -29,7 +29,7 @@ export const OPCIONES_MENU_ADMIN: OpcionMenuAdmin[] = [
   { href: "/admin/descuentos", icono: "pagos", texto: "Descuentos", defecto: false },
   { href: "/admin/formas-pago", icono: "pagos", texto: "Formas de pago", defecto: false },
   { href: "/admin/informes", icono: "metricas", texto: "Informes", defecto: true },
-  { href: "/admin/contenido", icono: "admin", texto: "Fotos y frases", defecto: false },
+  { href: "/admin/contenido", icono: "admin", texto: "Frases", defecto: false },
   { href: "/admin/automatizaciones", icono: "admin", texto: "Automatizaciones", defecto: false },
   { href: "/admin/legal", icono: "admin", texto: "Textos legales", defecto: false },
   { href: "/admin/exportar", icono: "metricas", texto: "Descargar datos", defecto: false },

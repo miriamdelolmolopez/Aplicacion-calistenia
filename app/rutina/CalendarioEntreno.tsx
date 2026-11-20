@@ -7,6 +7,7 @@ import { useIdioma } from "../useIdioma";
 import estilos from "./ver/ver.module.css";
 import { claveDia } from "@/lib/fechas";
 import { diaDeLaSemana } from "@/lib/semanas";
+import { diaInicioSemana, NOMBRES_DIAS } from "@/lib/diaInicioSemana";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
 import { leerComo } from "./useComo";
@@ -15,12 +16,15 @@ type Datos = {
   userId: string;
   dias: number[]; // 1 = lunes … 7 = domingo
   hechos: string[]; // días con un entreno terminado
+  inicio: number; // día en que empieza su semana (0 = lunes … 6 = domingo)
+  soloLectura: boolean; // la administradora viendo a otra persona: no se cambia
 };
 
 async function obtenerDatos(): Promise<Datos> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
-  const userId = leerComo() ?? auth.user?.id ?? "";
+  const como = leerComo();
+  const userId = como ?? auth.user?.id ?? "";
   const [{ data: entrenos }, { data: dias }] = await Promise.all([
     supabase
       .from("entrenos")
@@ -33,6 +37,8 @@ async function obtenerDatos(): Promise<Datos> {
   ]);
   return {
     userId,
+    inicio: await diaInicioSemana(supabase, userId),
+    soloLectura: !!como,
     dias: ((dias as { dias: number[] } | null)?.dias ?? []).slice().sort(),
     hechos: ((entrenos ?? []) as { terminado_en: string | null }[])
       .filter((e) => e.terminado_en)
@@ -46,7 +52,7 @@ const LETRAS = {
 };
 
 // Los días de entreno de la semana y el calendario del mes (hechos y previstos).
-export default function CalendarioEntreno() {
+export default function CalendarioEntreno({ alCambiarInicio }: { alCambiarInicio?: () => void }) {
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const [datos, setDatos] = useState<Datos | null>(null);
@@ -70,7 +76,17 @@ export default function CalendarioEntreno() {
     await createClient().from("dias_entreno").upsert({ user_id: datos.userId, dias: nuevos, actualizado_en: new Date().toISOString() });
   }
 
+  async function cambiarInicio(nuevo: number) {
+    if (!datos || datos.soloLectura) return;
+    setDatos({ ...datos, inicio: nuevo });
+    const { error } = await createClient().from("profiles").update({ dia_inicio_semana: nuevo }).eq("id", datos.userId);
+    if (!error) alCambiarInicio?.();
+  }
+
   if (datos === null) return <Cargando />;
+
+  // Las letras empiezan por el día que la persona ha elegido como inicio de su semana.
+  const orden = Array.from({ length: 7 }, (_, k) => (datos.inicio + k) % 7);
 
   const hoy = claveDia(new Date().toISOString());
   const mesActual = mes ?? hoy.slice(0, 7);
@@ -80,7 +96,7 @@ export default function CalendarioEntreno() {
   const primero = `${mesActual}-01`;
   const diasDelMes = new Date(anio, numMes, 0).getDate();
   const celdas: (string | null)[] = [
-    ...Array.from({ length: diaDeLaSemana(primero) }, () => null),
+    ...Array.from({ length: (diaDeLaSemana(primero) - datos.inicio + 7) % 7 }, () => null),
     ...Array.from({ length: diasDelMes }, (_, i) => `${mesActual}-${String(i + 1).padStart(2, "0")}`),
   ];
   const cambiarMes = (n: number) => {
@@ -93,10 +109,27 @@ export default function CalendarioEntreno() {
 
   return (
     <section className={estilos.calendario}>
-      <h2>{t.tusDiasEntreno}</h2>
+      <div className={estilos.cabeceraCal}>
+        <h2>{t.tusDiasEntreno}</h2>
+        <label className={estilos.inicioSemana} title={idioma === "en" ? "The week starts on" : "La semana empieza el"}>
+          <span>{idioma === "en" ? "Starts" : "Empieza"}</span>
+          <select
+            value={datos.inicio}
+            disabled={datos.soloLectura}
+            aria-label={idioma === "en" ? "First day of the week" : "Primer día de la semana"}
+            onChange={(e) => cambiarInicio(Number(e.target.value))}
+          >
+            {LETRAS[idioma].map((letra, i) => (
+              <option key={i} value={i} title={NOMBRES_DIAS[idioma][i]}>
+                {letra}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <p className={styles.ayuda}>{t.diasAyuda}</p>
       <div className={estilos.elegirDias}>
-        {LETRAS[idioma].map((letra, i) => (
+        {orden.map((i) => (
           <button
             key={i}
             type="button"
@@ -104,7 +137,7 @@ export default function CalendarioEntreno() {
             className={datos.dias.includes(i + 1) ? estilos.diaActivo : ""}
             onClick={() => alternarDia(i + 1)}
           >
-            {letra}
+            {LETRAS[idioma][i]}
           </button>
         ))}
       </div>
@@ -119,9 +152,9 @@ export default function CalendarioEntreno() {
         </button>
       </div>
       <div className={estilos.rejilla}>
-        {LETRAS[idioma].map((letra, i) => (
+        {orden.map((i) => (
           <span key={i} className={estilos.letra}>
-            {letra}
+            {LETRAS[idioma][i]}
           </span>
         ))}
         {celdas.map((d, i) => {

@@ -187,3 +187,33 @@
   padding-top: 8px;
   border-top: 1px solid var(--linea);
 }
+
+/* Título de «Tus días de entreno» con el desplegable sutil del primer día de la semana a la derecha */
+.cabeceraCal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cabeceraCal h2 {
+  margin: 0;
+}
+
+.inicioSemana {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--secundario);
+}
+
+.inicioSemana select {
+  min-height: 0;
+  padding: 3px 22px 3px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: transparent;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+}

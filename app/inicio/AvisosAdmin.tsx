@@ -58,7 +58,6 @@ export default function AvisosAdmin() {
   const dia = (n: number) => `${n} ${n === 1 ? "día" : "días"}`;
   const opciones = (base: number[], actual: number) => [...new Set([...base, actual])].sort((a, b) => a - b);
   const vistas = todas ? datos.caducan : datos.caducan.slice(0, VISIBLES);
-  const nada = datos.cumples.length === 0 && datos.caducan.length === 0;
   const sel = datos.cumples.find((c) => c.id === elegida);
 
   const ajuste = (que: "cumples" | "bonos") => (
@@ -81,13 +80,18 @@ export default function AvisosAdmin() {
 
   return (
     <>
-      {datos.cumples.length > 0 && (
+      {(
         <section className={estilos.atencion} aria-label="Cumpleaños">
           <h2 className={estilos.atencionTitulo}>
             <span className={`${estilos.atencionChip} ${estilos.chipRosa}`}><Icono nombre="regalo" tamano={15} /></span>
             Cumpleaños
             <span className={estilos.atencionCuenta}>{datos.cumples.length}</span>
           </h2>
+          {datos.cumples.length === 0 && (
+            <p className={estilos.cumpleDetalle}>
+              {datos.antelacionCumples === 0 ? "Hoy no cumple años nadie." : `Nadie cumple años en los próximos ${dia(datos.antelacionCumples)}.`}
+            </p>
+          )}
           <ul className={estilos.cumpleFila}>
             {datos.cumples.map((c) => (
               <li key={c.id}>
@@ -100,12 +104,13 @@ export default function AvisosAdmin() {
                   title={c.nombre}
                 >
                   <span className={estilos.cumpleAnillo}>
-                    <Circulo nombre={c.nombre} url={fotos[c.id]} tamano={52} />
+                    <Circulo nombre={c.nombre} url={fotos[c.id]} tamano={40} />
                   </span>
                 </button>
               </li>
             ))}
           </ul>
+          {datos.cumples.length > 0 && (
           <p className={estilos.cumpleDetalle} aria-live="polite">
             {sel ? (
               <>
@@ -116,6 +121,7 @@ export default function AvisosAdmin() {
               "Pulsa un círculo para ver el nombre"
             )}
           </p>
+          )}
           {ajuste("cumples")}
         </section>
       )}
@@ -158,13 +164,6 @@ export default function AvisosAdmin() {
         </section>
       )}
 
-      {nada && (
-        <section className={estilos.atencion} aria-label="Avisos">
-          <p className={estilos.atencionVacio}>Hoy no hay cumpleaños ni bonos a punto de caducar.</p>
-          {ajuste("cumples")}
-          {ajuste("bonos")}
-        </section>
-      )}
     </>
   );
 }

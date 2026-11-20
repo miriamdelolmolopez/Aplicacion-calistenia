@@ -160,7 +160,7 @@ export default function ResumenAdminTarjetas() {
 
   return (
     <section className={estilos.resumen} aria-label="Resumen del negocio">
-      <h2 className={estilos.resumenSeccion}>Este mes</h2>
+      <h2 className={estilos.resumenSeccion}>Ahora mismo</h2>
       <div className={`${estilos.resumenCuadricula} ${estilos.resumenPrincipal}`}>{principales.map((t, n) => pinta(t, n, true))}</div>
 
       <h2 className={estilos.resumenSeccion}>Por tipo de servicio</h2>

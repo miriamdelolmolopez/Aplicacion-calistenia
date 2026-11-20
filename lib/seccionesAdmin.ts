@@ -15,7 +15,7 @@ export const SECCIONES_ADMIN: { clave: string; texto: string }[] = [
   { clave: "informes", texto: "Informes" },
   { clave: "legal", texto: "Textos legales" },
   { clave: "automatizaciones", texto: "Automatizaciones" },
-  { clave: "contenido", texto: "Fotos y frases" },
+  { clave: "contenido", texto: "Frases" },
   { clave: "aprende", texto: "Aprende" },
   { clave: "exportar", texto: "Descargar datos (CSV)" },
 ];

@@ -15,7 +15,6 @@ import DiasEntreno from "../ajustes/notificaciones/DiasEntreno";
 import { claveDia } from "@/lib/fechas";
 import { inicioSemanaDe, numeroSemana } from "@/lib/semanas";
 import { diaInicioSemana } from "@/lib/diaInicioSemana";
-import DiaInicioSemana from "./DiaInicioSemana";
 import { createClient } from "@/lib/supabase/client";
 import { planOnlineComo } from "./planComo";
 import { leerComo } from "./useComo";
@@ -212,12 +211,11 @@ export default function Entrenamiento() {
           </ul>
 
           <div style={{ marginTop: 14 }}>
-            <CalendarioEntreno />
+            <CalendarioEntreno alCambiarInicio={() => obtenerResumen().then(setDatos)} />
           </div>
 
           <DiasEntreno en={idioma === "en"} />
 
-          <DiaInicioSemana valor={datos.diaInicio} en={idioma === "en"} soloLectura={datos.comoOtra} alCambiar={() => obtenerResumen().then(setDatos)} />
         </>
       )}
     </main>

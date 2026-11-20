@@ -881,3 +881,75 @@
     grid-column: span 4;
   }
 }
+
+/* Estadísticas con selector de periodo */
+.estadisticas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.estadCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.periodos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.periodo {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--secundario);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.periodoActivo {
+  color: #fff;
+  background: #0aa8c0;
+  border-color: #0aa8c0;
+}
+
+.fechasFila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.fechasFila label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.estadContenido {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity 0.2s;
+}
+
+.estadCifras {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 1024px) {
+  .estadCifras {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
