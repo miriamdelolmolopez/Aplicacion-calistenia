@@ -73,16 +73,10 @@
   color: var(--acento-oscuro);
 }
 
-/* Pestaña elegida: círculo naranja que sobresale, con una línea blanca fina */
+/* Pestaña elegida: óvalo suave con tu azul, sin efectos */
 .activa .icono {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  margin: -24px 0 6px;
-  border-radius: 50%;
-  background: var(--acento);
-  color: #ffffff;
-  box-shadow: 0 0 0 2px #ffffff, 0 14px 22px -10px rgba(10, 168, 192, 0.75);
+  background: rgba(10, 168, 192, 0.14);
+  color: var(--acento-oscuro);
 }
 
 @media print {
@@ -103,58 +97,6 @@ button.pestana:active:not(:disabled) {
   transform: none;
   filter: none;
   box-shadow: none;
-}
-
-/* Pestaña elegida: una luz da la vuelta alrededor del círculo (igual que el día elegido al reservar) */
-.activa .icono::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  padding: 2.5px;
-  border-radius: 50%;
-  pointer-events: none;
-  background: conic-gradient(from var(--ang), transparent 58%, #ffffff 84%, #a8eef5 94%, transparent 100%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: giroLuz 3.2s linear infinite;
-}
-
-/* La animación va aquí dentro: una definida en globals.css no la encuentra un archivo de módulos */
-@keyframes giroLuz {
-  to {
-    --ang: 360deg;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .activa .icono::before {
-    animation: none;
-  }
-}
-
-/* Acabado metálico: degradado con brillo y un destello que pasa de vez en cuando */
-.activa .icono {
-  background: linear-gradient(135deg, #5fd8e8 0%, #0aa8c0 38%, #087f92 62%, #52cfe0 100%);
-  overflow: visible;
-}
-
-.activa .icono::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
-  background-size: 250% 100%;
-  background-position: 130% 0;
-}
-
-/* El destello solo pasa al pulsar o pasar por encima, no todo el rato */
-.activa:hover .icono::after,
-.activa:active .icono::after {
-  background-position: -130% 0;
-  transition: background-position 0.8s ease;
 }
 
 /* El nombre de la pestaña se acorta con «…» si no cabe */

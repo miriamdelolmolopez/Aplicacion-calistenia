@@ -89,7 +89,7 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 28px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -132,7 +132,7 @@
   gap: 2px;
   padding: 12px;
   background: var(--crema);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .objetivo span {
@@ -154,7 +154,7 @@
   gap: 10px;
   padding: 14px;
   background: #f1f2f4;
-  border-radius: 22px;
+  border-radius: 16px;
 }
 
 .cronoTiempo {
@@ -336,7 +336,7 @@
   padding: 20px 24px 36px;
   color: var(--carbon);
   background: var(--blanco);
-  border-radius: 28px 28px 0 0;
+  border-radius: 16px 16px 0 0;
 }
 
 .siguiente span {
@@ -444,7 +444,7 @@
   padding: 14px 16px;
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   background: #ffffff;
-  border-radius: 36px;
+  border-radius: 20px;
   box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
@@ -501,6 +501,6 @@
 
 .ejercicio {
   border: 0;
-  border-radius: 30px;
+  border-radius: 16px;
   box-shadow: var(--ui-sombra-card);
 }

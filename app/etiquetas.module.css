@@ -1,0 +1,45 @@
+/* Etiquetas de color reutilizables (Alumno/a, Invitado/a, Pago pendiente…).
+   Uso: import etq from "@/app/etiquetas.module.css";  <span className={`${etq.etq} ${etq.verde}`}>Alumno/a</span> */
+.etq {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  border-radius: 6px;
+  color: var(--etq-gris);
+  background: var(--etq-gris-f);
+}
+
+.verde {
+  color: var(--etq-verde);
+  background: var(--etq-verde-f);
+}
+
+.ambar {
+  color: var(--etq-ambar);
+  background: var(--etq-ambar-f);
+}
+
+.gris {
+  color: var(--etq-gris);
+  background: var(--etq-gris-f);
+}
+
+.rojo {
+  color: var(--etq-rojo);
+  background: var(--etq-rojo-f);
+}
+
+.lila {
+  color: var(--etq-lila);
+  background: var(--etq-lila-f);
+}
+
+.azul {
+  color: var(--etq-azul);
+  background: var(--etq-azul-f);
+}

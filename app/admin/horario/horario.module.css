@@ -171,7 +171,7 @@
   max-width: 100%;
   overflow-x: auto;
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -239,7 +239,7 @@
   padding: 8px 8px 10px;
   background: #ffffff;
   border: 2px solid var(--carbon);
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
 .acciones {
@@ -348,7 +348,7 @@
   padding: 20px;
   overflow-y: auto;
   background: #ffffff;
-  border-radius: 28px;
+  border-radius: 16px;
   box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
 }
 

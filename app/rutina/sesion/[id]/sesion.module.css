@@ -14,7 +14,7 @@
   padding: 10px 14px 10px 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: var(--sombra);
 }
 

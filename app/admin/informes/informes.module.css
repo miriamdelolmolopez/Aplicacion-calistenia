@@ -32,7 +32,7 @@
   overflow: hidden;
   background: linear-gradient(135deg, color-mix(in srgb, var(--color) 16%, var(--blanco)), var(--blanco) 70%);
   border: 1px solid color-mix(in srgb, var(--color) 28%, transparent);
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -103,7 +103,7 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 

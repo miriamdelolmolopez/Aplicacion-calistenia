@@ -12,7 +12,7 @@
   gap: 12px;
   padding: 18px;
   background: #fff;
-  border-radius: 24px;
+  border-radius: 16px;
   border: 1px solid var(--linea);
   box-shadow: 0 4px 18px rgba(23, 24, 26, 0.07);
 }
@@ -57,7 +57,7 @@
   padding: 14px 10px;
   text-align: center;
   background: #fff;
-  border-radius: 22px;
+  border-radius: 16px;
   border: 1px solid var(--linea);
   box-shadow: 0 4px 18px rgba(23, 24, 26, 0.07);
 }
@@ -371,7 +371,7 @@
   padding: 14px 16px;
   text-align: left;
   border: 0;
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--ui-sombra-card);
 }
 
@@ -385,6 +385,6 @@
 
 .tarjeta {
   border: 0;
-  border-radius: 28px;
+  border-radius: 16px;
   box-shadow: var(--ui-sombra-card);
 }

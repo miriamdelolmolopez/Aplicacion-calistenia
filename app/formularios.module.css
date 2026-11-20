@@ -93,13 +93,13 @@
 }
 
 .campo input {
-  min-height: 48px;
-  padding: 0 16px;
+  min-height: 46px;
+  padding: 0 14px;
   font: inherit;
   color: var(--carbon);
   background: var(--blanco);
-  border: 1px solid var(--linea);
-  border-radius: 14px;
+  border: 1px solid rgba(23, 24, 26, 0.14);
+  border-radius: 10px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -162,27 +162,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
-  padding: 0 20px;
+  min-height: 48px;
+  padding: 0 18px;
   font: inherit;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--blanco);
   background: var(--acento);
   border: 0;
-  border-radius: 9999px;
+  border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .boton:hover:not(:disabled) {
   background: var(--acento-oscuro);
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-acento);
 }
 
 .boton:active:not(:disabled) {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .boton:disabled {
@@ -231,7 +230,7 @@
 
 .sesionAlumno {
   border: 1px solid var(--linea);
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 14px;
   background: var(--crema);
   display: flex;
@@ -315,32 +314,6 @@
   filter: contrast(1.136) hue-rotate(180deg) invert(1);
 }
 
-/* Botón principal con acabado metálico: degradado con brillo y destello al pasar por encima */
-.boton:not(.botonSecundario) {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #2fc3d8 0%, #0aa8c0 45%, #08889c 70%, #34c6da 100%);
-}
-
-.boton:not(.botonSecundario)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
-  transform: translateX(-120%);
-}
-
-.boton:not(.botonSecundario):hover:not(:disabled)::after {
-  transform: translateX(120%);
-  transition: transform 0.8s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .boton:not(.botonSecundario)::after {
-    display: none;
-  }
-}
 
 /* En el ordenador las pantallas de rutina aprovechan más ancho (en el móvil no cambia nada). */
 @media (min-width: 900px) {

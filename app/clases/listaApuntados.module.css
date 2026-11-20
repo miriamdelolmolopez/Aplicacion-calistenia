@@ -17,7 +17,7 @@
   padding: 24px 18px 18px;
   overflow-y: auto;
   background: var(--crema);
-  border-radius: 28px;
+  border-radius: 16px;
   animation: subir 0.25s ease-out;
 }
 
@@ -68,7 +68,7 @@
   padding: 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .cabecera {

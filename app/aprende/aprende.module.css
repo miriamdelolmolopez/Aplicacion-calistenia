@@ -17,7 +17,7 @@
   text-decoration: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 22px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -83,7 +83,7 @@
   padding: 14px 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .termino h2 {
@@ -104,7 +104,7 @@
   padding: 18px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 22px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 

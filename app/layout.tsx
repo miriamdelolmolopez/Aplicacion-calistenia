@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import ActualizadorApp from "./ActualizadorApp";
 import BarraComo from "./BarraComo";
 import AvisoFoto from "./AvisoFoto";
@@ -8,18 +8,12 @@ import NavegacionInferior from "./NavegacionInferior";
 import { SCRIPT_TEMA } from "./useTema";
 import "./globals.css";
 
-// Una sola familia para títulos y texto (Outfit) y Plus Jakarta Sans para el diseño nuevo.
-const letra = Outfit({
+// Una sola familia para títulos y texto (Inter). Se sigue llamando «--font-outfit» por dentro para no tocar los demás estilos;
+// «--font-jakarta» (la del sistema de diseño Calistenia UI) apunta a la misma, ver globals.css.
+const letra = Inter({
   variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-// Letra del sistema de diseño Calistenia UI (solo la usan las pantallas migradas).
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +30,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${letra.variable} ${jakarta.variable}`} suppressHydrationWarning>
+    <html lang="es" className={letra.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
       </head>

@@ -212,7 +212,7 @@
   padding: 12px 14px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .pago small {
@@ -380,7 +380,7 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 26px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -438,7 +438,7 @@
   text-decoration: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .filaTexto {
@@ -475,7 +475,7 @@
   padding: 20px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -551,7 +551,7 @@
   padding: 14px 16px;
   background: var(--ui-surface-pure);
   border: 0;
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--ui-sombra-card);
 }
 

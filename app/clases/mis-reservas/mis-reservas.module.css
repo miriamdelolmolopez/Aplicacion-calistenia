@@ -12,7 +12,7 @@
   padding: 16px 18px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 22px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -54,7 +54,7 @@
   padding: 16px 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -174,7 +174,7 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--sombra);
 }
 
@@ -189,7 +189,7 @@
   gap: 10px;
   padding: 12px 14px;
   background: var(--crema);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .clase > div:first-child {

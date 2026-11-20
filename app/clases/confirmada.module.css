@@ -35,7 +35,7 @@
   text-align: center;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 28px;
+  border-radius: 16px;
   box-shadow: var(--sombra-alta);
 }
 
@@ -215,7 +215,7 @@
   padding: 18px 20px;
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   background: var(--ui-surface-pure);
-  border-radius: 30px;
+  border-radius: 16px;
   box-shadow: var(--ui-sombra-card);
 }
 
