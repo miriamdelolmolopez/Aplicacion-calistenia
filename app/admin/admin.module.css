@@ -47,7 +47,7 @@
 .tarjeta {
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
   padding: 20px;
   display: flex;
@@ -124,7 +124,7 @@
   color: var(--blanco);
   background: var(--acento);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
@@ -158,7 +158,7 @@
 
 .aviso {
   background: var(--relleno);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 12px 14px;
   font-size: 0.95rem;
   margin: 0 0 8px;
@@ -183,7 +183,7 @@
   font-size: 0.8rem;
   background: var(--crema);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .lista {
@@ -197,7 +197,7 @@
 
 .persona {
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -228,7 +228,7 @@
   letter-spacing: 0;
   text-transform: none;
   padding: 5px 11px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   white-space: nowrap;
 }
 
@@ -243,7 +243,7 @@
   color: var(--carbon);
   font-size: 0.8rem;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .detalles summary {
@@ -269,7 +269,7 @@
   color: var(--carbon);
   background: var(--crema);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   resize: vertical;
 }
 
@@ -296,14 +296,14 @@
   color: var(--carbon);
   background: var(--crema);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .estadoChip {
   font-size: 0.8rem;
   font-weight: 600;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   white-space: nowrap;
 }
 
@@ -347,7 +347,7 @@
 
 .itemCaja {
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 12px;
   background: var(--blanco);
   display: flex;
@@ -363,7 +363,7 @@
   display: inline-block;
   margin-right: 6px;
   padding: 1px 8px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   background: var(--oliva-oscuro);
   color: var(--blanco);
   font-size: 0.75rem;
@@ -391,7 +391,7 @@
   color: var(--secundario);
   background: var(--relleno);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   cursor: grab;
   touch-action: none;
 }
@@ -409,7 +409,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   cursor: pointer;
 }
 
@@ -451,7 +451,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .oculto {
@@ -474,7 +474,7 @@
   min-height: 40px;
   padding: 0 14px;
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   color: var(--carbon);
   text-decoration: none;
   font-size: 0.9rem;
@@ -523,7 +523,7 @@
   gap: 12px;
   align-items: end;
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 14px;
 }
 
@@ -571,7 +571,7 @@
   gap: 10px;
   padding: 14px;
   background: var(--crema);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .videoRapido {
@@ -588,7 +588,7 @@
   width: 100%;
   padding: 14px;
   background: var(--crema);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .videoCaja label {
@@ -602,7 +602,7 @@
   font: inherit;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .muestras {
@@ -672,7 +672,7 @@
   text-decoration: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   transition: border-color 0.15s, background-color 0.15s;
 }
 
@@ -739,7 +739,7 @@ a.opcion:hover {
 /* Desplegable de varias opciones (músculos, material, filtros) */
 .multi {
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   background: var(--blanco);
   margin-bottom: 8px;
 }
@@ -809,7 +809,7 @@ a.opcion:hover {
   color: var(--ui-secundario-texto);
   background: var(--ui-surface-pure);
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -845,7 +845,7 @@ a.opcion:hover {
   color: #1f7a52;
   font-size: 0.8rem;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .etiquetaRoja {
@@ -853,7 +853,7 @@ a.opcion:hover {
   color: #b42318;
   font-size: 0.8rem;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 /* Título de la pantalla con lápiz para cambiarle el nombre (el título original queda escondido). */

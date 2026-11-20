@@ -35,7 +35,7 @@
   cursor: pointer;
   background: var(--relleno);
   border: 2px solid transparent;
-  border-radius: 16px;
+  border-radius: var(--radio-l);
 }
 
 .opcion input {

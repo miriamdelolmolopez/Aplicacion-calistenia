@@ -392,7 +392,7 @@ function PantallaClases() {
   return (
     <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
-      <h1 style={{ margin: "12px 0 8px", fontSize: "2rem" }}>{t.navReservar}</h1>
+      <h1 style={{ margin: "12px 0 8px", fontSize: "var(--letra-xl)", fontWeight: 700 }}>{t.navReservar}</h1>
 
       {datos && esAlumno && datos.restantes !== null && (
         <p className={styles.aviso}>

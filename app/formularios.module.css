@@ -32,7 +32,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .oculto {
@@ -120,7 +120,7 @@
 
 .aviso {
   background: var(--relleno);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 12px 14px;
   font-size: 0.95rem;
   margin: 0;
@@ -170,7 +170,7 @@
   color: var(--blanco);
   background: var(--acento);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
   text-decoration: none;
   transition: background-color 0.2s, box-shadow 0.2s;
@@ -230,7 +230,7 @@
 
 .sesionAlumno {
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 14px;
   background: var(--crema);
   display: flex;
@@ -250,7 +250,7 @@
 .ejercicioAlumno {
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -265,7 +265,7 @@
   display: inline-block;
   margin-right: 6px;
   padding: 1px 8px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   background: var(--oliva-oscuro);
   color: var(--blanco);
   font-size: 0.75rem;

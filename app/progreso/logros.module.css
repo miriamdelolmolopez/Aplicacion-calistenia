@@ -51,7 +51,7 @@
   text-align: center;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   box-shadow: var(--sombra);
 }
 
@@ -91,6 +91,6 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
 }

@@ -63,7 +63,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   text-decoration: none;
 }
 

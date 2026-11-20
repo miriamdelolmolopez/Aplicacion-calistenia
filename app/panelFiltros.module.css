@@ -28,7 +28,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid color-mix(in srgb, var(--acento) 45%, transparent);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .embudo:focus-visible {
@@ -59,7 +59,7 @@
   padding: 14px;
   background: #ffffff;
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
 }
 
 /* En móvil, solo el icono (y el número) para dejar sitio al buscador */

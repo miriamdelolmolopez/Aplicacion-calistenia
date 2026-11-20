@@ -8,7 +8,7 @@
   margin: 0 0 10px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .texto {

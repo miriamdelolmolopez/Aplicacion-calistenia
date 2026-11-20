@@ -4,7 +4,7 @@
   padding: 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
 }
 
 .cabecera {
