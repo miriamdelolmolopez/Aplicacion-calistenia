@@ -27,7 +27,7 @@
   font-weight: 600;
   color: var(--blanco);
   background: var(--oliva-oscuro);
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .elegirDias {

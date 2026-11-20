@@ -89,7 +89,7 @@
   font-size: 0.85rem;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .pestanas {
@@ -98,7 +98,7 @@
   margin: 16px 0 12px;
   padding: 4px;
   background: var(--relleno);
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .pestanas button {
@@ -110,7 +110,7 @@
   color: var(--carbon);
   background: none;
   border: 0;
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -159,7 +159,7 @@
   height: 10px;
   overflow: hidden;
   background: var(--relleno);
-  border-radius: 99px;
+  border-radius: 8px;
 }
 
 .relleno {
@@ -262,7 +262,7 @@
   color: var(--carbon);
   background: none;
   border: 0;
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 

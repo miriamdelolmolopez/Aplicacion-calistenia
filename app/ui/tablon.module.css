@@ -66,7 +66,7 @@
   display: inline-block;
   margin-bottom: 4px;
   padding: 1px 8px;
-  border-radius: 999px;
+  border-radius: 8px;
   color: #f4efe6;
   background: #5a5e3b;
   font-size: 0.7rem;
@@ -115,7 +115,7 @@
 .opcion {
   min-height: 36px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1px solid #5a5e3b;
   background: #ffffff;
   color: #3f4229;

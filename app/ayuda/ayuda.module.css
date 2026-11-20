@@ -92,7 +92,7 @@
   text-align: center;
   color: var(--acento-oscuro);
   background: color-mix(in srgb, var(--acento) 14%, var(--blanco));
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .flecha {

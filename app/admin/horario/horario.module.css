@@ -15,7 +15,7 @@
   color: var(--oliva-oscuro);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 999px;
+  border-radius: 8px;
   text-decoration: none;
 }
 
@@ -147,7 +147,7 @@
   cursor: pointer;
   background: var(--acento);
   border: 0;
-  border-radius: 9999px;
+  border-radius: 8px;
   box-shadow: var(--sombra-acento);
 }
 
@@ -256,7 +256,7 @@
   color: #ffffff;
   cursor: pointer;
   border: 0;
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .accionEditar {
@@ -279,7 +279,7 @@
   font-weight: 700;
   color: #a1302a;
   background: #fde8e6;
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .cifras {
@@ -300,7 +300,7 @@
 .apuntadas {
   padding: 2px 12px;
   background: #e7f6ee;
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .confirmar {
@@ -318,7 +318,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid var(--linea);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .errorClase {

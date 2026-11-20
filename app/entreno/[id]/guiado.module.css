@@ -53,7 +53,7 @@
   color: var(--oliva-oscuro);
   background: transparent;
   border: 1.5px solid var(--oliva-oscuro);
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -180,7 +180,7 @@
   color: var(--oliva-oscuro);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -320,7 +320,7 @@
   color: var(--blanco);
   background: rgba(0, 0, 0, 0.18);
   border: 0;
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -373,7 +373,7 @@
   color: var(--oliva-oscuro);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 

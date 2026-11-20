@@ -177,7 +177,7 @@
   white-space: nowrap;
   background: var(--ui-surface-pure);
   border: 1px solid transparent;
-  border-radius: 9999px;
+  border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -382,7 +382,7 @@
   font-weight: 600;
   color: var(--ui-title);
   background: #ffffff;
-  border: 1px solid rgba(23, 24, 26, 0.14);
+  border: 1px solid var(--linea-fuerte);
 }
 
 /* ── 7. Tarjetas de métrica (dos lado a lado) con barras finas y línea suave ── */
@@ -479,7 +479,7 @@
   width: 4px;
   height: 80px;
   background: var(--ui-barra-inactiva);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .cuenta {
@@ -488,7 +488,7 @@
   width: 6px;
   min-height: 12px;
   background: #55575e;
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .pistaColumna.destacada .pista {

@@ -15,7 +15,7 @@
   padding: 0 14px;
   background: #ffffff;
   border: 1px solid rgba(23, 24, 26, 0.12);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .buscar input {
@@ -40,7 +40,7 @@
   cursor: pointer;
   background: var(--acento);
   border: 0;
-  border-radius: 9999px;
+  border-radius: 8px;
   box-shadow: var(--sombra-acento);
 }
 
@@ -99,7 +99,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid rgba(23, 24, 26, 0.12);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .confirmar .guardar {
@@ -171,7 +171,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid rgba(23, 24, 26, 0.12);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 /* Confirmaciones: guardar / descartar */
@@ -208,7 +208,7 @@
   font-weight: 700;
   cursor: pointer;
   border: 1px solid rgba(23, 24, 26, 0.12);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .pie {
@@ -230,7 +230,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid rgba(23, 24, 26, 0.14);
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 /* Iconos pequeños a la derecha de cada pago del historial. */
@@ -284,7 +284,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   padding: 6px 12px;
-  border-radius: 9999px;
+  border-radius: 8px;
   border: 1px solid var(--acento);
   color: var(--acento-texto, var(--acento));
   text-decoration: none;

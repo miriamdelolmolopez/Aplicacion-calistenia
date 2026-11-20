@@ -229,7 +229,7 @@
   color: var(--ui-secundario-texto);
   background: var(--ui-surface-pure);
   border: 1px solid transparent;
-  border-radius: 9999px;
+  border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -247,7 +247,7 @@
 }
 
 .numeros button {
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .filtros {
@@ -272,7 +272,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 99px;
+  border-radius: 8px;
   cursor: pointer;
 }
 

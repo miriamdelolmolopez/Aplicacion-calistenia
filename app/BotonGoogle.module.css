@@ -29,7 +29,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1.5px solid #dadce0;
-  border-radius: 9999px;
+  border-radius: 8px;
 }
 
 .boton:hover:not(:disabled) {

@@ -40,7 +40,7 @@
   color: var(--oliva-oscuro);
   background: transparent;
   border: 1px solid var(--oliva-oscuro);
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
 }
 

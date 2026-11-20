@@ -13,8 +13,8 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    width: 260px;
-    padding: 16px 12px;
+    width: 247px;
+    padding: 12px 8px;
     overflow-y: auto;
     background: var(--blanco);
     border-right: 1px solid var(--linea);
@@ -71,12 +71,11 @@
 }
 
 .tituloGrupo {
-  margin: 4px 12px 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--secundario);
+  margin: 8px 8px 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #75777c;
 }
 
 .textoEnlace {
@@ -84,10 +83,10 @@
 }
 
 .subtitulo {
-  margin: 12px 12px 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--secundario);
+  margin: 14px 8px 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #75777c;
 }
 
 .subtitulo:first-child {
@@ -107,19 +106,20 @@
 .enlace {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  min-height: 44px;
-  padding: 0 14px;
+  min-height: 34px;
+  padding: 4px 8px;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.87rem;
   font-weight: 500;
-  color: var(--carbon);
+  letter-spacing: -0.02em;
+  color: #232529;
   text-align: left;
   text-decoration: none;
   background: transparent;
   border: 0;
-  border-radius: 12px;
+  border-radius: 9px;
   cursor: pointer;
 }
 
@@ -128,13 +128,20 @@
 }
 
 .enlace svg {
-  color: var(--oliva);
+  width: 18px;
+  height: 18px;
+  color: #5c5e63;
 }
 
-/* Opción elegida: fondo azul suave y letra azul, sin efectos */
-.activo {
+/* Opción elegida: fondo gris claro (#eeeff1, como HubFit) y letra e icono en tu azul */
+.activo,
+.activo:hover {
   color: var(--oliva-oscuro);
-  background: rgba(10, 168, 192, 0.12);
+  background: var(--relleno);
+}
+
+.activo svg {
+  color: var(--oliva);
 }
 
 .pie {

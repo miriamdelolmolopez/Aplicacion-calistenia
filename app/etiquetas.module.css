@@ -1,45 +1,54 @@
-/* Etiquetas de color reutilizables (Alumno/a, Invitado/a, Pago pendiente…).
+/* Etiquetas de color reutilizables (Alumno/a, Invitado/a, Pago pendiente…). Medidas tomadas de HubFit:
+   relleno 3px 6px, esquinas 6px, letra 12px en seminegrita y un anillo fino del mismo color.
    Uso: import etq from "@/app/etiquetas.module.css";  <span className={`${etq.etq} ${etq.verde}`}>Alumno/a</span> */
 .etq {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 8px;
-  font-size: 0.78rem;
+  padding: 3px 6px;
+  font-size: 0.8rem;
   font-weight: 500;
-  line-height: 1.5;
+  letter-spacing: -0.02em;
+  line-height: 16px;
   white-space: nowrap;
   border-radius: 6px;
   color: var(--etq-gris);
   background: var(--etq-gris-f);
+  box-shadow: inset 0 0 0 1px var(--etq-gris-r);
 }
 
 .verde {
   color: var(--etq-verde);
   background: var(--etq-verde-f);
+  box-shadow: inset 0 0 0 1px var(--etq-verde-r);
 }
 
 .ambar {
   color: var(--etq-ambar);
   background: var(--etq-ambar-f);
+  box-shadow: inset 0 0 0 1px var(--etq-ambar-r);
 }
 
 .gris {
   color: var(--etq-gris);
   background: var(--etq-gris-f);
+  box-shadow: inset 0 0 0 1px var(--etq-gris-r);
 }
 
 .rojo {
   color: var(--etq-rojo);
   background: var(--etq-rojo-f);
+  box-shadow: inset 0 0 0 1px var(--etq-rojo-r);
 }
 
 .lila {
   color: var(--etq-lila);
   background: var(--etq-lila-f);
+  box-shadow: inset 0 0 0 1px var(--etq-lila-r);
 }
 
 .azul {
   color: var(--etq-azul);
   background: var(--etq-azul-f);
+  box-shadow: inset 0 0 0 1px var(--etq-azul-r);
 }

@@ -1,12 +1,13 @@
 :root {
-  /* Base neutra: gris roto de fondo, tarjetas blancas, texto casi negro y gris para lo secundario */
-  --crema: #f3f4f5;
+  /* Base limpia (medida sobre HubFit): fondo blanco, tarjetas con borde fino, texto casi negro y gris azulado para lo secundario */
+  --crema: #ffffff;
   --blanco: #ffffff;
-  --carbon: #1a1a1a;
-  --texto: #2f3237;
-  --secundario: #6c757d;
-  --relleno: #ececee;
-  --linea: rgba(23, 24, 26, 0.08);
+  --carbon: #1a202c;
+  --texto: #1a202c;
+  --secundario: #718096;
+  --relleno: #eeeff1;
+  --linea: #edf2f7;
+  --linea-fuerte: #d9d9d9;
   /* Acento: azul cian */
   --acento: #0aa8c0;
   --acento-oscuro: #0e7490;
@@ -15,22 +16,28 @@
   --oliva-oscuro: #0e7490;
   --radio: 16px;
   /* Estilo plano: borde fino y una sombra mínima (las tarjetas no «flotan») */
-  --sombra: 0 0 0 1px rgba(23, 24, 26, 0.06), 0 1px 2px rgba(23, 24, 26, 0.05);
-  --sombra-alta: 0 0 0 1px rgba(23, 24, 26, 0.07), 0 8px 24px -8px rgba(23, 24, 26, 0.16);
-  --sombra-acento: 0 1px 2px rgba(10, 168, 192, 0.35);
-  /* Etiquetas de color (Alumno/a, Invitado/a, Pago pendiente…): fondo suave y letra oscura del mismo color */
-  --etq-verde: #166534;
-  --etq-verde-f: #e3f6ea;
-  --etq-ambar: #92400e;
-  --etq-ambar-f: #fdf0d8;
-  --etq-gris: #4b5563;
-  --etq-gris-f: #eceef2;
-  --etq-rojo: #b42318;
-  --etq-rojo-f: #fde8e6;
+  --sombra: none;
+  --sombra-alta: 0 8px 24px -8px rgba(26, 32, 44, 0.16);
+  --sombra-acento: 0 2px 0 rgba(10, 168, 192, 0.1);
+  /* Etiquetas de color (Alumno/a, Invitado/a, Pago pendiente…): fondo suave, anillo fino y letra del mismo color (medidas de HubFit) */
+  --etq-verde: #1f6b3a;
+  --etq-verde-f: #e6f6ec;
+  --etq-verde-r: #cdeed9;
+  --etq-ambar: #8a4b0f;
+  --etq-ambar-f: #fff3dc;
+  --etq-ambar-r: #fde3b0;
+  --etq-gris: #4a5058;
+  --etq-gris-f: #f1f2f4;
+  --etq-gris-r: #e2e4e8;
+  --etq-rojo: #a52f2e;
+  --etq-rojo-f: #ffebeb;
+  --etq-rojo-r: #ffdcdb;
   --etq-lila: #5b3fb3;
-  --etq-lila-f: #ece8fb;
+  --etq-lila-f: #efebfc;
+  --etq-lila-r: #ddd5f7;
   --etq-azul: #0e7490;
   --etq-azul-f: #e5f6f9;
+  --etq-azul-r: #c9ebf1;
   --font-titulos: var(--font-outfit);
   --font-cuerpo: var(--font-outfit);
   --font-jakarta: var(--font-outfit);
@@ -48,15 +55,17 @@ body {
 
 html {
   background: var(--crema);
+  font-size: 15px; /* un poco más compacto que el 16 de siempre: todo lo que va en «rem» se ajusta solo */
 }
 
 body {
   background: var(--crema);
   color: var(--texto);
   font-family: var(--font-cuerpo), system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.55;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-variant-numeric: tabular-nums;
@@ -161,7 +170,7 @@ time,
 @media (min-width: 1024px) {
   body.con-barra {
     padding-bottom: 0;
-    padding-left: 260px;
+    padding-left: 247px;
   }
 }
 
@@ -181,9 +190,9 @@ time,
   --ui-secundario-texto: #6c757d;
   --ui-badge-dark: #22292d;
   --ui-barra-inactiva: #ececee;
-  --ui-sombra-card: 0 0 0 1px rgba(23, 24, 26, 0.06), 0 1px 2px rgba(23, 24, 26, 0.04);
-  --ui-sombra-card-hover: 0 0 0 1px rgba(23, 24, 26, 0.09), 0 4px 12px -4px rgba(23, 24, 26, 0.08);
-  --ui-sombra-boton: 0 1px 2px rgba(10, 168, 192, 0.35);
+  --ui-sombra-card: 0 0 0 1px #edf2f7;
+  --ui-sombra-card-hover: 0 0 0 1px #d9dee6;
+  --ui-sombra-boton: 0 2px 0 rgba(10, 168, 192, 0.1);
 }
 
 /* Tema oscuro: se invierten los colores de toda la pantalla y las fotos se vuelven a poner como eran. */
