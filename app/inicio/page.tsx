@@ -184,7 +184,7 @@ export default function Inicio() {
   const textoFrase = frase ? (idioma === "en" ? frase.texto_en : frase.texto_es) : "";
 
   return (
-    <main className={`${styles.pagina} ${esAdmin ? estilos.paginaAdmin : ""}`}>
+    <main className={`${styles.pagina} ${esAdmin ? estilos.paginaAdmin : estilos.paginaAlumno}`}>
       <BarraSuperior />
 
       {esAdmin && perfil.rolReal === "admin" && (
@@ -231,7 +231,7 @@ export default function Inicio() {
       </header>
       )}
 
-      <div className={estilos.contenido}>
+      <div className={`${estilos.contenido} ${esAdmin ? "" : estilos.contenidoAlumno}`}>
         {esAdmin && (
           <div className={estilos.columnasAdmin}>
             <div className={estilos.colPrincipal}>

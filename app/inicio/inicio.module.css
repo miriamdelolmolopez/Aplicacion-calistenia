@@ -1017,3 +1017,26 @@
   font-size: var(--letra-s);
   opacity: 0.9;
 }
+
+/* Inicio del alumno/a en ordenador: más ancho y las tarjetas repartidas en dos columnas */
+@media (min-width: 1024px) {
+  main.paginaAlumno {
+    max-width: 1080px;
+  }
+
+  main.paginaAlumno .banda {
+    margin-inline: 0;
+    border-radius: var(--radio-l);
+  }
+
+  .contenidoAlumno {
+    display: block;
+    column-count: 2;
+    column-gap: var(--esp-4);
+  }
+
+  .contenidoAlumno > * {
+    margin-bottom: var(--esp-4);
+    break-inside: avoid;
+  }
+}

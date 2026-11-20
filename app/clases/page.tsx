@@ -390,7 +390,7 @@ function PantallaClases() {
   const boton = { minHeight: 44 } as const;
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <h1 style={{ margin: "12px 0 8px", fontSize: "2rem" }}>{t.navReservar}</h1>
 
