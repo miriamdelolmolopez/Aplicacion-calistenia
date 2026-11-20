@@ -11,6 +11,7 @@ import CabeceraAdmin from "./CabeceraAdmin";
 import { seccionesExcluidas } from "@/lib/admin";
 import { sinExcluidas } from "@/lib/seccionesAdmin";
 import { GRUPOS_ADMIN } from "../gruposAdmin";
+import ResumenInicio from "./ResumenInicio";
 
 export const metadata = { title: "Administración · CalisCoach" };
 
@@ -49,6 +50,8 @@ export default async function Administracion() {
           Inicio
         </Link>
       </CabeceraAdmin>
+
+      {!excluidas.includes("informes") && <ResumenInicio />}
 
       <section className={styles.tarjeta}>
         <h2><Icono nombre="regalo" tamano={16} /> Cumpleaños</h2>
