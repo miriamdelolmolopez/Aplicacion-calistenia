@@ -109,7 +109,7 @@ export default function EstadisticasInicio() {
             <TarjetaCifra
               titulo="Cobrado"
               valor={euros(i.ingresos.total_periodo)}
-              color="#0aa8c0"
+              color="var(--acento)"
               notas={
                 <>
                   <span>{i.ingresos.pagos_periodo} pagos</span>
@@ -139,7 +139,7 @@ export default function EstadisticasInicio() {
             <TarjetaCifra
               titulo="Retención"
               valor={a.retencion ? `${Math.round((a.retencion.siguen / a.retencion.base) * 100)} %` : "—"}
-              color="#0e7490"
+              color="var(--acento-oscuro)"
               notas={<span>{a.retencion ? `${a.retencion.siguen} de ${a.retencion.base} siguen` : "Sin alumnos/as al empezar"}</span>}
             />
             <TarjetaCifra titulo="Ausencias" valor={String(a.totalAusencias)} color="#94a3b8" notas={<span>No se presentaron a su clase</span>} />

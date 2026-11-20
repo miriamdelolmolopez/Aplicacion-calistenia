@@ -103,7 +103,7 @@ export default function Logros({ userId, admin = false }: { userId?: string; adm
       ) : (
         <>
           <div className={estilos.tarjetas}>
-            <TarjetaCifra titulo={t.mes} valor={String(l.mesActual)} color="#0aa8c0" notas={<span>{dif === 0 ? t.igual : dif > 0 ? t.mas(dif) : t.menos(-dif)}</span>} />
+            <TarjetaCifra titulo={t.mes} valor={String(l.mesActual)} color="var(--acento)" notas={<span>{dif === 0 ? t.igual : dif > 0 ? t.mas(dif) : t.menos(-dif)}</span>} />
             <TarjetaCifra
               titulo={t.racha}
               valor={String(l.rachaActual)}

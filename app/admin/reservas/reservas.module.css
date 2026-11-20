@@ -126,7 +126,7 @@
 
 .novino {
   color: #fff;
-  background: #0e7490;
+  background: var(--acento-oscuro);
   border-color: #3a3a3c;
 }
 

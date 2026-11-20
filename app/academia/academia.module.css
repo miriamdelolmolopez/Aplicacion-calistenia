@@ -128,7 +128,7 @@
   flex: none;
   width: 96px;
   height: 96px;
-  background-color: #0aa8c0;
+  background-color: var(--acento);
   background-size: cover;
   background-position: center;
   border-radius: 14px;
@@ -165,7 +165,7 @@
 .detalleFoto {
   height: 170px;
   margin: -6px 0 14px;
-  background-color: #0aa8c0;
+  background-color: var(--acento);
   background-size: cover;
   background-position: center;
   border-radius: 12px;

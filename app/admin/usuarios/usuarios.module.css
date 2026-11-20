@@ -241,7 +241,7 @@
 .vista_lista .botonLista,
 .vista_cards .botonCards {
   color: var(--acento-oscuro);
-  background: rgba(10, 168, 192, 0.18);
+  background: color-mix(in srgb, var(--acento) 18%, transparent);
 }
 
 .tabla {

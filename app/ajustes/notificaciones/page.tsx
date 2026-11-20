@@ -81,8 +81,8 @@ function Canal({ icono, nombre, activo, fijo, alCambiar }: { icono: "correo" | "
         alignItems: "center",
         justifyContent: "center",
         cursor: fijo ? "default" : "pointer",
-        border: `2px solid ${activo ? "#0aa8c0" : "var(--linea)"}`,
-        background: activo ? "#0aa8c0" : "#e4e2dc",
+        border: `2px solid ${activo ? "var(--acento)" : "var(--linea)"}`,
+        background: activo ? "var(--acento)" : "#e4e2dc",
         color: activo ? "#fff" : "#8a8984",
         opacity: fijo ? 0.9 : 1,
       }}

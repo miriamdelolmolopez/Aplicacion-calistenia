@@ -492,13 +492,13 @@
 }
 
 .pistaColumna.destacada .pista {
-  background: rgba(10, 168, 192, 0.2);
+  background: color-mix(in srgb, var(--acento) 20%, transparent);
 }
 
 .pistaColumna.destacada .cuenta {
   height: 18px;
   background: var(--ui-primary);
-  box-shadow: 0 2px 8px rgba(10, 168, 192, 0.5);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--acento) 50%, transparent);
 }
 
 .pistaEtiqueta {

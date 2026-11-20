@@ -150,7 +150,7 @@ export default async function Informes({
               <TarjetaCifra
                 titulo="Activas"
                 valor={String(i.personas.activas)}
-                color="#0aa8c0"
+                color="var(--acento)"
                 notas={<span>{i.personas.alumnas} alumnos/as · {i.personas.invitadas} invitados/as</span>}
               />
               <TarjetaCifra
@@ -287,7 +287,7 @@ export default async function Informes({
               <TarjetaCifra
                 titulo="Cobrado en el periodo"
                 valor={euros(i.ingresos.total_periodo)}
-                color="#0aa8c0"
+                color="var(--acento)"
                 notas={
                   <>
                     <span>{i.ingresos.pagos_periodo} pagos</span>

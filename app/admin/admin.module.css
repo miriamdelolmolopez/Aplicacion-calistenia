@@ -87,7 +87,7 @@
 .campo input:focus,
 .campo select:focus {
   border-color: var(--oliva);
-  box-shadow: 0 0 0 4px rgba(10, 168, 192, 0.16);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--acento) 16%, transparent);
 }
 
 .grupo {
@@ -220,7 +220,7 @@
 }
 
 .etiqueta {
-  background: rgba(10, 168, 192, 0.14);
+  background: color-mix(in srgb, var(--acento) 14%, transparent);
   color: var(--oliva-oscuro);
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 0.7rem;
@@ -677,7 +677,7 @@
 }
 
 a.opcion:hover {
-  border-color: rgba(10, 168, 192, 0.45);
+  border-color: color-mix(in srgb, var(--acento) 45%, transparent);
   background: #fbfdfe;
 }
 

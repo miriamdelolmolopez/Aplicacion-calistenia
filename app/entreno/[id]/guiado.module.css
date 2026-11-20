@@ -198,7 +198,7 @@
 }
 
 .cronoBotones .cronoParar {
-  background: #0e7490;
+  background: var(--acento-oscuro);
   border-color: #3a3a3c;
 }
 
@@ -496,7 +496,7 @@
 
 .progreso > div {
   background: var(--ui-primary);
-  box-shadow: 0 0 10px rgba(10, 168, 192, 0.45);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--acento) 45%, transparent);
 }
 
 .ejercicio {

@@ -135,7 +135,7 @@
 
 .lineaActual {
   fill: none;
-  stroke: #0aa8c0;
+  stroke: var(--acento);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -150,12 +150,12 @@
 
 .punto {
   fill: #ffffff;
-  stroke: #0aa8c0;
+  stroke: var(--acento);
   stroke-width: 2.5;
 }
 
 .punto:hover {
-  fill: #0aa8c0;
+  fill: var(--acento);
 }
 
 /* Rosca */

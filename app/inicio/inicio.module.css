@@ -153,11 +153,11 @@
 }
 
 .oliva {
-  background: linear-gradient(160deg, #0aa8c0, #0aa8c0);
+  background: linear-gradient(160deg, var(--acento), var(--acento));
 }
 
 .olivaOscuro {
-  background: linear-gradient(160deg, #0aa8c0, #2a2b2f);
+  background: linear-gradient(160deg, var(--acento), #2a2b2f);
 }
 
 .carbon {
@@ -494,7 +494,7 @@
   position: absolute;
   inset: 14px auto 14px 0;
   width: 4px;
-  background: var(--tono, #0aa8c0);
+  background: var(--tono, var(--acento));
   border-radius: 0 4px 4px 0;
 }
 
@@ -745,7 +745,7 @@
 
 .circuloIniciales {
   color: #fff;
-  background: linear-gradient(135deg, #0aa8c0, #6d5efc);
+  background: linear-gradient(135deg, var(--acento), #6d5efc);
 }
 
 .atencionCuenta {
@@ -774,7 +774,7 @@
 }
 
 .cumpleElegido .cumpleAnillo {
-  box-shadow: 0 0 0 3px rgba(10, 168, 192, 0.35);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 35%, transparent);
 }
 
 .cumpleDetalle {
@@ -918,8 +918,8 @@
 
 .periodoActivo {
   color: #fff;
-  background: #0aa8c0;
-  border-color: #0aa8c0;
+  background: var(--acento);
+  border-color: var(--acento);
 }
 
 .fechasFila {
@@ -952,4 +952,68 @@
   .estadCifras {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/* Cabecera del alumno/a: banda con tu azul, fecha, saludo y campana en un cristal */
+.banda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  margin: calc(var(--esp-4) * -1) calc(var(--esp-5) * -1) var(--esp-4);
+  padding: var(--esp-4) var(--esp-5) var(--esp-6);
+  color: #fff;
+  background: linear-gradient(160deg, var(--acento-oscuro), var(--acento));
+  border-radius: 0 0 var(--radio-l) var(--radio-l);
+}
+
+.bandaArriba {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+.bandaAvatar {
+  display: inline-flex;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+}
+
+.bandaMarca {
+  flex: 1;
+  font-size: var(--letra-m);
+  font-weight: 600;
+  text-align: center;
+}
+
+.cristal {
+  display: inline-flex;
+  padding: 2px 6px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.bandaFecha {
+  margin: 0;
+  font-size: var(--letra-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.bandaSaludo {
+  margin: 0;
+  font-size: var(--letra-l);
+  font-weight: 700;
+  color: #fff;
+}
+
+.bandaFrase {
+  margin: var(--esp-1) 0 0;
+  font-size: var(--letra-s);
+  opacity: 0.9;
 }

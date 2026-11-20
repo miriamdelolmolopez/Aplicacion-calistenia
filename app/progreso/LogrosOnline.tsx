@@ -73,7 +73,7 @@ export default function LogrosOnline({ userId, admin = false }: { userId?: strin
       ) : (
         <>
           <div className={estilos.tarjetas}>
-            <TarjetaCifra titulo={es ? "Entrenos este mes" : "Workouts this month"} valor={String(datos.mes)} color="#0aa8c0" notas={<span>&nbsp;</span>} />
+            <TarjetaCifra titulo={es ? "Entrenos este mes" : "Workouts this month"} valor={String(datos.mes)} color="var(--acento)" notas={<span>&nbsp;</span>} />
             <TarjetaCifra
               titulo={es ? "Racha" : "Streak"}
               valor={String(datos.rachaActual)}

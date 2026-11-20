@@ -27,18 +27,18 @@
   color: #3a3a3c;
   cursor: pointer;
   background: #ffffff;
-  border: 1px solid rgba(10, 168, 192, 0.45);
+  border: 1px solid color-mix(in srgb, var(--acento) 45%, transparent);
   border-radius: 12px;
 }
 
 .embudo:focus-visible {
-  outline: 3px solid #0aa8c0;
+  outline: 3px solid var(--acento);
   outline-offset: 2px;
 }
 
 .embudoActivo {
   background: #f1f2f4;
-  border-color: #0aa8c0;
+  border-color: var(--acento);
 }
 
 .insignia {
@@ -50,7 +50,7 @@
   padding: 0 6px;
   font-size: 0.75rem;
   color: #ffffff;
-  background: #0aa8c0;
+  background: var(--acento);
   border-radius: 10px;
 }
 

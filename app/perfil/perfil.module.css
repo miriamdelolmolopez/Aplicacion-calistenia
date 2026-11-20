@@ -167,7 +167,7 @@
 }
 
 .interruptor input:checked {
-  background: linear-gradient(135deg, #2fc3d8 0%, #0aa8c0 50%, #08889c 100%);
+  background: linear-gradient(135deg, #2fc3d8 0%, var(--acento) 50%, #08889c 100%);
 }
 
 .interruptor input:checked::before {

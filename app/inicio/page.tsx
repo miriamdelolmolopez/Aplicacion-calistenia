@@ -22,6 +22,7 @@ import TablonAnuncios from "../ui/TablonAnuncios";
 import VerComoAlumno from "../admin/VerComoAlumno";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import EstadisticasInicio from "./EstadisticasInicio";
+import Seccion, { Accesos, Fila } from "../ui/Seccion";
 import AvisosAdmin from "./AvisosAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta } from "@/lib/fechas";
@@ -191,6 +192,27 @@ export default function Inicio() {
           <VerComoAlumno />
         </div>
       )}
+      {!esAdmin && (
+        <header className={estilos.banda}>
+          <div className={estilos.bandaArriba}>
+            <span className={estilos.bandaAvatar}>
+              <Avatar nombre={perfil.nombre} url={miFoto} tamano={32} />
+            </span>
+            <span className={estilos.bandaMarca}>CalisCoach</span>
+            <span className={estilos.cristal}>
+              <CampanaAvisos />
+            </span>
+          </div>
+          <p className={estilos.bandaFecha}>
+            {new Intl.DateTimeFormat(idioma === "en" ? "en-GB" : "es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Madrid" }).format(new Date())}
+          </p>
+          <h1 className={estilos.bandaSaludo}>
+            {t.hola} {perfil.nombre}
+          </h1>
+          {textoFrase && <p className={estilos.bandaFrase}>{textoFrase}</p>}
+        </header>
+      )}
+      {esAdmin && (
       <header className={clay.cabecera}>
         <span className={clay.avatar}>
           <Avatar nombre={perfil.nombre} url={miFoto} tamano={40} />
@@ -207,6 +229,7 @@ export default function Inicio() {
           <CampanaAvisos />
         </span>
       </header>
+      )}
 
       <div className={estilos.contenido}>
         {esAdmin && (
@@ -246,6 +269,29 @@ export default function Inicio() {
               </div>
             </section>
           </div>
+        )}
+
+        {!esAdmin && (
+          <Seccion icono="inicio" titulo={idioma === "en" ? "Today" : "Hoy"}>
+            {extra.entrenoId && (
+              <Fila icono="rutina" titulo={idioma === "en" ? "Workout in progress" : "Entreno en curso"} sub={idioma === "en" ? "Tap to continue" : "Toca para continuar"} estado="flecha" href={`/entreno/${extra.entrenoId}`} />
+            )}
+            {extra.reservas[0] && (
+              <Fila
+                icono="reservas"
+                titulo={extra.reservas[0].nombre || (idioma === "en" ? "Your next class" : "Tu próxima clase")}
+                sub={new Intl.DateTimeFormat(idioma === "en" ? "en-GB" : "es-ES", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" }).format(new Date(extra.reservas[0].empieza_en))}
+                estado="flecha"
+                href="/clases"
+              />
+            )}
+            {planOnline && extra.sesionesOnline.length > 0 && !extra.entrenoId && (
+              <Fila icono="rutina" titulo={idioma === "en" ? "Your workout" : "Tu entreno"} sub={extra.rutinaNombre ?? undefined} estado="pendiente" href="/rutina" />
+            )}
+            {!extra.entrenoId && !extra.reservas[0] && !(planOnline && extra.sesionesOnline.length > 0) && (
+              <Fila icono="reservar" titulo={idioma === "en" ? "Book a class" : "Reservar una clase"} sub={idioma === "en" ? "Nothing planned yet" : "Todavía no tienes nada previsto"} estado="flecha" href="/clases" />
+            )}
+          </Seccion>
         )}
 
         {extra.entrenoId && (
@@ -335,6 +381,21 @@ export default function Inicio() {
         })()}
 
         <TablonAnuncios limite={3} />
+
+        {!esAdmin && (
+          <Seccion icono="biblioteca" titulo={idioma === "en" ? "Resources" : "Recursos"}>
+            <Accesos
+              items={[
+                { href: "/aprende", icono: "aprende", texto: idioma === "en" ? "Learn" : "Aprende" },
+                { href: "/academia", icono: "academia", texto: idioma === "en" ? "Courses" : "Cursos" },
+                { href: "/tablon", icono: "tablon", texto: idioma === "en" ? "Notice board" : "Tablón" },
+                { href: "/pagos", icono: "pagos", texto: idioma === "en" ? "My payments" : "Mis pagos" },
+                { href: "/ayuda", icono: "ayuda", texto: idioma === "en" ? "Help" : "Ayuda" },
+                { href: "/ajustes", icono: "ajustes", texto: idioma === "en" ? "Settings" : "Ajustes" },
+              ]}
+            />
+          </Seccion>
+        )}
       </div>
     </main>
   );

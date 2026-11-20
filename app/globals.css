@@ -11,14 +11,33 @@
   /* Acento: azul cian */
   --acento: #0aa8c0;
   --acento-oscuro: #0e7490;
+  --acento-hover: #0b8aa3;
+  /* Tonos derivados del acento: así, al cambiar --acento, cambian también fondos y anillos suaves */
+  --acento-fondo: color-mix(in srgb, var(--acento) 10%, #fff);
+  --acento-anillo: color-mix(in srgb, var(--acento) 25%, #fff);
   --acento-suave: #f1f2f4;
-  --oliva: #0aa8c0;
-  --oliva-oscuro: #0e7490;
+  /* Escala de espacios, radios y letra (los componentes usan estas, no valores sueltos) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 40px;
+  --radio-s: 8px;
+  --radio-m: 12px;
+  --radio-l: 16px;
+  --letra-xs: 0.75rem;
+  --letra-s: 0.875rem;
+  --letra-m: 1rem;
+  --letra-l: 1.25rem;
+  --letra-xl: 1.75rem;
+  --oliva: var(--acento);
+  --oliva-oscuro: var(--acento-oscuro);
   --radio: 16px;
   /* Estilo plano: borde fino y una sombra mínima (las tarjetas no «flotan») */
   --sombra: none;
   --sombra-alta: 0 8px 24px -8px rgba(26, 32, 44, 0.16);
-  --sombra-acento: 0 2px 0 rgba(10, 168, 192, 0.1);
+  --sombra-acento: 0 2px 0 color-mix(in srgb, var(--acento) 10%, transparent);
   /* Etiquetas de color (Alumno/a, Invitado/a, Pago pendiente…): fondo suave, anillo fino y letra del mismo color (medidas de HubFit) */
   --etq-verde: #1f6b3a;
   --etq-verde-f: #e6f6ec;
@@ -35,7 +54,7 @@
   --etq-lila: #5b3fb3;
   --etq-lila-f: #efebfc;
   --etq-lila-r: #ddd5f7;
-  --etq-azul: #0e7490;
+  --etq-azul: var(--acento-oscuro);
   --etq-azul-f: #e5f6f9;
   --etq-azul-r: #c9ebf1;
   --font-titulos: var(--font-outfit);
@@ -177,9 +196,9 @@ time,
 
 /* Sistema de diseño Calistenia UI (solo lo usan las pantallas migradas; ver app/ui/clay.module.css) */
 :root {
-  --ui-primary: #0aa8c0;
-  --ui-primary-hover: #0b8aa3;
-  --ui-primary-active: #0e7490;
+  --ui-primary: var(--acento);
+  --ui-primary-hover: var(--acento-hover);
+  --ui-primary-active: var(--acento-oscuro);
   --ui-primary-light: #f1f2f4;
   --ui-primary-soft-btn: #2ff7f1;
   --ui-surface-pure: #ffffff;
@@ -193,7 +212,7 @@ time,
   --ui-barra-inactiva: #ececee;
   --ui-sombra-card: 0 0 0 1px #edf2f7;
   --ui-sombra-card-hover: 0 0 0 1px #d9dee6;
-  --ui-sombra-boton: 0 2px 0 rgba(10, 168, 192, 0.1);
+  --ui-sombra-boton: 0 2px 0 color-mix(in srgb, var(--acento) 10%, transparent);
 }
 
 /* Tema oscuro: se invierten los colores de toda la pantalla y las fotos se vuelven a poner como eran. */
