@@ -13,7 +13,6 @@ import estilos from "./entrenamiento.module.css";
 import CalendarioEntreno from "./CalendarioEntreno";
 import DiasEntreno from "../ajustes/notificaciones/DiasEntreno";
 import { claveDia } from "@/lib/fechas";
-import { estiloFoto } from "@/lib/fotos";
 import { lunesDe, numeroSemana } from "@/lib/semanas";
 import { createClient } from "@/lib/supabase/client";
 import { planOnlineComo } from "./planComo";
@@ -169,7 +168,6 @@ export default function Entrenamiento() {
 
           {r ? (
             <section className={estilos.resumen}>
-              <div className={estilos.foto} style={estiloFoto("online", r.fotoUrl)} />
               <div className={estilos.resumenCuerpo}>
                 <h2>{r.nombre}</h2>
                 <p>

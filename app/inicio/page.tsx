@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
-import { useFotoCard } from "../useFotosCards";
-import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import { obtenerFotos } from "../perfil/acciones";
 import { obtenerMisBonos, type MiBono } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
@@ -25,7 +23,6 @@ import ResumenAdminTarjetas from "./ResumenAdmin";
 import AvisosAdmin from "./AvisosAdmin";
 import estilos from "./inicio.module.css";
 import { fechaCorta } from "@/lib/fechas";
-import { estiloFoto, type FotoNombre } from "@/lib/fotos";
 import { aceptadoVigente, versionesVigentes } from "@/lib/legal";
 import { createClient } from "@/lib/supabase/client";
 import Cargando from "../Cargando";
@@ -121,9 +118,6 @@ async function cargarExtra(userId: string, planOnline: boolean): Promise<Extra> 
   };
 }
 
-// Fotos de ejemplo entre las que se elige una al azar cada vez que se abre la app.
-const FOTOS_INICIO: FotoNombre[] = ["inicio", "calistenia", "progreso", "personal"];
-
 export default function Inicio() {
   const [idioma] = useIdioma();
   const tr = useNombresEn();
@@ -131,11 +125,8 @@ export default function Inicio() {
   const router = useRouter();
   const perfil = useMiPerfil();
   const [extra, setExtra] = useState<Extra | null>(null);
-  const [propiaInicio, setPropiaInicio] = useState<string | null>(null);
-  const fotoBannerInicio = useFotoCard("inicio:banner");
-  const [fotosListas, setFotosListas] = useState(false);
   const [miFoto, setMiFoto] = useState<string | null>(null);
-  const [azar, setAzar] = useState<{ foto: FotoNombre; frase: number } | null>(null);
+  const [azar, setAzar] = useState<{ frase: number } | null>(null);
   const id = perfil && perfil !== "anonimo" ? perfil.id : null;
   const planOnline = !!perfil && perfil !== "anonimo" && perfil.planOnline;
 
@@ -157,22 +148,12 @@ export default function Inicio() {
 
   useEffect(() => {
     if (!id) return;
-    // La foto y la frase se eligen al azar cada vez que se abre la app.
+    // La frase se elige al azar cada vez que se abre la app.
     cargarExtra(id, planOnline).then((e) => {
       setExtra(e);
-      setAzar({
-        foto: FOTOS_INICIO[Math.floor(Math.random() * FOTOS_INICIO.length)],
-        frase: Math.floor(Math.random() * Math.max(e.frases.length, 1)),
-      });
+      setAzar({ frase: Math.floor(Math.random() * Math.max(e.frases.length, 1)) });
     });
   }, [id, planOnline]);
-
-  useEffect(() => {
-    obtenerFotosAppCliente().then((f) => {
-      setPropiaInicio(f.inicio);
-      setFotosListas(true);
-    });
-  }, []);
 
   // Hasta tener los datos y las aceptaciones no se puede avanzar.
   useEffect(() => {
@@ -227,11 +208,6 @@ export default function Inicio() {
           <span className={clay.bannerEtiqueta}>
             {perfil.rol === "admin" ? t.vistaAdmin : perfil.rol === "invitado" ? t.vistaInvitado : t.vistaAlumno}
           </span>
-          <div
-            className={clay.bannerFoto}
-            style={estiloFoto(azar?.foto ?? "inicio", propiaInicio ?? fotoBannerInicio, !fotosListas)}
-            aria-hidden="true"
-          />
         </section>
       </div>
 

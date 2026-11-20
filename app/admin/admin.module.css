@@ -650,46 +650,80 @@
 
 .cuadricula {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 
-.azulejo {
-  position: relative;
+/* Tarjeta de opción: blanca, borde fino, icono en un cuadrito azul suave, título y descripción */
+.opcion {
   display: flex;
-  align-items: flex-end;
-  min-height: 116px;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
   padding: 12px 14px;
-  overflow: hidden;
-  color: var(--blanco);
+  color: var(--texto);
   text-decoration: none;
-  background-color: #1f2023;
-  background-size: cover;
-  background-position: center;
-  border-radius: 14px;
-  box-shadow: var(--sombra);
-  transition: box-shadow 0.2s;
-  background-blend-mode: normal, overlay, normal;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  transition: border-color 0.15s, background-color 0.15s;
 }
 
-.azulejo:hover {
-  box-shadow: var(--sombra-alta);
+a.opcion:hover {
+  border-color: rgba(10, 168, 192, 0.45);
+  background: #fbfdfe;
 }
 
-.azulejo span {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
-}
-
-.azulejo:focus-visible {
+.opcion:focus-visible {
   outline: 3px solid var(--oliva-oscuro);
   outline-offset: 2px;
 }
 
+.opcionIcono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--etq-azul);
+  background: var(--etq-azul-f);
+  border-radius: 10px;
+}
+
+.opcionTexto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.opcionTexto strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--carbon);
+}
+
+.opcionTexto small {
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.opcion > svg {
+  flex: none;
+  color: var(--secundario);
+}
+
+.opcionApagada {
+  opacity: 0.55;
+}
+
 @media (min-width: 560px) {
+  .cuadricula {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
   .cuadricula {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

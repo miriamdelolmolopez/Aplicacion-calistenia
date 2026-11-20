@@ -48,6 +48,52 @@
   color: var(--secundario);
 }
 
+/* Menú de dos niveles (administradora): botón «Volver» y título del grupo */
+.volver {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.volver:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.tituloGrupo {
+  margin: 4px 12px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.textoEnlace {
+  flex: 1;
+}
+
+.subtitulo {
+  margin: 12px 12px 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--secundario);
+}
+
+.subtitulo:first-child {
+  margin-top: 0;
+}
+
 .lista {
   display: flex;
   flex: 1;

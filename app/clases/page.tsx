@@ -5,8 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import Avatar from "../Avatar";
 import BarraSuperior from "../BarraSuperior";
-import CamaraCard from "../CamaraCard";
-import { useFotosCards } from "../useFotosCards";
 import { obtenerMisBonos } from "../cuenta/acciones";
 import styles from "../formularios.module.css";
 import { obtenerFotos, obtenerProfe } from "../perfil/acciones";
@@ -15,7 +13,6 @@ import PanelFiltros from "../PanelFiltros";
 import { useIdioma } from "../useIdioma";
 import { useNombresEn } from "../useNombresEn";
 import estilos from "./clases.module.css";
-import { obtenerFotosAppCliente } from "@/lib/fotosCliente";
 import { IconoPapelera } from "../admin/comunes/iconos";
 import CancelarClaseAdmin from "./CancelarClaseAdmin";
 import DatosTaller from "./DatosTaller";
@@ -24,7 +21,6 @@ import ReservaConfirmada, { type ClaseConfirmada } from "./ReservaConfirmada";
 import SaberMas from "./SaberMas";
 import { claveDia, textoDia, textoHora } from "@/lib/fechas";
 import { vistaAlumnaActiva } from "../useMiPerfil";
-import { estiloFoto, fotoDeClase } from "@/lib/fotos";
 import { createClient } from "@/lib/supabase/client";
 import { leerComo } from "../rutina/useComo";
 import {
@@ -249,9 +245,6 @@ function PantallaClases() {
     };
   }, [datos, puedeVerCanceladas]);
   const [profe, setProfe] = useState<{ nombre: string; foto: string | null } | null>(null);
-  const [fotosTipos, setFotosTipos] = useState<Record<string, string>>({});
-  const fotosCards = useFotosCards();
-  const [fotosListas, setFotosListas] = useState(false);
   const [verNombres, setVerNombres] = useState<string | null>(null);
   const [listaClase, setListaClase] = useState<string | null>(null);
   const [descripciones, setDescripciones] = useState<Record<string, { es: string | null; en: string | null }>>({});
@@ -276,10 +269,6 @@ function PantallaClases() {
     });
     soyCoach().then(setYo);
     obtenerProfe().then(setProfe);
-    obtenerFotosAppCliente().then((f) => {
-      setFotosTipos(f.tipos);
-      setFotosListas(true);
-    });
     createClient()
       .from("tipos_clase")
       .select("nombre, descripcion, descripcion_en")
@@ -563,10 +552,9 @@ function PantallaClases() {
                 id={`clase-${c.id}`}
                 className={`${estilos.tarjeta} ${cancelada ? estilos.cancelada : ""} ${noIncluida && !c.mi_reserva ? estilos.noIncluida : ""}`}
               >
-                <div className={estilos.titulo} style={estiloFoto(fotoDeClase(c.tipo), fotosCards[`clase:${c.tipo}`] ?? fotosTipos[c.tipo], !fotosListas)}>
+                <div className={estilos.titulo}>
                   <h2>{tr(c.tipo)}</h2>
                   <span className={estilos.hora}>{textoHora(c.empieza_en)}</span>
-                  <CamaraCard clave={`clase:${c.tipo}`} />
                 </div>
                 <div className={estilos.profe}>
                   <Avatar nombre={coaches[c.id]?.nombre ?? profe?.nombre ?? "Miriam"} url={coaches[c.id] ? coaches[c.id].foto : profe?.foto} tamano={28} />

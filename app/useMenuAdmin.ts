@@ -58,6 +58,24 @@ function cargarNombres(): Promise<Record<string, string>> {
   return nombresGuardados.lista;
 }
 
+// Para el menú lateral de dos niveles: las secciones que esta administradora tiene excluidas y los nombres que ha cambiado.
+export function useAjustesMenuAdmin(): { excluidas: string[]; nombres: Record<string, string> } {
+  const [excluidas, setExcluidas] = useState<string[]>([]);
+  const [nombres, setNombres] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let vigente = true;
+    cargarExcluidas().then((e) => vigente && setExcluidas(e));
+    const leerNombres = () => cargarNombres().then((n) => vigente && setNombres(n));
+    leerNombres();
+    window.addEventListener("nombres-menu-admin", leerNombres);
+    return () => {
+      vigente = false;
+      window.removeEventListener("nombres-menu-admin", leerNombres);
+    };
+  }, []);
+  return { excluidas, nombres };
+}
+
 // Se llama al cambiar un nombre: las barras lo vuelven a leer enseguida.
 export function olvidarNombresMenu() {
   nombresGuardados = null;

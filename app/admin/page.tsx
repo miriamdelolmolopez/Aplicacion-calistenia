@@ -9,52 +9,15 @@ import { Cuadricula, type Azulejo } from "./Hub";
 import CabeceraAdmin from "./CabeceraAdmin";
 import { seccionesExcluidas } from "@/lib/admin";
 import { sinExcluidas } from "@/lib/seccionesAdmin";
+import { GRUPOS_ADMIN } from "../gruposAdmin";
 
 export const metadata = { title: "Administración · CalisCoach" };
 
-// Cada grupo es un título con sus fotos debajo. Las fotos son las de ejemplo de la app.
-const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = [
-  {
-    azulejos: [
-      { href: "/admin/usuarios", titulo: "Usuarios", foto: "calistenia" },
-      { href: "/admin/registro", titulo: "Registro", foto: "pino" },
-      { href: "/admin/importar", titulo: "Importar contactos", foto: "inicio" },
-    ],
-  },
-  {
-    titulo: "Servicios",
-    azulejos: [
-      { href: "/admin/presenciales", titulo: "Clases presenciales", foto: "pino" },
-      { href: "/admin/online", titulo: "Entrenamientos online 1:1", foto: "online" },
-      { href: "/admin/talleres", titulo: "Talleres", foto: "pino" },
-      { href: "/admin/academia", titulo: "Cursos", foto: "pino" },
-      { titulo: "Retos por semanas", foto: "progreso", proximamente: true },
-      { titulo: "Membresía", foto: "personal", proximamente: true },
-    ],
-  },
-  {
-    titulo: "Economía",
-    azulejos: [
-      { href: "/admin/bonos", titulo: "Pagos", foto: "personal" },
-      { href: "/admin/tarifas", titulo: "Servicios", foto: "calistenia" },
-      { href: "/admin/descuentos", titulo: "Descuentos", foto: "progreso" },
-      { href: "/admin/formas-pago", titulo: "Formas de pago", foto: "personal" },
-      { titulo: "Contabilidad", foto: "progreso", proximamente: true },
-    ],
-  },
-  {
-    titulo: "Resumen y contenido",
-    azulejos: [
-      { href: "/admin/informes", titulo: "Informes", foto: "progreso" },
-      { href: "/admin/legal", titulo: "Textos legales", foto: "personal" },
-      { href: "/admin/automatizaciones", titulo: "Automatizaciones", foto: "online" },
-      { href: "/admin/contenido", titulo: "Fotos y frases", foto: "inicio" },
-      { href: "/admin/tablon", titulo: "Tablón de anuncios", foto: "inicio" },
-      { href: "/admin/aprende", titulo: "Aprende", foto: "calistenia" },
-      { href: "/admin/exportar", titulo: "Descargar datos (CSV)", foto: "inicio" },
-    ],
-  },
-];
+// Cada grupo es un título con sus tarjetas debajo (los mismos grupos que el menú lateral, ver app/gruposAdmin.ts).
+const GRUPOS: { titulo?: string; azulejos: Azulejo[] }[] = GRUPOS_ADMIN.map((g) => ({
+  titulo: g.titulo,
+  azulejos: g.opciones.map((o) => ({ href: o.href, titulo: o.texto, descripcion: o.descripcion, icono: o.icono, proximamente: o.proximamente })),
+}));
 
 export default async function Administracion() {
   const { supabase } = await requireAdmin();

@@ -23,7 +23,8 @@ export default function CabeceraAdmin({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!editable) return;
-    const t = cabecera.current?.querySelector("h1")?.textContent ?? "";
+    // El título original es el h1 que viene de fuera (hijo directo de la cabecera), no el que se pinta aquí dentro: si no, el título sale vacío.
+    const t = cabecera.current?.querySelector(":scope > h1")?.textContent ?? "";
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOriginal(t);
   }, [editable, ruta]);

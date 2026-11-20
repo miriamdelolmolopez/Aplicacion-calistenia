@@ -137,22 +137,24 @@ time,
 
 /* Barra de scroll ancha y cómoda, de color carbón */
 ::-webkit-scrollbar {
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--crema);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2b2f;
-  border: 3px solid var(--crema);
+  background: #c9ccd2;
+  border: 2px solid transparent;
+  background-clip: content-box;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--carbon);
+  background: #aeb2ba;
+  background-clip: content-box;
 }
 
 /* Pantallas grandes: menú lateral fijo en vez de la barra de abajo */
