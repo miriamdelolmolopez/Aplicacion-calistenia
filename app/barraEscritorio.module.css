@@ -1,0 +1,75 @@
+/* Barra de arriba (solo en ordenador). Medidas de HubFit: 49 px de alto y una línea fina debajo. */
+.barra {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .barra {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 247px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 49px;
+    padding: 0 68px 0 20px; /* a la derecha queda sitio para tu foto, que flota encima */
+    background: var(--blanco);
+    border-bottom: 1px solid #eeeff1;
+  }
+}
+
+.donde {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.9rem;
+}
+
+.donde strong {
+  overflow: hidden;
+  font-weight: 600;
+  color: var(--carbon);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grupo {
+  color: var(--secundario);
+  text-decoration: none;
+}
+
+.grupo:hover {
+  color: var(--carbon);
+}
+
+.separador {
+  color: #c6cbd3;
+}
+
+.derecha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ayuda {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.87rem;
+  color: var(--secundario);
+  text-decoration: none;
+}
+
+.ayuda:hover {
+  color: var(--carbon);
+}
+
+@media print {
+  .barra {
+    display: none;
+  }
+}

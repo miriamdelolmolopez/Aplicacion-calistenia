@@ -171,6 +171,7 @@ time,
   body.con-barra {
     padding-bottom: 0;
     padding-left: 247px;
+    padding-top: 49px; /* sitio para la barra de arriba */
   }
 }
 

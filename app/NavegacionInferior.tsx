@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Icono, { type NombreIcono } from "./Icono";
+import BarraEscritorio from "./BarraEscritorio";
 import MenuEscritorio from "./MenuEscritorio";
 import MenuLateral from "./MenuLateral";
 import estilos from "./navegacion.module.css";
@@ -98,6 +99,7 @@ export default function NavegacionInferior() {
       </nav>
       <MenuLateral perfil={perfilActual} abierto={menu} onCerrar={cerrar} />
       <MenuEscritorio perfil={perfilActual} />
+      <BarraEscritorio perfil={perfilActual} />
     </>
   );
 }
