@@ -40,7 +40,7 @@ export default function VerComoAlumno() {
           color: "var(--carbon)",
           background: "var(--blanco)",
           border: "1px solid var(--linea)",
-          borderRadius: 999,
+          borderRadius: 8,
           cursor: "pointer",
           whiteSpace: "nowrap",
         }}

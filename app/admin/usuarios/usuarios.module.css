@@ -259,12 +259,14 @@
   letter-spacing: 0;
   text-transform: none;
   color: var(--secundario);
-  background: #f1f0ec;
+  white-space: nowrap;
+  background: var(--blanco);
   border-bottom: 1px solid var(--linea);
 }
 
 .tabla td {
   padding: 8px 12px;
+  white-space: nowrap;
   vertical-align: middle;
   border-bottom: 1px solid var(--linea);
 }
@@ -384,10 +386,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 12px;
-  background: var(--relleno);
-  border-left: 4px solid var(--acento);
-  border-radius: 10px 14px 14px 10px;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .tarifaCaja span {

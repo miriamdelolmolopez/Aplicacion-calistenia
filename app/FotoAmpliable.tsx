@@ -41,7 +41,7 @@ export default function FotoAmpliable({ nombre, url, tamano = 72 }: { nombre: st
           <button
             type="button"
             onClick={() => setGrande(false)}
-            style={{ cursor: "pointer", font: "inherit", padding: "8px 18px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.5)", background: "transparent", color: "#fff" }}
+            style={{ cursor: "pointer", font: "inherit", padding: "8px 18px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.5)", background: "transparent", color: "#fff" }}
           >
             Cerrar
           </button>

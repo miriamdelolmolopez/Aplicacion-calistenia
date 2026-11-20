@@ -72,11 +72,11 @@ export default function ElegirAlumno({
         <p style={{ margin: 0, fontSize: "0.8rem", opacity: 0.7 }}>Solo se ve lo suyo, sin poder cambiar nada.</p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {alVistaGeneral && (
-            <button type="button" onClick={alVistaGeneral} style={{ font: "inherit", minHeight: 40, padding: "0 14px", borderRadius: 999, border: "1px solid var(--linea)", background: "var(--blanco)", cursor: "pointer", color: "inherit" }}>
+            <button type="button" onClick={alVistaGeneral} style={{ font: "inherit", minHeight: 40, padding: "0 14px", borderRadius: 8, border: "1px solid var(--linea)", background: "var(--blanco)", cursor: "pointer", color: "inherit" }}>
               Vista general (sin elegir a nadie)
             </button>
           )}
-          <button type="button" onClick={alCerrar} style={{ font: "inherit", minHeight: 40, padding: "0 14px", borderRadius: 999, border: "1px solid var(--linea)", background: "var(--blanco)", cursor: "pointer", color: "inherit" }}>
+          <button type="button" onClick={alCerrar} style={{ font: "inherit", minHeight: 40, padding: "0 14px", borderRadius: 8, border: "1px solid var(--linea)", background: "var(--blanco)", cursor: "pointer", color: "inherit" }}>
             Cancelar
           </button>
         </div>

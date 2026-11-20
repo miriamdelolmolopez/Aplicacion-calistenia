@@ -60,7 +60,7 @@ export default function BarraComo() {
     window.location.href = destino;
   }
 
-  const boton = { padding: "6px 12px", borderRadius: 999, fontSize: "0.8rem", fontWeight: 700, color: "#fff", background: "transparent", border: "1px solid rgba(255,255,255,0.5)", font: "inherit", cursor: "pointer" } as const;
+  const boton = { padding: "6px 12px", borderRadius: 8, fontSize: "0.8rem", fontWeight: 700, color: "#fff", background: "transparent", border: "1px solid rgba(255,255,255,0.5)", font: "inherit", cursor: "pointer" } as const;
   return (
     <>
       <div

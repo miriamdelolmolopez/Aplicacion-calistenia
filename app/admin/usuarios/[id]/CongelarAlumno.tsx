@@ -96,7 +96,7 @@ export default function CongelarAlumno({ userId, congelado }: { userId: string; 
               </button>
             </>
           ) : (
-            <button type="button" disabled={pendiente} onClick={() => setConfirmando(true)} style={{ cursor: "pointer", font: "inherit", padding: "8px 14px", borderRadius: 999, border: "1px solid rgba(0,0,0,0.2)", background: "#fff" }}>
+            <button type="button" disabled={pendiente} onClick={() => setConfirmando(true)} style={{ cursor: "pointer", font: "inherit", padding: "8px 14px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.2)", background: "#fff" }}>
               Descongelar ahora
             </button>
           ))}

@@ -299,7 +299,7 @@ export function ResumenRutina({
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
           {materiales.length === 0 && <span className={styles.ayuda}>Ninguno</span>}
           {materiales.map((m) => (
-            <span key={m} style={{ padding: "4px 12px", fontSize: "0.85rem", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 999 }}>
+            <span key={m} style={{ padding: "4px 12px", fontSize: "0.85rem", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 8 }}>
               {m}
             </span>
           ))}

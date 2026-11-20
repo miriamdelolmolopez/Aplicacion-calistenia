@@ -12,7 +12,7 @@ export default function EtiquetaTarifa({ e }: { e: EtiquetaT | null }) {
   const c = COLORES[e.tono];
   return (
     <span
-      style={{ display: "inline-block", padding: "2px 10px", borderRadius: 999, fontSize: "0.75rem", fontWeight: 700, background: c.fondo, color: c.texto, whiteSpace: "nowrap", marginRight: 6 }}
+      style={{ display: "inline-block", padding: "2px 10px", borderRadius: 6, fontSize: "0.75rem", fontWeight: 700, background: c.fondo, color: c.texto, whiteSpace: "nowrap", marginRight: 6 }}
     >
       {e.texto}
     </span>

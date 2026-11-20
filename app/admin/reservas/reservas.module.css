@@ -31,7 +31,7 @@
   padding: 8px 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-left: 8px solid var(--oliva);
+  border-left: 3px solid var(--oliva);
   border-radius: 14px;
 }
 
@@ -165,7 +165,8 @@
   padding: 4px 0;
   font-weight: 600;
   color: var(--carbon);
-  background: #eeece8;
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
   border-radius: 8px;
   text-decoration: none;
 }
@@ -176,13 +177,14 @@
 
 .diaTira small {
   font-size: 0.7rem;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--secundario);
 }
 
 .diaElegido {
   color: #fff;
   background: var(--acento);
+  border-color: var(--acento);
 }
 
 .diaElegido small {
@@ -214,20 +216,20 @@
 
 .cuadro {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   overflow: hidden;
-  background: #eeece8;
+  background: var(--relleno);
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
 }
 
 .cuadro > * {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 0 !important;
+  border-radius: 50% !important;
 }
 
 .cuadroVino {
@@ -427,7 +429,7 @@
   padding: 10px 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-left: 8px solid var(--oliva);
+  border-left: 3px solid var(--oliva);
   border-radius: 14px;
 }
 

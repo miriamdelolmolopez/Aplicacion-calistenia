@@ -55,7 +55,7 @@ export default function Encuadrador({
     e.stopPropagation();
   };
 
-  const boton: React.CSSProperties = { minHeight: 48, padding: "0 20px", font: "inherit", fontWeight: 700, borderRadius: 999, cursor: "pointer" };
+  const boton: React.CSSProperties = { minHeight: 48, padding: "0 20px", font: "inherit", fontWeight: 700, borderRadius: 8, cursor: "pointer" };
 
   return createPortal(
     <div
