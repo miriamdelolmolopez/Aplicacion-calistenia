@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -38,7 +39,7 @@ export default function AvisoComo({ userId }: { userId: string }) {
         boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
       }}
     >
-      <span aria-hidden="true">👁</span> Viendo lo de {nombre || "…"} · Volver
+      <Icono nombre="ojo" tamano={16} /> Viendo lo de {nombre || "…"} · Volver
     </Link>
   );
 }

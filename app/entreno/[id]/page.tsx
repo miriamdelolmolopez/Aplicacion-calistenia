@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../Icono";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -650,7 +651,7 @@ export default function PantallaEntreno() {
           <h1 className={estilos.nombre}>{nombreActual}</h1>
           {avisoSuperserie && (
             <div role="note" style={{ margin: "0 0 12px", padding: "10px 14px", borderRadius: 14, border: "1px solid rgba(10, 168, 192, 0.55)", background: "rgba(10, 168, 192, 0.14)", textAlign: "left", lineHeight: 1.4 }}>
-              <strong style={{ display: "block", fontSize: "0.85rem", letterSpacing: "0.03em", textTransform: "uppercase" }}>🔁 {avisoSuperserie.titulo}</strong>
+              <strong style={{ display: "block", fontSize: "0.85rem", letterSpacing: "0.03em", textTransform: "uppercase" }}><Icono nombre="repetir" tamano={16} /> {avisoSuperserie.titulo}</strong>
               <span style={{ fontSize: "0.92rem" }}>{avisoSuperserie.texto}</span>
             </div>
           )}

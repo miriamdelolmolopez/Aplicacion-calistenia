@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import { useState } from "react";
 import { olvidarPerfilCargado } from "../useMiPerfil";
 import { fijarComo } from "../rutina/useComo";
@@ -44,7 +45,7 @@ export default function VerComoAlumno() {
           whiteSpace: "nowrap",
         }}
       >
-        <span aria-hidden="true">👁</span> Ver como alumno/a
+        <Icono nombre="ojo" tamano={16} /> Ver como alumno/a
       </button>
     </>
   );

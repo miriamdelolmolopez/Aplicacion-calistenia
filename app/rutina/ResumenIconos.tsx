@@ -1,3 +1,5 @@
+import Icono from "../Icono";
+import { IconoDe } from "../Icono";
 import MapaCorporal from "../MapaCorporal";
 import styles from "../formularios.module.css";
 
@@ -29,7 +31,7 @@ export default function ResumenIconos({
         {datos.map((d) => (
           <div key={d.texto} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "var(--relleno)", borderRadius: 16 }}>
             <span aria-hidden="true" style={{ fontSize: "1.4rem" }}>
-              {d.icono}
+              <IconoDe nombre={d.icono} tamano={22} />
             </span>
             <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
               <strong>{d.valor}</strong>
@@ -40,19 +42,19 @@ export default function ResumenIconos({
       </div>
       {tipos.length > 0 && (
         <div>
-          <strong>🏷 {en ? "Type of work" : "Tipo de trabajo"}</strong>
+          <strong><Icono nombre="etiqueta" tamano={16} /> {en ? "Type of work" : "Tipo de trabajo"}</strong>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>{tipos.map(etiqueta)}</div>
         </div>
       )}
       <div>
-        <strong>🧰 {en ? "Equipment" : "Material"}</strong>
+        <strong><Icono nombre="maletin" tamano={16} /> {en ? "Equipment" : "Material"}</strong>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
           {materiales.length === 0 ? <span className={styles.ayuda}>{en ? "None" : "Ninguno"}</span> : materiales.map(etiqueta)}
         </div>
       </div>
       {intensidades && Object.keys(intensidades).length > 0 && (
         <div>
-          <strong>💪 {en ? "Muscles worked" : "Músculos trabajados"}</strong>
+          <strong><Icono nombre="rutina" tamano={16} /> {en ? "Muscles worked" : "Músculos trabajados"}</strong>
           <MapaCorporal intensidades={intensidades} etiquetas={{ frente: en ? "Front" : "Frente", espalda: en ? "Back" : "Espalda" }} />
         </div>
       )}

@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import { esSuelto, nombreVisible } from "@/lib/regalos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -229,9 +230,7 @@ export default function Inicio() {
 
         {!esAdmin && extra.cumples.length > 0 && (
           <div className={clay.consejoEnvoltura}>
-            <span className={clay.insignia} aria-hidden="true">
-              🎂
-            </span>
+            <span className={clay.insignia} aria-hidden="true"><Icono nombre="regalo" tamano={18} /></span>
             <section className={clay.consejo}>
               <p className={clay.consejoTexto}>
                 <strong>{t.cumpleHoy}</strong>

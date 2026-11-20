@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../../Icono";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import styles from "../../admin.module.css";
@@ -46,7 +47,7 @@ export default function CongelarAlumno({ userId, congelado }: { userId: string; 
     <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "8px 0" }}>
       {congelado ? (
         <p style={{ margin: 0 }}>
-          ❄ Congelado/a desde el <strong>{congelado.desde ? fecha(congelado.desde) : "—"}</strong>
+          <Icono nombre="copo" tamano={16} /> Congelado/a desde el <strong>{congelado.desde ? fecha(congelado.desde) : "—"}</strong>
           {congelado.hasta ? (
             <>
               {" "}

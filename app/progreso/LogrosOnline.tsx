@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import { useEffect, useState } from "react";
 import { TarjetaCifra } from "../admin/informes/GraficosPagos";
 import { useIdioma } from "../useIdioma";
@@ -94,7 +95,7 @@ export default function LogrosOnline({ userId, admin = false }: { userId?: strin
               return (
                 <li key={m.id} className={`${estilos.medalla} ${lograda ? "" : estilos.bloqueada}`}>
                   <span className={estilos.icono} aria-hidden="true">
-                    {m.racha ? "🔥" : m.meta}
+                    {m.racha ? <Icono nombre="llama" tamano={20} /> : m.meta}
                   </span>
                   <strong>
                     {m.racha

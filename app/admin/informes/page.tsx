@@ -1,3 +1,4 @@
+import Icono from "../../Icono";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { nombresFormas } from "@/lib/formasPago";
@@ -413,7 +414,7 @@ export default async function Informes({
               {cumples.map((c, n) => (
                 <li key={`${c.id}-${n}`}>
                   <span>
-                    {c.fecha === hoy && "🎂 "}
+                    {c.fecha === hoy && <><Icono nombre="regalo" tamano={14} />{" "}</>}
                     <Link href={`/admin/usuarios/${c.id}`}>{c.nombre}</Link>
                   </span>
                   <span>

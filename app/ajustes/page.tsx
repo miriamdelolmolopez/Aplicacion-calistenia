@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import Link from "next/link";
 import { useState } from "react";
 import BarraSuperior from "../BarraSuperior";
@@ -72,17 +73,17 @@ export default function Ajustes() {
 
       <nav className={estilos.lista} style={{ marginBottom: 12 }}>
         <Link href="/ajustes/notificaciones" className={estilos.fila}>
-          <span aria-hidden="true">🔔</span>
+          <Icono nombre="campana" tamano={16} />
           <span className={estilos.filaTexto}>{idioma === "en" ? "Notifications" : "Notificaciones"}</span>
           <span aria-hidden="true">›</span>
         </Link>
         <Link href="/ajustes/privacidad" className={estilos.fila}>
-          <span aria-hidden="true">🔒</span>
+          <Icono nombre="candado" tamano={16} />
           <span className={estilos.filaTexto}>{t.privacidadTitulo}</span>
           <span aria-hidden="true">›</span>
         </Link>
         <Link href="/ajustes/textos-legales" className={estilos.fila}>
-          <span aria-hidden="true">📄</span>
+          <Icono nombre="documento" tamano={16} />
           <span className={estilos.filaTexto}>{idioma === "en" ? "My legal texts" : "Mis textos legales"}</span>
           <span aria-hidden="true">›</span>
         </Link>

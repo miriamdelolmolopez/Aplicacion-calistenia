@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../Icono";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -82,7 +83,7 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
               </div>
               <div className={estilos.botonesFila} style={{ marginTop: 8 }}>
                 <Link href={`/admin/usuarios/${p.userId}`} className={estilos.marca} aria-label={`Perfil de ${p.nombre}`} title="Ver su perfil">
-                  👤
+                  <Icono nombre="perfil" tamano={16} />
                 </Link>
                 <Link
                   href={`/admin/reservas/como/${p.userId}?dia=${clase.dia}`}
@@ -90,7 +91,7 @@ function Listado({ clase, elegida, alCerrar }: { clase: ClaseDelDia; elegida: st
                   aria-label={`Reservas de ${p.nombre}`}
                   title="Ver y cambiar sus reservas, como si fueras ella"
                 >
-                  📅
+                  <Icono nombre="reservar" tamano={16} />
                 </Link>
                 <button
                   type="button"

@@ -1,5 +1,6 @@
 "use client";
 
+import { IconoDe } from "../../Icono";
 import { useState, useTransition } from "react";
 import PanelFiltros from "../../PanelFiltros";
 import { euros } from "@/lib/formato";
@@ -35,9 +36,9 @@ const esSuelta = (t: TipoBono) => t.clases === 1 && t.servicio !== "online" && !
 
 // Las tarifas se agrupan en carpetas según su servicio principal.
 const CARPETAS: { clave: string; nombre: string; icono: string; vale: (t: TipoBono) => boolean }[] = [
-  { clave: "presencial", nombre: "Presencial", icono: "🏋️", vale: (t) => t.servicio === "grupal" || t.servicio === "individual" },
-  { clave: "online", nombre: "Online", icono: "💻", vale: (t) => t.servicio === "online" },
-  { clave: "talleres", nombre: "Talleres", icono: "🎟️", vale: (t) => t.servicio === "taller" },
+  { clave: "presencial", nombre: "Presencial", icono: "rutina", vale: (t) => t.servicio === "grupal" || t.servicio === "individual" },
+  { clave: "online", nombre: "Online", icono: "portatil", vale: (t) => t.servicio === "online" },
+  { clave: "talleres", nombre: "Talleres", icono: "ticket", vale: (t) => t.servicio === "taller" },
 ];
 
 // Lista de tarifas: arriba «+ Nueva», buscar y filtrar. Cada fila: editar, duplicar y eliminar.
@@ -118,7 +119,7 @@ export default function ListaTarifas({ tarifas }: { tarifas: TipoBono[] }) {
         return (
           <details key={carpeta.clave} open className={estilosTarifas.carpeta}>
             <summary>
-              <span aria-hidden="true">{carpeta.icono}</span> {carpeta.nombre} <em>({delGrupo.length})</em>
+              <span aria-hidden="true"><IconoDe nombre={carpeta.icono} tamano={16} /></span> {carpeta.nombre} <em>({delGrupo.length})</em>
             </summary>
             {delGrupo.map((t) => {
         const d = desglose(t.precio_centimos, t.iva_porcentaje);

@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../Icono";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import PanelFiltros from "../../PanelFiltros";
@@ -286,7 +287,7 @@ export default function ListaRutinas({
           <div key={c.id} className={comunes.fila} style={resaltado(c.id)} {...zona(c.id, c.id)}>
             <button type="button" onClick={() => setActual(c.id)} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
               <span aria-hidden="true" style={{ fontSize: 22 }}>
-                📁
+                <Icono nombre="carpeta" tamano={22} />
               </span>
               <div>
                 <strong>{c.nombre}</strong>

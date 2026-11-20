@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../Icono";
 import { useEffect, useRef, useState } from "react";
 import estilos from "./guiado.module.css";
 
@@ -201,7 +202,7 @@ export default function Cronometro({
           {textos.reiniciar}
         </button>
         <button type="button" aria-pressed={sonido} onClick={alCambiarSonido}>
-          {sonido ? `🔊 ${textos.sonido}` : `🔇 ${textos.sinSonido}`}
+          {sonido ? <><Icono nombre="altavoz" tamano={16} /> {textos.sonido}</> : <><Icono nombre="altavozOff" tamano={16} /> {textos.sinSonido}</>}
         </button>
       </div>
     </div>

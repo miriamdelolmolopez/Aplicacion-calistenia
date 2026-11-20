@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { textoCuando } from "@/lib/cumpleanosTexto";
@@ -31,7 +32,7 @@ export default function AvisosAdmin() {
   return (
     <>
       <div className={clay.consejoEnvoltura}>
-        <span className={clay.insignia} aria-hidden="true">🎂</span>
+        <span className={clay.insignia} aria-hidden="true"><Icono nombre="regalo" tamano={18} /></span>
         <section className={clay.consejo}>
           <p className={clay.consejoTexto}>
             <strong>Cumpleaños</strong>
@@ -66,7 +67,7 @@ export default function AvisosAdmin() {
       </div>
 
       <div className={clay.consejoEnvoltura}>
-        <span className={clay.insignia} aria-hidden="true">⏳</span>
+        <span className={clay.insignia} aria-hidden="true"><Icono nombre="relojArena" tamano={18} /></span>
         <section className={clay.consejo}>
           <p className={clay.consejoTexto}>
             <strong>Tarifas a punto de caducar</strong>

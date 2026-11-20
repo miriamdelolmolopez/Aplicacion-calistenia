@@ -1,5 +1,7 @@
 "use client";
 
+import Icono from "../../../Icono";
+import { IconoDe } from "../../../Icono";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import MapaCorporal from "../../../MapaCorporal";
@@ -190,14 +192,14 @@ export function FotoEditable({
           opacity: trabajando ? 0.5 : 1,
         }}
       >
-        <span style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{trabajando ? "…" : "📷"}</span>
+        <span style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{trabajando ? "…" : <Icono nombre="camara" tamano={16} />}</span>
       </button>
       {menu && (
         <div style={{ position: "absolute", top: tamano + 8, left: 0, zIndex: 40, width: 210, padding: "6px 0", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.14)" }}>
           {aviso && <p className={styles.ayuda} style={{ margin: "4px 14px 6px" }}>{aviso}</p>}
           {url && (
             <button type="button" style={opcion} onClick={() => { setMenu(false); setViendo(true); }}>
-              <span aria-hidden="true">👁</span> Ver foto
+              <Icono nombre="ojo" tamano={16} /> Ver foto
             </button>
           )}
           {url && (
@@ -206,16 +208,16 @@ export function FotoEditable({
             </button>
           )}
           <button type="button" style={opcion} onClick={() => tomar.current?.click()}>
-            <span aria-hidden="true">📷</span> Tomar foto
+            <Icono nombre="camara" tamano={16} /> Tomar foto
           </button>
           <button type="button" style={opcion} onClick={() => subir.current?.click()}>
-            <span aria-hidden="true">📁</span> Subir foto
+            <Icono nombre="carpeta" tamano={16} /> Subir foto
           </button>
           {url && (
             <>
               <div style={{ height: 1, margin: "4px 12px", background: "var(--linea)" }} />
               <button type="button" style={opcion} onClick={quitar}>
-                <span aria-hidden="true">🗑</span> Quitar foto
+                <Icono nombre="papelera" tamano={16} /> Quitar foto
               </button>
             </>
           )}
@@ -273,7 +275,7 @@ export function ResumenRutina({
   const dato = (icono: string, valor: string, texto: string) => (
     <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 16 }}>
       <span aria-hidden="true" style={{ fontSize: "1.4rem" }}>
-        {icono}
+        <IconoDe nombre={icono} tamano={22} />
       </span>
       <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
         <strong>{valor}</strong>
@@ -285,12 +287,12 @@ export function ResumenRutina({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
-        {dato("📅", `${entrenos} por semana`, `durante ${semanas} ${semanas === 1 ? "semana" : "semanas"}`)}
-        {dato("🏋️", String(todos.length), `ejercicios en ${sesiones.length} ${sesiones.length === 1 ? "sesión" : "sesiones"}`)}
-        {dato("🔁", String(series), "series en total (una semana)")}
-        {dato("⏱", `~${minutosPorSesion} min`, "cada sesión")}
-        {dato("⌛", `~${horas(totalMin)}`, "toda la rutina")}
-        {dato("🏷", String(categorias.length), "tipos de ejercicio")}
+        {dato("reservar", `${entrenos} por semana`, `durante ${semanas} ${semanas === 1 ? "semana" : "semanas"}`)}
+        {dato("rutina", String(todos.length), `ejercicios en ${sesiones.length} ${sesiones.length === 1 ? "sesión" : "sesiones"}`)}
+        {dato("repetir", String(series), "series en total (una semana)")}
+        {dato("cronometro", `~${minutosPorSesion} min`, "cada sesión")}
+        {dato("relojArena", `~${horas(totalMin)}`, "toda la rutina")}
+        {dato("etiqueta", String(categorias.length), "tipos de ejercicio")}
       </div>
       <div>
         <strong>Material</strong>
@@ -336,13 +338,13 @@ export function PreviaAlumno({
 
   return (
     <Ventana titulo={`Así lo ve el/la alumno/a · ${nombre}`} cerrar={cerrar}>
-      {nota && <p style={{ marginTop: 0 }}>📝 {nota}</p>}
+      {nota && <p style={{ marginTop: 0 }}><Icono nombre="editar" tamano={16} /> {nota}</p>}
       <ResumenIconos
         idioma="es"
         datos={[
-          { icono: "📅", valor: String(semanas), texto: semanas === 1 ? "semana" : "semanas" },
-          { icono: "🔁", valor: String(porSemana), texto: "entrenos por semana" },
-          { icono: "🏋️", valor: String(todos.length), texto: "ejercicios" },
+          { icono: "reservar", valor: String(semanas), texto: semanas === 1 ? "semana" : "semanas" },
+          { icono: "repetir", valor: String(porSemana), texto: "entrenos por semana" },
+          { icono: "rutina", valor: String(todos.length), texto: "ejercicios" },
         ]}
         tipos={tipos}
         materiales={materiales}
@@ -367,7 +369,7 @@ export function PreviaAlumno({
                     <small style={{ color: "var(--secundario)" }}>
                       {i.series} × {textoObjetivoAlumno(i, "rep") || "—"} · descanso {i.descanso_seg} s
                     </small>
-                    {i.nota && <small>📝 {i.nota}</small>}
+                    {i.nota && <small><Icono nombre="editar" tamano={16} /> {i.nota}</small>}
                   </span>
                 </li>
               );

@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../Icono";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import BarraSuperior from "../../BarraSuperior";
@@ -308,7 +309,7 @@ export default function Resumen({
         {vista ? <img src={vista} alt="" className={estilos.vistaPrevia} /> : <p className={styles.ayuda}>{t.generandoImagen}</p>}
         <div className={estilos.pie}>
           <button type="button" className={styles.boton} disabled={ocupado} onClick={compartir}>
-            ↗ {t.compartir}
+            <Icono nombre="externo" tamano={16} /> {t.compartir}
           </button>
           <button
             type="button"

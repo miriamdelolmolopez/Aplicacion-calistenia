@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import { useEffect, useState } from "react";
 import { BarrasColores, PALETA, TarjetaCifra } from "../admin/informes/GraficosPagos";
 import { useIdioma } from "../useIdioma";
@@ -127,7 +128,7 @@ export default function Logros({ userId, admin = false }: { userId?: string; adm
               return (
                 <li key={m.id} className={`${estilos.medalla} ${lograda ? "" : estilos.bloqueada}`}>
                   <span className={estilos.icono} aria-hidden="true">
-                    {m.clave === "racha" ? "🔥" : m.clave === "mes" ? "★" : m.meta}
+                    {m.clave === "racha" ? <Icono nombre="llama" tamano={20} /> : m.clave === "mes" ? "★" : m.meta}
                   </span>
                   <strong>{t.medallaTitulo(m.clave, m.meta)}</strong>
                   <small>{lograda ? t.conseguida(fechaCorta(`${m.conseguidaEn}T12:00:00Z`, idioma)) : `${t.medallaAyuda(m.clave, m.meta)} · ${t.faltan(Math.max(m.meta - m.valor, 0))}`}</small>

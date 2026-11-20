@@ -1,3 +1,4 @@
+import Icono from "../../../Icono";
 import Link from "next/link";
 import PestanasFicha from "./PestanasFicha";
 import { notFound } from "next/navigation";
@@ -680,7 +681,7 @@ export default async function FichaUsuario({
               {online && <Link href={`/admin/usuarios/${id}/entrenos`}>Historial de entrenamientos</Link>}
               {p.rol === "alumno" && (
                 <details className={estilos.accionDespliega} open={!!congelado}>
-                  <summary>{congelado ? "❄ Congelado/a · ver o descongelar" : "Congelar alumno/a"}</summary>
+                  <summary>{congelado ? <><Icono nombre="copo" tamano={16} /> Congelado/a · ver o descongelar</> : "Congelar alumno/a"}</summary>
                   <CongelarAlumno userId={p.id} congelado={congelado} />
                 </details>
               )}
@@ -799,7 +800,7 @@ export default async function FichaUsuario({
                 </span>
               )}
               {esAlumna && sinPagar && <span className={estilos.sinPagar}>Sin pagar</span>}
-              {congelado && <span className={estilos.sinPagar} style={{ background: "#e3f1f7", color: "#1f5f7a" }}>❄ Congelado/a{congelado.hasta ? ` hasta el ${congelado.hasta.split("-").reverse().join("/")}` : ""}</span>}
+              {congelado && <span className={estilos.sinPagar} style={{ background: "#e3f1f7", color: "#1f5f7a" }}><Icono nombre="copo" tamano={16} /> Congelado/a{congelado.hasta ? ` hasta el ${congelado.hasta.split("-").reverse().join("/")}` : ""}</span>}
             </div>
             <div className={styles.ayuda} style={{ overflowWrap: "anywhere" }}>
               {p.email}

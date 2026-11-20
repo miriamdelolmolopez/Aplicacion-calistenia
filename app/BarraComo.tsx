@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "./Icono";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ElegirAlumno from "./admin/ver/ElegirAlumno";
@@ -65,7 +66,7 @@ export default function BarraComo() {
       <div
         style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 400, minHeight: 52, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: "8px 12px", background: "#1f2023", color: "#fff" }}
       >
-        <span style={{ fontSize: "0.82rem", fontWeight: 700, flex: "1 1 160px" }}>👁 Estás viendo como {nombre || "…"} · solo lectura</span>
+        <span style={{ fontSize: "0.82rem", fontWeight: 700, flex: "1 1 160px" }}><Icono nombre="ojo" tamano={16} /> Estás viendo como {nombre || "…"} · solo lectura</span>
         <button type="button" onClick={() => setEligiendo(true)} style={boton}>
           Cambiar alumno/a
         </button>

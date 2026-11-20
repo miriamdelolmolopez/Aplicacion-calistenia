@@ -212,9 +212,9 @@ export default function Sesion() {
           <ResumenIconos
             idioma={idioma}
             datos={[
-              { icono: "⏱", valor: `~${minutosEstimados(datos.items)} min`, texto: idioma === "en" ? "total time" : "tiempo total" },
-              { icono: "🏋️", valor: String(datos.items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
-              { icono: "🔁", valor: String(datos.items.reduce((n, i) => n + i.series, 0)), texto: idioma === "en" ? "sets" : "series" },
+              { icono: "cronometro", valor: `~${minutosEstimados(datos.items)} min`, texto: idioma === "en" ? "total time" : "tiempo total" },
+              { icono: "rutina", valor: String(datos.items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
+              { icono: "repetir", valor: String(datos.items.reduce((n, i) => n + i.series, 0)), texto: idioma === "en" ? "sets" : "series" },
             ]}
             tipos={tipos}
             materiales={materiales}

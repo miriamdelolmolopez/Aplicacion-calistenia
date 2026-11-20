@@ -1,5 +1,6 @@
 "use client";
 
+import { IconoDe } from "../Icono";
 import { esSuelto, nombreVisible } from "@/lib/regalos";
 import Link from "next/link";
 import MenuFoto from "../MenuFoto";
@@ -210,12 +211,12 @@ export default function Perfil() {
   numeros.push({ valor: "0", etiqueta: t.cursos });
 
   const opcionesLista: { href: string; texto: string; icono: string }[] = [
-    { href: "/perfil/datos", texto: t.misDatos, icono: "👤" },
+    { href: "/perfil/datos", texto: t.misDatos, icono: "perfil" },
   ];
-  if (!esAdmin && presencial) opcionesLista.push({ href: "/clases/mis-reservas?desde=perfil", texto: t.historialClases, icono: "📅" });
-  if (!esAdmin && online) opcionesLista.push({ href: "/rutina?desde=perfil", texto: t.entrenamientos, icono: "🏋️" });
-  opcionesLista.push({ href: "/perfil/calculadoras", texto: t.calculadoras, icono: "🧮" });
-  opcionesLista.push({ href: "/perfil/contrasena", texto: t.cambiarContrasena, icono: "🔒" });
+  if (!esAdmin && presencial) opcionesLista.push({ href: "/clases/mis-reservas?desde=perfil", texto: t.historialClases, icono: "reservar" });
+  if (!esAdmin && online) opcionesLista.push({ href: "/rutina?desde=perfil", texto: t.entrenamientos, icono: "rutina" });
+  opcionesLista.push({ href: "/perfil/calculadoras", texto: t.calculadoras, icono: "calculadora" });
+  opcionesLista.push({ href: "/perfil/contrasena", texto: t.cambiarContrasena, icono: "candado" });
 
   return (
     <main className={estilos.perfilPagina}>
@@ -264,7 +265,7 @@ export default function Perfil() {
       <nav className={estilos.lista} aria-label={t.titulo}>
         {opcionesLista.map((o) => (
           <Link key={o.href} href={o.href} className={estilos.fila}>
-            <span aria-hidden="true">{o.icono}</span>
+            <span aria-hidden="true"><IconoDe nombre={o.icono} tamano={20} /></span>
             <span className={estilos.filaTexto}>{o.texto}</span>
             <span aria-hidden="true">›</span>
           </Link>

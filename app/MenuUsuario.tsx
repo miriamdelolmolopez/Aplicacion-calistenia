@@ -1,5 +1,7 @@
 "use client";
 
+import Icono from "./Icono";
+import { IconoDe } from "./Icono";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +17,6 @@ import { useTema, type Tema } from "./useTema";
 // Pantallas donde no se muestra (el entreno ocupa toda la pantalla y la vista de imprimir va sin adornos).
 const SIN_MENU = ["/entreno"];
 
-const EMOJI_IDIOMA: Record<string, string> = { es: "🇪🇸", en: "🇬🇧" };
 
 // Tu foto, siempre arriba a la derecha. Al pulsarla: cambiar de idioma y de tema (claro u oscuro).
 export default function MenuUsuario() {
@@ -68,8 +69,8 @@ export default function MenuUsuario() {
   }
 
   const temas: { valor: Tema; texto: string; icono: string }[] = [
-    { valor: "claro", texto: en ? "Light" : "Claro", icono: "☀️" },
-    { valor: "oscuro", texto: en ? "Dark" : "Oscuro", icono: "🌙" },
+    { valor: "claro", texto: en ? "Light" : "Claro", icono: "sol" },
+    { valor: "oscuro", texto: en ? "Dark" : "Oscuro", icono: "luna" },
   ];
 
   return (
@@ -82,10 +83,10 @@ export default function MenuUsuario() {
           <div className={estilos.nombre}>{conSesion.nombre}</div>
 
           <Link href="/perfil" className={estilos.opcion} role="menuitem" onClick={() => setAbierto(false)}>
-            <span>👤 {en ? "View profile" : "Ver perfil"}</span>
+            <span><Icono nombre="perfil" tamano={16} /> {en ? "View profile" : "Ver perfil"}</span>
           </Link>
 
-          <div className={estilos.titulo}>🌐 {en ? "Language" : "Idioma"}</div>
+          <div className={estilos.titulo}><Icono nombre="globo" tamano={16} /> {en ? "Language" : "Idioma"}</div>
           {IDIOMAS.map((i) => (
             <button
               key={i.codigo}
@@ -96,13 +97,13 @@ export default function MenuUsuario() {
               onClick={() => cambiarIdioma(i.codigo as Idioma)}
             >
               <span>
-                {EMOJI_IDIOMA[i.codigo] ?? "🌐"} {i.nombre}
+                {i.codigo.toUpperCase()} · {i.nombre}
               </span>
               {idioma === i.codigo && <span className={estilos.marca}>✓</span>}
             </button>
           ))}
 
-          <div className={estilos.titulo}>🎨 {en ? "Theme" : "Tema"}</div>
+          <div className={estilos.titulo}><Icono nombre="paleta" tamano={16} /> {en ? "Theme" : "Tema"}</div>
           {temas.map((t) => (
             <button
               key={t.valor}
@@ -113,14 +114,14 @@ export default function MenuUsuario() {
               onClick={() => cambiarTema(t.valor)}
             >
               <span>
-                {t.icono} {t.texto}
+                <IconoDe nombre={t.icono} tamano={16} /> {t.texto}
               </span>
               {tema === t.valor && <span className={estilos.marca}>✓</span>}
             </button>
           ))}
 
           <button type="button" role="menuitem" className={`${estilos.opcion} ${estilos.salir}`} onClick={salir}>
-            <span>🚪 {en ? "Log out" : "Salir"}</span>
+            <span><Icono nombre="salir" tamano={16} /> {en ? "Log out" : "Salir"}</span>
           </button>
         </div>
       )}

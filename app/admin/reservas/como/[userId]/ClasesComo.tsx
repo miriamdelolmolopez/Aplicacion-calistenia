@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../../../Icono";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -96,10 +97,10 @@ export default function ClasesComo({ userId, clases, dia }: { userId: string; cl
                 </p>
                 <div className={estilos.botonesFila}>
                   <Link href={`/admin/usuarios/${seleccionada.userId}`} className={estilos.marca} aria-label={`Perfil de ${seleccionada.nombre}`} title="Ver su perfil">
-                    👤
+                    <Icono nombre="perfil" tamano={16} />
                   </Link>
                   <Link href={`/admin/reservas/como/${seleccionada.userId}?dia=${dia}`} className={estilos.marca} aria-label={`Reservas de ${seleccionada.nombre}`} title="Ver y cambiar sus reservas, como si fueras ella">
-                    📅
+                    <Icono nombre="reservar" tamano={16} />
                   </Link>
                   <button
                     type="button"

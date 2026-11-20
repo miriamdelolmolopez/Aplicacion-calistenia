@@ -1,3 +1,4 @@
+import Icono from "../Icono";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { cumpleanosProximos } from "@/lib/cumpleanos";
@@ -50,7 +51,7 @@ export default async function Administracion() {
       </CabeceraAdmin>
 
       <section className={styles.tarjeta}>
-        <h2>🎂 Cumpleaños</h2>
+        <h2><Icono nombre="regalo" tamano={16} /> Cumpleaños</h2>
         {cumples.length === 0 ? (
           <p className={styles.ayuda} style={{ margin: 0 }}>
             {antelacion === 0 ? "Hoy no cumple años nadie." : `No cumple años nadie en los próximos ${antelacion} ${antelacion === 1 ? "día" : "días"}.`}
@@ -81,7 +82,7 @@ export default async function Administracion() {
       </section>
 
       <section className={styles.tarjeta}>
-        <h2>⏳ Tarifas a punto de caducar</h2>
+        <h2><Icono nombre="relojArena" tamano={16} /> Tarifas a punto de caducar</h2>
         {porCaducar.length === 0 ? (
           <p className={styles.ayuda} style={{ margin: 0 }}>
             A nadie se le acaba la tarifa en los próximos {diasBonos} {diasBonos === 1 ? "día" : "días"}.

@@ -10,7 +10,7 @@ import estilos from "../../perfil/perfil.module.css";
 import { useIdioma } from "../../useIdioma";
 import { usePreferencias, type Clave } from "../usePreferencias";
 
-// Cada tipo de aviso sale una sola vez. Al lado van sus canales: correo (✉) y app/móvil (🔔).
+// Cada tipo de aviso sale una sola vez. Al lado van sus canales: correo (sobre) y app/móvil (campana).
 // Un canal que no existe para ese aviso no se dibuja. Si el aviso es obligatorio, sus iconos van siempre en azul.
 type Aviso = {
   correo?: Clave;
@@ -119,8 +119,8 @@ export default function Notificaciones() {
       <h1 style={{ margin: "12px 0 8px", fontSize: "2rem" }}>{en ? "Notifications" : "Notificaciones"}</h1>
       <p className={styles.ayuda}>
         {en
-          ? "Choose how you want to receive each notice. ✉ is email and 🔔 is the app and your phone. Blue is on, grey is off. Press to change."
-          : "Elige cómo quieres recibir cada aviso. ✉ es el correo y 🔔 es la app y el móvil. Azul es activado y gris desactivado. Pulsa para cambiarlo."}
+          ? "Choose how you want to receive each notice. The envelope is email and the bell is the app and your phone. Blue is on, grey is off. Press to change."
+          : "Elige cómo quieres recibir cada aviso. El sobre es el correo y la campana es la app y el móvil. Azul es activado y gris desactivado. Pulsa para cambiarlo."}
       </p>
       {!pref || !app ? (
         <Cargando />

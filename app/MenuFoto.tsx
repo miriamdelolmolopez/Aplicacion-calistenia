@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "./Icono";
 import { createPortal } from "react-dom";
 import Encuadrador from "./Encuadrador";
 import { sinEncuadre } from "@/lib/fotos";
@@ -86,7 +87,7 @@ export default function MenuFoto({
     <div role="menu" aria-label={etiqueta} style={{ width: 230, padding: "6px 0", background: "var(--blanco)", border: "1px solid var(--linea)", borderRadius: 18, boxShadow: "0 10px 30px rgba(0,0,0,0.18)" }}>
       {url && (
         <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); setAbierto(false); setViendo(true); }}>
-          <span aria-hidden="true">👁</span> {en ? "View photo" : "Ver foto"}
+          <Icono nombre="ojo" tamano={16} /> {en ? "View photo" : "Ver foto"}
         </button>
       )}
       {url && encuadre && (
@@ -95,10 +96,10 @@ export default function MenuFoto({
         </button>
       )}
       <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); tomar.current?.click(); }}>
-        <span aria-hidden="true">📷</span> {en ? "Take photo" : "Tomar foto"}
+        <Icono nombre="camara" tamano={16} /> {en ? "Take photo" : "Tomar foto"}
       </button>
       <button type="button" role="menuitem" style={opcion} onClick={(e) => { quieto(e); subir.current?.click(); }}>
-        <span aria-hidden="true">📁</span> {en ? "Upload photo" : "Subir foto"}
+        <Icono nombre="carpeta" tamano={16} /> {en ? "Upload photo" : "Subir foto"}
       </button>
       {url && (
         <>
@@ -113,7 +114,7 @@ export default function MenuFoto({
               void alQuitar();
             }}
           >
-            <span aria-hidden="true">🗑</span> {en ? "Remove photo" : "Quitar foto"}
+            <Icono nombre="papelera" tamano={16} /> {en ? "Remove photo" : "Quitar foto"}
           </button>
         </>
       )}

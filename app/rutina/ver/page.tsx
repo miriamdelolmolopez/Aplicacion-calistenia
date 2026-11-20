@@ -208,10 +208,10 @@ export default function VerRutina() {
           <ResumenIconos
             idioma={idioma}
             datos={[
-              { icono: "📅", valor: String(rutina.semanas), texto: rutina.semanas === 1 ? (idioma === "en" ? "week" : "semana") : idioma === "en" ? "weeks" : "semanas" },
-              { icono: "🔁", valor: String(porSemana), texto: idioma === "en" ? "workouts per week" : "entrenos por semana" },
-              { icono: "🏁", valor: `${hechosRutina}/${porSemana * rutina.semanas}`, texto: idioma === "en" ? "workouts done" : "entrenos hechos" },
-              { icono: "🏋️", valor: String(items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
+              { icono: "reservar", valor: String(rutina.semanas), texto: rutina.semanas === 1 ? (idioma === "en" ? "week" : "semana") : idioma === "en" ? "weeks" : "semanas" },
+              { icono: "repetir", valor: String(porSemana), texto: idioma === "en" ? "workouts per week" : "entrenos por semana" },
+              { icono: "bandera", valor: `${hechosRutina}/${porSemana * rutina.semanas}`, texto: idioma === "en" ? "workouts done" : "entrenos hechos" },
+              { icono: "rutina", valor: String(items.length), texto: idioma === "en" ? "exercises" : "ejercicios" },
             ]}
             tipos={tipos}
             materiales={materiales}

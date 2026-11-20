@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../Icono";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -659,7 +660,7 @@ function PantallaClases() {
                           return (
                             <span key={String(tarde)} className={estilos.grupoCanceladas} title={explicacion}>
                               <span className={estilos.iconoCancelada} aria-label={explicacion} role="img">
-                                {tarde ? "✖" : <IconoPapelera />}
+                                {tarde ? <Icono nombre="cerrar" tamano={16} /> : <IconoPapelera />}
                               </span>
                               {grupo.map((x, n) => (
                                 <span key={`${x.userId}-${n}`} className={estilos.miniCuadrado} title={x.nombre}>

@@ -1,5 +1,6 @@
 "use client";
 
+import Icono from "../../../Icono";
 import {
   DndContext,
   KeyboardSensor,
@@ -500,14 +501,14 @@ function TarjetaItem({
             {textoObjetivo(item, campos)} · descanso {item.descanso_seg} s
             {!ejercicio?.activo && ejercicio && " · archivado"}
           </div>
-          {item.nota && <div className={styles.ayuda}>📝 {item.nota}</div>}
+          {item.nota && <div className={styles.ayuda}><Icono nombre="editar" tamano={16} /> {item.nota}</div>}
         </div>
         <div style={{ display: "flex", gap: 6, flex: "none", marginLeft: "auto" }}>
           <IconoBoton titulo={abierto ? "Cerrar" : "Editar el ejercicio"} onClick={() => alternarAbierto()}>
             ✎
           </IconoBoton>
           <IconoBoton titulo="Ver los músculos" onClick={() => setMusculos(true)}>
-            🧍
+            <Icono nombre="perfil" tamano={16} />
           </IconoBoton>
           <IconoBoton
             titulo="Quitar el ejercicio"
@@ -523,7 +524,7 @@ function TarjetaItem({
               });
             }}
           >
-            🗑
+            <Icono nombre="papelera" tamano={16} />
           </IconoBoton>
         </div>
         <div className={styles.flechas}>
@@ -817,7 +818,7 @@ function TarjetaSesion({
     <section className={styles.sesionCaja} style={sesion.archivada ? { opacity: 0.65 } : undefined}>
       {sesion.archivada && (
         <p className={styles.ayuda} style={{ margin: "0 0 6px" }}>
-          <strong>📦 Archivado:</strong> la persona no ve este día ni sus ejercicios. Pulsa 📤 para desarchivarlo.
+          <strong><Icono nombre="paquete" tamano={16} /> Archivado:</strong> la persona no ve este día ni sus ejercicios. Pulsa <Icono nombre="subir" tamano={14} /> para desarchivarlo.
         </p>
       )}
       <div className={styles.itemCabecera}>
@@ -842,14 +843,14 @@ function TarjetaSesion({
             ✎
           </IconoBoton>
           <IconoBoton titulo="Ver los músculos de la sesión" onClick={() => setMusculos(true)}>
-            🧍
+            <Icono nombre="perfil" tamano={16} />
           </IconoBoton>
           <IconoBoton
             titulo={sesion.archivada ? "Desarchivar el día: la persona volverá a verlo" : "Archivar el día: la persona dejará de verlo"}
             disabled={pendiente}
             onClick={() => ejecutar(() => archivarSesion(rutinaId, sesion.id, !sesion.archivada))}
           >
-            {sesion.archivada ? "📤" : "📦"}
+            {sesion.archivada ? <Icono nombre="subir" tamano={16} /> : <Icono nombre="paquete" tamano={16} />}
           </IconoBoton>
           <IconoBoton
             titulo="Quitar la sesión"
@@ -859,7 +860,7 @@ function TarjetaSesion({
               if (window.confirm(`¿Quitar la sesión «${sesion.nombre}» con sus ${sesion.items.length} ejercicios?`)) ejecutar(() => quitarSesion(rutinaId, sesion.id));
             }}
           >
-            🗑
+            <Icono nombre="papelera" tamano={16} />
           </IconoBoton>
         </div>
         <div className={styles.flechas}>
@@ -872,7 +873,7 @@ function TarjetaSesion({
         </div>
       </div>
 
-      {sesion.nota && !editando && <p className={styles.ayuda} style={{ margin: "4px 0 0" }}>📝 {sesion.nota}</p>}
+      {sesion.nota && !editando && <p className={styles.ayuda} style={{ margin: "4px 0 0" }}><Icono nombre="editar" tamano={16} /> {sesion.nota}</p>}
 
       {editando && (
         <form onSubmit={guardarNombre} className={styles.formularioInterno}>
@@ -1175,7 +1176,7 @@ export function Constructor({
 
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setPrevia(true)}>
-          👁 Ver como alumno/a
+          <Icono nombre="ojo" tamano={16} /> Ver como alumno/a
         </button>
       </div>
       {previa && <PreviaAlumno nombre={rutina.nombre} nota={rutina.nota} sesiones={sesiones.filter((s) => !s.archivada)} semanas={rutina.semanas} entrenosSemana={rutina.entrenosSemana} catalogo={catalogo} cerrar={() => setPrevia(false)} />}
