@@ -624,7 +624,8 @@
 
 .cumpleFila {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
   margin: 0;
   padding: 2px 2px 6px;
   overflow-x: auto;
@@ -727,4 +728,84 @@
   align-items: center;
   gap: 8px;
   margin-top: 8px;
+}
+
+/* Círculos con foto o iniciales, y barra de tiempo que queda */
+.circulo {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 50%;
+  background-color: #e8edf2;
+  background-position: center;
+  background-size: cover;
+}
+
+.circuloIniciales {
+  color: #fff;
+  background: linear-gradient(135deg, #0aa8c0, #6d5efc);
+}
+
+.atencionCuenta {
+  margin-left: auto;
+  padding: 1px 9px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--secundario);
+  background: #f1f3f5;
+  border-radius: 999px;
+}
+
+.cumpleBoton {
+  padding: 0;
+  font: inherit;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.cumpleBoton:hover,
+.cumpleElegido {
+  transform: scale(1.07);
+}
+
+.cumpleElegido .cumpleAnillo {
+  box-shadow: 0 0 0 3px rgba(10, 168, 192, 0.35);
+}
+
+.cumpleDetalle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.cumpleDetalle strong {
+  color: var(--carbon);
+}
+
+.barra {
+  display: block;
+  height: 6px;
+  margin-top: 4px;
+  overflow: hidden;
+  background: #eef1f4;
+  border-radius: 999px;
+}
+
+.barra i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.caducaCuando {
+  flex: none;
+  min-width: 64px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: right;
 }
