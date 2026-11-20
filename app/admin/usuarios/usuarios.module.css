@@ -362,7 +362,7 @@
   padding: 2px 10px;
   font-size: 0.78rem;
   letter-spacing: 0;
-  border-radius: 999px;
+  border-radius: 6px;
 }
 
 .activa {
@@ -449,24 +449,26 @@
 }
 
 .contacto {
-  padding: 7px 14px;
+  padding: 6px 12px;
   font-size: 0.85rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 600;
+  color: var(--texto);
   text-decoration: none;
-  background: var(--carbon);
-  border-radius: 999px;
+  background: var(--blanco);
+  border: 1px solid rgba(23, 24, 26, 0.14);
+  border-radius: 8px;
 }
 
+/* Pestañas subrayadas (estilo plano): la elegida lleva la raya y la letra en azul */
 .pestanas {
   display: flex;
-  gap: 4px;
-  padding: 4px;
+  gap: 2px;
+  padding: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  background: var(--blanco);
-  border: 1px solid var(--linea);
-  border-radius: 999px;
+  background: transparent;
+  border-bottom: 1px solid var(--linea);
+  border-radius: 0;
 }
 
 .pestanas::-webkit-scrollbar {
@@ -480,18 +482,21 @@
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 9px 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
   text-align: center;
   color: var(--secundario);
   text-decoration: none;
-  border-radius: 999px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
 }
 
 .pestanaActiva {
-  color: #ffffff;
-  background: var(--acento);
+  color: var(--acento-oscuro);
+  background: transparent;
+  border-bottom-color: var(--acento);
 }
 
 .mesNavegar {

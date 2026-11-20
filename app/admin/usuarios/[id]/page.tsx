@@ -29,6 +29,7 @@ import Notas from "./Notas";
 import HistorialReservas from "./HistorialReservas";
 import { esSuelto, nombreVisible } from "@/lib/regalos";
 import AnadirSinCobrar from "./AnadirSinCobrar";
+import etq from "../../../etiquetas.module.css";
 import PanelActual from "./PanelActual";
 import VerComoEsta from "./VerComoEsta";
 import type { Periodo, ReservaFila, TipoClaseChip } from "./periodos";
@@ -786,9 +787,9 @@ export default async function FichaUsuario({
           <div style={{ minWidth: 0 }}>
             <strong style={{ fontSize: "1.15rem" }}>{nombre}</strong>
             <div className={estilos.etiquetas} style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "4px 0" }}>
-              <span className={styles.etiquetaSuave}>{ROLES[p.rol] ?? p.rol}</span>
+              <span className={`${etq.etq} ${p.rol === "admin" ? etq.azul : p.rol === "alumno" ? etq.verde : p.rol === "invitado" ? etq.ambar : etq.gris}`}>{ROLES[p.rol] ?? p.rol}</span>
               {servicios.map((s) => (
-                <span key={s} className={styles.etiquetaSuave}>
+                <span key={s} className={`${etq.etq} ${etq.azul}`}>
                   {SERVICIOS[s] ?? s}
                 </span>
               ))}

@@ -658,31 +658,30 @@
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: 190px;
-  padding: 14px;
+  min-height: 116px;
+  padding: 12px 14px;
   overflow: hidden;
   color: var(--blanco);
   text-decoration: none;
   background-color: #1f2023;
   background-size: cover;
   background-position: center;
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: var(--sombra);
-  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
+  transition: box-shadow 0.2s;
   background-blend-mode: normal, overlay, normal;
 }
 
 .azulejo:hover {
-  transform: translateY(-3px);
   box-shadow: var(--sombra-alta);
 }
 
 .azulejo span {
-  font-size: 1.3rem;
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
 
 .azulejo:focus-visible {
