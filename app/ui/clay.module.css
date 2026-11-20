@@ -205,6 +205,7 @@
 }
 
 .apilada::before {
+  display: none; /* la «hoja» gris de detrás se quita: estilo plano */
   content: "";
   position: absolute;
   top: -7px;
@@ -227,8 +228,8 @@
   overflow: hidden;
   color: #ffffff;
   background: #2b2b2a;
-  border-radius: 16px;
-  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  box-shadow: var(--ui-sombra-card);
 }
 
 .bannerArriba {
@@ -304,61 +305,47 @@
 }
 
 /* ── 6. Consejo con insignia flotante ── */
+/* Tarjeta de aviso: blanca, con un icono pequeño en un cuadrito azul suave a la izquierda (estilo plano) */
 .consejoEnvoltura {
   position: relative;
-  margin-top: 22px;
+  margin-top: 10px;
 }
 
 .insignia {
   position: absolute;
-  top: -22px;
-  left: 50%;
+  top: 16px;
+  left: 16px;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  color: #ffffff;
-  background: var(--ui-badge-dark);
-  border: 3.5px solid #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-  transform: translateX(-50%);
-  animation: ondaToque 2.5s infinite;
-}
-
-@keyframes ondaToque {
-  0% {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(10, 168, 192, 0.4);
-  }
-  70% {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 12px rgba(10, 168, 192, 0);
-  }
-  100% {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(10, 168, 192, 0);
-  }
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  color: var(--etq-azul);
+  background: var(--etq-azul-f);
+  border-radius: 10px;
 }
 
 .consejo {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 30px 20px 20px;
-  text-align: center;
-  color: #ffffff;
-  background: var(--ui-primary);
-  border-radius: 16px;
-  box-shadow: 0 16px 36px -6px rgba(10, 168, 192, 0.45);
+  align-items: flex-start;
+  padding: 16px 16px 16px 64px;
+  text-align: left;
+  color: var(--ui-body);
+  background: var(--ui-surface-pure);
+  border-radius: 14px;
+  box-shadow: var(--ui-sombra-card);
 }
 
 .consejoTexto {
-  margin: 0 0 18px;
-  padding: 0 4px;
-  font-size: 14.5px;
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.45;
-  color: #ffffff;
+  color: var(--ui-title);
 }
 
 .consejoAcciones {
@@ -377,30 +364,27 @@
   text-align: center;
   text-decoration: none;
   border: 0;
-  border-radius: 9999px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
+/* Botón principal: tu azul, plano */
 .botonSuave {
   color: #ffffff;
-  background: var(--ui-primary-soft-btn);
-  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--ui-primary);
+  transition: background-color 0.18s;
 }
 
 .botonSuave:hover {
-  background: #0aa8c0;
+  background: var(--ui-primary-active);
 }
 
+/* Botón secundario: blanco con borde fino */
 .botonBlanco {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ui-title);
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.botonBlanco:hover {
-  transform: translateY(-1px);
+  border: 1px solid rgba(23, 24, 26, 0.14);
 }
 
 /* ── 7. Tarjetas de métrica (dos lado a lado) con barras finas y línea suave ── */

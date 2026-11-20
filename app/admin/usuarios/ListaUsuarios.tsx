@@ -6,9 +6,20 @@ import Avatar from "../../Avatar";
 import PanelFiltros from "../../PanelFiltros";
 import styles from "../admin.module.css";
 import estilos from "./usuarios.module.css";
+import etq from "../../etiquetas.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { IconoBarra, IconoCalendario, IconoEuro, IconoLapiz } from "./IconosUsuario";
+
+// Color de la etiqueta de cada tipo de cuenta (ver app/etiquetas.module.css).
+const COLOR_TIPO: Record<string, string> = {
+  "Administradora": etq.azul,
+  "Alumno/a": etq.verde,
+  "Invitado/a": etq.ambar,
+  "Exalumno/a": etq.gris,
+  "Coach": etq.lila,
+};
+const claseTipo = (nombre: string) => `${etq.etq} ${COLOR_TIPO[nombre] ?? etq.gris}`;
 
 export type Usuario = {
   id: string;
@@ -250,7 +261,15 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                     </span>
                   </Link>
                 </td>
-                <td>{(u.etiquetas ?? [u.rol === "invitado" ? "Invitado/a" : "Alumno/a"]).join(", ")}</td>
+                <td>
+                  <span style={{ display: "inline-flex", flexWrap: "wrap", gap: 4 }}>
+                    {(u.etiquetas ?? [u.rol === "invitado" ? "Invitado/a" : "Alumno/a"]).map((e) => (
+                      <span key={e} className={claseTipo(e)}>
+                        {e}
+                      </span>
+                    ))}
+                  </span>
+                </td>
                 <td>{u.servicios.map((x) => NOMBRE_SERVICIO[x] ?? x).join(", ") || "—"}</td>
                 <td>{soloAdmin(u) ? "—" : u.tarifas.join(" + ") || "—"}</td>
                 <td>
@@ -293,7 +312,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
                 {u.etiquetas && u.etiquetas.length > 0 && (
                   <div className={estilos.etiquetas}>
                     {u.etiquetas.map((e) => (
-                      <span key={e} className={e === "Administradora" ? estilos.etiquetaAdmin : estilos.etiqueta}>
+                      <span key={e} className={claseTipo(e)}>
                         {e}
                       </span>
                     ))}

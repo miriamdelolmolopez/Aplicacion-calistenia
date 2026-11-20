@@ -408,29 +408,36 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 6px 12px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--carbon);
   text-decoration: none;
-  border: 1.5px solid var(--carbon);
-  border-radius: 999px;
+  background: var(--blanco);
+  border: 1px solid rgba(23, 24, 26, 0.14);
+  border-radius: 8px;
 }
 
 .iconos {
   display: inline-flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .icono {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
+  width: 34px;
   height: 34px;
-  color: #ffffff;
-  background: var(--carbon);
-  border-radius: 999px;
+  color: var(--texto);
+  background: var(--blanco);
+  border: 1px solid rgba(23, 24, 26, 0.14);
+  border-radius: 8px;
+}
+
+.icono:hover {
+  color: var(--acento-oscuro);
+  background: var(--etq-azul-f);
 }
 
 /* Ficha: contactos, pestañas y acciones */
