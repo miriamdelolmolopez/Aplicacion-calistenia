@@ -382,3 +382,16 @@
 .botonPildora {
   border-radius: 999px;
 }
+
+/* En las pantallas que son una pestaña u opción principal no hay a dónde volver */
+.barra[data-raiz] .enlaceBarra {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .paginaAncha {
+    max-width: none;
+    margin: 0;
+    padding: 16px 20px 48px;
+  }
+}

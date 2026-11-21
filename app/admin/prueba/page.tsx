@@ -7,10 +7,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
 import ControlesLink from "./Controles";
 import CabeceraAdmin from "../CabeceraAdmin";
+import RegistroAntiguos from "../usuarios/exalumnos/RegistroAntiguos";
+import SelectorEstado from "../usuarios/SelectorEstado";
 
-export const metadata = { title: "Link de prueba gratuita · Administración" };
+export const metadata = { title: "Invitados · Administración" };
 
-export default async function LinkPrueba() {
+export default async function LinkPrueba({ searchParams }: { searchParams: Promise<{ vista?: string }> }) {
+  const { vista } = await searchParams;
+  const verAntiguos = vista === "antiguos";
   await requireAdmin("presenciales");
   const admin = createAdminClient();
   const { activo, codigo } = await estadoLinkPrueba();
@@ -23,7 +27,10 @@ export default async function LinkPrueba() {
 
   // Quién se ha registrado desde el link (queda anotado en su cuenta).
   const { data: lista } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  const llegados = (lista?.users ?? []).filter((u) => u.user_metadata?.origen === "prueba");
+  // Invitados: quienes llegaron por el link y cualquier persona con rol de invitado/a (por ejemplo, dada de alta a mano).
+  const { data: invitadosPerfil } = await admin.from("profiles").select("id").eq("rol", "invitado");
+  const idsInvitados = new Set(((invitadosPerfil ?? []) as { id: string }[]).map((p) => p.id));
+  const llegados = (lista?.users ?? []).filter((u) => u.user_metadata?.origen === "prueba" || idsInvitados.has(u.id));
   const ids = llegados.map((u) => u.id);
   const [{ data: perfiles }, { data: pruebas }] = ids.length
     ? await Promise.all([
@@ -48,14 +55,19 @@ export default async function LinkPrueba() {
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>
-        <h1>Link de prueba gratuita</h1>
+        <h1>Invitados</h1>
         <Link href="/inicio" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </CabeceraAdmin>
 
+      <SelectorEstado base="/admin/prueba" vista={verAntiguos ? "antiguos" : "actuales"} />
+      {verAntiguos ? (
+        <RegistroAntiguos grupo="invitados" />
+      ) : (
+        <>
       <section className={styles.tarjeta}>
-        <h2>Link de clase de prueba gratuita</h2>
+        <h2>Link de prueba</h2>
         <p className={styles.ayuda}>
           Compártelo en Instagram o por WhatsApp. Quien lo abre ve una página de «Prueba una clase gratis» y crea su cuenta. Se registra como invitado/a: solo ve las plazas de
           prueba libres y puede hacer una clase. Con el registro cerrado (en Registro), este link es la única forma de que alguien nuevo cree cuenta.
@@ -64,8 +76,8 @@ export default async function LinkPrueba() {
       </section>
 
       <section className={styles.tarjeta}>
-        <h2>Han llegado por este link ({filas.length})</h2>
-        {filas.length === 0 && <p className={styles.ayuda}>Todavía no se ha registrado nadie desde el link.</p>}
+        <h2>Invitados/as ({filas.length})</h2>
+        {filas.length === 0 && <p className={styles.ayuda}>Todavía no hay invitados/as.</p>}
         <ul className={styles.lista}>
           {filas.map((f) => (
             <li key={f.id} className={styles.persona}>
@@ -83,6 +95,8 @@ export default async function LinkPrueba() {
         </ul>
         <p className={styles.ayuda}>Se cuentan las cuentas creadas desde el link, también las que entran con Google.</p>
       </section>
+        </>
+      )}
     </main>
   );
 }

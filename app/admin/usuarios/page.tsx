@@ -6,6 +6,8 @@ import ListaUsuarios, { type Usuario } from "./ListaUsuarios";
 import { formasActivas } from "@/lib/formasPago";
 import NuevoUsuario, { type DescuentoOpcion, type TarifaOpcion } from "./NuevoUsuario";
 import CabeceraAdmin from "../CabeceraAdmin";
+import RegistroAntiguos from "./exalumnos/RegistroAntiguos";
+import SelectorEstado from "./SelectorEstado";
 import { claveDia, textoHora } from "@/lib/fechas";
 import { euros } from "@/lib/formato";
 import { esSuelto, nombreVisible } from "@/lib/regalos";
@@ -14,8 +16,9 @@ export const metadata = { title: "Usuarios · Administración" };
 
 type Fila = Omit<Usuario, "tarifa_sin_clases" | "sueltas" | "foto" | "tarifas" | "tarifa_desde" | "tarifa_hasta" | "pendiente_cobro" | "clases_usadas" | "clases_total" | "online_usados" | "online_total"> & { foto_path: string | null };
 
-export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string; archivadas?: string }> }) {
-  const { nuevo, archivadas } = await searchParams;
+export default async function Usuarios({ searchParams }: { searchParams: Promise<{ nuevo?: string; archivadas?: string; vista?: string }> }) {
+  const { nuevo, archivadas, vista } = await searchParams;
+  const verAntiguos = vista === "antiguos";
   const verArchivadas = archivadas === "1";
   const { supabase } = await requireAdmin("usuarios");
 
@@ -66,7 +69,7 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
         entrenos_mes: 0,
         ultimo_entreno: null,
       }));
-  const filas = [...filasAdmin, ...todas.filter((f) => (f.rol === "archivado") === verArchivadas)];
+  const filas = [...filasAdmin, ...todas.filter((f) => (f.rol === "archivado") === verArchivadas && f.rol !== "invitado")];
 
   // Fotos (privadas): enlaces temporales solo para esta pantalla.
   const rutas = filas.map((f) => f.foto_path).filter((r): r is string => !!r);
@@ -176,11 +179,13 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
           ← Volver
         </Link>
       </CabeceraAdmin>
+      <SelectorEstado base="/admin/usuarios" vista={verAntiguos ? "antiguos" : "actuales"} />
+      {verAntiguos ? (
+        <RegistroAntiguos grupo="clientes" />
+      ) : (
+        <>
       <NuevoUsuario tarifas={tarifas} descuentos={descuentos} hoy={hoy} ahora={ahora} formas={await formasActivas()} abiertoInicial={nuevo === "1"} />
       <p style={{ margin: "0 0 12px" }}>
-        <Link href="/admin/usuarios/exalumnos" className={styles.enlaceBarra} style={{ marginRight: 14 }}>
-          Exalumnos e invitados antiguos
-        </Link>
         {verArchivadas ? (
           <Link href="/admin/usuarios" className={styles.enlaceBarra}>
             ← Volver a las personas activas
@@ -194,6 +199,8 @@ export default async function Usuarios({ searchParams }: { searchParams: Promise
         )}
       </p>
       <ListaUsuarios usuarios={usuarios} />
+        </>
+      )}
     </main>
   );
 }

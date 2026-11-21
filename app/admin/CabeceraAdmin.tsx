@@ -6,11 +6,19 @@ import styles from "./admin.module.css";
 import { useNombresAdmin } from "./NombresAdmin";
 import { guardarNombreAdmin } from "./acciones";
 import { olvidarNombresMenu } from "../useMenuAdmin";
+import { MENU_ADMIN, PESTANAS_AJUSTES } from "../gruposAdmin";
 
 // Cabecera de cada pantalla de Administración: el título y el botón de volver, sin foto.
 // En las pantallas a las que se llega desde una tarjeta, el título lleva un lápiz gris para cambiarle el nombre.
+// Direcciones que son una pestaña o una opción principal del menú: en ellas no hay a dónde «volver».
+const RAIZ = new Set<string>([
+  ...MENU_ADMIN.flatMap((g) => g.items.flatMap((i) => [i.href, ...(i.pestanas ?? []).map((p) => p.href)])),
+  ...PESTANAS_AJUSTES.map((p) => p.href),
+].filter((h): h is string => !!h));
+
 export default function CabeceraAdmin({ children }: { children: ReactNode }) {
   const ruta = usePathname();
+  const esRaiz = RAIZ.has(ruta);
   const router = useRouter();
   const nombres = useNombresAdmin();
   const editable = /^\/admin\/[^/]+$/.test(ruta);
@@ -29,7 +37,7 @@ export default function CabeceraAdmin({ children }: { children: ReactNode }) {
     setOriginal(t);
   }, [editable, ruta]);
 
-  if (!editable) return <header className={styles.barra}>{children}</header>;
+  if (!editable) return <header className={styles.barra} data-raiz={esRaiz ? "" : undefined}>{children}</header>;
 
   const nombre = nombres[ruta] ?? original ?? "";
 
@@ -48,7 +56,7 @@ export default function CabeceraAdmin({ children }: { children: ReactNode }) {
   }
 
   return (
-    <header ref={cabecera} className={`${styles.barra} ${styles.barraEditable}`}>
+    <header ref={cabecera} className={`${styles.barra} ${styles.barraEditable}`} data-raiz={esRaiz ? "" : undefined}>
       <div className={styles.tituloEditable}>
         {editando ? (
           <>

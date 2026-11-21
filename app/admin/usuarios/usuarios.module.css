@@ -1016,3 +1016,49 @@
   border-color: var(--linea);
   box-shadow: inset 0 1px 3px rgba(26, 32, 44, 0.1);
 }
+
+/* Selector Actuales | Antiguos */
+.selectorEstado {
+  display: inline-flex;
+  align-self: flex-start;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s);
+}
+
+.opcionEstado {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: var(--letra-s);
+  color: var(--carbon);
+  text-decoration: none;
+  background: var(--blanco);
+  border-right: 1px solid var(--linea-fuerte);
+}
+
+.opcionEstado:last-child {
+  border-right: 0;
+}
+
+.opcionEstadoActiva {
+  color: var(--acento);
+  background: var(--acento-fondo);
+}
+
+/* Fila de una persona antigua */
+.filaAntigua {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.filaAntigua:last-child {
+  border-bottom: 0;
+}

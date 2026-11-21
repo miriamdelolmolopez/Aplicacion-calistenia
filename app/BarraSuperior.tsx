@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import styles from "./formularios.module.css";
 import { IDIOMAS, textos, type Idioma } from "./textos";
@@ -13,6 +14,7 @@ export default function BarraSuperior({
 }: {
   izquierda?: { href: string; texto: "volver" | "entrar" };
 }) {
+  const ruta = usePathname();
   const [idioma, cambiarIdioma] = useIdioma();
   const t = textos[idioma];
   const perfil = useMiPerfil();
@@ -24,7 +26,9 @@ export default function BarraSuperior({
     () => null,
   );
 
-  const enlace = izquierda ? (
+  // En las pantallas principales del menú no hay a dónde volver.
+  const principal = ["/inicio", "/clases", "/rutina", "/progreso", "/pagos", "/perfil", "/biblioteca"].includes(ruta);
+  const enlace = izquierda && !(principal && izquierda.texto === "volver") ? (
     <Link
       href={desde === "perfil" && izquierda.texto === "volver" ? "/perfil" : izquierda.href}
       className={styles.enlaceBarra}

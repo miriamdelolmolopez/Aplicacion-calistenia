@@ -27,7 +27,8 @@ export async function anadirPersona(_previo: Estado, formData: FormData): Promis
     .from("personas_registradas")
     .insert({ nombre: nombre || null, correo: correo || null, dni: dni || null, telefono: telefono || null, nota: nota || null, origen: "manual", tipo: tipos[0], tipos, bloquea_prueba: bloquea, creado_por: user.id });
   if (error) return { error: "No se ha podido guardar. Inténtalo de nuevo." };
-  revalidatePath("/admin/usuarios/exalumnos");
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/prueba");
   return { mensaje: bloquea ? "Guardada. Si se registra, no podrá hacer clase de prueba gratis." : "Guardada. Si se registra, podrá hacer su clase de prueba." };
 }
 
@@ -36,7 +37,8 @@ export async function quitarPersona(id: string): Promise<{ ok: boolean }> {
   await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok: false };
   await createAdminClient().from("personas_registradas").delete().eq("id", id);
-  revalidatePath("/admin/usuarios/exalumnos");
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/prueba");
   return { ok: true };
 }
 
@@ -45,6 +47,7 @@ export async function cambiarBloqueo(id: string, bloquea: boolean): Promise<{ ok
   await requireAdmin("usuarios");
   if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok: false };
   await createAdminClient().from("personas_registradas").update({ bloquea_prueba: bloquea }).eq("id", id);
-  revalidatePath("/admin/usuarios/exalumnos");
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/prueba");
   return { ok: true };
 }
