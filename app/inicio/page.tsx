@@ -234,8 +234,8 @@ export default function Inicio() {
         {esAdmin && (
           <div className={estilos.columnasAdmin}>
             <div className={estilos.colPrincipal}>
-              <ResumenAdminTarjetas />
               <EstadisticasInicio />
+              <ResumenAdminTarjetas />
             </div>
             <aside className={estilos.colLateral}>
               <AvisosAdmin />
