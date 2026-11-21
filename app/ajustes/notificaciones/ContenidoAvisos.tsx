@@ -30,7 +30,6 @@ const AVISOS_ALUMNA: Aviso[] = [
   { correo: "avisos_inactividad", app: "inactividad", es: ["Llevas tiempo sin venir", "Un mensaje de Miriam si pasa mucho tiempo sin que vengas."], en: ["You have been away for a while", "A message from Miriam if you have not come in a long time."] },
   { correo: "avisos_cumpleanos", app: "cumpleanos", es: ["Felicitación de cumpleaños", "El día de tu cumpleaños, con un regalo."], en: ["Birthday greeting", "On your birthday, with a gift."] },
   { app: "mensaje", es: ["Mensajes de Miriam", "Por ejemplo, después de tu clase de prueba."], en: ["Messages from Miriam", "For example, after your trial class."] },
-  { app: "anuncio", es: ["Anuncios del tablón", "Cuando Miriam publica un anuncio nuevo."], en: ["Notice board", "When Miriam posts a new notice."] },
   { obligatorio: true, es: ["Clase cancelada", "Si Miriam cancela una clase en la que estás apuntado/a."], en: ["Class cancelled", "If Miriam cancels a class you are signed up for."] },
   { obligatorio: true, es: ["Plaza liberada", "Cuando se libera una plaza en una clase en la que estás en lista de espera."], en: ["Spot opened up", "When a spot opens in a class you are on the waiting list for."] },
   { obligatorio: true, es: ["Aniversario", "Cuando cumples un tiempo con nosotras."], en: ["Anniversary", "When you reach a milestone with us."] },

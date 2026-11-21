@@ -186,7 +186,6 @@ export function seccionesDe(p: MiPerfil): Seccion[] {
   // El progreso tiene su propia sección para todas las alumnas (con online incluye las gráficas de ejercicios).
   if (p.rol !== "admin") lista.push("progreso");
   if (p.rol !== "admin") lista.push("pagos");
-  if (p.rol !== "admin") lista.push("tablon");
   lista.push("ayuda", "perfil", "ajustes");
   if (p.rol === "admin") lista.push("admin");
   return lista;

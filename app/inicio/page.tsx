@@ -18,7 +18,6 @@ import clay from "../ui/clay.module.css";
 import { IconoCorona, IconoReloj } from "../ui/Mini";
 import Anillo from "../ui/Anillo";
 import CampanaAvisos from "../ui/CampanaAvisos";
-import TablonAnuncios from "../ui/TablonAnuncios";
 import VerComoAlumno from "../admin/VerComoAlumno";
 import ResumenAdminTarjetas from "./ResumenAdmin";
 import EstadisticasInicio from "./EstadisticasInicio";
@@ -380,7 +379,6 @@ export default function Inicio() {
           );
         })()}
 
-        <TablonAnuncios limite={3} />
 
         {!esAdmin && (
           <Seccion icono="biblioteca" titulo={idioma === "en" ? "Resources" : "Recursos"}>
