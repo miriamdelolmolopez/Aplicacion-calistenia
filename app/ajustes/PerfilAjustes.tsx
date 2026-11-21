@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Avatar from "../Avatar";
+import { IconoDe } from "../Icono";
 import Cargando from "../Cargando";
 import { obtenerFotos, pedirBorradoCuenta, quitarFoto, subirFoto } from "../perfil/acciones";
 import { IDIOMAS, textos, type Idioma } from "../textos";
@@ -131,7 +132,7 @@ export default function PerfilAjustes({ alumno = false }: { alumno?: boolean }) 
   };
   const zonas = Intl.supportedValuesOf("timeZone");
 
-  const segmentos = <T extends string>(valor: T, opciones: { v: T; t: string }[], alElegir: (v: T) => void) => (
+  const segmentos = <T extends string>(valor: T, opciones: { v: T; t: React.ReactNode }[], alElegir: (v: T) => void) => (
     <span className={estilos.segmentos} role="radiogroup">
       {opciones.map((o) => (
         <button key={o.v} type="button" role="radio" aria-checked={valor === o.v} className={`${estilos.segmento} ${valor === o.v ? estilos.elegido : ""}`} onClick={() => alElegir(o.v)}>
@@ -264,7 +265,7 @@ export default function PerfilAjustes({ alumno = false }: { alumno?: boolean }) 
         <div className={estilos.tarjeta}>
           <div className={estilos.fila}>
             <span className={estilos.etiqueta}>{x("Tema", "Theme")}</span>
-            {segmentos(tema, [{ v: "claro", t: `☀️ ${x("Claro", "Light")}` }, { v: "oscuro", t: `🌙 ${x("Oscuro", "Dark")}` }], cambiarTema)}
+            {segmentos(tema, [{ v: "claro", t: <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><IconoDe nombre="sol" tamano={15} />{x("Claro", "Light")}</span> }, { v: "oscuro", t: <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><IconoDe nombre="luna" tamano={15} />{x("Oscuro", "Dark")}</span> }], cambiarTema)}
           </div>
         </div>
       </section>

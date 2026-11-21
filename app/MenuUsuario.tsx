@@ -1,6 +1,6 @@
 "use client";
 
-import Icono from "./Icono";
+import Icono, { IconoDe } from "./Icono";
 import ElegirAlumno from "./admin/ver/ElegirAlumno";
 import { empezarVerComo } from "./admin/VerComoAlumno";
 import Link from "next/link";
@@ -120,7 +120,7 @@ export default function MenuUsuario() {
 
           <button type="button" role="menuitem" className={estilos.opcion} onClick={() => cambiarTema(tema === "oscuro" ? "claro" : "oscuro")}>
             <span>
-              <span aria-hidden="true">{tema === "oscuro" ? "🌙" : "☀️"}</span> {tema === "oscuro" ? (en ? "Dark theme" : "Tema oscuro") : (en ? "Light theme" : "Tema claro")}
+              <IconoDe nombre={tema === "oscuro" ? "luna" : "sol"} tamano={16} /> {tema === "oscuro" ? (en ? "Dark theme" : "Tema oscuro") : (en ? "Light theme" : "Tema claro")}
             </span>
           </button>
 
