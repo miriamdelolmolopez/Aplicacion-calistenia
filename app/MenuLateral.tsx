@@ -3,12 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Icono from "./Icono";
 import estilos from "./menu.module.css";
 import { textos, type ClaveTexto } from "./textos";
 import { useIdioma } from "./useIdioma";
-import { useMenuAdmin } from "./useMenuAdmin";
+import { MENU_ADMIN, destinoDe, type ItemMenu } from "./gruposAdmin";
 import { RUTAS, seccionesDe, type MiPerfil, type Seccion, olvidarVistaAlumna } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
 
@@ -41,7 +41,7 @@ export default function MenuLateral({
   const [idioma] = useIdioma();
   const t = textos[idioma];
   const router = useRouter();
-  const { visibles: visiblesAdmin } = useMenuAdmin();
+  const [abierto2, setAbierto2] = useState<ItemMenu | null>(null);
   const esAdmin = perfil.rol === "admin";
 
   useEffect(() => {
@@ -60,8 +60,13 @@ export default function MenuLateral({
     router.push("/");
   }
 
+  const cerrarTodo = () => {
+    setAbierto2(null);
+    onCerrar();
+  };
+
   return (
-    <div className={estilos.capa} onClick={onCerrar}>
+    <div className={estilos.capa} onClick={cerrarTodo}>
       <nav className={estilos.panel} aria-label={t.menuAbrir} onClick={(e) => e.stopPropagation()}>
         <div className={estilos.cabecera}>
           <Image src="/logos/icono-anilla.png" alt="CalisCoach" width={48} height={48} style={{ borderRadius: 11 }} />
@@ -74,16 +79,72 @@ export default function MenuLateral({
           </button>
         </div>
 
+        {esAdmin && abierto2 && (
+          <>
+            <button type="button" className={estilos.volver} onClick={() => setAbierto2(null)}>
+              ‹ Volver
+            </button>
+            <h2 className={estilos.tituloSeccion}>{abierto2.texto}</h2>
+            <ul className={estilos.lista}>
+              {(abierto2.pestanas ?? []).map((p) => (
+                <li key={p.texto}>
+                  {p.href ? (
+                    <Link href={p.href} className={estilos.enlace} onClick={cerrarTodo}>
+                      {p.icono && <Icono nombre={p.icono} />}
+                      {p.texto}
+                    </Link>
+                  ) : (
+                    <span className={`${estilos.enlace} ${estilos.pronto}`} aria-disabled="true">
+                      {p.icono && <Icono nombre={p.icono} />}
+                      {p.texto}
+                      <small className={estilos.etiquetaPronto}>Pronto</small>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {esAdmin &&
+          !abierto2 &&
+          MENU_ADMIN.map((g, n) => (
+            <div key={g.titulo ?? n}>
+              {g.titulo && <h2 className={estilos.tituloSeccion}>{g.titulo}</h2>}
+              <ul className={estilos.lista}>
+                {g.items.map((i) => {
+                  const destino = destinoDe(i);
+                  const conPestanas = (i.pestanas?.length ?? 0) > 1;
+                  return (
+                    <li key={i.clave}>
+                      {!destino ? (
+                        <span className={`${estilos.enlace} ${estilos.pronto}`} aria-disabled="true">
+                          <Icono nombre={i.icono} />
+                          {i.texto}
+                          <small className={estilos.etiquetaPronto}>Pronto</small>
+                        </span>
+                      ) : conPestanas ? (
+                        <button type="button" className={estilos.enlace} onClick={() => setAbierto2(i)} aria-label={`${i.texto}: ver opciones`}>
+                          <Icono nombre={i.icono} />
+                          {i.texto}
+                          <span className={estilos.flecha} aria-hidden="true">
+                            ›
+                          </span>
+                        </button>
+                      ) : (
+                        <Link href={destino} className={estilos.enlace} onClick={cerrarTodo}>
+                          <Icono nombre={i.icono} />
+                          {i.texto}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+
         <ul className={estilos.lista}>
-          {esAdmin &&
-            visiblesAdmin.map((o) => (
-              <li key={o.href}>
-                <Link href={o.href} className={estilos.enlace} onClick={onCerrar}>
-                  <Icono nombre={o.icono} />
-                  {o.texto}
-                </Link>
-              </li>
-            ))}
           {!esAdmin &&
             seccionesDe(perfil)
             .filter((s) => s !== "ajustes" && s !== "ayuda")

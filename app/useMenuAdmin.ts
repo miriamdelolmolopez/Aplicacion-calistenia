@@ -12,7 +12,7 @@ const CLAVE_BARRA = "barraAdmin"; // qué opciones salen en la barra de abajo (s
 const EVENTO = "cambio-menu-admin";
 
 export const MAX_BARRA = 5;
-export const BARRA_POR_DEFECTO = ["/admin", "/admin/usuarios", "/admin/reservas", "/perfil"];
+export const BARRA_POR_DEFECTO = ["/admin/usuarios", "/admin/reservas", "/admin/ejercicios", "/admin/bonos"];
 
 // Las secciones del panel que esta administradora tiene excluidas. Se lee una vez por minuto como mucho.
 let excluidasGuardadas: { cuando: number; lista: Promise<string[]> } | null = null;
@@ -132,11 +132,11 @@ export function useMenuAdmin(): {
 } {
   const crudo = useSyncExternalStore(suscribir, () => leer(CLAVE), () => "");
   const crudoOrden = useSyncExternalStore(suscribir, () => leer(CLAVE_ORDEN), () => "");
-  const crudoBarra = useSyncExternalStore(suscribir, () => leer(CLAVE_BARRA), () => "");
 
   const elegido = useMemo(() => analizar<Record<string, boolean>>(crudo, {}), [crudo]);
   const orden = useMemo(() => analizar<string[]>(crudoOrden, []), [crudoOrden]);
-  const hrefsBarra = useMemo(() => analizar<string[]>(crudoBarra, BARRA_POR_DEFECTO), [crudoBarra]);
+  // La barra de abajo ya no se personaliza: siempre sale la misma.
+  const hrefsBarra = BARRA_POR_DEFECTO;
 
   const [nombres, setNombres] = useState<Record<string, string>>({});
   useEffect(() => {

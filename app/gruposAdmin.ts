@@ -19,7 +19,7 @@ export type ItemMenu = {
 
 export type GrupoMenu = { titulo?: string; items: ItemMenu[] };
 
-export const MENU_ADMIN: GrupoMenu[] = [
+const MENU_BASE: GrupoMenu[] = [
   {
     items: [{ clave: "inicio", texto: "Inicio", icono: "inicio", href: "/inicio" }],
   },
@@ -125,24 +125,36 @@ export const MENU_ADMIN: GrupoMenu[] = [
   },
 ];
 
+// Las opciones se reparten en secciones, como en HubFit: Principal, Administrar, Biblioteca y Automatizaciones.
+const POR_CLAVE = new Map(MENU_BASE.flatMap((g) => g.items).map((i) => [i.clave, i]));
+const de = (...claves: string[]): ItemMenu[] => claves.map((c) => POR_CLAVE.get(c)).filter((i): i is ItemMenu => !!i);
+
+export const MENU_ADMIN: GrupoMenu[] = [
+  { titulo: "Principal", items: de("inicio", "leads", "usuarios", "mensajes", "tareas") },
+  { titulo: "Administrar", items: de("reservas", "packs", "pagos", "informes", "comunidad", "retos", "equipo", "contabilidad") },
+  { titulo: "Biblioteca", items: de("entrenamiento", "nutricion", "formularios", "recursos", "academia") },
+  { titulo: "Automatizaciones", items: de("automatizaciones") },
+];
+
 // Las pestañas de Ajustes (se abren desde el menú de tu foto). «alias» = otras pantallas que cuentan como esa pestaña.
 export const PESTANAS_AJUSTES: Pestana[] = [
-  { texto: "Perfil", href: "/perfil", icono: "perfil", alias: ["/ajustes", "/ajustes/privacidad", "/ajustes/textos-legales"] },
+  { texto: "Perfil", href: "/ajustes", icono: "perfil", alias: ["/perfil", "/ajustes/privacidad", "/ajustes/textos-legales"] },
+  { texto: "Notificaciones", href: "/ajustes/notificaciones", icono: "campana" },
   { texto: "Branding", icono: "paleta" },
   { texto: "Integraciones", icono: "externo" },
-  { texto: "Notificaciones", href: "/ajustes/notificaciones", icono: "campana" },
   { texto: "API", icono: "candado" },
   { texto: "MCP", icono: "globo" },
   { texto: "Frases", href: "/admin/contenido", icono: "admin" },
   { texto: "Textos legales", href: "/admin/legal", icono: "documento" },
   { texto: "Registro", href: "/admin/registro", icono: "usuarios" },
-  { texto: "Menú", href: "/ajustes/barra-lateral", icono: "ajustes", alias: ["/ajustes/barra-inferior"] },
   { texto: "Eliminar cuenta", icono: "salir" },
 ];
 
 const coincide = (ruta: string, href: string) => ruta === href || ruta.startsWith(href + "/");
 
 export function esDePestana(ruta: string, p: Pestana): boolean {
+  // «/ajustes» solo es la pestaña Perfil cuando es exactamente esa pantalla (las demás cuelgan de «/ajustes/...» y tienen su pestaña).
+  if (p.href === "/ajustes") return ruta === "/ajustes" || (p.alias ?? []).some((h) => coincide(ruta, h));
   return [p.href, ...(p.alias ?? [])].some((h) => !!h && coincide(ruta, h));
 }
 

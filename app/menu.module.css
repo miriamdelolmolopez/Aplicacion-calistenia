@@ -143,3 +143,44 @@
 .engranaje:hover {
   background: var(--relleno);
 }
+
+/* Menú del móvil de la administradora: secciones con título sutil y segundo nivel con «Volver» */
+.tituloSeccion {
+  margin: 14px 0 4px;
+  padding: 0 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--secundario);
+  opacity: 0.75;
+}
+
+.volver {
+  align-self: flex-start;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: var(--letra-s);
+  color: var(--secundario);
+  background: none;
+  border: 0;
+  border-radius: var(--radio-s);
+}
+
+.flecha {
+  margin-left: auto;
+  font-size: 1.3rem;
+  color: var(--secundario);
+}
+
+.pronto {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.etiquetaPronto {
+  margin-left: auto;
+  padding: 1px 7px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  background: #f1f3f5;
+  border-radius: 999px;
+}

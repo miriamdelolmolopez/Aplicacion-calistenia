@@ -14,6 +14,7 @@ import { useIdioma } from "../useIdioma";
 import { useMiPerfil } from "../useMiPerfil";
 import { usePreferencias } from "./usePreferencias";
 import Cargando from "../Cargando";
+import PerfilAjustes from "./PerfilAjustes";
 
 export default function Ajustes() {
   const [idioma, cambiarIdioma] = useIdioma();
@@ -22,6 +23,8 @@ export default function Ajustes() {
   const { pref, setPref } = usePreferencias();
   const [confirmando, setConfirmando] = useState(false);
   const [error, setError] = useState(false);
+
+  if (typeof mi === "object" && mi !== null && mi.rolReal === "admin") return <PerfilAjustes />;
 
   if (!pref) {
     return (
@@ -56,20 +59,6 @@ export default function Ajustes() {
         </select>
       </section>
 
-      {typeof mi === "object" && mi !== null && mi.rolReal === "admin" && (
-        <nav className={estilos.lista} style={{ marginBottom: 12 }}>
-          <Link href="/ajustes/barra-lateral" className={estilos.fila}>
-            <span aria-hidden="true">☰</span>
-            <span className={estilos.filaTexto}>Barra lateral</span>
-            <span aria-hidden="true">›</span>
-          </Link>
-          <Link href="/ajustes/barra-inferior" className={estilos.fila}>
-            <span aria-hidden="true">▭</span>
-            <span className={estilos.filaTexto}>Barra de abajo</span>
-            <span aria-hidden="true">›</span>
-          </Link>
-        </nav>
-      )}
 
       <nav className={estilos.lista} style={{ marginBottom: 12 }}>
         <Link href="/ajustes/notificaciones" className={estilos.fila}>

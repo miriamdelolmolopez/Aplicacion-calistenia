@@ -17,7 +17,7 @@ export const OPCIONES_MENU_ADMIN: OpcionMenuAdmin[] = [
   { href: "/clases", icono: "reservar", texto: "Reservar clases", defecto: true },
   { href: "/admin/horario", icono: "historial", texto: "Horarios presenciales", defecto: false },
   { href: "/admin/reservas", icono: "reservas", texto: "Reservas", defecto: false },
-  { href: "/admin/ejercicios", icono: "biblioteca", texto: "Biblioteca de ejercicios", defecto: true },
+  { href: "/admin/ejercicios", icono: "biblioteca", texto: "Entrenamiento", defecto: true },
   { href: "/admin/rutinas", icono: "rutina", texto: "Entrenamiento online", defecto: true },
   { href: "/admin/bonos", icono: "pagos", texto: "Pagos", defecto: false },
   { href: "/admin/tarifas", icono: "pagos", texto: "Servicios", defecto: false },

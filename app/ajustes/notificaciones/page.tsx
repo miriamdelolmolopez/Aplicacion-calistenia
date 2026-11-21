@@ -5,8 +5,8 @@ import BarraSuperior from "../../BarraSuperior";
 import { guardarPreferenciaApp, obtenerPreferenciasApp } from "../../notificaciones/acciones";
 import ActivarPush from "./ActivarPush";
 import Cargando from "../../Cargando";
-import styles from "../../formularios.module.css";
-import estilos from "../../perfil/perfil.module.css";
+import Interruptor from "../Interruptor";
+import estilos from "../ajustesTarjetas.module.css";
 import { useIdioma } from "../../useIdioma";
 import { usePreferencias, type Clave } from "../usePreferencias";
 
@@ -47,51 +47,6 @@ const AVISOS_ADMIN: Aviso[] = [
   { app: "admin_tarea", es: ["Tareas de tus automatizaciones", "Cuando una automatización te deja una tarea (por ejemplo, escribir a alguien)."], en: ["Tasks from your automations", "When an automation leaves you a task (for example, writing to someone)."] },
 ];
 
-function Icono({ tipo }: { tipo: "correo" | "campana" }) {
-  const base = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
-  return tipo === "correo" ? (
-    <svg {...base}>
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="m3 7 9 6 9-6" />
-    </svg>
-  ) : (
-    <svg {...base}>
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8" />
-      <path d="M10.3 21a2 2 0 0 0 3.4 0" />
-    </svg>
-  );
-}
-
-// Círculo con un icono: azul si está activado, gris si no. Se pulsa para cambiarlo.
-function Canal({ icono, nombre, activo, fijo, alCambiar }: { icono: "correo" | "campana"; nombre: string; activo: boolean; fijo?: boolean; alCambiar?: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={fijo ? undefined : alCambiar}
-      disabled={fijo}
-      aria-pressed={activo}
-      aria-label={`${nombre}: ${activo ? "on" : "off"}`}
-      title={nombre}
-      style={{
-        width: 42,
-        height: 42,
-        flex: "none",
-        borderRadius: "50%",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: fijo ? "default" : "pointer",
-        border: `2px solid ${activo ? "var(--acento)" : "var(--linea)"}`,
-        background: activo ? "var(--acento)" : "#e4e2dc",
-        color: activo ? "#fff" : "#8a8984",
-        opacity: fijo ? 0.9 : 1,
-      }}
-    >
-      <Icono tipo={icono} />
-    </button>
-  );
-}
-
 export default function Notificaciones() {
   const [idioma] = useIdioma();
   const en = idioma === "en";
@@ -113,52 +68,56 @@ export default function Notificaciones() {
     await guardarPreferenciaApp(clave, valor);
   }
 
+  const titulo = esAdmin ? (en ? "Client activity" : "Actividad de tus clientes") : en ? "Your notices" : "Tus avisos";
+  const ayuda = esAdmin
+    ? en
+      ? "Choose how you want to be notified about what your clients do."
+      : "Elige cómo quieres recibir avisos sobre lo que hacen tus clientes."
+    : en
+      ? "Choose how you want to receive each notice."
+      : "Elige cómo quieres recibir cada aviso.";
+
   return (
-    <main className={styles.pagina}>
-      <BarraSuperior izquierda={{ href: "/ajustes", texto: "volver" }} />
-      <h1 style={{ margin: "12px 0 8px", fontSize: "2rem" }}>{en ? "Notifications" : "Notificaciones"}</h1>
-      <p className={styles.ayuda}>
-        {en
-          ? "Choose how you want to receive each notice. The envelope is email and the bell is the app and your phone. Blue is on, grey is off. Press to change."
-          : "Elige cómo quieres recibir cada aviso. El sobre es el correo y la campana es la app y el móvil. Azul es activado y gris desactivado. Pulsa para cambiarlo."}
-      </p>
+    <main className={estilos.pagina}>
+      {!esAdmin && <BarraSuperior izquierda={{ href: "/ajustes", texto: "volver" }} />}
       {!pref || !app ? (
         <Cargando />
       ) : (
         <>
-          <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-            <ActivarPush />
-            {avisos.map((o) => (
-              <div key={o.es[0]} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
-                <span>
-                  <strong>
+          <ActivarPush />
+          <section className={estilos.grupo}>
+            <h2 className={estilos.titulo}>{titulo}</h2>
+            <p className={estilos.ayuda}>{ayuda}</p>
+            <div className={estilos.tarjeta}>
+              <div className={estilos.cabeceraColumnas}>
+                <span className={estilos.columna}>{en ? "Email" : "Correo electrónico"}</span>
+                <span className={estilos.columna}>{en ? "Push" : "Móvil"}</span>
+              </div>
+              {avisos.map((o) => (
+                <div key={o.es[0]} className={estilos.fila}>
+                  <span className={estilos.etiqueta}>
                     {o[en ? "en" : "es"][0]}
                     {o.obligatorio ? ` · ${en ? "required" : "obligatorio"}` : ""}
-                  </strong>
-                  <br />
-                  <small>{o[en ? "en" : "es"][1]}</small>
-                </span>
-                <span style={{ display: "flex", gap: 8 }}>
-                  {(o.correo || o.obligatorio) && (
-                    <Canal
-                      icono="correo"
-                      nombre={en ? "Email" : "Correo"}
-                      activo={o.obligatorio ? true : pref[o.correo!]}
-                      fijo={o.obligatorio}
-                      alCambiar={() => o.correo && cambiar(o.correo, !pref[o.correo])}
-                    />
-                  )}
-                  {o.app && (
-                    <Canal
-                      icono="campana"
-                      nombre={en ? "App and phone" : "App y móvil"}
-                      activo={app[o.app] !== false}
-                      alCambiar={() => cambiarApp(o.app!, app[o.app!] === false)}
-                    />
-                  )}
-                </span>
-              </div>
-            ))}
+                    <span className={estilos.descripcion}>{o[en ? "en" : "es"][1]}</span>
+                  </span>
+                  <span className={estilos.canales}>
+                    <span className={estilos.canal}>
+                      {o.correo || o.obligatorio ? (
+                        <Interruptor
+                          nombre={en ? "Email" : "Correo electrónico"}
+                          activo={o.obligatorio ? true : pref[o.correo!]}
+                          fijo={o.obligatorio}
+                          alCambiar={() => o.correo && cambiar(o.correo, !pref[o.correo])}
+                        />
+                      ) : null}
+                    </span>
+                    <span className={estilos.canal}>
+                      {o.app ? <Interruptor nombre={en ? "Push" : "Móvil"} activo={app[o.app] !== false} alCambiar={() => cambiarApp(o.app!, app[o.app!] === false)} /> : null}
+                    </span>
+                  </span>
+                </div>
+              ))}
+            </div>
           </section>
         </>
       )}
