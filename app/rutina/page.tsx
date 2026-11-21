@@ -184,9 +184,12 @@ export default function Entrenamiento() {
                 </div>
                 {!datos.enCurso && r.siguiente && (
                   <>
-                    <button type="button" className={styles.boton} disabled={iniciando} onClick={() => iniciar(r.siguiente!.id)}>
-                      {idioma === "en" ? "Start workout" : "Iniciar entrenamiento"} · {r.siguiente.nombre}
-                    </button>
+                    <div className={estilos.accionEntreno}>
+                      <span className={estilos.siguienteEntreno}>{r.siguiente.nombre}</span>
+                      <button type="button" className={styles.boton} disabled={iniciando} onClick={() => iniciar(r.siguiente!.id)}>
+                        {idioma === "en" ? "Start workout" : "Iniciar entrenamiento"}
+                      </button>
+                    </div>
                     {error && <p className={styles.error}>{error}</p>}
                   </>
                 )}

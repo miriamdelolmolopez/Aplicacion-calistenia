@@ -207,6 +207,8 @@ function PantallaClases() {
   // Si se llega desde «Mis reservas» pulsando un día del calendario (/clases?dia=2026-11-12), se abre ese día.
   const diaPedido = useSearchParams().get("dia");
   const [semana, setSemana] = useState<number | null>(null);
+  const [vista, setVista] = useState<"semana" | "mes">("semana");
+  const [mesPedido, setMesPedido] = useState<string | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [extras, setExtras] = useState<Record<string, ExtraTaller>>({});
   const [coaches, setCoaches] = useState<Record<string, { coachId: string; nombre: string; foto: string | null }>>({});
@@ -389,6 +391,16 @@ function PantallaClases() {
 
   const boton = { minHeight: 44 } as const;
 
+  // ---- Vista de mes: un calendario con los días que tienen clases marcados ----
+  const mesVisto = (mesPedido ?? diaElegido).slice(0, 7); // «2026-11»
+  const primerDiaMes = `${mesVisto}-01`;
+  const diasDelMes = new Date(Date.UTC(Number(mesVisto.slice(0, 4)), Number(mesVisto.slice(5, 7)), 0)).getUTCDate();
+  const huecosInicio = datos ? diaSemana(primerDiaMes) : 0;
+  const diasConClases = new Set(todas.filter((c) => filtro === "todo" || c.servicio === filtro).map((c) => claveDia(c.empieza_en)));
+  const mesAnterior = datos ? sumarDias(primerDiaMes, -1).slice(0, 7) : "";
+  const mesSiguiente = datos ? sumarDias(primerDiaMes, diasDelMes).slice(0, 7) : "";
+  const nombreMes = !datos ? "" : new Intl.DateTimeFormat(idioma === "en" ? "en" : "es", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${primerDiaMes}T12:00:00Z`));
+
   return (
     <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
@@ -429,12 +441,6 @@ function PantallaClases() {
 
       {datos && (
         <>
-          {!esAdmin && (
-            <Link href="/clases/mis-reservas" className={estilos.misReservas}>
-              {t.verMisReservasBoton} →
-            </Link>
-          )}
-
           <PanelFiltros etiqueta={idioma === "en" ? "Filters" : "Filtros"} activos={filtro !== "todo" ? 1 : 0}>
           <div className={estilos.filtros} role="tablist" aria-label={t.filtroTodo}>
             {(
@@ -462,8 +468,31 @@ function PantallaClases() {
           <div className={estilos.cabeceraDia}>
             <span className={estilos.etiquetaDia}>{t.diaLabel}</span>
             <strong>{etiquetaDia}</strong>
+            <span className={estilos.segmentosVista} role="radiogroup" aria-label={idioma === "en" ? "View" : "Vista"}>
+              {(
+                [
+                  ["semana", idioma === "en" ? "Week" : "Semana"],
+                  ["mes", idioma === "en" ? "Month" : "Mes"],
+                ] as const
+              ).map(([v, texto]) => (
+                <button
+                  key={v}
+                  type="button"
+                  role="radio"
+                  aria-checked={vista === v}
+                  className={`${estilos.segmentoVista} ${vista === v ? estilos.segmentoVistaActivo : ""}`}
+                  onClick={() => {
+                    setVista(v);
+                    setMesPedido(null);
+                  }}
+                >
+                  {texto}
+                </button>
+              ))}
+            </span>
           </div>
 
+          {vista === "semana" ? (
           <div className={estilos.tira}>
             <button
               type="button"
@@ -505,6 +534,61 @@ function PantallaClases() {
               ›
             </button>
           </div>
+          ) : (
+          <div className={estilos.mes}>
+            <div className={estilos.mesCabecera}>
+              <button
+                type="button"
+                className={estilos.flecha}
+                aria-label={idioma === "en" ? "Previous month" : "Mes anterior"}
+                disabled={mesVisto <= primerDia.slice(0, 7)}
+                onClick={() => setMesPedido(mesAnterior)}
+              >
+                ‹
+              </button>
+              <strong className={estilos.mesNombre}>{nombreMes}</strong>
+              <button
+                type="button"
+                className={estilos.flecha}
+                aria-label={idioma === "en" ? "Next month" : "Mes siguiente"}
+                disabled={mesVisto >= ultimo.slice(0, 7)}
+                onClick={() => setMesPedido(mesSiguiente)}
+              >
+                ›
+              </button>
+            </div>
+            <div className={estilos.mesRejilla}>
+              {LETRAS[idioma].map((l, i) => (
+                <span key={`l${i}`} className={estilos.mesLetra}>
+                  {l}
+                </span>
+              ))}
+              {Array.from({ length: huecosInicio }, (_, i) => (
+                <span key={`h${i}`} />
+              ))}
+              {Array.from({ length: diasDelMes }, (_, i) => {
+                const d = `${mesVisto}-${String(i + 1).padStart(2, "0")}`;
+                const fuera = d < primerDia || d > ultimo;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    disabled={fuera}
+                    className={`${estilos.mesDia} ${d === diaElegido ? estilos.diaElegido : ""} ${d === hoy ? estilos.mesHoy : ""}`}
+                    onClick={() => {
+                      setDia(d);
+                      setConfirmando(null);
+                      setVerNombres(null);
+                    }}
+                  >
+                    <strong>{i + 1}</strong>
+                    {diasConClases.has(d) && <span className={estilos.mesPunto} aria-hidden="true" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          )}
 
           {clasesDelDia.length > 1 && (
             <div className={estilos.horas}>

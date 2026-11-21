@@ -6,6 +6,7 @@ import Icono from "./Icono";
 import { PESTANAS_AJUSTES, esDePestana, itemDeRuta, type Pestana } from "./gruposAdmin";
 import { sinExcluidas } from "@/lib/seccionesAdmin";
 import { useMiPerfil } from "./useMiPerfil";
+import { useIdioma } from "./useIdioma";
 import estilos from "./pestanasPagina.module.css";
 
 // Pantallas de «Ajustes» (se abren desde el menú de tu foto): ahí sale la barra de pestañas de Ajustes en vez de la de una opción del menú.
@@ -17,12 +18,22 @@ const esDeAjustes = (ruta: string) => DE_AJUSTES.some((p) => ruta === p || ruta.
 export default function PestanasPagina({ excluidas = [] }: { excluidas?: string[] }) {
   const ruta = usePathname();
   const perfil = useMiPerfil(ruta);
-  const esAdmin = typeof perfil === "object" && perfil !== null && perfil.rolReal === "admin";
-  if (!esAdmin) return null;
+  const [idioma] = useIdioma();
+  const conPerfil = typeof perfil === "object" && perfil !== null ? perfil : null;
+  const esAdmin = conPerfil?.rolReal === "admin" && conPerfil.rol === "admin";
+  // El alumno/a (y la administradora que mira «como alumno/a») ve las pestañas de Reservas.
+  const esAlumno = !!conPerfil && conPerfil.rol !== "admin" && (ruta === "/clases" || ruta.startsWith("/clases/"));
+  if (!esAdmin && !esAlumno) return null;
 
   let pestanas: Pestana[] = [];
   let titulo = "";
-  if (esDeAjustes(ruta)) {
+  if (esAlumno) {
+    pestanas = [
+      { texto: idioma === "en" ? "Book a class" : "Reservar clase", href: "/clases", icono: "reservar" },
+      { texto: idioma === "en" ? "My bookings" : "Mis reservas", href: "/clases/mis-reservas", icono: "reservas" },
+    ];
+    titulo = idioma === "en" ? "Bookings" : "Reservas";
+  } else if (esDeAjustes(ruta)) {
     pestanas = PESTANAS_AJUSTES;
     titulo = "Ajustes";
   } else {
@@ -35,7 +46,9 @@ export default function PestanasPagina({ excluidas = [] }: { excluidas?: string[
   if (pestanas.length < 2) return null;
 
   const visibles = sinExcluidas(pestanas, excluidas);
-  const activa = visibles.find((p) => esDePestana(ruta, p));
+  const activa = visibles
+    .filter((p) => esDePestana(ruta, p))
+    .sort((a, b) => Math.max(...[b.href, ...(b.alias ?? [])].map((h) => (h && ruta.startsWith(h) ? h.length : 0))) - Math.max(...[a.href, ...(a.alias ?? [])].map((h) => (h && ruta.startsWith(h) ? h.length : 0))))[0];
 
   return (
     <nav className={estilos.barra} aria-label={titulo}>

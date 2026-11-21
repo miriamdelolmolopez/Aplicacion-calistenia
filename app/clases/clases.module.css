@@ -499,3 +499,119 @@
 .puntoNaranja::before {
   background: #e8912d;
 }
+
+/* Selector Semana / Mes */
+.segmentosVista {
+  display: inline-flex;
+  margin-left: auto;
+  overflow: hidden;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s);
+}
+
+.segmentoVista {
+  min-height: 30px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--letra-s);
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 0;
+  border-right: 1px solid var(--linea-fuerte);
+}
+
+.segmentoVista:last-child {
+  border-right: 0;
+}
+
+.segmentoVistaActivo {
+  color: var(--acento);
+  background: var(--acento-fondo);
+}
+
+/* Calendario del mes */
+.mes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding: var(--esp-3);
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-l);
+}
+
+.mesCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+
+.mesNombre {
+  font-size: var(--letra-s);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mesRejilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.mesLetra {
+  padding-bottom: 4px;
+  font-size: var(--letra-xs);
+  color: var(--secundario);
+  text-align: center;
+}
+
+.mesDia {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  font: inherit;
+  font-size: var(--letra-s);
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid transparent;
+  border-radius: var(--radio-s);
+}
+
+.mesDia strong {
+  font-weight: 500;
+}
+
+.mesDia:disabled {
+  color: #c4c9d0;
+  background: none;
+}
+
+.mesDia:hover:not(:disabled) {
+  background: #f1f2f4;
+}
+
+.mesHoy {
+  border-color: var(--linea-fuerte);
+}
+
+.mesPunto {
+  position: absolute;
+  bottom: 5px;
+  width: 5px;
+  height: 5px;
+  background: var(--acento);
+  border-radius: 50%;
+}
+
+.mesDia.diaElegido {
+  color: #ffffff;
+  background: var(--acento);
+}
+
+.mesDia.diaElegido .mesPunto {
+  background: #ffffff;
+}

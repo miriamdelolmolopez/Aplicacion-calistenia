@@ -188,3 +188,23 @@
   border-color: var(--ui-primary);
   box-shadow: var(--ui-sombra-boton);
 }
+
+/* Zona del botón «Iniciar entrenamiento»: separada de la barra de progreso, con el nombre del día en gris y el botón pequeño a la derecha */
+.accionEntreno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-top: var(--esp-4);
+}
+
+.siguienteEntreno {
+  min-width: 0;
+  font-size: var(--letra-s);
+  color: var(--secundario);
+}
+
+.accionEntreno button {
+  flex: none;
+  min-height: 36px;
+}
