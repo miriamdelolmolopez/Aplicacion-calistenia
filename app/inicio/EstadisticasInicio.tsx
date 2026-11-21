@@ -7,6 +7,7 @@ import { rangoDe } from "@/lib/periodos";
 import { BarrasColores, Cambio, COLOR_SERVICIO, LineaMensual, PALETA, Rosca, TarjetaCifra } from "../admin/informes/GraficosPagos";
 import { obtenerEstadisticas, type Estadisticas } from "./accionesEstadisticas";
 import estilos from "./inicio.module.css";
+import LimiteErrores from "./LimiteErrores";
 
 type Opcion = "mes" | "tres" | "seis" | "fechas";
 const OPCIONES: { id: Opcion; texto: string }[] = [
@@ -104,6 +105,7 @@ export default function EstadisticasInicio() {
       {valido && !datos && <p className={estilos.resumenVacio}>{cargando ? "Cargando estadísticas…" : "No se han podido cargar las estadísticas."}</p>}
 
       {valido && i && a && (
+        <LimiteErrores aviso="No se han podido dibujar las estadísticas de este periodo.">
         <div className={estilos.estadContenido} style={{ opacity: cargando ? 0.55 : 1 }}>
           <div className={estilos.estadCifras}>
             <TarjetaCifra
@@ -148,20 +150,20 @@ export default function EstadisticasInicio() {
           <div className={estilos.graficos}>
             <div className={estilos.graficoTarjeta}>
               <h3>Ingresos mes a mes</h3>
-              <LineaMensual datos={i.ingresos.mensual.map((m) => ({ mes: m.mes, total: m.total, anterior: m.ano_anterior }))} />
+              <LineaMensual datos={(i.ingresos.mensual ?? []).map((m) => ({ mes: m.mes, total: m.total, anterior: m.ano_anterior }))} />
             </div>
             <div className={estilos.graficoTarjeta}>
               <h3>Altas mes a mes</h3>
-              <LineaMensual formato={String} entero datos={i.altas_mensuales.map((m) => ({ mes: m.mes, total: m.altas }))} />
+              <LineaMensual formato={String} entero datos={(i.altas_mensuales ?? []).map((m) => ({ mes: m.mes, total: m.altas }))} />
             </div>
             <div className={estilos.graficoTarjeta}>
               <h3>Ingresos por tipo de servicio</h3>
-              {i.ingresos.por_servicio.length === 0 ? (
+              {(i.ingresos.por_servicio ?? []).length === 0 ? (
                 <p className={estilos.resumenVacio}>No hay cobros en este periodo.</p>
               ) : (
                 <Rosca
                   total={i.ingresos.total_periodo}
-                  filas={i.ingresos.por_servicio.map((m) => ({ texto: SERVICIOS[m.servicio] ?? m.servicio, valor: m.total, color: COLOR_SERVICIO[m.servicio] ?? COLOR_SERVICIO.otros }))}
+                  filas={(i.ingresos.por_servicio ?? []).map((m) => ({ texto: SERVICIOS[m.servicio] ?? m.servicio, valor: m.total, color: COLOR_SERVICIO[m.servicio] ?? COLOR_SERVICIO.otros }))}
                 />
               )}
             </div>
@@ -182,34 +184,35 @@ export default function EstadisticasInicio() {
             </div>
             <div className={estilos.graficoTarjeta}>
               <h3>Método de pago</h3>
-              {i.ingresos.por_metodo.length === 0 ? (
+              {(i.ingresos.por_metodo ?? []).length === 0 ? (
                 <p className={estilos.resumenVacio}>No hay cobros en este periodo.</p>
               ) : (
-                <BarrasColores filas={i.ingresos.por_metodo.map((m, n) => ({ texto: datos?.metodos[m.metodo] ?? m.metodo, valor: m.total, color: PALETA[n % PALETA.length] }))} />
+                <BarrasColores filas={(i.ingresos.por_metodo ?? []).map((m, n) => ({ texto: datos?.metodos[m.metodo] ?? m.metodo, valor: m.total, color: PALETA[n % PALETA.length] }))} />
               )}
             </div>
             <div className={estilos.graficoTarjeta}>
               <h3>Tarifas más contratadas</h3>
-              {i.tarifas.length === 0 ? (
+              {(i.tarifas ?? []).length === 0 ? (
                 <p className={estilos.resumenVacio}>Todavía no hay datos.</p>
               ) : (
-                <BarrasColores formato={(n) => `${n} ${n === 1 ? "vez" : "veces"}`} filas={i.tarifas.map((t, n) => ({ texto: t.nombre, valor: t.contratadas, color: PALETA[n % PALETA.length] }))} />
+                <BarrasColores formato={(n) => `${n} ${n === 1 ? "vez" : "veces"}`} filas={(i.tarifas ?? []).map((t, n) => ({ texto: t.nombre, valor: t.contratadas, color: PALETA[n % PALETA.length] }))} />
               )}
             </div>
             <div className={estilos.graficoTarjeta}>
               <h3>Ocupación de las clases</h3>
-              {a.ocupacion.length === 0 ? (
+              {(a.ocupacion ?? []).length === 0 ? (
                 <p className={estilos.resumenVacio}>Sin clases en este periodo.</p>
               ) : (
-                <BarrasColores porcentaje={false} formato={(n) => `${n} %`} filas={a.ocupacion.map((f, n) => ({ texto: f.texto, valor: f.valor, color: PALETA[n % PALETA.length] }))} />
+                <BarrasColores porcentaje={false} formato={(n) => `${n} %`} filas={(a.ocupacion ?? []).map((f, n) => ({ texto: f.texto, valor: f.valor, color: PALETA[n % PALETA.length] }))} />
               )}
             </div>
             <div className={estilos.graficoTarjeta}>
               <h3>Alumnos/as por edad</h3>
-              <BarrasColores formato={String} filas={EDADES.map(([k, texto], n) => ({ texto, valor: i.por_edad[k] ?? 0, color: PALETA[n % PALETA.length] }))} />
+              <BarrasColores formato={String} filas={EDADES.map(([k, texto], n) => ({ texto, valor: i.por_edad?.[k] ?? 0, color: PALETA[n % PALETA.length] }))} />
             </div>
           </div>
         </div>
+        </LimiteErrores>
       )}
     </section>
   );

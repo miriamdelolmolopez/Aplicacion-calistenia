@@ -25,7 +25,7 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
   const ruta = usePathname();
   const router = useRouter();
   const esAdmin = perfil.rol === "admin";
-  const { excluidas, nombres } = useAjustesMenuAdmin();
+  const { excluidas } = useAjustesMenuAdmin();
 
   const opcionesAlumna: Opcion[] = esAdmin
     ? []
@@ -69,7 +69,7 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
             <ul className={estilos.lista}>
               {items.map((i) => {
                 const destino = destinoDe(i);
-                const nombre = (destino && nombres[destino]) || i.texto;
+                const nombre = i.texto;
                 return (
                   <li key={i.clave}>
                     {destino ? (

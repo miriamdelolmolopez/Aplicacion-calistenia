@@ -21,7 +21,7 @@ export default function CabeceraAdmin({ children }: { children: ReactNode }) {
   const esRaiz = RAIZ.has(ruta);
   const router = useRouter();
   const nombres = useNombresAdmin();
-  const editable = /^\/admin\/[^/]+$/.test(ruta);
+  const editable = false as boolean; // los nombres ya no se cambian: son los del menú y las pestañas
   const cabecera = useRef<HTMLElement>(null);
   const [original, setOriginal] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);

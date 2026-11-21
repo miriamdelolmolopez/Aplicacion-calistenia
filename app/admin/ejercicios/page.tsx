@@ -14,7 +14,7 @@ import FiltrosEjercicios from "./FiltrosEjercicios";
 import GestionMaterial, { type MaterialFila } from "./GestionMaterial";
 import CabeceraAdmin from "../CabeceraAdmin";
 
-export const metadata = { title: "Biblioteca · Administración" };
+export const metadata = { title: "Ejercicios · Administración" };
 
 type Fila = Omit<EjercicioForm, "musculos" | "materiales"> & {
   ejercicio_musculos: { musculo: string; rol: string }[];
@@ -119,7 +119,7 @@ export default async function Ejercicios({
   return (
     <main className={styles.pagina}>
       <CabeceraAdmin>
-        <h1>Biblioteca</h1>
+        <h1>Ejercicios</h1>
         <Link href="/inicio" className={styles.enlaceBarra}>
           ← Volver
         </Link>

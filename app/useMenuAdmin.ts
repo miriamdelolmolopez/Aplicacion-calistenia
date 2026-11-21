@@ -149,7 +149,7 @@ export function useMenuAdmin(): {
       window.removeEventListener("nombres-menu-admin", leerNombres);
     };
   }, []);
-  const porHref = useMemo(() => new Map(OPCIONES_MENU_ADMIN.map((o) => [o.href, { ...o, texto: nombres[o.href] ?? o.texto }])), [nombres]);
+  const porHref = useMemo(() => new Map(OPCIONES_MENU_ADMIN.map((o) => [o.href, { ...o }])), [nombres]);
 
   // Lo que esta administradora tiene excluido no sale en ningún menú.
   const [excluidas, setExcluidas] = useState<string[]>([]);
