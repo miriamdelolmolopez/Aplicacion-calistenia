@@ -17,7 +17,7 @@
   padding: 24px 18px 18px;
   overflow-y: auto;
   background: var(--crema);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   animation: subir 0.25s ease-out;
 }
 
@@ -68,7 +68,7 @@
   padding: 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .cabecera {
@@ -100,7 +100,7 @@
   font-style: normal;
   color: var(--acento-oscuro);
   background: var(--relleno);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .noVino {
@@ -124,7 +124,7 @@
   color: var(--acento-oscuro);
   text-decoration: none;
   background: var(--relleno);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .cruz {
@@ -181,7 +181,7 @@
   padding: 0 18px;
   font: inherit;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
 }
 

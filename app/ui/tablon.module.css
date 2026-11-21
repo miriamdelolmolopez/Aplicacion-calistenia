@@ -3,7 +3,7 @@
   color-scheme: only light;
   margin: 18px 0 8px;
   padding: 16px 14px 18px;
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   /* Un corcho de verdad: color de corcho con puntitos y vetas, y un marco de madera. */
   background-color: #c9995f;
   background-image:
@@ -66,7 +66,7 @@
   display: inline-block;
   margin-bottom: 4px;
   padding: 1px 8px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   color: #f4efe6;
   background: #5a5e3b;
   font-size: 0.7rem;
@@ -115,7 +115,7 @@
 .opcion {
   min-height: 36px;
   padding: 0 12px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   border: 1px solid #5a5e3b;
   background: #ffffff;
   color: #3f4229;
@@ -204,6 +204,6 @@
   margin: 6px 0 0;
   padding: 8px 10px 8px 26px;
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   font-size: 0.9rem;
 }

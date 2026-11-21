@@ -17,7 +17,7 @@
   padding: 28px 24px;
   overflow-y: auto;
   background: var(--crema);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   animation: subir 0.25s ease-out;
 }
 

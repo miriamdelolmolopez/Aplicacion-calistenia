@@ -13,7 +13,7 @@
   text-decoration: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   box-shadow: var(--sombra);
 }
 
@@ -22,7 +22,7 @@
   width: 84px;
   height: 84px;
   background-color: var(--relleno);
-  background-image: linear-gradient(160deg, #c9c5bd, #0aa8c0);
+  background-image: linear-gradient(160deg, #c9c5bd, var(--acento));
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -89,7 +89,7 @@
   font-size: 0.85rem;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .pestanas {
@@ -98,7 +98,7 @@
   margin: 16px 0 12px;
   padding: 4px;
   background: var(--relleno);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .pestanas button {
@@ -110,7 +110,7 @@
   color: var(--carbon);
   background: none;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
 }
 
@@ -126,7 +126,7 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .pasos {
@@ -159,7 +159,7 @@
   height: 10px;
   overflow: hidden;
   background: var(--relleno);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .relleno {
@@ -187,7 +187,7 @@
 
 .heroVacio {
   height: 150px;
-  background: linear-gradient(160deg, #c9c5bd, #0aa8c0);
+  background: linear-gradient(160deg, #c9c5bd, var(--acento));
 }
 
 .atras {
@@ -262,7 +262,7 @@
   color: var(--carbon);
   background: none;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
 }
 
@@ -321,7 +321,7 @@
     top: 24px;
     width: 100%;
     margin: 0;
-    border-radius: 16px;
+    border-radius: var(--radio-l);
   }
 
   .fichaAncha .cuerpo {

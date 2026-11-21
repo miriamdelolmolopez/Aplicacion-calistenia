@@ -15,7 +15,7 @@
   color: var(--oliva-oscuro);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   text-decoration: none;
 }
 
@@ -126,7 +126,7 @@
 
 .novino {
   color: #fff;
-  background: #0e7490;
+  background: var(--acento-oscuro);
   border-color: #3a3a3c;
 }
 
@@ -137,7 +137,7 @@
   margin-top: 8px;
   padding: 12px;
   background: var(--crema);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .reservaFila {
@@ -167,7 +167,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea-fuerte);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   text-decoration: none;
 }
 
@@ -256,7 +256,7 @@
   color: inherit;
   background: transparent;
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   cursor: pointer;
 }
 
@@ -270,7 +270,7 @@
   padding: 6px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
 
@@ -283,7 +283,7 @@
   color: inherit;
   background: transparent;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
 }
 
@@ -304,7 +304,7 @@
   color: inherit;
   background: transparent;
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   cursor: pointer;
 }
 
@@ -316,7 +316,7 @@
   width: 64px;
   height: 64px;
   background: #eeece8;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   opacity: 0.6;
 }
 

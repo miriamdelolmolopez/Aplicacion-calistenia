@@ -151,3 +151,23 @@
   padding-top: 8px;
   border-top: 1px solid var(--linea);
 }
+
+/* Opciones que todavía no existen: visibles pero apagadas, con una etiqueta «Pronto» */
+.pronto {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.pronto:hover {
+  background: transparent;
+}
+
+.etiquetaPronto {
+  margin-left: auto;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--secundario);
+  background: #f1f3f5;
+  border-radius: 999px;
+}

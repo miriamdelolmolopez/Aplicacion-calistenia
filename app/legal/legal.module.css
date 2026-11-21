@@ -19,7 +19,7 @@
 
 .tarjeta {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   padding: 20px 18px;
   line-height: 1.6;
 }

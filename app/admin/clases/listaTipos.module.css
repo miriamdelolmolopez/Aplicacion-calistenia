@@ -14,7 +14,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid rgba(23, 24, 26, 0.14);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .acciones button:hover:not(:disabled) {

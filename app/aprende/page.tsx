@@ -21,7 +21,7 @@ export default function Aprende() {
   ];
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto titulo={t.titulo} />
       <ul className={estilos.opciones}>

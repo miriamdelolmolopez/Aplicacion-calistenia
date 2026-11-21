@@ -20,5 +20,5 @@
   font-weight: 700;
   color: #9a2c2c;
   background: color-mix(in srgb, #d1495b 16%, var(--blanco));
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }

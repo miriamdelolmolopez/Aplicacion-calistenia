@@ -14,7 +14,7 @@
   padding: 28px 24px 20px;
   text-align: center;
   background: var(--crema);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
 }
 
@@ -41,7 +41,7 @@
   color: #fff;
   background: var(--acento);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   cursor: pointer;
 }
 

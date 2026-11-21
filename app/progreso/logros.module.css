@@ -51,7 +51,7 @@
   text-align: center;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   box-shadow: var(--sombra);
 }
 
@@ -70,9 +70,9 @@
   font-size: 1.15rem;
   font-weight: 800;
   color: #ffffff;
-  background: linear-gradient(135deg, #5fd8e8 0%, #0aa8c0 38%, #087f92 62%, #52cfe0 100%);
+  background: linear-gradient(135deg, #5fd8e8 0%, var(--acento) 38%, #087f92 62%, #52cfe0 100%);
   border-radius: 50%;
-  box-shadow: 0 0 0 3px #ffffff, 0 10px 18px -8px rgba(10, 168, 192, 0.7);
+  box-shadow: 0 0 0 3px #ffffff, 0 10px 18px -8px color-mix(in srgb, var(--acento) 70%, transparent);
 }
 
 .bloqueada {
@@ -91,6 +91,6 @@
   padding: 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
 }

@@ -15,7 +15,7 @@
   color: var(--oliva-oscuro);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   text-decoration: none;
 }
 
@@ -36,12 +36,12 @@
   padding: 12px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
 }
 
 .hoy {
   border-color: var(--oliva);
-  box-shadow: 0 0 0 2px rgba(10, 168, 192, 0.25);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acento) 25%, transparent);
 }
 
 .dia h2 {
@@ -147,7 +147,7 @@
   cursor: pointer;
   background: var(--acento);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
   box-shadow: var(--sombra-acento);
 }
 
@@ -171,7 +171,7 @@
   max-width: 100%;
   overflow-x: auto;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
 }
 
@@ -239,7 +239,7 @@
   padding: 8px 8px 10px;
   background: #ffffff;
   border: 2px solid var(--carbon);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .acciones {
@@ -256,7 +256,7 @@
   color: #ffffff;
   cursor: pointer;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .accionEditar {
@@ -279,7 +279,7 @@
   font-weight: 700;
   color: #a1302a;
   background: #fde8e6;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .cifras {
@@ -300,7 +300,7 @@
 .apuntadas {
   padding: 2px 12px;
   background: #e7f6ee;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .confirmar {
@@ -318,7 +318,7 @@
   cursor: pointer;
   background: #ffffff;
   border: 1px solid var(--linea);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .errorClase {
@@ -348,7 +348,7 @@
   padding: 20px;
   overflow-y: auto;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
 }
 

@@ -75,7 +75,7 @@
 
 /* Pestaña elegida: óvalo suave con tu azul, sin efectos */
 .activa .icono {
-  background: rgba(10, 168, 192, 0.14);
+  background: color-mix(in srgb, var(--acento) 14%, transparent);
   color: var(--acento-oscuro);
 }
 
@@ -104,5 +104,37 @@ button.pestana:active:not(:disabled) {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Estilo píldora flotante: solo iconos, más aire y el elegido en un óvalo suave */
+.barra {
+  width: min(360px, calc(100vw - 32px));
+  padding: 6px 8px;
+}
+
+.barra::before {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 28px -10px rgba(26, 32, 44, 0.28);
+}
+
+.pestana {
+  position: relative;
+  padding: 0;
+}
+
+.icono {
+  width: 100%;
+  max-width: 56px;
+  height: 44px;
+  border-radius: 22px;
+}
+
+.texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }

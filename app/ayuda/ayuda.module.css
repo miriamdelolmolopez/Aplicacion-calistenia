@@ -9,7 +9,7 @@
   padding: 4px 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
 }
 
 .pregunta summary {
@@ -30,7 +30,7 @@
   text-align: center;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
 }
 
 .contacto h2 {
@@ -53,7 +53,7 @@
 .carpeta {
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
   overflow: hidden;
 }
@@ -92,7 +92,7 @@
   text-align: center;
   color: var(--acento-oscuro);
   background: color-mix(in srgb, var(--acento) 14%, var(--blanco));
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .flecha {
@@ -115,5 +115,5 @@
 
 .carpetaCuerpo .pregunta {
   background: color-mix(in srgb, var(--acento) 5%, var(--blanco));
-  border-radius: 16px;
+  border-radius: var(--radio-l);
 }

@@ -78,7 +78,7 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
     <ul className={estilos.lista}>
       {enlace({ href: "/inicio", icono: "inicio", texto: nombre("/inicio", "Inicio") })}
       {enlace({ href: "/admin", icono: "admin", texto: nombre("/admin", "Panel") })}
-      {GRUPOS_ADMIN.map((g) => ({ ...g, opciones: sinExcluidas(g.opciones, excluidas).filter((o) => !o.proximamente) }))
+      {GRUPOS_ADMIN.map((g) => ({ ...g, opciones: sinExcluidas(g.opciones, excluidas) }))
         .filter((g) => g.opciones.length > 0)
         .map((g) => {
           const dentro = grupoDeRuta(ruta)?.clave === g.clave;
@@ -107,11 +107,21 @@ export default function MenuEscritorio({ perfil }: { perfil: MiPerfil }) {
       <h2 className={estilos.tituloGrupo}>{grupoAbierto.titulo}</h2>
       <ul className={estilos.lista}>
         {sinExcluidas(grupoAbierto.menu ?? grupoAbierto.opciones, excluidas)
-          .filter((o) => o.href && !o.proximamente)
+          .filter((o) => o.href || o.proximamente)
           .map((o, i, todas) => (
-            <Fragment key={o.href}>
+            <Fragment key={o.href ?? o.texto}>
               {o.sub && o.sub !== todas[i - 1]?.sub && <li className={estilos.subtitulo}>{o.sub}</li>}
-              {enlace({ href: o.href as string, icono: o.icono, texto: nombre(o.href as string, o.texto) })}
+              {o.proximamente || !o.href ? (
+                <li>
+                  <span className={`${estilos.enlace} ${estilos.pronto}`} aria-disabled="true">
+                    <Icono nombre={o.icono} />
+                    <span className={estilos.textoEnlace}>{o.texto}</span>
+                    <small className={estilos.etiquetaPronto}>Pronto</small>
+                  </span>
+                </li>
+              ) : (
+                enlace({ href: o.href, icono: o.icono, texto: nombre(o.href, o.texto) })
+              )}
             </Fragment>
           ))}
       </ul>

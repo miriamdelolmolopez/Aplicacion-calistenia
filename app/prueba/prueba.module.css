@@ -28,6 +28,6 @@
   height: 30px;
   font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(135deg, #5fd8e8, #0aa8c0 45%, #087f92);
+  background: linear-gradient(135deg, #5fd8e8, var(--acento) 45%, #087f92);
   border-radius: 50%;
 }

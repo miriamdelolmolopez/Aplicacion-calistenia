@@ -9,7 +9,7 @@
   color: var(--blanco);
   background-size: cover;
   background-position: center;
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
 }
 
@@ -42,7 +42,7 @@
   padding: 18px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
 }
 
@@ -128,7 +128,7 @@
   text-decoration: none;
   background-size: cover;
   background-position: center;
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
   transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
 }
@@ -153,11 +153,11 @@
 }
 
 .oliva {
-  background: linear-gradient(160deg, #0aa8c0, #0aa8c0);
+  background: linear-gradient(160deg, var(--acento), var(--acento));
 }
 
 .olivaOscuro {
-  background: linear-gradient(160deg, #0aa8c0, #2a2b2f);
+  background: linear-gradient(160deg, var(--acento), #2a2b2f);
 }
 
 .carbon {
@@ -200,7 +200,7 @@
   text-decoration: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
   transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
 }
@@ -239,7 +239,7 @@
   text-decoration: none;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   box-shadow: var(--sombra);
 }
 
@@ -274,7 +274,7 @@
   text-transform: uppercase;
   color: var(--blanco);
   background: rgba(23, 24, 26, 0.55);
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 /* Resumen del negocio (Inicio de la administradora) */
@@ -302,7 +302,7 @@
   color: var(--carbon);
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 16px;
+  border-radius: var(--radio-l);
   box-shadow: var(--sombra);
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.2s;
@@ -352,7 +352,7 @@
   padding: 14px 16px;
   background: var(--blanco);
   border: 1px solid var(--linea);
-  border-radius: 12px;
+  border-radius: var(--radio-m);
   box-shadow: var(--sombra);
 }
 
@@ -494,7 +494,7 @@
   position: absolute;
   inset: 14px auto 14px 0;
   width: 4px;
-  background: var(--tono, #0aa8c0);
+  background: var(--tono, var(--acento));
   border-radius: 0 4px 4px 0;
 }
 
@@ -609,7 +609,7 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  border-radius: 8px;
+  border-radius: var(--radio-s);
 }
 
 .chipRosa {
@@ -745,7 +745,7 @@
 
 .circuloIniciales {
   color: #fff;
-  background: linear-gradient(135deg, #0aa8c0, #6d5efc);
+  background: linear-gradient(135deg, var(--acento), #6d5efc);
 }
 
 .atencionCuenta {
@@ -774,7 +774,7 @@
 }
 
 .cumpleElegido .cumpleAnillo {
-  box-shadow: 0 0 0 3px rgba(10, 168, 192, 0.35);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 35%, transparent);
 }
 
 .cumpleDetalle {
@@ -918,8 +918,8 @@
 
 .periodoActivo {
   color: #fff;
-  background: #0aa8c0;
-  border-color: #0aa8c0;
+  background: var(--acento);
+  border-color: var(--acento);
 }
 
 .fechasFila {
@@ -951,5 +951,92 @@
 @media (min-width: 1024px) {
   .estadCifras {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Cabecera del alumno/a: banda con tu azul, fecha, saludo y campana en un cristal */
+.banda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  margin: calc(var(--esp-4) * -1) calc(var(--esp-5) * -1) var(--esp-4);
+  padding: var(--esp-4) var(--esp-5) var(--esp-6);
+  color: #fff;
+  background: linear-gradient(160deg, var(--acento-oscuro), var(--acento));
+  border-radius: 0 0 var(--radio-l) var(--radio-l);
+}
+
+.bandaArriba {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+.bandaAvatar {
+  display: inline-flex;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+}
+
+.bandaMarca {
+  flex: 1;
+  font-size: var(--letra-m);
+  font-weight: 600;
+  text-align: center;
+}
+
+.cristal {
+  display: inline-flex;
+  padding: 2px 6px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.bandaFecha {
+  margin: 0;
+  font-size: var(--letra-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.bandaSaludo {
+  margin: 0;
+  font-size: var(--letra-l);
+  font-weight: 700;
+  color: #fff;
+}
+
+.bandaFrase {
+  margin: var(--esp-1) 0 0;
+  font-size: var(--letra-s);
+  opacity: 0.9;
+}
+
+/* Inicio del alumno/a en ordenador: más ancho y las tarjetas repartidas en dos columnas */
+@media (min-width: 1024px) {
+  main.paginaAlumno {
+    max-width: 1080px;
+  }
+
+  main.paginaAlumno .banda {
+    margin-inline: 0;
+    border-radius: var(--radio-l);
+  }
+
+  .contenidoAlumno {
+    display: block;
+    column-count: 2;
+    column-gap: var(--esp-4);
+  }
+
+  .contenidoAlumno > * {
+    margin-bottom: var(--esp-4);
+    break-inside: avoid;
   }
 }

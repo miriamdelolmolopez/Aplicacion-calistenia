@@ -48,7 +48,7 @@ export default function MisPagos() {
     new Intl.NumberFormat(idioma === "en" ? "en-GB" : "es-ES", { style: "currency", currency: "EUR" }).format(c / 100);
 
   return (
-    <main className={styles.pagina}>
+    <main className={`${styles.pagina} ${styles.paginaAncha}`}>
       <BarraSuperior izquierda={{ href: "/inicio", texto: "volver" }} />
       <CabeceraFoto titulo={t.navPagos} />
 
