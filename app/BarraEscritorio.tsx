@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import CampanaAvisos from "./ui/CampanaAvisos";
-import { GRUPOS_ADMIN, grupoDeRuta } from "./gruposAdmin";
+import { PESTANAS_AJUSTES, esDePestana, itemDeRuta } from "./gruposAdmin";
 import estilos from "./barraEscritorio.module.css";
 import type { MiPerfil } from "./useMiPerfil";
 
@@ -24,18 +24,25 @@ export default function BarraEscritorio({ perfil }: { perfil: MiPerfil }) {
     return () => observador.disconnect();
   }, [ruta]);
 
-  const grupo = perfil.rol === "admin" ? grupoDeRuta(ruta) : null;
-  const opcion = grupo ? [...GRUPOS_ADMIN.flatMap((g) => [...g.opciones, ...(g.menu ?? [])])].filter((o) => o.href && (ruta === o.href || ruta.startsWith(o.href + "/"))).sort((a, b) => (b.href?.length ?? 0) - (a.href?.length ?? 0))[0] : null;
-  const actual = opcion?.texto ?? (titulo && titulo !== "CalisCoach" ? titulo : ruta === "/inicio" ? "Inicio" : "");
+  const esAdmin = perfil.rol === "admin";
+  const item = esAdmin ? itemDeRuta(ruta) : null;
+  const deAjustes = esAdmin ? PESTANAS_AJUSTES.find((p) => esDePestana(ruta, p)) : null;
+  const grupo = deAjustes ? { texto: "Ajustes", href: "/ajustes" } : item?.pestanas ? { texto: item.texto, href: null as string | null } : null;
+  const pestana = deAjustes ?? item?.pestanas?.find((p) => esDePestana(ruta, p));
+  const actual = pestana?.texto ?? item?.texto ?? (titulo && titulo !== "CalisCoach" ? titulo : ruta === "/inicio" ? "Inicio" : "");
 
   return (
     <header className={estilos.barra}>
       <div className={estilos.donde}>
         {grupo && (
           <>
-            <Link href="/admin" className={estilos.grupo}>
-              {grupo.titulo}
-            </Link>
+            {grupo.href ? (
+              <Link href={grupo.href} className={estilos.grupo}>
+                {grupo.texto}
+              </Link>
+            ) : (
+              <span className={estilos.grupo}>{grupo.texto}</span>
+            )}
             <span className={estilos.separador} aria-hidden="true">
               /
             </span>

@@ -102,7 +102,7 @@ export default async function Horario({ searchParams }: { searchParams: Promise<
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Horarios presenciales</h1>
-        <Link href="/admin/presenciales" className={styles.enlaceBarra}>
+        <Link href="/inicio" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </CabeceraAdmin>

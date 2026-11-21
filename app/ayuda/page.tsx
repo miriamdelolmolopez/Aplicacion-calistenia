@@ -6,7 +6,7 @@ import CabeceraFoto from "../CabeceraFoto";
 import styles from "../formularios.module.css";
 import { useIdioma } from "../useIdioma";
 import Icono from "../Icono";
-import aprende from "../aprende/aprende.module.css";
+import aprende from "../ui/buscador.module.css";
 import estilos from "./ayuda.module.css";
 
 type Pregunta = { s: string; p: string; r: string };

@@ -38,7 +38,7 @@ export default async function PlantillasOnline() {
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Plantillas online</h1>
-        <Link href="/admin/online" className={styles.enlaceBarra}>
+        <Link href="/inicio" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </CabeceraAdmin>

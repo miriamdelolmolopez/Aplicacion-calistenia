@@ -171,3 +171,20 @@
   background: #f1f3f5;
   border-radius: 999px;
 }
+
+/* Menú de un solo nivel con títulos de grupo muy sutiles */
+.grupos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tituloGrupoMenu {
+  margin: 14px 0 4px;
+  padding: 0 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--secundario);
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}

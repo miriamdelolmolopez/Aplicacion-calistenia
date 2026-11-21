@@ -1,103 +1,165 @@
 import type { NombreIcono } from "./Icono";
 
-// Los grupos del panel de administración: se usan en el menú lateral (dos niveles) y en las tarjetas de la pantalla «Panel».
-export type OpcionGrupo = { href?: string; texto: string; descripcion: string; icono: NombreIcono; proximamente?: boolean; sub?: string };
-// «opciones» son las tarjetas de la pantalla Panel; «menu» (si hay) es la lista completa que sale en el menú lateral, con subtítulos.
-export type GrupoAdmin = { clave: string; titulo: string; icono: NombreIcono; opciones: OpcionGrupo[]; menu?: OpcionGrupo[] };
+// El menú de la administradora: un solo nivel en el lateral (con títulos de grupo muy sutiles) y, dentro de cada opción,
+// sus pestañas arriba de la pantalla. Lo que todavía no existe sale apagado con la etiqueta «Pronto».
+export type Pestana = {
+  texto: string;
+  href?: string; // sin «href» = todavía no existe (Pronto)
+  alias?: string[]; // otras direcciones que cuentan como esta pestaña
+  icono?: NombreIcono;
+};
 
-export const GRUPOS_ADMIN: GrupoAdmin[] = [
+export type ItemMenu = {
+  clave: string;
+  texto: string;
+  icono: NombreIcono;
+  href?: string; // dirección propia si no tiene pestañas (Inicio)
+  pestanas?: Pestana[];
+};
+
+export type GrupoMenu = { titulo?: string; items: ItemMenu[] };
+
+export const MENU_ADMIN: GrupoMenu[] = [
   {
-    clave: "personas",
+    items: [{ clave: "inicio", texto: "Inicio", icono: "inicio", href: "/inicio" }],
+  },
+  {
     titulo: "Personas",
-    icono: "usuarios",
-    opciones: [
-      { href: "/admin/usuarios", texto: "Usuarios", descripcion: "Alumnos/as, invitados/as y su ficha", icono: "usuarios" },
-      { href: "/admin/registro", texto: "Registro", descripcion: "Quién puede darse de alta", icono: "perfil" },
-      { href: "/admin/importar", texto: "Importar contactos", descripcion: "Subir una lista de personas", icono: "historial" },
-      { texto: "Leads", descripcion: "Personas que llegan de fuera, con embudo y etiquetas", icono: "embudo", proximamente: true },
-      { texto: "Mensajes", descripcion: "Chats, grupos y difusiones", icono: "sobre", proximamente: true },
-      { texto: "Tareas", descripcion: "Cosas por hacer para ti y tu equipo", icono: "documento", proximamente: true },
-      { texto: "Formularios y check-ins", descripcion: "Cuestionarios y seguimiento periódico", icono: "documento", proximamente: true },
-      { texto: "Hábitos", descripcion: "Hábitos para asignar a las personas", icono: "repetir", proximamente: true },
-      { texto: "Onboarding de clientes", descripcion: "Pasos de bienvenida automáticos", icono: "bandera", proximamente: true },
-      { texto: "Referidos", descripcion: "Enlace de recomendación con descuento", icono: "regalo", proximamente: true },
-      { texto: "Equipo y roles", descripcion: "Invita a más personas y elige sus permisos", icono: "usuarios", proximamente: true },
+    items: [
+      { clave: "leads", texto: "Leads", icono: "embudo" },
+      {
+        clave: "usuarios",
+        texto: "Usuarios",
+        icono: "usuarios",
+        pestanas: [
+          { texto: "Clientes", href: "/admin/usuarios" },
+          { texto: "Invitados", href: "/admin/prueba" },
+          { texto: "Importar contactos", href: "/admin/importar" },
+        ],
+      },
+      { clave: "mensajes", texto: "Mensajes", icono: "sobre" },
+      { clave: "equipo", texto: "Equipo", icono: "usuarios" },
+      { clave: "tareas", texto: "Tareas", icono: "documento" },
+      { clave: "formularios", texto: "Formularios", icono: "documento" },
     ],
   },
   {
-    clave: "servicios",
     titulo: "Servicios",
-    icono: "rutina",
-    opciones: [
-      { href: "/admin/presenciales", texto: "Clases presenciales", descripcion: "Horarios, plantillas y tipos de clase", icono: "historial" },
-      { href: "/admin/reservas", texto: "Reservas", descripcion: "Quién está apuntado a cada clase", icono: "reservas" },
-      { href: "/admin/online", texto: "Entrenamientos online 1:1", descripcion: "Rutinas y seguimiento online", icono: "rutina" },
-      { href: "/admin/talleres", texto: "Talleres", descripcion: "Talleres y eventos puntuales", icono: "historial" },
-      { href: "/admin/academia", texto: "Cursos", descripcion: "Cursos para ver en la app", icono: "academia" },
-      { texto: "Nutrición", descripcion: "Alimentos, planes de comidas y recetas", icono: "paquete", proximamente: true },
-      { texto: "Comunidad", descripcion: "Publicaciones, temas y miembros", icono: "tablon", proximamente: true },
-      { texto: "Retos", descripcion: "Retos con ranking o por hitos", icono: "bandera", proximamente: true },
-      { texto: "Membresías", descripcion: "Acceso a contenido por suscripción", icono: "ticket", proximamente: true },
-      { texto: "Packs y ofertas", descripcion: "Packs de varios productos y cobro recurrente", icono: "paquete", proximamente: true },
-    ],
-    menu: [
-      { href: "/admin/reservas", texto: "Reservar clases", descripcion: "", icono: "reservas", sub: "Clases presenciales" },
-      { href: "/admin/horario", texto: "Horarios presenciales", descripcion: "", icono: "historial", sub: "Clases presenciales" },
-      { href: "/admin/horarios", texto: "Plantillas presenciales", descripcion: "", icono: "historial", sub: "Clases presenciales" },
-      { href: "/admin/clases", texto: "Tipos de clase", descripcion: "", icono: "historial", sub: "Clases presenciales" },
-      { href: "/admin/prueba", texto: "Link de prueba gratuita", descripcion: "", icono: "usuarios", sub: "Clases presenciales" },
-      { href: "/admin/ejercicios", texto: "Biblioteca", descripcion: "", icono: "biblioteca", sub: "Entrenamientos online 1:1" },
-      { href: "/admin/rutinas", texto: "Rutinas", descripcion: "", icono: "rutina", sub: "Entrenamientos online 1:1" },
-      { href: "/admin/plantillas-online", texto: "Plantillas online", descripcion: "", icono: "rutina", sub: "Entrenamientos online 1:1" },
-      { href: "/admin/talleres", texto: "Talleres", descripcion: "", icono: "historial", sub: "Otros servicios" },
-      { href: "/admin/academia", texto: "Cursos", descripcion: "", icono: "academia", sub: "Otros servicios" },
-      { texto: "Nutrición", descripcion: "", icono: "paquete", proximamente: true, sub: "Próximamente" },
-      { texto: "Comunidad", descripcion: "", icono: "tablon", proximamente: true, sub: "Próximamente" },
-      { texto: "Retos", descripcion: "", icono: "bandera", proximamente: true, sub: "Próximamente" },
-      { texto: "Membresías", descripcion: "", icono: "ticket", proximamente: true, sub: "Próximamente" },
-      { texto: "Packs y ofertas", descripcion: "", icono: "paquete", proximamente: true, sub: "Próximamente" },
-    ],
-  },
-  {
-    clave: "economia",
-    titulo: "Economía",
-    icono: "pagos",
-    opciones: [
-      { href: "/admin/bonos", texto: "Pagos", descripcion: "Cobros, bonos y pendientes", icono: "pagos" },
-      { href: "/admin/tarifas", texto: "Servicios", descripcion: "Tarifas y precios", icono: "pagos" },
-      { href: "/admin/descuentos", texto: "Descuentos", descripcion: "Códigos y ofertas", icono: "pagos" },
-      { href: "/admin/formas-pago", texto: "Formas de pago", descripcion: "Efectivo, Bizum, tarjeta…", icono: "pagos" },
-      { texto: "Contabilidad", descripcion: "Ingresos, gastos y acceso para tu gestor", icono: "metricas", proximamente: true },
-      { texto: "Planes y facturas", descripcion: "Tu plan, sus precios y tus facturas", icono: "documento", proximamente: true },
-      { texto: "Tienda y marcas", descripcion: "Merchandising y productos de marcas", icono: "maletin", proximamente: true },
+    items: [
+      {
+        clave: "reservas",
+        texto: "Reservas",
+        icono: "reservas",
+        pestanas: [
+          { texto: "Horarios", href: "/admin/horario" },
+          { texto: "Plantillas de horarios", href: "/admin/horarios" },
+          { texto: "Reservas", href: "/admin/reservas" },
+          { texto: "Tipos de entrenamiento", href: "/admin/clases" },
+        ],
+      },
+      {
+        clave: "entrenamiento",
+        texto: "Entrenamiento",
+        icono: "rutina",
+        pestanas: [
+          { texto: "Ejercicios", href: "/admin/ejercicios" },
+          { texto: "Rutinas", href: "/admin/rutinas" },
+          { texto: "Plantillas de rutinas", href: "/admin/plantillas-online" },
+          { texto: "Workouts" },
+          { texto: "Colección de workouts" },
+        ],
+      },
+      { clave: "nutricion", texto: "Nutrición", icono: "paquete" },
+      { clave: "comunidad", texto: "Comunidad", icono: "tablon" },
+      { clave: "retos", texto: "Retos", icono: "bandera" },
+      { clave: "academia", texto: "Academia", icono: "academia" },
     ],
   },
   {
-    clave: "resumen",
-    titulo: "Resumen y contenido",
-    icono: "metricas",
-    opciones: [
-      { href: "/admin/informes", texto: "Informes", descripcion: "Cifras y estadísticas", icono: "metricas" },
-      { href: "/admin/aprende", texto: "Aprende", descripcion: "Contenido y exámenes", icono: "aprende" },
-      { href: "/admin/tablon", texto: "Tablón de anuncios", descripcion: "Avisos para todas las personas", icono: "tablon" },
-      { href: "/admin/contenido", texto: "Frases", descripcion: "Frases que salen en el Inicio", icono: "admin" },
-      { href: "/admin/automatizaciones", texto: "Automatizaciones", descripcion: "Correos y avisos automáticos", icono: "admin" },
-      { href: "/admin/legal", texto: "Textos legales", descripcion: "Privacidad, términos y consentimientos", icono: "admin" },
-      { href: "/admin/exportar", texto: "Descargar datos (CSV)", descripcion: "Copia de tus datos", icono: "metricas" },
-      { texto: "Asistente de IA", descripcion: "Ayuda para crear entrenos, recetas y textos", icono: "globo", proximamente: true },
-      { texto: "Integraciones", descripcion: "Conexión con otras aplicaciones y claves de API", icono: "externo", proximamente: true },
+    titulo: "Dinero",
+    items: [
+      {
+        clave: "packs",
+        texto: "Packs",
+        icono: "paquete",
+        pestanas: [
+          { texto: "Tarifas", href: "/admin/tarifas" },
+          { texto: "Descuentos", href: "/admin/descuentos" },
+          { texto: "Packs" },
+          { texto: "Membresías" },
+          { texto: "Ofertas" },
+        ],
+      },
+      {
+        clave: "pagos",
+        texto: "Pagos",
+        icono: "pagos",
+        pestanas: [
+          { texto: "Pagos", href: "/admin/bonos" },
+          { texto: "Formas de pago", href: "/admin/formas-pago" },
+        ],
+      },
+      { clave: "contabilidad", texto: "Contabilidad", icono: "metricas" },
+    ],
+  },
+  {
+    titulo: "Negocio",
+    items: [
+      {
+        clave: "informes",
+        texto: "Informes",
+        icono: "metricas",
+        pestanas: [
+          { texto: "Informes", href: "/admin/informes" },
+          { texto: "Descargar datos (CSV)", href: "/admin/exportar" },
+        ],
+      },
+      {
+        clave: "automatizaciones",
+        texto: "Automatizaciones",
+        icono: "admin",
+        pestanas: [{ texto: "Automatizaciones", href: "/admin/automatizaciones" }, { texto: "Onboarding de alumnos/as" }],
+      },
+      { clave: "recursos", texto: "Recursos", icono: "biblioteca" },
     ],
   },
 ];
 
-// Grupo al que pertenece una dirección (para abrir el menú lateral en su sitio). null si no es de ningún grupo.
-export function grupoDeRuta(ruta: string): GrupoAdmin | null {
-  let mejor: { g: GrupoAdmin; largo: number } | null = null;
-  for (const g of GRUPOS_ADMIN) {
-    for (const o of [...g.opciones, ...(g.menu ?? [])]) {
-      if (!o.href) continue;
-      if ((ruta === o.href || ruta.startsWith(o.href + "/")) && (!mejor || o.href.length > mejor.largo)) mejor = { g, largo: o.href.length };
+// Las pestañas de Ajustes (se abren desde el menú de tu foto). «alias» = otras pantallas que cuentan como esa pestaña.
+export const PESTANAS_AJUSTES: Pestana[] = [
+  { texto: "Perfil", href: "/perfil", icono: "perfil", alias: ["/ajustes", "/ajustes/privacidad", "/ajustes/textos-legales"] },
+  { texto: "Branding", icono: "paleta" },
+  { texto: "Integraciones", icono: "externo" },
+  { texto: "Notificaciones", href: "/ajustes/notificaciones", icono: "campana" },
+  { texto: "API", icono: "candado" },
+  { texto: "MCP", icono: "globo" },
+  { texto: "Frases", href: "/admin/contenido", icono: "admin" },
+  { texto: "Textos legales", href: "/admin/legal", icono: "documento" },
+  { texto: "Registro", href: "/admin/registro", icono: "usuarios" },
+  { texto: "Menú", href: "/ajustes/barra-lateral", icono: "ajustes", alias: ["/ajustes/barra-inferior"] },
+  { texto: "Eliminar cuenta", icono: "salir" },
+];
+
+const coincide = (ruta: string, href: string) => ruta === href || ruta.startsWith(href + "/");
+
+export function esDePestana(ruta: string, p: Pestana): boolean {
+  return [p.href, ...(p.alias ?? [])].some((h) => !!h && coincide(ruta, h));
+}
+
+// Primera dirección real de una opción del menú (a donde lleva al pulsarla).
+export function destinoDe(i: ItemMenu): string | null {
+  return i.href ?? i.pestanas?.find((p) => p.href)?.href ?? null;
+}
+
+// La opción del menú a la que pertenece una dirección (la coincidencia más larga gana, así «/admin/horarios» no se confunde con «/admin/horario»).
+export function itemDeRuta(ruta: string): ItemMenu | null {
+  let mejor: { i: ItemMenu; largo: number } | null = null;
+  for (const g of MENU_ADMIN) {
+    for (const i of g.items) {
+      for (const h of [i.href, ...(i.pestanas ?? []).flatMap((p) => [p.href, ...(p.alias ?? [])])]) {
+        if (h && coincide(ruta, h) && (!mejor || h.length > mejor.largo)) mejor = { i, largo: h.length };
+      }
     }
   }
-  return mejor?.g ?? null;
+  return mejor?.i ?? null;
 }

@@ -20,8 +20,6 @@ export const CLAVE_TEXTO: Record<Seccion, ClaveTexto> = {
   biblioteca: "navBiblioteca",
   progreso: "miProgreso",
   pagos: "navPagos",
-  academia: "navAcademia",
-  aprende: "navAprende",
   tablon: "navTablon",
   ayuda: "navAyuda",
   perfil: "navCuenta",

@@ -120,7 +120,7 @@ export default async function Ejercicios({
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Biblioteca</h1>
-        <Link href="/admin/online" className={styles.enlaceBarra}>
+        <Link href="/inicio" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </CabeceraAdmin>

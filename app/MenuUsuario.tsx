@@ -1,7 +1,8 @@
 "use client";
 
 import Icono from "./Icono";
-import { IconoDe } from "./Icono";
+import ElegirAlumno from "./admin/ver/ElegirAlumno";
+import { empezarVerComo } from "./admin/VerComoAlumno";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -12,7 +13,7 @@ import { IDIOMAS, type Idioma } from "./textos";
 import { useIdioma } from "./useIdioma";
 import { olvidarVistaAlumna, useMiPerfil } from "./useMiPerfil";
 import { createClient } from "@/lib/supabase/client";
-import { useTema, type Tema } from "./useTema";
+import { useTema } from "./useTema";
 
 // Pantallas donde no se muestra (el entreno ocupa toda la pantalla y la vista de imprimir va sin adornos).
 const SIN_MENU = ["/entreno"];
@@ -27,6 +28,7 @@ export default function MenuUsuario() {
   const [tema, cambiarTema] = useTema();
   const [foto, setFoto] = useState<string | null>(null);
   const [abierto, setAbierto] = useState(false);
+  const [eligiendo, setEligiendo] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
 
   const conSesion = typeof perfil === "object" && perfil !== null ? perfil : null;
@@ -60,6 +62,7 @@ export default function MenuUsuario() {
   if (!conSesion || SIN_MENU.some((p) => ruta === p || ruta.startsWith(p + "/")) || ruta.endsWith("/imprimir")) return null;
 
   const en = idioma === "en";
+  const esAdmin = conSesion.rolReal === "admin";
 
   async function salir() {
     setAbierto(false);
@@ -67,11 +70,6 @@ export default function MenuUsuario() {
     await createClient().auth.signOut();
     router.push("/");
   }
-
-  const temas: { valor: Tema; texto: string; icono: string }[] = [
-    { valor: "claro", texto: en ? "Light" : "Claro", icono: "sol" },
-    { valor: "oscuro", texto: en ? "Dark" : "Oscuro", icono: "luna" },
-  ];
 
   return (
     <div className={estilos.contenedor} ref={caja}>
@@ -82,9 +80,26 @@ export default function MenuUsuario() {
         <div className={estilos.menu} role="menu">
           <div className={estilos.nombre}>{conSesion.nombre}</div>
 
-          <Link href="/perfil" className={estilos.opcion} role="menuitem" onClick={() => setAbierto(false)}>
-            <span><Icono nombre="perfil" tamano={16} /> {en ? "View profile" : "Ver perfil"}</span>
-          </Link>
+          {esAdmin ? (
+            <>
+              <span className={`${estilos.opcion} ${estilos.pronto}`} role="menuitem" aria-disabled="true">
+                <span><Icono nombre="documento" tamano={16} /> {en ? "Billing and plans" : "Facturación y planes"}</span>
+                <small className={estilos.etiqueta}>Pronto</small>
+              </span>
+              <span className={`${estilos.opcion} ${estilos.pronto}`} role="menuitem" aria-disabled="true">
+                <span><Icono nombre="regalo" tamano={16} /> {en ? "Refer and earn" : "Recomienda y gana"}</span>
+                <small className={estilos.etiqueta}>Pronto</small>
+              </span>
+              <span className={`${estilos.opcion} ${estilos.pronto}`} role="menuitem" aria-disabled="true">
+                <span><Icono nombre="externo" tamano={16} /> {en ? "Download the app" : "Descargar la app"}</span>
+                <small className={estilos.etiqueta}>Pronto</small>
+              </span>
+            </>
+          ) : (
+            <Link href="/perfil" className={estilos.opcion} role="menuitem" onClick={() => setAbierto(false)}>
+              <span><Icono nombre="perfil" tamano={16} /> {en ? "View profile" : "Ver perfil"}</span>
+            </Link>
+          )}
 
           <div className={estilos.titulo}><Icono nombre="globo" tamano={16} /> {en ? "Language" : "Idioma"}</div>
           {IDIOMAS.map((i) => (
@@ -103,28 +118,29 @@ export default function MenuUsuario() {
             </button>
           ))}
 
-          <div className={estilos.titulo}><Icono nombre="paleta" tamano={16} /> {en ? "Theme" : "Tema"}</div>
-          {temas.map((t) => (
-            <button
-              key={t.valor}
-              type="button"
-              role="menuitemradio"
-              aria-checked={tema === t.valor}
-              className={`${estilos.opcion} ${tema === t.valor ? estilos.activa : ""}`}
-              onClick={() => cambiarTema(t.valor)}
-            >
-              <span>
-                <IconoDe nombre={t.icono} tamano={16} /> {t.texto}
-              </span>
-              {tema === t.valor && <span className={estilos.marca}>✓</span>}
-            </button>
-          ))}
+          <button type="button" role="menuitem" className={estilos.opcion} onClick={() => cambiarTema(tema === "oscuro" ? "claro" : "oscuro")}>
+            <span>
+              <span aria-hidden="true">{tema === "oscuro" ? "🌙" : "☀️"}</span> {tema === "oscuro" ? (en ? "Dark theme" : "Tema oscuro") : (en ? "Light theme" : "Tema claro")}
+            </span>
+          </button>
+
+          {esAdmin && (
+            <>
+              <Link href="/ajustes" className={estilos.opcion} role="menuitem" onClick={() => setAbierto(false)}>
+                <span><Icono nombre="ajustes" tamano={16} /> {en ? "Settings" : "Ajustes"}</span>
+              </Link>
+              <button type="button" role="menuitem" className={estilos.opcion} onClick={() => { setAbierto(false); setEligiendo(true); }}>
+                <span><Icono nombre="ojo" tamano={16} /> {en ? "View as a student" : "Ver como alumno/a"}</span>
+              </button>
+            </>
+          )}
 
           <button type="button" role="menuitem" className={`${estilos.opcion} ${estilos.salir}`} onClick={salir}>
-            <span><Icono nombre="salir" tamano={16} /> {en ? "Log out" : "Salir"}</span>
+            <span><Icono nombre="salir" tamano={16} /> {en ? "Log out" : "Cerrar sesión"}</span>
           </button>
         </div>
       )}
+      {esAdmin && <ElegirAlumno abierto={eligiendo} alCerrar={() => setEligiendo(false)} alElegir={empezarVerComo} />}
     </div>
   );
 }

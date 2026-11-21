@@ -72,7 +72,7 @@ export default async function Rutinas() {
     <main className={styles.pagina}>
       <CabeceraAdmin>
         <h1>Rutinas</h1>
-        <Link href="/admin/online" className={styles.enlaceBarra}>
+        <Link href="/inicio" className={styles.enlaceBarra}>
           ← Volver
         </Link>
       </CabeceraAdmin>

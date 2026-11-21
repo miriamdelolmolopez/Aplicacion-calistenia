@@ -23,8 +23,6 @@ import EditarDatos from "./EditarDatos";
 import CorreosPersona from "./CorreosPersona";
 import EditorPersona from "../../EditorPersona";
 import AccesosUsuario from "./AccesosUsuario";
-import HistorialExamen, { type Intento } from "../../../aprende/examen/HistorialExamen";
-import { textosAprende } from "../../../aprende/textosAprende";
 import TarifaAsistentes, { type BonoAsistente, type TarifaOpcion } from "./TarifaAsistentes";
 import Notas from "./Notas";
 import HistorialReservas from "./HistorialReservas";
@@ -134,7 +132,7 @@ export default async function FichaUsuario({
     : null;
 
   // Todo lo que no depende de otra consulta se pide a la vez.
-  const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: intentosDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
+  const [METODOS, { data: p }, , { data: usuarioAuth }, { data: asistenciaDatos }, { data: nota }, { data: avisosPersona }, { data: aceptacionesDatos }, { data: todasDatos }, { data: tarifasDatos }, { data: futurasDatos }] = await Promise.all([
     nombresFormas(),
     supabase
       .from("profiles")
@@ -151,7 +149,6 @@ export default async function FichaUsuario({
     admin.from("profiles").select("avisos_reserva, avisos_recordatorio, avisos_bono, avisos_novedades, avisar_cumple, avisos_cancelacion, avisos_bono_clases, avisos_inactividad, avisos_cumpleanos").eq("id", id).maybeSingle(),
     // Cuántos textos legales ha aceptado (el listado completo está en su propia pantalla).
     admin.from("consentimientos").select("tipo, version, aceptado_en").eq("user_id", id).order("aceptado_en", { ascending: false }),
-    supabase.from("intentos_examen").select("id, aciertos, total, creado_en").eq("user_id", id).order("creado_en", { ascending: false }).limit(50),
     // Todas sus reservas, para el calendario (cada clase con el color de su tipo).
     admin
       .from("reservas")
@@ -186,8 +183,6 @@ export default async function FichaUsuario({
   const motivoDe = new Map((altasSueltos ?? []).map((m) => [m.bono_id as string, String(m.nota ?? "").replace(/^Regalo([ ]*[:·][ ]*|$)/, "").trim()]));
 
   const aceptaciones = (aceptacionesDatos ?? []) as { tipo: string; version: string; aceptado_en: string }[];
-
-  const intentos = (intentosDatos ?? []) as Intento[];
 
   const eventos: EventoCalendario[] = ((todasDatos ?? []) as unknown as ReservaCalendario[])
     .filter((r) => r.sesiones_clase)
@@ -588,10 +583,6 @@ export default async function FichaUsuario({
             <Medidas userId={p.id} soloLectura />
           </section>
 
-          <section className={styles.tarjeta}>
-            <h2>Tests de Aprende</h2>
-            <HistorialExamen intentos={intentos} t={{ ...textosAprende.es, sinIntentos: "Todavía no ha hecho ningún examen." }} idioma="es" />
-          </section>
           </>
           )}
 

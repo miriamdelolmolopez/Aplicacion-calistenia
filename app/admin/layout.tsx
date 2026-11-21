@@ -1,5 +1,6 @@
 import { seccionesExcluidas } from "@/lib/admin";
 import { obtenerNombresAdmin } from "@/lib/nombresAdmin";
+import PestanasPagina from "../PestanasPagina";
 import GuardaSecciones from "./GuardaSecciones";
 import { ProveedorNombres } from "./NombresAdmin";
 
@@ -10,7 +11,10 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   const nombres = await obtenerNombresAdmin();
   return (
     <ProveedorNombres nombres={nombres}>
-      <GuardaSecciones excluidas={excluidas}>{children}</GuardaSecciones>
+      <GuardaSecciones excluidas={excluidas}>
+        <PestanasPagina excluidas={excluidas} />
+        {children}
+      </GuardaSecciones>
     </ProveedorNombres>
   );
 }

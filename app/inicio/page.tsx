@@ -386,8 +386,6 @@ export default function Inicio() {
           <Seccion icono="biblioteca" titulo={idioma === "en" ? "Resources" : "Recursos"}>
             <Accesos
               items={[
-                { href: "/aprende", icono: "aprende", texto: idioma === "en" ? "Learn" : "Aprende" },
-                { href: "/academia", icono: "academia", texto: idioma === "en" ? "Courses" : "Cursos" },
                 { href: "/tablon", icono: "tablon", texto: idioma === "en" ? "Notice board" : "Tablón" },
                 { href: "/pagos", icono: "pagos", texto: idioma === "en" ? "My payments" : "Mis pagos" },
                 { href: "/ayuda", icono: "ayuda", texto: idioma === "en" ? "Help" : "Ayuda" },

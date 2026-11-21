@@ -32,8 +32,6 @@ export default function Galeria() {
       <Seccion icono="biblioteca" titulo="Recursos">
         <Accesos
           items={[
-            { href: "#", icono: "aprende", texto: "Aprende" },
-            { href: "#", icono: "academia", texto: "Cursos" },
             { href: "#", icono: "tablon", texto: "Tablón" },
             { href: "#", icono: "pagos", texto: "Mis pagos" },
             { href: "#", icono: "ayuda", texto: "Ayuda" },

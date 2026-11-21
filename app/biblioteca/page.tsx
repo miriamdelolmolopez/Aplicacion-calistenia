@@ -7,7 +7,7 @@ import BarraSuperior from "../BarraSuperior";
 import Cargando from "../Cargando";
 import styles from "../formularios.module.css";
 import Icono from "../Icono";
-import aprende from "../aprende/aprende.module.css";
+import aprende from "../ui/buscador.module.css";
 import { useIdioma } from "../useIdioma";
 import estilos from "./biblioteca.module.css";
 import Medidor from "./Medidor";

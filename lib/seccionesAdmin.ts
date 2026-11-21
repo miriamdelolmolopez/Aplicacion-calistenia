@@ -6,8 +6,6 @@ export const SECCIONES_ADMIN: { clave: string; texto: string }[] = [
   { clave: "presenciales", texto: "Clases presenciales (horarios, plantillas, tipos de clase)" },
   { clave: "reservas", texto: "Reservas" },
   { clave: "online", texto: "Entrenamientos online 1:1" },
-  { clave: "talleres", texto: "Talleres" },
-  { clave: "academia", texto: "Cursos" },
   { clave: "pagos", texto: "Pagos" },
   { clave: "tarifas", texto: "Servicios (tarifas)" },
   { clave: "descuentos", texto: "Descuentos" },
@@ -16,7 +14,6 @@ export const SECCIONES_ADMIN: { clave: string; texto: string }[] = [
   { clave: "legal", texto: "Textos legales" },
   { clave: "automatizaciones", texto: "Automatizaciones" },
   { clave: "contenido", texto: "Frases" },
-  { clave: "aprende", texto: "Aprende" },
   { clave: "exportar", texto: "Descargar datos (CSV)" },
 ];
 
@@ -37,8 +34,6 @@ const PREFIJOS: [string, string][] = [
   ["/admin/rutinas", "online"],
   ["/admin/plantillas-online", "online"],
   ["/admin/ejercicios", "online"],
-  ["/admin/talleres", "talleres"],
-  ["/admin/academia", "academia"],
   ["/admin/bonos", "pagos"],
   ["/admin/tarifas", "tarifas"],
   ["/admin/descuentos", "descuentos"],
@@ -47,7 +42,6 @@ const PREFIJOS: [string, string][] = [
   ["/admin/legal", "legal"],
   ["/admin/automatizaciones", "automatizaciones"],
   ["/admin/contenido", "contenido"],
-  ["/admin/aprende", "aprende"],
   ["/admin/exportar", "exportar"],
 ];
 
