@@ -34,18 +34,19 @@
 
 .nuevo {
   display: inline-flex;
-  flex: none;
   align-items: center;
+  flex: none;
   gap: 6px;
-  padding: 11px 18px;
+  min-height: 34px;
+  padding: 0 14px;
   font: inherit;
-  font-weight: 600;
+  font-size: var(--letra-s);
+  font-weight: 500;
   color: #ffffff;
   cursor: pointer;
   background: var(--acento);
   border: 0;
   border-radius: var(--radio-s);
-  box-shadow: var(--sombra-acento);
 }
 
 .nuevo b {

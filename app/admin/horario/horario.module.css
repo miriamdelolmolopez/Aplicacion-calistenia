@@ -136,19 +136,20 @@
 
 /* Horario semanal por horas, al estilo de un horario de box */
 .anadir {
-  display: block;
-  width: 100%;
-  padding: 16px 20px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
   margin: 0 0 14px;
+  min-height: 34px;
+  padding: 0 14px;
   font: inherit;
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: var(--letra-s);
+  font-weight: 500;
   color: #ffffff;
   cursor: pointer;
   background: var(--acento);
   border: 0;
   border-radius: var(--radio-s);
-  box-shadow: var(--sombra-acento);
 }
 
 .leyenda {

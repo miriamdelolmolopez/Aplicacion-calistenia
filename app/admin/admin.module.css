@@ -1000,3 +1000,14 @@ a.opcion:hover {
     padding: 16px 20px 48px;
   }
 }
+
+/* Ordenador: los botones miden lo que necesita su texto, no todo el ancho de la caja */
+@media (min-width: 1024px) {
+  :global(body.con-barra) .boton,
+  :global(body.con-barra) .botonSecundario,
+  :global(body.con-barra) .botonSuave,
+  :global(body.con-barra) .botonOscuro,
+  :global(body.con-barra) .botonPeligro {
+    width: fit-content;
+  }
+}
