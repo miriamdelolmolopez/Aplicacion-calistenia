@@ -174,7 +174,7 @@ export default function ListaUsuarios({ usuarios }: { usuarios: Usuario[] }) {
           buscador={
             <div className={styles.campo}>
               <label htmlFor="buscar">Buscar por nombre o correo</label>
-              <input id="buscar" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+              <input id="buscar" placeholder="Buscar por nombre o correo" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
             </div>
           }
         >

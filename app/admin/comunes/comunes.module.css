@@ -12,17 +12,21 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 0 14px;
+  min-height: 34px;
+  padding: 0 12px;
+  color: var(--secundario);
   background: #ffffff;
-  border: 1px solid rgba(23, 24, 26, 0.12);
+  border: 1px solid var(--linea-fuerte);
   border-radius: var(--radio-s);
 }
 
 .buscar input {
   flex: 1;
   min-width: 0;
-  padding: 12px 0;
+  padding: 6px 0;
   font: inherit;
+  font-size: var(--letra-s);
+  color: var(--carbon);
   background: none;
   border: 0;
   outline: none;

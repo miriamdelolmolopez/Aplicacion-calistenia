@@ -293,8 +293,20 @@
   }
 }
 
-/* «Volver»: solo una flechita a la izquierda del título, discreta */
+/* Enlace de texto normal (fuera de la cabecera) */
 .enlaceBarra {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  color: var(--acento-oscuro);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+
+/* «Volver»: solo una flechita a la izquierda del título, discreta */
+.barra .enlaceBarra {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -309,14 +321,14 @@
   border-radius: var(--radio-s);
 }
 
-.enlaceBarra::before {
+.barra .enlaceBarra::before {
   content: "‹";
   font-size: 1.7rem;
   line-height: 1;
   transform: translateY(-1px);
 }
 
-.enlaceBarra:hover {
+.barra .enlaceBarra:hover {
   color: var(--carbon);
   background: #f1f2f4;
 }
@@ -334,4 +346,39 @@
   background: #fafafa;
   border-bottom: 1px solid var(--linea);
   border-radius: var(--radio) var(--radio) 0 0;
+}
+
+/* Botones con distinta prioridad: .boton (color, el principal), .botonSecundario (contorno), .botonSuave (gris), .botonOscuro, .botonPeligro y .botonPildora */
+.botonSuave {
+  color: var(--carbon);
+  background: #f1f2f4;
+  border: 1px solid transparent;
+}
+
+.botonSuave:hover:not(:disabled) {
+  background: #e6e8eb;
+}
+
+.botonOscuro {
+  color: #ffffff;
+  background: #16181d;
+  border: 1px solid #16181d;
+}
+
+.botonOscuro:hover:not(:disabled) {
+  background: #2b2f38;
+}
+
+.botonPeligro {
+  color: #ffffff;
+  background: #e5484d;
+  border: 1px solid transparent;
+}
+
+.botonPeligro:hover:not(:disabled) {
+  background: #cf3a3f;
+}
+
+.botonPildora {
+  border-radius: 999px;
 }

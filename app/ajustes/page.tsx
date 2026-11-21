@@ -1,117 +1,34 @@
 "use client";
 
-import Icono from "../Icono";
-import Link from "next/link";
-import { useState } from "react";
 import BarraSuperior from "../BarraSuperior";
-import CabeceraFoto from "../CabeceraFoto";
-import styles from "../formularios.module.css";
-import { pedirBorradoCuenta } from "../perfil/acciones";
-import estilos from "../perfil/perfil.module.css";
+import Cargando from "../Cargando";
 import { textos } from "../textos";
-import { IDIOMAS, type Idioma } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { useMiPerfil } from "../useMiPerfil";
-import { usePreferencias } from "./usePreferencias";
-import Cargando from "../Cargando";
 import PerfilAjustes from "./PerfilAjustes";
 
+// Ajustes: una sola pantalla con tarjetas. La administradora la ve como la pestaña «Perfil» (con las demás pestañas arriba);
+// el alumno/a la ve con su perfil, notificaciones, privacidad y la opción de pedir el borrado de su cuenta.
 export default function Ajustes() {
-  const [idioma, cambiarIdioma] = useIdioma();
+  const [idioma] = useIdioma();
   const t = textos[idioma];
   const mi = useMiPerfil();
-  const { pref, setPref } = usePreferencias();
-  const [confirmando, setConfirmando] = useState(false);
-  const [error, setError] = useState(false);
 
-  if (typeof mi === "object" && mi !== null && mi.rolReal === "admin") return <PerfilAjustes />;
-
-  if (!pref) {
+  if (typeof mi !== "object" || mi === null) {
     return (
-      <main className={styles.pagina}>
-        <BarraSuperior izquierda={{ href: "/perfil", texto: "volver" }} />
+      <main style={{ padding: 20 }}>
         <Cargando />
       </main>
     );
   }
 
-  async function pedirBorrado() {
-    setError(false);
-    const r = await pedirBorradoCuenta();
-    setConfirmando(false);
-    if (!r.ok) return setError(true);
-    setPref((p) => (p ? { ...p, borradoPedido: true } : p));
-  }
+  if (mi.rolReal === "admin") return <PerfilAjustes />;
 
   return (
-    <main className={styles.pagina}>
+    <main style={{ width: "100%", maxWidth: 680, margin: "0 auto", padding: "16px 16px 0" }}>
       <BarraSuperior izquierda={{ href: "/perfil", texto: "volver" }} />
-      <CabeceraFoto titulo={t.ajustesTitulo} />
-
-      <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-        <h2>{t.idioma}</h2>
-        <select value={idioma} onChange={(e) => cambiarIdioma(e.target.value as Idioma)}>
-          {IDIOMAS.map((i) => (
-            <option key={i.codigo} value={i.codigo}>
-              {i.nombre}
-            </option>
-          ))}
-        </select>
-      </section>
-
-
-      <nav className={estilos.lista} style={{ marginBottom: 12 }}>
-        <Link href="/ajustes/notificaciones" className={estilos.fila}>
-          <Icono nombre="campana" tamano={16} />
-          <span className={estilos.filaTexto}>{idioma === "en" ? "Notifications" : "Notificaciones"}</span>
-          <span aria-hidden="true">›</span>
-        </Link>
-        <Link href="/ajustes/privacidad" className={estilos.fila}>
-          <Icono nombre="candado" tamano={16} />
-          <span className={estilos.filaTexto}>{t.privacidadTitulo}</span>
-          <span aria-hidden="true">›</span>
-        </Link>
-        <Link href="/ajustes/textos-legales" className={estilos.fila}>
-          <Icono nombre="documento" tamano={16} />
-          <span className={estilos.filaTexto}>{idioma === "en" ? "My legal texts" : "Mis textos legales"}</span>
-          <span aria-hidden="true">›</span>
-        </Link>
-      </nav>
-
-      <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-        <h2>{t.borrarCuentaTitulo}</h2>
-        <p className={styles.ayuda}>{t.borrarCuentaTexto}</p>
-        {pref.borradoPedido ? (
-          <p className={styles.aviso}>{t.borradoPendiente}</p>
-        ) : confirmando ? (
-          <>
-            <p className={styles.error}>{t.confirmarBorrado}</p>
-            <button type="button" className={styles.boton} onClick={pedirBorrado}>
-              {t.pedirBorrado}
-            </button>
-            <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(false)}>
-              {t.noDescartar}
-            </button>
-          </>
-        ) : (
-          <button type="button" className={styles.botonSecundario} onClick={() => setConfirmando(true)}>
-            {t.pedirBorrado}
-          </button>
-        )}
-        {error && <p className={styles.error}>{t.errorGeneral}</p>}
-      </section>
-      <section className={`${styles.tarjeta} ${estilos.seccion}`}>
-        <h2>{idioma === "en" ? "Legal" : "Textos legales"}</h2>
-        <p className={styles.ayuda} style={{ display: "flex", flexWrap: "wrap", gap: "0 14px" }}>
-          <Link href="/legal/terminos" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{idioma === "en" ? "Terms and conditions" : "Términos y condiciones"}</Link>
-          {" "}
-          <Link href="/legal/privacidad" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{idioma === "en" ? "Privacy policy" : "Política de privacidad"}</Link>
-          {" "}
-          <Link href="/legal/aviso-legal" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>{idioma === "en" ? "Legal notice" : "Aviso legal"}</Link>
-          {" "}
-          <Link href="/legal/cookies" style={{ display: "inline-flex", alignItems: "center", minHeight: 40 }}>Cookies</Link>
-        </p>
-      </section>
+      <h1 style={{ margin: "8px 0 0" }}>{t.ajustesTitulo}</h1>
+      <PerfilAjustes alumno />
     </main>
   );
 }

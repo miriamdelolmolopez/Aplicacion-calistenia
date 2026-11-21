@@ -4,13 +4,16 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Avatar from "../Avatar";
 import Cargando from "../Cargando";
-import { obtenerFotos, quitarFoto, subirFoto } from "../perfil/acciones";
-import { IDIOMAS, type Idioma } from "../textos";
+import { obtenerFotos, pedirBorradoCuenta, quitarFoto, subirFoto } from "../perfil/acciones";
+import { IDIOMAS, textos, type Idioma } from "../textos";
 import { useIdioma } from "../useIdioma";
 import { useTema } from "../useTema";
 import { createClient } from "@/lib/supabase/client";
 import { guardarPreferenciaCuenta, obtenerPreferenciasCuenta, type PreferenciasCuenta } from "./acciones";
 import estilos from "./ajustesTarjetas.module.css";
+import Interruptor from "./Interruptor";
+import ContenidoAvisos from "./notificaciones/ContenidoAvisos";
+import { usePreferencias } from "./usePreferencias";
 
 // Reduce la foto en el propio navegador: recorte cuadrado de 512 px.
 async function prepararFoto(archivo: File): Promise<Blob> {
@@ -38,16 +41,24 @@ function etiquetaZona(zona: string): string {
 
 type Datos = { id: string; nombre: string; apellidos: string; email: string; foto: string | null };
 
-// Ajustes > Perfil de la administradora: foto, nombre, preferencias, contraseña y apariencia, en tarjetas.
-export default function PerfilAjustes() {
+const botonPequeno = { border: "1px solid var(--linea-fuerte)", borderRadius: "var(--radio-s)" } as const;
+
+// Pantalla de Ajustes en tarjetas (estilo HubFit). La administradora ve la pestaña «Perfil»; el alumno/a ve, además, sus
+// notificaciones, su privacidad y la opción de pedir el borrado de su cuenta en esta misma pantalla.
+export default function PerfilAjustes({ alumno = false }: { alumno?: boolean }) {
   const [idioma, cambiarIdioma] = useIdioma();
+  const t = textos[idioma];
+  const en = idioma === "en";
+  const x = (es: string, ingles: string) => (en ? ingles : es);
   const [tema, cambiarTema] = useTema();
   const [datos, setDatos] = useState<Datos | null>(null);
   const [pref, setPref] = useState<PreferenciasCuenta | null>(null);
   const [prefDisponible, setPrefDisponible] = useState(true);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
   const entrada = useRef<HTMLInputElement>(null);
+  const { pref: privacidad, cambiar, cambiarImagen, setPref: setPrivacidad } = usePreferencias();
 
   async function cargar() {
     const supabase = createClient();
@@ -103,9 +114,17 @@ export default function PerfilAjustes() {
     }
   }
 
+  async function pedirBorrado() {
+    setError(false);
+    const r = await pedirBorradoCuenta();
+    setConfirmando(false);
+    if (!r.ok) return setError(true);
+    setPrivacidad((p) => (p ? { ...p, borradoPedido: true } : p));
+  }
+
   const nombrePais = (codigo: string) => {
     try {
-      return new Intl.DisplayNames(["es"], { type: "region" }).of(codigo) ?? codigo;
+      return new Intl.DisplayNames([idioma], { type: "region" }).of(codigo) ?? codigo;
     } catch {
       return codigo;
     }
@@ -125,59 +144,66 @@ export default function PerfilAjustes() {
   return (
     <div className={estilos.pagina}>
       <section className={estilos.grupo}>
-        <h2 className={estilos.titulo}>Información personal</h2>
-        <p className={estilos.ayuda}>Cómo te ven las demás personas en la aplicación.</p>
+        <h2 className={estilos.titulo}>{x("Información personal", "Personal information")}</h2>
+        <p className={estilos.ayuda}>{x("Cómo te ven las demás personas en la aplicación.", "How other people see you in the app.")}</p>
         <div className={estilos.tarjeta}>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Foto de perfil</span>
+            <span className={estilos.etiqueta}>{x("Foto de perfil", "Profile photo")}</span>
             <span className={estilos.valor}>
               <Avatar nombre={[datos.nombre, datos.apellidos].filter(Boolean).join(" ") || "·"} url={datos.foto} tamano={40} />
               <input ref={entrada} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && elegirFoto(e.target.files[0])} />
-              <button type="button" className={estilos.segmento} style={{ border: "1px solid var(--linea-fuerte)", borderRadius: "var(--radio-s)" }} disabled={subiendo} onClick={() => entrada.current?.click()}>
-                {subiendo ? "Subiendo…" : "Cambiar"}
+              <button type="button" className={estilos.segmento} style={botonPequeno} disabled={subiendo} onClick={() => entrada.current?.click()}>
+                {subiendo ? x("Subiendo…", "Uploading…") : x("Cambiar", "Change")}
               </button>
               {datos.foto && (
                 <button
                   type="button"
                   className={estilos.segmento}
-                  style={{ border: "1px solid var(--linea-fuerte)", borderRadius: "var(--radio-s)" }}
+                  style={botonPequeno}
                   onClick={async () => {
                     await quitarFoto();
                     await cargar();
                   }}
                 >
-                  Quitar
+                  {x("Quitar", "Remove")}
                 </button>
               )}
             </span>
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Correo electrónico</span>
+            <span className={estilos.etiqueta}>{x("Correo electrónico", "Email")}</span>
             <span className={estilos.valor}>
               {datos.email}
               <span className={estilos.aviso} style={{ padding: "2px 8px", borderRadius: 999 }}>
-                Cambiarlo: próximamente
+                {x("Cambiarlo: próximamente", "Change it: coming soon")}
               </span>
             </span>
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Nombre</span>
-            <input className={estilos.campo} defaultValue={datos.nombre} maxLength={60} aria-label="Nombre" onBlur={(e) => guardarNombre("nombre", e.target.value)} />
+            <span className={estilos.etiqueta}>{x("Nombre", "First name")}</span>
+            <input className={estilos.campo} defaultValue={datos.nombre} maxLength={60} aria-label={x("Nombre", "First name")} onBlur={(e) => guardarNombre("nombre", e.target.value)} />
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Apellidos</span>
-            <input className={estilos.campo} defaultValue={datos.apellidos} maxLength={80} aria-label="Apellidos" onBlur={(e) => guardarNombre("apellidos", e.target.value)} />
+            <span className={estilos.etiqueta}>{x("Apellidos", "Last name")}</span>
+            <input className={estilos.campo} defaultValue={datos.apellidos} maxLength={80} aria-label={x("Apellidos", "Last name")} onBlur={(e) => guardarNombre("apellidos", e.target.value)} />
           </div>
         </div>
       </section>
 
       <section className={estilos.grupo}>
-        <h2 className={estilos.titulo}>Preferencias</h2>
-        <p className={estilos.ayuda}>Tu idioma, zona horaria, país y unidades de medida.</p>
-        {!prefDisponible && <p className={estilos.aviso}>Estas preferencias todavía no se pueden guardar (falta un paso de configuración en la base de datos). Mientras tanto se usa Europa/Madrid, España, kg y cm.</p>}
+        <h2 className={estilos.titulo}>{x("Preferencias", "Preferences")}</h2>
+        <p className={estilos.ayuda}>{x("Tu idioma, zona horaria, país y unidades de medida.", "Your language, time zone, country and units.")}</p>
+        {!prefDisponible && (
+          <p className={estilos.aviso}>
+            {x(
+              "Estas preferencias todavía no se pueden guardar (falta un paso de configuración en la base de datos). Mientras tanto se usa Europa/Madrid, España, kg y cm.",
+              "These preferences can't be saved yet (a database setup step is missing). Meanwhile Europe/Madrid, Spain, kg and cm are used.",
+            )}
+          </p>
+        )}
         <div className={estilos.tarjeta}>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Idioma</span>
+            <span className={estilos.etiqueta}>{x("Idioma", "Language")}</span>
             <select className={estilos.campo} value={idioma} onChange={(e) => cambiarIdioma(e.target.value as Idioma)}>
               {IDIOMAS.map((i) => (
                 <option key={i.codigo} value={i.codigo}>
@@ -187,7 +213,7 @@ export default function PerfilAjustes() {
             </select>
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Zona horaria</span>
+            <span className={estilos.etiqueta}>{x("Zona horaria", "Time zone")}</span>
             <select className={estilos.campo} value={pref.zona_horaria} disabled={!prefDisponible} onChange={(e) => cambiarPref("zona_horaria", e.target.value)}>
               {zonas.map((z) => (
                 <option key={z} value={z}>
@@ -197,7 +223,7 @@ export default function PerfilAjustes() {
             </select>
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>País</span>
+            <span className={estilos.etiqueta}>{x("País", "Country")}</span>
             <select className={estilos.campo} value={pref.pais} disabled={!prefDisponible} onChange={(e) => cambiarPref("pais", e.target.value)}>
               {(PAISES.includes(pref.pais) ? PAISES : [pref.pais, ...PAISES]).map((p) => (
                 <option key={p} value={p}>
@@ -207,43 +233,148 @@ export default function PerfilAjustes() {
             </select>
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Unidad de peso</span>
-            {segmentos(pref.unidad_peso, [{ v: "kg", t: "Kilogramos (kg)" }, { v: "lb", t: "Libras (lb)" }], (v) => prefDisponible && cambiarPref("unidad_peso", v))}
+            <span className={estilos.etiqueta}>{x("Unidad de peso", "Weight unit")}</span>
+            {segmentos(pref.unidad_peso, [{ v: "kg", t: x("Kilogramos (kg)", "Kilograms (kg)") }, { v: "lb", t: x("Libras (lb)", "Pounds (lb)") }], (v) => prefDisponible && cambiarPref("unidad_peso", v))}
           </div>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Unidad de longitud</span>
-            {segmentos(pref.unidad_longitud, [{ v: "cm", t: "Centímetros (cm)" }, { v: "in", t: "Pulgadas (in)" }], (v) => prefDisponible && cambiarPref("unidad_longitud", v))}
+            <span className={estilos.etiqueta}>{x("Unidad de longitud", "Length unit")}</span>
+            {segmentos(pref.unidad_longitud, [{ v: "cm", t: x("Centímetros (cm)", "Centimetres (cm)") }, { v: "in", t: x("Pulgadas (in)", "Inches (in)") }], (v) => prefDisponible && cambiarPref("unidad_longitud", v))}
           </div>
         </div>
       </section>
 
       <section className={estilos.grupo}>
-        <h2 className={estilos.titulo}>Contraseña</h2>
-        <p className={estilos.ayuda}>Actualiza la contraseña de tu cuenta.</p>
+        <h2 className={estilos.titulo}>{x("Contraseña", "Password")}</h2>
+        <p className={estilos.ayuda}>{x("Actualiza la contraseña de tu cuenta.", "Update your account password.")}</p>
         <div className={estilos.tarjeta}>
           <div className={estilos.fila}>
             <span className={estilos.valor} aria-hidden="true">
               ••••••••
             </span>
             <Link href="/perfil/contrasena" className={estilos.enlace}>
-              Cambiar la contraseña
+              {x("Cambiar la contraseña", "Change password")}
             </Link>
           </div>
         </div>
       </section>
 
       <section className={estilos.grupo}>
-        <h2 className={estilos.titulo}>Apariencia</h2>
-        <p className={estilos.ayuda}>Modo claro u oscuro.</p>
+        <h2 className={estilos.titulo}>{x("Apariencia", "Appearance")}</h2>
+        <p className={estilos.ayuda}>{x("Modo claro u oscuro.", "Light or dark mode.")}</p>
         <div className={estilos.tarjeta}>
           <div className={estilos.fila}>
-            <span className={estilos.etiqueta}>Tema</span>
-            {segmentos(tema, [{ v: "claro", t: "☀️ Claro" }, { v: "oscuro", t: "🌙 Oscuro" }], cambiarTema)}
+            <span className={estilos.etiqueta}>{x("Tema", "Theme")}</span>
+            {segmentos(tema, [{ v: "claro", t: `☀️ ${x("Claro", "Light")}` }, { v: "oscuro", t: `🌙 ${x("Oscuro", "Dark")}` }], cambiarTema)}
           </div>
         </div>
       </section>
 
-      {error && <p className={estilos.aviso}>No se ha podido guardar el último cambio. Inténtalo otra vez.</p>}
+      {alumno && (
+        <>
+          <ContenidoAvisos incrustado />
+
+          <section className={estilos.grupo}>
+            <h2 className={estilos.titulo}>{t.privacidadTitulo}</h2>
+            <p className={estilos.ayuda}>{x("Qué ven de ti las demás personas y qué puede hacer la academia con tu imagen.", "What other people see about you and what the academy may do with your image.")}</p>
+            {!privacidad ? (
+              <Cargando />
+            ) : (
+              <div className={estilos.tarjeta}>
+                <div className={estilos.fila}>
+                  <span className={estilos.etiqueta}>{t.mostrarFoto}</span>
+                  <Interruptor nombre={t.mostrarFoto} activo={privacidad.mostrar_foto} alCambiar={() => cambiar("mostrar_foto", !privacidad.mostrar_foto)} />
+                </div>
+                <div className={estilos.fila}>
+                  <span className={estilos.etiqueta}>{t.mostrarApellido}</span>
+                  <Interruptor nombre={t.mostrarApellido} activo={privacidad.mostrar_apellido} alCambiar={() => cambiar("mostrar_apellido", !privacidad.mostrar_apellido)} />
+                </div>
+                <div className={estilos.fila}>
+                  <span className={estilos.etiqueta}>{t.avisarCumple}</span>
+                  <Interruptor nombre={t.avisarCumple} activo={privacidad.avisar_cumple} alCambiar={() => cambiar("avisar_cumple", !privacidad.avisar_cumple)} />
+                </div>
+                <div className={estilos.fila}>
+                  <span className={estilos.etiqueta}>
+                    {x(
+                      "Autorizo el uso de fotos y vídeos en los que aparezca en redes sociales y canales profesionales",
+                      "I authorise the use of photos and videos in which I appear on social media and professional channels",
+                    )}
+                    <span className={estilos.descripcion}>{t.privacidadNota}</span>
+                  </span>
+                  <Interruptor nombre={x("Autorización de imagen", "Image authorisation")} activo={privacidad.imagen} alCambiar={() => cambiarImagen(!privacidad.imagen)} />
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className={estilos.grupo}>
+            <h2 className={estilos.titulo}>{x("Textos legales", "Legal texts")}</h2>
+            <div className={estilos.tarjeta}>
+              <div className={estilos.fila}>
+                <span className={estilos.etiqueta}>{x("Mis textos legales", "My legal texts")}</span>
+                <Link href="/ajustes/textos-legales" className={estilos.enlace}>
+                  {x("Ver", "View")}
+                </Link>
+              </div>
+              <div className={estilos.fila}>
+                <span className={estilos.etiqueta}>{x("Términos y condiciones", "Terms and conditions")}</span>
+                <Link href="/legal/terminos" className={estilos.enlace}>
+                  {x("Ver", "View")}
+                </Link>
+              </div>
+              <div className={estilos.fila}>
+                <span className={estilos.etiqueta}>{x("Política de privacidad", "Privacy policy")}</span>
+                <Link href="/legal/privacidad" className={estilos.enlace}>
+                  {x("Ver", "View")}
+                </Link>
+              </div>
+              <div className={estilos.fila}>
+                <span className={estilos.etiqueta}>{x("Aviso legal", "Legal notice")}</span>
+                <Link href="/legal/aviso-legal" className={estilos.enlace}>
+                  {x("Ver", "View")}
+                </Link>
+              </div>
+              <div className={estilos.fila}>
+                <span className={estilos.etiqueta}>Cookies</span>
+                <Link href="/legal/cookies" className={estilos.enlace}>
+                  {x("Ver", "View")}
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          <section className={estilos.grupo}>
+            <h2 className={estilos.titulo} style={{ color: "#b3261e" }}>
+              {t.borrarCuentaTitulo}
+            </h2>
+            <p className={estilos.ayuda}>{t.borrarCuentaTexto}</p>
+            {privacidad?.borradoPedido ? (
+              <p className={estilos.aviso}>{t.borradoPendiente}</p>
+            ) : (
+              <div className={estilos.tarjeta} style={{ borderColor: "#f3c9c6" }}>
+                <div className={estilos.fila}>
+                  <span className={estilos.etiqueta}>{confirmando ? t.confirmarBorrado : t.borrarCuentaTitulo}</span>
+                  {confirmando ? (
+                    <span className={estilos.valor}>
+                      <button type="button" className={estilos.segmento} style={{ ...botonPequeno, color: "#b3261e", borderColor: "#e8a6a2" }} onClick={pedirBorrado}>
+                        {t.pedirBorrado}
+                      </button>
+                      <button type="button" className={estilos.segmento} style={botonPequeno} onClick={() => setConfirmando(false)}>
+                        {t.noDescartar}
+                      </button>
+                    </span>
+                  ) : (
+                    <button type="button" className={estilos.segmento} style={{ ...botonPequeno, color: "#b3261e", borderColor: "#e8a6a2" }} onClick={() => setConfirmando(true)}>
+                      {t.pedirBorrado}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+
+      {error && <p className={estilos.aviso}>{x("No se ha podido guardar el último cambio. Inténtalo otra vez.", "The last change could not be saved. Please try again.")}</p>}
     </div>
   );
 }
