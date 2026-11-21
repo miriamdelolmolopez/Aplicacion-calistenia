@@ -51,7 +51,7 @@ export default function ElegirAlumno({
           onChange={(e) => setTexto(e.target.value)}
           placeholder="Buscar por nombre o correo"
           aria-label="Buscar alumno/a"
-          style={{ font: "inherit", minHeight: 44, padding: "0 12px", borderRadius: 10, border: "1px solid var(--linea)" }}
+          style={{ font: "inherit", fontSize: "0.875rem", minHeight: 34, padding: "0 12px 0 34px", borderRadius: 8, border: "1px solid var(--linea-fuerte)", background: "#fff url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E\") no-repeat 11px center" }}
         />
         <div style={{ overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
           {lista === null && <p style={{ margin: 0, opacity: 0.7 }}>Buscando…</p>}

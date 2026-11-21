@@ -56,20 +56,23 @@
 
 .buscador input {
   width: 100%;
-  min-height: 52px;
-  padding: 0 16px 0 48px;
+  min-height: 34px;
+  padding: 0 12px 0 34px;
   box-sizing: border-box;
   font: inherit;
+  font-size: var(--letra-s);
   color: var(--carbon);
   background: var(--blanco);
-  border: 1px solid var(--linea);
-  border-radius: var(--radio-l);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s);
 }
 
 .buscador svg {
   position: absolute;
-  top: 15px;
-  left: 16px;
+  top: 9px;
+  left: 11px;
+  width: 16px;
+  height: 16px;
   color: var(--secundario);
 }
 

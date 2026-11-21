@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState } from "react";
-import Icono from "./Icono";
 import estilos from "./panelFiltros.module.css";
 
 // Botón con el icono del embudo (junto al buscador, si lo hay). Los filtros solo se ven al pulsarlo;
@@ -31,9 +30,12 @@ export default function PanelFiltros({
           aria-controls={id}
           onClick={() => setAbierto((v) => !v)}
         >
-          <Icono nombre="embudo" tamano={20} />
-          <span>{etiqueta}</span>
-          {activos > 0 && <span className={estilos.insignia}>{activos}</span>}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+            <circle cx="16" cy="7" r="2" />
+            <circle cx="8" cy="17" r="2" />
+          </svg>
+          <span>{activos > 0 ? `${activos} ${etiqueta === "Filters" ? (activos === 1 ? "filter" : "filters") : activos === 1 ? "filtro" : "filtros"}` : etiqueta}</span>
         </button>
       </div>
       {abierto && (

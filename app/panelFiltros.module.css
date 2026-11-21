@@ -105,3 +105,14 @@
 .fila {
   align-items: center;
 }
+
+/* Ordenador: el buscador no ocupa todo el ancho y el botón de filtros va pegado a él */
+@media (min-width: 1024px) {
+  .fila {
+    justify-content: flex-start;
+  }
+
+  .buscador {
+    flex: 0 1 380px;
+  }
+}
