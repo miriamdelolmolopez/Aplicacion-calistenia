@@ -573,3 +573,12 @@
   font-weight: 500;
   color: var(--ui-secundario);
 }
+
+/* Ordenador: pantallas pegadas al menú y a todo el ancho (solo cuando hay sesión y menú lateral) */
+@media (min-width: 1024px) {
+  :global(body.con-barra) .perfilPagina {
+    max-width: none;
+    margin: 0;
+    padding: 16px 20px 40px;
+  }
+}

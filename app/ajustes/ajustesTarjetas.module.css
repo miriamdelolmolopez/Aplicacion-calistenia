@@ -200,3 +200,11 @@ select.campo {
 .encendido .bola {
   transform: translateX(16px);
 }
+
+/* Ordenador: pantallas pegadas al menú y a todo el ancho (solo cuando hay sesión y menú lateral) */
+@media (min-width: 1024px) {
+  .pagina {
+    margin: 0;
+    padding-inline: 20px;
+  }
+}

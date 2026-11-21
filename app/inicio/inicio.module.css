@@ -1075,3 +1075,12 @@
   border-color: var(--linea);
   box-shadow: inset 0 1px 3px rgba(26, 32, 44, 0.1);
 }
+
+/* Ordenador: pantallas pegadas al menú y a todo el ancho (solo cuando hay sesión y menú lateral) */
+@media (min-width: 1024px) {
+  :global(body.con-barra) main.paginaAdmin,
+  :global(body.con-barra) main.paginaAlumno {
+    max-width: none;
+    margin: 0;
+  }
+}
