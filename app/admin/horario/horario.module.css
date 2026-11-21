@@ -142,7 +142,7 @@
   margin: 0 0 14px;
   font: inherit;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #ffffff;
   cursor: pointer;
   background: var(--acento);
@@ -187,7 +187,7 @@
   top: 0;
   padding: 12px 6px;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -211,7 +211,7 @@
 .hora {
   padding: 14px 4px;
   font-size: 0.85rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: center;
   border-top: 1px solid var(--linea);
 }
@@ -276,7 +276,7 @@
 .etiquetaCancelada {
   padding: 1px 8px;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #a1302a;
   background: #fde8e6;
   border-radius: var(--radio-s);
@@ -288,7 +288,7 @@
   justify-content: center;
   gap: 12px;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .cifras span {
@@ -314,7 +314,7 @@
   padding: 3px 10px;
   font: inherit;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   background: #ffffff;
   border: 1px solid var(--linea);
@@ -360,7 +360,7 @@
 .cerrar {
   padding: 12px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--secundario);
   cursor: pointer;
   background: none;
@@ -368,7 +368,7 @@
 }
 
 .irSemana {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--oliva-oscuro);
 }
 

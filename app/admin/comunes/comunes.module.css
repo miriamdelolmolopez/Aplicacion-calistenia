@@ -35,7 +35,7 @@
   gap: 6px;
   padding: 11px 18px;
   font: inherit;
-  font-weight: 800;
+  font-weight: 600;
   color: #ffffff;
   cursor: pointer;
   background: var(--acento);
@@ -95,7 +95,7 @@
   padding: 6px 12px;
   font: inherit;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   background: #ffffff;
   border: 1px solid rgba(23, 24, 26, 0.12);
@@ -166,7 +166,7 @@
 .volver {
   padding: 10px 16px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--carbon);
   cursor: pointer;
   background: #ffffff;
@@ -205,7 +205,7 @@
   padding: 8px 16px;
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   border: 1px solid rgba(23, 24, 26, 0.12);
   border-radius: var(--radio-s);
@@ -225,7 +225,7 @@
 .cancelar {
   padding: 12px 28px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--secundario);
   cursor: pointer;
   background: #ffffff;

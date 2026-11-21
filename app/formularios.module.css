@@ -14,16 +14,6 @@
   min-height: 44px;
 }
 
-.enlaceBarra {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 4px;
-  color: var(--oliva-oscuro);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
 
 .idioma select {
   min-height: 44px;
@@ -55,7 +45,7 @@
 
 .cabecera h1 {
   margin: 8px 0 4px;
-  font-size: 2rem;
+  font-size: var(--letra-xl);
 }
 
 .cabecera p {
@@ -159,21 +149,22 @@
 }
 
 .boton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 0 18px;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
   font: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: var(--letra-s);
+  font-weight: 500;
   color: var(--blanco);
   background: var(--acento);
-  border: 0;
+  border: 1px solid transparent;
   border-radius: var(--radio-s);
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
 .boton:hover:not(:disabled) {
@@ -190,14 +181,14 @@
 }
 
 .botonSecundario {
-  background: transparent;
-  color: var(--acento-oscuro);
-  border: 1.5px solid var(--acento);
+  background: var(--blanco);
+  color: var(--carbon);
+  border: 1px solid var(--linea-fuerte);
 }
 
 .botonSecundario:hover:not(:disabled) {
-  background: var(--acento-suave);
-  color: var(--acento-oscuro);
+  background: #f1f2f4;
+  color: var(--carbon);
   box-shadow: none;
 }
 
@@ -300,4 +291,47 @@
   .paginaAncha {
     max-width: 960px;
   }
+}
+
+/* «Volver»: solo una flechita a la izquierda del título, discreta */
+.enlaceBarra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  order: -1;
+  width: 32px;
+  height: 32px;
+  min-height: 0;
+  padding: 0;
+  font-size: 0;
+  color: var(--secundario);
+  text-decoration: none;
+  border-radius: var(--radio-s);
+}
+
+.enlaceBarra::before {
+  content: "‹";
+  font-size: 1.7rem;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.enlaceBarra:hover {
+  color: var(--carbon);
+  background: #f1f2f4;
+}
+
+.barra:has(.enlaceBarra) {
+  justify-content: flex-start;
+}
+
+/* Cabecera de tarjeta como en HubFit: título pequeño sobre gris clarito, separado por una línea fina */
+.tarjeta > h2:first-child {
+  margin: -20px -20px 0;
+  padding: 11px 20px;
+  font-size: var(--letra-s);
+  font-weight: 600;
+  background: #fafafa;
+  border-bottom: 1px solid var(--linea);
+  border-radius: var(--radio) var(--radio) 0 0;
 }

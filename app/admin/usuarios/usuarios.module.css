@@ -352,7 +352,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--secundario);
 }
@@ -770,7 +770,7 @@
   min-height: 48px;
   padding: 0 24px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: var(--radio-m);
   cursor: pointer;
 }
@@ -896,7 +896,7 @@
 
 .numeroGrande {
   font-size: 3rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   min-width: 48px;
   text-align: right;

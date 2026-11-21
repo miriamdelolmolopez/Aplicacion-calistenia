@@ -472,7 +472,7 @@
 
 .tiempoTotal strong {
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.3px;
   color: var(--ui-title);
 }

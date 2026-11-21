@@ -98,7 +98,7 @@
 
 .diaHecho {
   color: var(--blanco);
-  font-weight: 700;
+  font-weight: 600;
   background: #2f9e63;
 }
 
@@ -142,7 +142,7 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--blanco);
   background: transparent;
   border: 2px solid var(--linea);

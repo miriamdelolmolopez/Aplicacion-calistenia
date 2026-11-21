@@ -56,7 +56,7 @@
 .imcValor {
   margin: 4px 0;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .formMedidas {
@@ -253,7 +253,7 @@
 .perfilTitulo {
   margin: 0;
   font-size: var(--letra-xl);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .volver {
@@ -563,7 +563,7 @@
 .numeros strong {
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.04em;
   color: var(--ui-title);
 }

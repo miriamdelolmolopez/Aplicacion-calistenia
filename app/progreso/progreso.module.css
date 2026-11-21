@@ -308,7 +308,7 @@
   padding: 0;
   margin-bottom: 2px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #5e5d58;
   text-transform: uppercase;
 }
@@ -378,7 +378,7 @@
 .numero strong {
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 1.9rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.04em;
   color: var(--ui-title);
 }

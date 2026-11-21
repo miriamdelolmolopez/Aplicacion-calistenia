@@ -50,7 +50,7 @@
   padding: 4px 0;
   text-align: center;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--secundario);
 }
 
@@ -82,7 +82,7 @@
 
 .numero {
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .chip {

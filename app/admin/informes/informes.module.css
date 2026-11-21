@@ -48,7 +48,7 @@
 
 .tarjetaTitulo {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--color) 70%, var(--carbon));
@@ -174,7 +174,7 @@
 
 .roscaTotal {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   fill: var(--carbon);
 }
 

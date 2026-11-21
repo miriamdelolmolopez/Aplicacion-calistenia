@@ -69,7 +69,7 @@
 .datos strong {
   font-family: var(--font-titulos), system-ui, sans-serif;
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.1;
   color: var(--carbon);
@@ -204,7 +204,7 @@
 
 .contenido h1 {
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.6px;
   color: var(--ui-title);
 }

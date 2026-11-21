@@ -152,3 +152,33 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Estilo HubFit: cabecera en gris clarito con línea fina debajo, filas blancas separadas por línea finísima y gris al pasar el cursor */
+.cabecera {
+  padding: var(--esp-3) var(--esp-4);
+  background: #fafafa;
+  border-bottom: 1px solid var(--linea);
+}
+
+.titulo {
+  font-size: var(--letra-s);
+}
+
+.cuerpo {
+  margin-inline: 0;
+  padding-block: 0;
+  border-top: 0;
+}
+
+.fila {
+  padding-inline: var(--esp-4);
+  border-bottom: 1px solid var(--linea);
+}
+
+.fila:last-child {
+  border-bottom: 0;
+}
+
+a.fila:hover {
+  background: #f6f7f8;
+}

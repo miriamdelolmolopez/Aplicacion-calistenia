@@ -330,7 +330,7 @@
 .resumenValor {
   font-family: var(--font-jakarta), var(--font-outfit), system-ui, sans-serif;
   font-size: 1.7rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 1.15;
 }
@@ -509,7 +509,7 @@
 
 .resumenValor {
   font-size: 1.9rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--carbon);
 }
 
@@ -1008,7 +1008,7 @@
 .bandaSaludo {
   margin: 0;
   font-size: var(--letra-l);
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
 }
 

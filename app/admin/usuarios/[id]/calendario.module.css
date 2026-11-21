@@ -18,7 +18,7 @@
 .cabecera {
   padding: 2px 0;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   color: var(--secundario);
 }
@@ -63,7 +63,7 @@
 }
 
 .clase b {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* En el móvil solo la hora (con el color del tipo); el nombre sale en pantallas más anchas */
@@ -73,7 +73,7 @@
 
 .clase i {
   font-style: normal;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .cancelada {
