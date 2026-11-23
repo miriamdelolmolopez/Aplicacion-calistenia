@@ -1,0 +1,1920 @@
+/* Sección Leads. Usa los colores y el estilo de la app (la parte visual la afina Alberto). */
+
+/* Fila de arriba: buscador + botones */
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.buscador {
+  display: flex;
+  flex: 1 1 260px;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--secundario);
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s);
+}
+
+.buscador input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--carbon);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.proximamente {
+  margin-left: 6px;
+  padding: 1px 7px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--secundario);
+  background: #f1f3f5;
+  border-radius: 999px;
+}
+
+/* Tabla */
+.contenedorTabla {
+  overflow-x: auto;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-l);
+}
+
+.tabla {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: var(--letra-s);
+}
+
+.tabla th {
+  padding: 12px 14px;
+  font-size: var(--letra-xs);
+  font-weight: 600;
+  color: var(--secundario);
+  text-align: left;
+  white-space: nowrap;
+  background: #fafbfc;
+  border-bottom: 1px solid var(--linea);
+}
+
+.tabla td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--linea);
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabla tbody tr:hover {
+  background: #fafbfc;
+}
+
+.enlaceNombre {
+  font-weight: 600;
+  color: var(--carbon);
+  text-decoration: none;
+}
+
+.enlaceNombre:hover {
+  color: var(--acento-oscuro);
+  text-decoration: underline;
+}
+
+.sinLeads {
+  padding: 32px 14px !important;
+  text-align: center;
+  color: var(--secundario);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--etq-azul);
+  background: var(--etq-azul-f);
+  border-radius: 999px;
+}
+
+.estado {
+  display: inline-block;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--acento-oscuro);
+  border: 1px solid var(--acento-anillo);
+  border-radius: 999px;
+}
+
+/* Cabecera de columna con la flechita del filtro */
+.cabeceraColumna {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.flechaFiltro {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.flechaFiltro:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.flechaActiva {
+  color: var(--acento);
+}
+
+.desplegable {
+  position: fixed;
+  z-index: 70;
+  max-height: min(380px, 70dvh);
+  padding: 10px;
+  overflow-y: auto;
+  font-weight: 400;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-alta);
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.opciones label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 6px;
+  font-size: var(--letra-s);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.opciones label:hover {
+  background: var(--relleno);
+}
+
+.vacioFiltro {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--secundario);
+}
+
+.limpiar {
+  margin-top: 8px;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--acento-oscuro);
+  text-decoration: underline;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.conLapiz {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.lapiz {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lapiz:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+/* Filtro de fechas */
+.fechas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fechas label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.fechas input[type="date"] {
+  min-height: 36px;
+  padding: 0 8px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}
+
+.opcionOrden {
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  color: var(--carbon);
+  background: transparent;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.opcionActiva {
+  color: var(--acento-oscuro);
+  background: var(--acento-fondo);
+  border-color: var(--acento-anillo);
+}
+
+/* Formularios */
+.panelNuevo h2,
+.subtitulo {
+  margin: 0 0 12px;
+  font-size: var(--letra-l);
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.ancho {
+  grid-column: 1 / -1;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.areaTexto {
+  min-height: 80px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--carbon);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+  resize: vertical;
+}
+
+/* Ventana para editar los estados */
+.capa {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(26, 32, 44, 0.45);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(680px, 100%);
+  max-height: 90dvh;
+  padding: 20px;
+  overflow-y: auto;
+  background: var(--blanco);
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-alta);
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: var(--letra-l);
+}
+
+.filasEstado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filasEstado li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filasEstado input[type="text"],
+.filasEstado input:not([type]) {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}
+
+.marcaGanado {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.iconoBoton {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font: inherit;
+  color: var(--secundario);
+  background: transparent;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.iconoBoton:hover:not(:disabled) {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.iconoBoton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Ficha de un lead: a la izquierda los datos y a la derecha las notas y la información (en móvil, una debajo de otra) */
+.ficha {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .ficha {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+.columnaPrincipal,
+.columnaLateral {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.estadoCaja {
+  position: relative;
+  display: inline-block;
+}
+
+.estadoBoton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+  background: var(--acento-fondo);
+  border: 1px solid var(--acento-anillo);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.menuEstados {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-alta);
+}
+
+.menuEstados button {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  font: inherit;
+  text-align: left;
+  color: var(--carbon);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.menuEstados button:hover {
+  background: var(--relleno);
+}
+
+.convertir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ayudaConvertir {
+  color: var(--secundario);
+}
+
+.elegirTipo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.enlace {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+.nuevaNota {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nuevaNota input {
+  flex: 1 1 180px;
+  min-height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}
+
+.listaNotas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listaNotas li {
+  padding: 10px 12px;
+  background: #fafbfc;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-m);
+}
+
+.listaNotas p {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.listaNotas small {
+  color: var(--secundario);
+}
+
+.infoEditable {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.parInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+}
+
+.parInfo input {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}
+
+.infoLista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 0;
+}
+
+.infoLista dt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secundario);
+}
+
+.infoLista dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* Conexión de formularios */
+.direccionNueva {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  background: var(--acento-fondo);
+  border: 1px solid var(--acento-anillo);
+  border-radius: var(--radio-m);
+}
+
+.pasos {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 0.88rem;
+}
+
+.pasos li + li {
+  margin-top: 8px;
+}
+
+.listaConexiones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listaConexiones li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fafbfc;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-m);
+}
+
+.listaConexiones small {
+  color: var(--secundario);
+}
+
+/* Lo que ha contratado al convertir en cliente */
+.contratos {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filaContrato {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.filaContrato select {
+  min-height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}
+
+/* Etiquetas y tipos con color */
+.etiquetaCampo {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.etiquetaElegible {
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--blanco);
+  border: 1px solid;
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.etiquetaElegible:hover {
+  opacity: 1;
+}
+
+.etiquetaActiva {
+  opacity: 1;
+}
+
+.editarLista {
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--acento-oscuro);
+  text-align: left;
+  text-decoration: underline;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.filaColor {
+  flex-wrap: wrap;
+}
+
+.colores {
+  display: flex;
+  gap: 4px;
+}
+
+.muestra {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.muestraActiva {
+  box-shadow: 0 0 0 2px var(--blanco), 0 0 0 4px var(--carbon);
+}
+
+.filaColor input {
+  font-weight: 600;
+}
+
+/* Color propio: la rueda de colores dentro de una muestra redonda */
+.muestraPropia {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+  border-color: var(--linea-fuerte);
+}
+
+.muestraPropia input {
+  position: absolute;
+  inset: -6px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* Ordenar arrastrando */
+.asa {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 32px;
+  padding: 0;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: grab;
+}
+
+.asa:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.asa:active {
+  cursor: grabbing;
+}
+
+.filaSobre {
+  box-shadow: 0 -2px 0 var(--acento);
+}
+
+/* Apartado desplegable dentro de un formulario (Etiquetas al crear un lead) */
+.apartado {
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-m);
+}
+
+.apartado summary {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.apartado > :not(summary) {
+  margin: 0 12px 12px;
+}
+
+/* Botoncito del historial junto al estado */
+.estadoFila {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.historialCaja {
+  position: relative;
+}
+
+.botonHistorial {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--secundario);
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.botonHistorial:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.panelHistorial {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(340px, 80vw);
+  padding: 12px;
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-alta);
+}
+
+/* Como mucho 8 cambios a la vista; si hay más, aparece la barra para bajar */
+.panelHistorial ul {
+  display: flex;
+  flex-direction: column;
+  max-height: 264px;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.panelHistorial li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--linea);
+}
+
+.panelHistorial small {
+  color: var(--secundario);
+}
+
+/* Historial de estados (versión antigua): plegado y en una línea por cambio, para que no ocupe sitio */
+.historial {
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+.historial summary {
+  color: var(--secundario);
+  cursor: pointer;
+}
+
+.historial ul {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historial li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.historial small {
+  color: var(--secundario);
+}
+
+/* Filas de las listas con color: el nombre ocupa el sitio que queda y, si no cabe, la fila baja de línea */
+.filaColor input:not([type]),
+.filaColor input[type="text"] {
+  flex: 1 1 150px;
+}
+
+/* Ordenador: la pantalla se aprovecha entera y la ficha se reparte en tres columnas
+   (estado e información a la izquierda, los datos en el centro y las notas a la derecha) */
+@media (min-width: 1200px) {
+  .ficha {
+    grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr) minmax(300px, 1.1fr);
+    grid-template-areas:
+      "estado datos notas"
+      "info datos notas";
+    grid-template-rows: auto 1fr;
+    gap: 16px;
+  }
+
+  .columnaPrincipal,
+  .columnaLateral {
+    display: contents;
+  }
+
+  .seccionEstado {
+    grid-area: estado;
+  }
+
+  .seccionDatos {
+    grid-area: datos;
+  }
+
+  .seccionNotas {
+    grid-area: notas;
+  }
+
+  .seccionInfo {
+    grid-area: info;
+  }
+}
+
+/* Pantallas muy grandes: la lista de leads reparte mejor las columnas */
+@media (min-width: 1500px) {
+  .tabla th,
+  .tabla td {
+    padding: 14px 18px;
+  }
+}
+
+/* Editores de estados, etiquetas y tipos: filas compactas (mover · nombre · circulito de color · papelera) */
+.modalEstrecho {
+  width: min(460px, 100%);
+}
+
+.modalPequeno {
+  width: min(380px, 100%);
+}
+
+.filasEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filaEditor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.filaEditor input:not([type]),
+.filaEditor input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+.filaEditor input:not([type]):focus,
+.filaEditor input[type="text"]:focus {
+  outline: 2px solid var(--acento-anillo);
+  outline-offset: 1px;
+}
+
+.circuloColor {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.circuloColor:hover {
+  transform: scale(1.12);
+}
+
+.paleta {
+  position: fixed;
+  z-index: 90;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 236px;
+  padding: 10px;
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-alta);
+}
+
+.muestraPaleta {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.muestraElegida {
+  box-shadow: 0 0 0 2px var(--blanco), 0 0 0 4px #9aa0a6;
+}
+
+/* El «+» de las etiquetas */
+.botonMas {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--secundario);
+  background: transparent;
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.botonMas:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+/* ===== Estilo Notion: elegir o crear al pulsar, «···» para editar ===== */
+.flotante {
+  position: fixed;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: min(520px, 80dvh);
+  padding: 8px;
+  overflow-y: auto;
+  color: var(--carbon);
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-alta);
+}
+
+.disparadorCampo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 12px;
+  font: inherit;
+  color: var(--carbon);
+  text-align: left;
+  background: var(--blanco);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.disparadorPastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 600;
+  background: var(--blanco);
+  border: 1px solid;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.marcador {
+  color: var(--secundario);
+}
+
+.cabeceraOpciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--relleno);
+  border-radius: 8px;
+}
+
+.cabeceraOpciones input {
+  flex: 1 1 100px;
+  min-width: 80px;
+  min-height: 28px;
+  padding: 0;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.elegidaConQuitar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.elegidaConQuitar button {
+  padding: 0 4px;
+  font: inherit;
+  line-height: 1;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.pista {
+  margin: 2px 6px;
+  font-size: 0.78rem;
+  color: var(--secundario);
+}
+
+.listaOpciones {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.opcionFila {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+}
+
+.opcionFila:hover {
+  background: var(--relleno);
+}
+
+.opcionElegir {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--secundario);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.visto {
+  margin-left: auto;
+  color: var(--acento);
+  font-weight: 700;
+}
+
+.tresPuntos {
+  flex: none;
+  padding: 0 8px;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.opcionFila:hover .tresPuntos,
+.tresPuntos:focus-visible {
+  opacity: 1;
+}
+
+.nombreOpcion {
+  min-height: 34px;
+  padding: 0 10px;
+  font: inherit;
+  background: var(--blanco);
+  border: 2px solid var(--acento-anillo);
+  border-radius: 8px;
+  outline: 0;
+}
+
+.accionMenu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--carbon);
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.accionMenu:hover:not(:disabled) {
+  background: var(--relleno);
+}
+
+.accionPeligro {
+  color: #c2362b;
+}
+
+.tituloMenu {
+  margin: 2px 6px 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--secundario);
+}
+
+.listaColores {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filaColorPaleta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--carbon);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.filaColorPaleta:hover {
+  background: var(--relleno);
+}
+
+.cuadrito {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.cuadrito.muestraPropia {
+  border-radius: 4px;
+}
+
+.chipFila {
+  flex: 1;
+  min-width: 0;
+}
+
+.flechaFila {
+  flex: none;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.flechaFila:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.filaNueva {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--linea);
+}
+
+.filaNueva input {
+  flex: 1;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 0.88rem;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 8px;
+}
+
+.errorMenu {
+  margin: 4px 6px;
+  font-size: 0.82rem;
+  color: #c2362b;
+}
+
+/* Tres puntitos al final de cada fila de la lista */
+.celdaOpciones {
+  width: 44px;
+  text-align: right;
+}
+
+.tresPuntosFila {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tresPuntosFila:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+/* Columnas que se arrastran por la cabecera */
+.columnaArrastrable {
+  cursor: grab;
+}
+
+.columnaArrastrable:active {
+  cursor: grabbing;
+}
+
+.columnaSobre {
+  box-shadow: inset 3px 0 0 var(--acento);
+}
+
+/* ===== Menú de columna (como en Notion) ===== */
+.cabeceraBoton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cabeceraBoton:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.puntoFiltro {
+  width: 7px;
+  height: 7px;
+  background: var(--acento);
+  border-radius: 50%;
+}
+
+.flechaOrden {
+  color: var(--acento);
+  font-weight: 700;
+}
+
+.nombrePropiedad {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 2px;
+}
+
+.nombrePropiedad input {
+  flex: 1;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--carbon);
+  cursor: default;
+  background: var(--relleno);
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  outline: 0;
+}
+
+.botonInfo {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--blanco);
+  background: #9aa0a6;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.botonInfo:hover {
+  background: var(--secundario);
+}
+
+.infoPropiedad {
+  margin: 2px 6px 4px;
+  font-size: 0.82rem;
+  color: var(--secundario);
+}
+
+.atrasMenu {
+  align-self: flex-start;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.atrasMenu:hover {
+  color: var(--carbon);
+  background: var(--relleno);
+}
+
+.operador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.operador select {
+  min-height: 30px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}
+
+.campoFiltro {
+  min-height: 34px;
+  margin: 0 6px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 8px;
+}
+
+.ordenOpciones {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ordenActivo {
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+  background: var(--acento-fondo);
+  border-radius: 8px;
+}
+
+.cabeceraSeccion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== Seleccionar varios leads ===== */
+.celdaCasilla {
+  width: 40px;
+  padding-right: 0 !important;
+}
+
+.celdaCasilla input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--acento);
+  cursor: pointer;
+}
+
+.filaMarcada {
+  background: var(--acento-fondo);
+}
+
+.barraSeleccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-m);
+}
+
+.contadores {
+  display: inline-flex;
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--acento-anillo);
+  border-radius: 999px;
+}
+
+.contadorMarcados {
+  padding: 5px 12px;
+  color: var(--acento-oscuro);
+  background: var(--acento-fondo);
+}
+
+.contadorTodo {
+  padding: 5px 12px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+  background: var(--blanco);
+  border: 0;
+  cursor: pointer;
+}
+
+.contadorTodo:hover {
+  background: var(--relleno);
+}
+
+.accionBarra {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--carbon);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.accionBarra:hover:not(:disabled) {
+  background: var(--relleno);
+}
+
+.accionBarra:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.mensajeBarra {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--acento-oscuro);
+}
+
+.errorBarra {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: #c2362b;
+}
+
+/* Nombre de la columna en su menú: texto sin fondo (no se puede cambiar) y una «i» pequeña y suave al lado */
+.nombrePropiedad {
+  gap: 8px;
+  padding: 6px 8px 2px;
+}
+
+.tituloPropiedad {
+  font-weight: 600;
+  color: var(--carbon);
+}
+
+.nombrePropiedad .botonInfo {
+  width: auto;
+  height: auto;
+  padding: 0 2px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1;
+  color: #b6bbc2;
+  background: transparent;
+  border-radius: 4px;
+}
+
+.nombrePropiedad .botonInfo:hover {
+  color: var(--secundario);
+  background: transparent;
+}
+
+/* ===== Ajustes de forma: pastilla «Seleccionado», «i» con círculo, letras menos gruesas, iconos en las columnas ===== */
+.pildoraSeleccion {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--acento-oscuro);
+  background: var(--acento-fondo);
+  border: 1px solid var(--acento-anillo);
+  border-radius: 10px;
+}
+
+.botonPrimarioLote {
+  min-height: 34px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--blanco);
+  background: var(--acento);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.botonPrimarioLote:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.buscadorLista {
+  min-height: 36px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.88rem;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 8px;
+  outline: 0;
+}
+
+.buscadorLista:focus {
+  border-color: var(--acento);
+}
+
+.listaDesplazable {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.nombrePropiedad {
+  gap: 14px;
+}
+
+.nombrePropiedad .botonInfo {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #a3a8af;
+  background: transparent;
+  border: 1px solid #d3d7dc;
+  border-radius: 50%;
+}
+
+.nombrePropiedad .botonInfo:hover {
+  color: var(--secundario);
+  border-color: var(--secundario);
+}
+
+.tituloPropiedad {
+  font-weight: 500;
+}
+
+.enlaceNombre {
+  font-weight: 500;
+}
+
+.tabla th {
+  font-weight: 500;
+}
+
+.iconoPulsable {
+  display: inline-grid;
+  place-items: center;
+  color: var(--secundario);
+}
+
+/* ===== Contorno en lugar de relleno, círculo «+N» e iconos de columna ===== */
+.chip {
+  padding: 1px 9px;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid;
+}
+
+.estado {
+  background: transparent;
+}
+
+.circuloMas {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--secundario);
+  background: transparent;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  cursor: default;
+}
+
+.iconoColumna {
+  display: inline-grid;
+  place-items: center;
+  color: var(--secundario);
+}
+
+/* «i» de información: al pasar el ratón por encima (o enfocarla con el teclado) sale un globito con la explicación */
+.infoContenedor {
+  position: relative;
+  display: inline-flex;
+}
+
+.infoGlobo {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  z-index: 5;
+  width: max-content;
+  max-width: 230px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--blanco);
+  text-align: left;
+  pointer-events: none;
+  background: #2b2f38;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translate(-50%, -2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.infoContenedor:hover .infoGlobo,
+.infoContenedor:focus-within .infoGlobo {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Los estados salen del mismo tamaño que las etiquetas y los tipos */
+.estado {
+  padding: 1px 9px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: normal;
+}
+
+/* Una etiqueta, un tipo o un estado nunca se parten en dos líneas: todas las píldoras miden igual de alto */
+.chip,
+.estado {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ===== Casillas suaves, seis puntitos para arrastrar las filas y formulario compacto ===== */
+.celdaCasilla {
+  width: 64px;
+}
+
+.controlesFila {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.asaFila {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 22px;
+  padding: 0;
+  color: #b9bec6;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: grab;
+  opacity: 0.6;
+}
+
+tr:hover .asaFila,
+.asaFila:focus-visible {
+  opacity: 1;
+}
+
+.asaFila:hover {
+  color: var(--secundario);
+  background: var(--relleno);
+}
+
+.asaFila:active {
+  cursor: grabbing;
+}
+
+.filaDestino td {
+  box-shadow: inset 0 2px 0 var(--acento);
+}
+
+/* Casillas más finas y suaves */
+.celdaCasilla input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: var(--blanco);
+  border: 1.5px solid #cdd2d9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.celdaCasilla input[type="checkbox"]:hover {
+  border-color: #aab1ba;
+}
+
+.celdaCasilla input[type="checkbox"]:checked,
+.celdaCasilla input[type="checkbox"]:indeterminate {
+  background-color: color-mix(in srgb, var(--acento) 12%, white);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px 11px;
+  border-color: color-mix(in srgb, var(--acento) 55%, white);
+}
+
+.celdaCasilla input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e7490' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.5l4.5 4.5L19 7.5'/></svg>");
+}
+
+.celdaCasilla input[type="checkbox"]:indeterminate {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e7490' stroke-width='3.2' stroke-linecap='round'><path d='M6 12h12'/></svg>");
+}
+
+.celdaCasilla input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--acento-anillo);
+  outline-offset: 2px;
+}
+
+/* Crear lead: los campos en columnas de ancho razonable, alineados; etiquetas y notas ocupan dos columnas */
+.panelNuevo .formulario {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  max-width: 980px;
+}
+
+.ancho2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 560px) {
+  .ancho2 {
+    grid-column: 1 / -1;
+  }
+}

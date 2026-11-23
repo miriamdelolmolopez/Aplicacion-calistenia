@@ -3,6 +3,7 @@ export const SECCIONES_ADMIN: { clave: string; texto: string }[] = [
   { clave: "usuarios", texto: "Usuarios" },
   { clave: "importar", texto: "Importar contactos" },
   { clave: "registro", texto: "Registro" },
+  { clave: "leads", texto: "Leads (formulario de contacto)" },
   { clave: "presenciales", texto: "Clases presenciales (horarios, plantillas, tipos de clase)" },
   { clave: "reservas", texto: "Reservas" },
   { clave: "online", texto: "Entrenamientos online 1:1" },
@@ -25,6 +26,7 @@ const PREFIJOS: [string, string][] = [
   ["/admin/tablon", "contenido"],
   ["/admin/importar", "importar"],
   ["/admin/registro", "registro"],
+  ["/admin/leads", "leads"],
   ["/admin/presenciales", "presenciales"],
   ["/admin/clases", "presenciales"],
   ["/admin/horario", "presenciales"], // también «/admin/horarios»
