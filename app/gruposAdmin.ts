@@ -26,7 +26,7 @@ const MENU_BASE: GrupoMenu[] = [
   {
     titulo: "Personas",
     items: [
-      { clave: "leads", texto: "Leads", icono: "embudo" },
+      { clave: "leads", texto: "Leads", icono: "embudo", href: "/admin/leads" },
       {
         clave: "usuarios",
         texto: "Usuarios",
