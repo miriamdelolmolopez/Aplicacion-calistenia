@@ -2,6 +2,13 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ESTADOS_INICIALES, ETIQUETAS_INICIALES, TIPOS_INICIALES, type EstadoLead, type ItemColor } from "./tipos";
 
+// De quién son los leads: de la administradora más antigua (la entrenadora). Las demás administradoras ven y editan los mismos leads, estados, etiquetas, tipos y conexiones.
+export async function duenoDeLeads(): Promise<string> {
+  const { data } = await createAdminClient().from("profiles").select("id").eq("rol", "admin").order("creado_en", { ascending: true }).limit(1).maybeSingle();
+  if (!data) throw new Error("No hay ninguna administradora.");
+  return data.id as string;
+}
+
 // Los estados de un entrenador. La primera vez se le crean los de por defecto.
 export async function estadosDe(entrenadorId: string): Promise<EstadoLead[]> {
   const admin = createAdminClient();

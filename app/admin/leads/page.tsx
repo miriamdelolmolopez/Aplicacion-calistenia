@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin";
+import { requireLeads } from "./acceso";
 import styles from "../admin.module.css";
 import CabeceraAdmin from "../CabeceraAdmin";
 import { catalogosDe, estadosDe } from "./datos";
@@ -8,10 +8,10 @@ import { COLUMNAS_LEAD, type Lead } from "./tipos";
 export const metadata = { title: "Leads · Administración" };
 
 export default async function Leads() {
-  const { supabase, user } = await requireAdmin("leads");
-  const [estados, { etiquetas, tipos }] = await Promise.all([estadosDe(user.id), catalogosDe(user.id)]);
+  const { supabase, duenoId } = await requireLeads();
+  const [estados, { etiquetas, tipos }] = await Promise.all([estadosDe(duenoId), catalogosDe(duenoId)]);
   // Solo salen los leads de este entrenador (además, la base de datos lo exige).
-  const { data } = await supabase.from("leads").select(COLUMNAS_LEAD).eq("entrenador_id", user.id).order("llegada_en", { ascending: false }).limit(2000);
+  const { data } = await supabase.from("leads").select(COLUMNAS_LEAD).eq("entrenador_id", duenoId).order("llegada_en", { ascending: false }).limit(2000);
 
   return (
     <main className={styles.pagina} style={{ maxWidth: "none" }}>

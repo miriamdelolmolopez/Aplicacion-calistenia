@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { catalogosDe, estadosDe } from "@/app/admin/leads/datos";
+import { catalogosDe, duenoDeLeads, estadosDe } from "@/app/admin/leads/datos";
 import { camposDe, huella, leadDe, LIMITE_POR_MINUTO, MAX_BYTES, sinTildes } from "@/lib/leadsEntrada";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
@@ -55,7 +55,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (!emailValido(lead.email)) return responder({ ok: false, error: "Falta un correo válido." }, 422);
   if (!lead.nombre) lead.nombre = lead.email.split("@")[0].slice(0, 80);
 
-  const entrenadorId = conexion.entrenador_id as string;
+  const entrenadorId = await duenoDeLeads();
   const { data: existente } = await admin.from("leads").select("id, info, estado_id, leads_estados(nombre)").eq("entrenador_id", entrenadorId).ilike("email", lead.email).limit(1).maybeSingle();
 
   if (existente) {

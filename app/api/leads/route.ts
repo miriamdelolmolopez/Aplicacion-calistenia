@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { SERVICIOS_INTERES } from "@/lib/leads";
 import { notificarApp } from "@/lib/notificaciones";
-import { estadosDe } from "@/app/admin/leads/datos";
+import { duenoDeLeads, estadosDe } from "@/app/admin/leads/datos";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
 
@@ -78,10 +78,8 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
 
-  // El lead es de la primera administradora de la app.
-  const { data: jefa } = await admin.from("profiles").select("id").eq("rol", "admin").order("creado_en", { ascending: true }).limit(1).maybeSingle();
-  if (!jefa) return responder({ ok: false, error: "guardar" }, 500);
-  const entrenadorId = jefa.id as string;
+  // El lead es de la entrenadora principal (la administradora más antigua); las demás administradoras lo ven igual.
+  const entrenadorId = await duenoDeLeads();
 
   // Freno básico contra abusos: máximo 3 envíos por correo en 24 horas.
   const desde = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
@@ -115,7 +113,8 @@ export async function POST(request: Request) {
   if (error || !nuevo) return responder({ ok: false, error: "guardar" }, 500);
 
   // Aviso a la administradora: campana de la app y notificación en el móvil.
-  await notificarApp([entrenadorId], {
+  const { data: admins } = await admin.from("profiles").select("id").eq("rol", "admin");
+  await notificarApp((admins ?? []).map((a) => a.id as string), {
     tipo: "admin_lead",
     titulo: "Nuevo lead",
     cuerpo: `${nombre} · ${email}`,
