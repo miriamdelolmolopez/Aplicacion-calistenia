@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
+import { fijarInicioBono, inicioAltaValido } from "@/lib/altaBono";
 import { claveDia, instanteMadrid } from "@/lib/fechas";
 import { aCentimos } from "@/lib/formato";
 import { formaActiva } from "@/lib/formasPago";
@@ -43,6 +44,7 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
   const mes = Number(formData.get("mes"));
   const anio = Number(formData.get("anio"));
   const fin = String(formData.get("fin") ?? "").trim();
+  const inicio = String(formData.get("inicio") ?? "").trim();
   if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
   if (!UUID.test(tipo)) return { error: "Elige qué va a pagar." };
   if (!(await formaActiva(metodo))) return { error: "Elige la forma de pago." };
@@ -56,7 +58,10 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
   const periodo = `${anio}-${String(mes).padStart(2, "0")}`;
   const hastaFin = fin ? instanteMadrid(fin, "23:59") : null;
   if (fin && !hastaFin) return { error: "La fecha de fin no es válida." };
-  if (hastaFin && hastaFin.getTime() <= c.instante.getTime()) return { error: "La fecha de fin tiene que ser posterior al día del pago." };
+  if (inicio && !inicioAltaValido(inicio)) return { error: "La fecha de inicio del bono no es válida (puede ser pasada hasta dos años o futura hasta un año)." };
+  const desdeInicio = inicio ? instanteMadrid(inicio, "00:00") : null;
+  if (hastaFin && desdeInicio && hastaFin.getTime() <= desdeInicio.getTime()) return { error: "La fecha de fin tiene que ser posterior al inicio del bono." };
+  if (hastaFin && !desdeInicio && hastaFin.getTime() <= c.instante.getTime()) return { error: "La fecha de fin tiene que ser posterior al día del pago." };
   const admin = createAdminClient();
 
   const { data: tarifa } = await admin.from("tipos_bono").select("precio_centimos, servicio, servicio2").eq("id", tipo).maybeSingle();
@@ -104,8 +109,11 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
       .from("pagos")
       .update(sinCobrar ? { periodo } : { pagado_en: c.instante.toISOString(), periodo })
       .eq("bono_id", bonoId as string);
-    // Fecha de fin elegida: se aplica a lo que ya está en marcha (lo que queda en espera toma su fecha al empezar).
-    if (hastaFin) {
+    // Inicio del bono distinto de hoy: se fija la fecha en que empieza (y su fin). Si es futuro, el bono espera y se activa ese día.
+    if (inicio && inicio !== claveDia(new Date().toISOString())) {
+      await fijarInicioBono(admin, bonoId as string, inicio, hastaFin);
+    } else if (hastaFin) {
+      // Fecha de fin elegida: se aplica a lo que ya está en marcha (lo que queda en espera toma su fecha al empezar).
       await admin
         .from("bonos")
         .update({ caduca_en: hastaFin.toISOString() })

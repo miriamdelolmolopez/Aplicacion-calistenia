@@ -117,6 +117,7 @@ export function FormGuiado({
   const [anio, setAnio] = useState<number | null>(null);
   const [importeTexto, setImporteTexto] = useState<string | null>(null);
   const [fin, setFin] = useState<string | null>(null);
+  const [inicio, setInicio] = useState<string | null>(null);
   const [sinCobrar, setSinCobrar] = useState(false);
 
   const tipo = tipos.find((t) => t.id === tipoId);
@@ -126,7 +127,8 @@ export function FormGuiado({
   const rebaja = d ? (d.tipo === "porcentaje" ? Math.round((importe * d.valor) / 100) : Math.min(d.valor, importe)) : 0;
   const mesValor = mes ?? Number(fecha.slice(5, 7));
   const anioValor = anio ?? Number(fecha.slice(0, 4));
-  const finValor = fin ?? (fecha && tipo ? masDias(fecha, tipo.validez) : "");
+  const inicioValor = inicio ?? fecha;
+  const finValor = fin ?? (inicioValor && tipo ? masDias(inicioValor, tipo.validez) : "");
   const anioActual = Number(hoy.slice(0, 4));
 
   return (
@@ -197,8 +199,14 @@ export function FormGuiado({
       <SelectorForma formas={formas} id="pg" />
 
       <div className={styles.campo}>
+        <label htmlFor="pg-inicio">Inicio del bono <AyudaI texto="El día en que empieza a contar el bono. Puede ser distinto al día del pago: pasado (si ya empezó) o futuro (queda en espera y se activa ese día). Por defecto, el día del pago." /></label>
+        <input id="pg-inicio" name="inicio" type="date" value={inicioValor} onChange={(e) => { setInicio(e.target.value); setFin(null); }} />
+        <span className={styles.ayuda}>Por defecto, el día del pago. Cámbialo si el bono empieza otro día.</span>
+      </div>
+
+      <div className={styles.campo}>
         <label htmlFor="pg-fin">Fecha de fin <AyudaI texto="Hasta qué día dura el servicio. Si no la cambias, son los días de validez de la tarifa." /></label>
-        <input id="pg-fin" name="fin" type="date" value={finValor} min={fecha} onChange={(e) => setFin(e.target.value)} />
+        <input id="pg-fin" name="fin" type="date" value={finValor} min={inicioValor} onChange={(e) => setFin(e.target.value)} />
         <span className={styles.ayuda}>Hasta cuándo dura. Por defecto, los días de validez de la tarifa.</span>
       </div>
 
