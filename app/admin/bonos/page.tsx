@@ -5,6 +5,8 @@ import { euros } from "@/lib/formato";
 import { formasActivas, nombresFormas } from "@/lib/formasPago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import styles from "../admin.module.css";
+import { ajustesCuotas } from "@/lib/cuotas";
+import AjustesCuotas from "./AjustesCuotas";
 import { BotonPagado } from "./Controles";
 import HistorialPagos, { type FilaPago } from "./HistorialPagos";
 import RegistrarPago from "./RegistrarPago";
@@ -29,6 +31,10 @@ type PagoPendiente = {
   descuento_centimos: number;
   metodo: string;
   creado_en: string;
+  user_id: string | null;
+  vence_en: string | null;
+  cuota_n: number | null;
+  cuotas_total: number | null;
   profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null;
   bonos: { tipos_bono: { nombre: string } | null } | null;
 };
@@ -53,11 +59,14 @@ export default async function AdminBonos() {
   const { data: pendientesDatos } = await supabase
     .from("pagos")
     .select(
-      "id, importe_centimos, descuento_centimos, metodo, creado_en, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))",
+      "id, importe_centimos, descuento_centimos, metodo, creado_en, user_id, vence_en, cuota_n, cuotas_total, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))",
     )
     .eq("estado", "pendiente")
+    .order("vence_en", { ascending: true, nullsFirst: false })
     .order("creado_en");
   const pendientes = (pendientesDatos ?? []) as unknown as PagoPendiente[];
+  const cuotasAjustes = await ajustesCuotas();
+  const hoyMadrid = claveDia(new Date().toISOString());
 
   // Descuentos que se pueden elegir ahora: activos, sin caducar y con usos libres.
   const { data: descuentosDatos } = await supabase
@@ -164,8 +173,15 @@ export default async function AdminBonos() {
                 <div>
                   <strong>{p.profiles ? nombreDe(p.profiles) : "(persona borrada)"}</strong>
                   <div className={styles.ayuda}>
-                    {p.bonos?.tipos_bono?.nombre ?? "Pago"} · {METODOS[p.metodo] ?? p.metodo} · {fechaCorta(p.creado_en)}
+                    {p.bonos?.tipos_bono?.nombre ?? "Pago"}
+                    {p.cuotas_total && p.cuotas_total > 1 ? ` · cuota ${p.cuota_n ?? 1} de ${p.cuotas_total}` : ""} · {METODOS[p.metodo] ?? p.metodo} · {fechaCorta(p.creado_en)}
                   </div>
+                  {p.vence_en && (
+                    <div className={styles.ayuda} style={p.vence_en < hoyMadrid ? { color: "#b3261e", fontWeight: 600 } : undefined}>
+                      {p.vence_en < hoyMadrid ? "Atrasado: venció el " : p.vence_en === hoyMadrid ? "Vence hoy: " : "Vence el "}
+                      {p.vence_en.split("-").reverse().join("/")}
+                    </div>
+                  )}
                 </div>
                 <span className={styles.etiqueta}>
                   {euros(p.importe_centimos)}
@@ -173,9 +189,20 @@ export default async function AdminBonos() {
                 </span>
               </div>
               <BotonPagado pagoId={p.id} />
+              {p.user_id && (
+                <Link href={`/admin/usuarios/${p.user_id}/pagos?pestana=historial`} className={styles.ayuda} style={{ textDecoration: "underline" }}>
+                  Ver todos los pagos de esta persona (cobrar varios a la vez)
+                </Link>
+              )}
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className={styles.tarjeta}>
+        <h2>Pagos a plazos</h2>
+        <p className={styles.ayuda}>Cuando añades un pago a plazos, cada cuota tiene su fecha de vencimiento. Te avisamos cuando vencen, y a la persona también.</p>
+        <AjustesCuotas margen={cuotasAjustes.margen} aviso={cuotasAjustes.aviso} />
       </section>
 
       <section className={styles.tarjeta}>

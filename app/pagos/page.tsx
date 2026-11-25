@@ -22,6 +22,9 @@ type Pago = {
   estado: string;
   creado_en: string;
   pagado_en: string | null;
+  vence_en: string | null;
+  cuota_n: number | null;
+  cuotas_total: number | null;
   bonos: { tipos_bono: { nombre: string } | null } | null;
 };
 
@@ -37,7 +40,7 @@ export default function MisPagos() {
     let consulta = createClient()
       .from("pagos")
       .select(
-        "id, importe_centimos, importe_original_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, bonos(tipos_bono(nombre))",
+        "id, importe_centimos, importe_original_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, vence_en, cuota_n, cuotas_total, bonos(tipos_bono(nombre))",
       )
       .order("creado_en", { ascending: false });
     if (como) consulta = consulta.eq("user_id", como);
@@ -63,6 +66,17 @@ export default function MisPagos() {
               <small>
                 {fechaCorta(p.pagado_en ?? p.creado_en, idioma)} · {t[`metodo_${p.metodo}` as ClaveTexto]}
               </small>
+              {p.cuotas_total && p.cuotas_total > 1 && (
+                <small>
+                  {idioma === "en" ? `Instalment ${p.cuota_n ?? 1} of ${p.cuotas_total}` : `Cuota ${p.cuota_n ?? 1} de ${p.cuotas_total}`}
+                </small>
+              )}
+              {p.estado === "pendiente" && p.vence_en && (
+                <small>
+                  {idioma === "en" ? "Due on " : "Vence el "}
+                  {p.vence_en.split("-").reverse().join("/")}
+                </small>
+              )}
               {p.descuento_centimos > 0 && p.importe_original_centimos !== null && (
                 <small>
                   {t.precioLabel} {euros(p.importe_original_centimos)} − {t.descuentoLabel}{" "}

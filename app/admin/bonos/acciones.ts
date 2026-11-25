@@ -163,3 +163,25 @@ export async function cambiarPrecio(_previo: Estado, formData: FormData): Promis
   revalidatePath("/admin/bonos");
   return { mensaje: "Precio guardado (los bonos ya registrados no cambian)." };
 }
+
+// Ajustes de los pagos a plazos: días de margen tras el vencimiento (después la tarifa se pausa) y días de aviso antes.
+export async function guardarAjustesCuotas(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin("pagos");
+  const margen = entero(formData.get("margen"));
+  const aviso = entero(formData.get("aviso"));
+  if (!Number.isInteger(margen) || margen < 0 || margen > 90) return { error: "Los días de margen tienen que estar entre 0 y 90." };
+  if (!Number.isInteger(aviso) || aviso < 0 || aviso > 30) return { error: "Los días de aviso tienen que estar entre 0 y 30." };
+  const admin = createAdminClient();
+  const { error } = await admin.from("ajustes").upsert(
+    [
+      { clave: "cuotas_margen_dias", valor: String(margen), actualizado_en: new Date().toISOString() },
+      { clave: "cuotas_aviso_dias", valor: String(aviso), actualizado_en: new Date().toISOString() },
+    ],
+    { onConflict: "clave" },
+  );
+  if (error) return { error: "No se han podido guardar los ajustes." };
+  // Si se amplía el margen, lo que estaba pausado por un retraso puede volver a activarse.
+  await admin.rpc("refrescar_bonos");
+  revalidatePath("/admin/bonos");
+  return { mensaje: "Ajustes guardados." };
+}

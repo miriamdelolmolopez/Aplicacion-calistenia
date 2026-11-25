@@ -5,7 +5,7 @@ import type { Estado } from "../../../acciones";
 import styles from "../../../admin.module.css";
 import AyudaI from "../../../comunes/AyudaI";
 import { euros } from "@/lib/formato";
-import { anularPagoPersona, editarPago, cobrarPendiente, guardarPrecioPersonalizado, pagoGuiado, pagoManual, quitarPrecioPersonalizado } from "./acciones";
+import { anularPagoPersona, cambiarVencimiento, cobrarTodasPendientes, editarPago, cobrarPendiente, guardarPrecioPersonalizado, pagoGuiado, pagoManual, quitarPrecioPersonalizado } from "./acciones";
 import estilos from "./pagosPersona.module.css";
 
 export type FormaOpcion = { clave: string; nombre: string };
@@ -28,7 +28,11 @@ export type FilaPagoPersona = {
   dia: string; // AAAA-MM-DD
   hora: string; // HH:MM
   tieneFactura: boolean;
+  vence: string | null; // AAAA-MM-DD (solo pagos con vencimiento)
+  cuota: string | null; // «Cuota 2 de 3»
 };
+
+type Plazo = { importe: string; descuento: string; vence: string; pagada: boolean };
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const mesTexto = (p: string | null) => (p ? `${MESES[Number(p.slice(5, 7)) - 1]} ${p.slice(0, 4)}` : "—");
@@ -92,6 +96,18 @@ function masDias(fecha: string, dias: number): string {
   return new Date(Date.UTC(a, m - 1, d + dias)).toISOString().slice(0, 10);
 }
 
+// Suma meses a una fecha AAAA-MM-DD manteniendo el día (si el mes es más corto, el último día de ese mes).
+function masMeses(fecha: string, meses: number): string {
+  const [a, m, d] = fecha.split("-").map(Number);
+  const destino = new Date(Date.UTC(a, m - 1 + meses, 1));
+  const ultimo = new Date(Date.UTC(destino.getUTCFullYear(), destino.getUTCMonth() + 1, 0)).getUTCDate();
+  destino.setUTCDate(Math.min(d, ultimo));
+  return destino.toISOString().slice(0, 10);
+}
+
+const aEuros = (c: number) => (c / 100).toFixed(2).replace(".", ",");
+const aCents = (t: string) => Math.round(Number(t.replace(",", ".")) * 100) || 0;
+
 export function FormGuiado({
   userId,
   hoy,
@@ -119,6 +135,9 @@ export function FormGuiado({
   const [fin, setFin] = useState<string | null>(null);
   const [inicio, setInicio] = useState<string | null>(null);
   const [sinCobrar, setSinCobrar] = useState(false);
+  const [aPlazos, setAPlazos] = useState(false);
+  const [numCuotas, setNumCuotas] = useState(3);
+  const [plazos, setPlazos] = useState<Plazo[]>([]);
 
   const tipo = tipos.find((t) => t.id === tipoId);
   const d = descuentos.find((x) => x.id === descuentoId);
@@ -130,6 +149,35 @@ export function FormGuiado({
   const inicioValor = inicio ?? fecha;
   const finValor = fin ?? (inicioValor && tipo ? masDias(inicioValor, tipo.validez) : "");
   const anioActual = Number(hoy.slice(0, 4));
+
+  // Reparte la tarifa en cuotas iguales (la última se lleva el resto) con un vencimiento al mes, empezando el día del pago.
+  function repartir(n: number, precio: number, desde: string): Plazo[] {
+    const base = Math.floor(precio / n);
+    return Array.from({ length: n }, (_, i) => ({
+      importe: aEuros(i === n - 1 ? precio - base * (n - 1) : base),
+      descuento: "",
+      vence: masMeses(desde, i),
+      pagada: i === 0,
+    }));
+  }
+  function activarPlazos(on: boolean) {
+    setAPlazos(on);
+    if (on) setPlazos(repartir(numCuotas, tipo?.precio ?? 0, fecha));
+  }
+  function cambiarNumero(n: number) {
+    const v = Math.min(12, Math.max(2, n || 2));
+    setNumCuotas(v);
+    setPlazos(repartir(v, tipo?.precio ?? 0, fecha));
+  }
+  function tocar(i: number, cambio: Partial<Plazo>) {
+    setPlazos((ps) => ps.map((p, j) => (j === i ? { ...p, ...cambio } : p)));
+  }
+  const rebajaDeCuota = (p: Plazo) => {
+    const dd = descuentos.find((x) => x.id === p.descuento);
+    const bruto = aCents(p.importe);
+    return dd ? (dd.tipo === "porcentaje" ? Math.round((bruto * dd.valor) / 100) : Math.min(dd.valor, bruto)) : 0;
+  };
+  const sumaCuotas = plazos.reduce((n, p) => n + aCents(p.importe) - rebajaDeCuota(p), 0);
 
   return (
     <form action={accion} className={styles.tarjeta}>
@@ -145,6 +193,7 @@ export function FormGuiado({
             setTipoId(e.target.value);
             setImporteTexto(null);
             setFin(null);
+            if (aPlazos) setPlazos(repartir(numCuotas, tipos.find((t) => t.id === e.target.value)?.precio ?? 0, fecha));
           }}
           required
         >
@@ -190,11 +239,72 @@ export function FormGuiado({
         </div>
       </div>
 
+      <label className={styles.casilla}>
+        <input type="checkbox" checked={aPlazos} onChange={(e) => activarPlazos(e.target.checked)} />
+        <span>
+          Pagar a plazos <AyudaI texto="La persona paga la tarifa en varias cuotas. Cada cuota tiene su importe, su descuento, su fecha de vencimiento y se marca como pagada cuando se cobra. Te avisaremos cuando venzan." />
+        </span>
+      </label>
+
+      {aPlazos && (
+        <div className={styles.campo}>
+          <input type="hidden" name="plazos" value={JSON.stringify(plazos)} />
+          <label htmlFor="pg-ncuotas">Número de cuotas</label>
+          <input id="pg-ncuotas" type="number" min={2} max={12} value={numCuotas} onChange={(e) => cambiarNumero(Number(e.target.value))} style={{ maxWidth: 120 }} />
+          <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
+            {plazos.map((p, i) => {
+              const rebaja = rebajaDeCuota(p);
+              return (
+                <fieldset key={i} style={{ border: "1px solid var(--linea, #ddd)", borderRadius: 10, padding: 12, margin: 0, display: "grid", gap: 8 }}>
+                  <legend style={{ padding: "0 6px", fontWeight: 600 }}>Cuota {i + 1} de {plazos.length}</legend>
+                  <div className={estilos.dos}>
+                    <div className={styles.campo}>
+                      <label htmlFor={`pl-imp-${i}`}>Importe (€)</label>
+                      <input id={`pl-imp-${i}`} inputMode="decimal" value={p.importe} onChange={(e) => tocar(i, { importe: e.target.value })} />
+                    </div>
+                    <div className={styles.campo}>
+                      <label htmlFor={`pl-vence-${i}`}>Vence el</label>
+                      <input id={`pl-vence-${i}`} type="date" value={p.vence} onChange={(e) => tocar(i, { vence: e.target.value })} />
+                    </div>
+                  </div>
+                  {descuentos.length > 0 && (
+                    <div className={styles.campo}>
+                      <label htmlFor={`pl-desc-${i}`}>Descuento de esta cuota</label>
+                      <select id={`pl-desc-${i}`} value={p.descuento} onChange={(e) => tocar(i, { descuento: e.target.value })}>
+                        <option value="">Sin descuento</option>
+                        {descuentos.map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.texto}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <label className={styles.casilla}>
+                    <input type="checkbox" checked={p.pagada} onChange={(e) => tocar(i, { pagada: e.target.checked })} />
+                    <span>Ya pagada (se cobra con el día y la forma de pago de arriba)</span>
+                  </label>
+                  <span className={styles.ayuda}>
+                    A pagar: <b>{euros(aCents(p.importe) - rebaja)}</b>
+                    {rebaja > 0 && ` (descuento −${euros(rebaja)} sobre ${euros(aCents(p.importe))})`}
+                  </span>
+                </fieldset>
+              );
+            })}
+          </div>
+          <span className={styles.ayuda}>
+            Suma de las cuotas: {euros(sumaCuotas)}. Precio de la tarifa: {tipo ? euros(tipo.precio) : "—"}.
+          </span>
+        </div>
+      )}
+
+      {!aPlazos && (
       <div className={styles.campo}>
         <label htmlFor="pg-importe">Importe (€, IVA incluido) <AyudaI texto="Lo que paga la persona. Viene con el precio de la tarifa, pero puedes cambiarlo solo para este pago." /></label>
         <input id="pg-importe" name="importe" inputMode="decimal" value={importeValor} onChange={(e) => setImporteTexto(e.target.value)} required />
         {tipo && importe !== tipo.precio && <span className={styles.ayuda}>El precio de la tarifa es {euros(tipo.precio)}.</span>}
       </div>
+      )}
 
       <SelectorForma formas={formas} id="pg" />
 
@@ -210,7 +320,7 @@ export function FormGuiado({
         <span className={styles.ayuda}>Hasta cuándo dura. Por defecto, los días de validez de la tarifa.</span>
       </div>
 
-      {descuentos.length > 0 && (
+      {!aPlazos && descuentos.length > 0 && (
         <div className={styles.campo}>
           <label htmlFor="pg-desc">Aplicar un descuento <AyudaI texto="Rebaja el importe con uno de los descuentos que tienes creados. Cuenta como un uso de ese descuento." /></label>
           <select id="pg-desc" name="descuento" value={descuentoId} onChange={(e) => setDescuentoId(e.target.value)}>
@@ -229,16 +339,18 @@ export function FormGuiado({
         </div>
       )}
 
+      {!aPlazos && (
       <label className={styles.casilla}>
         <input type="checkbox" name="sinCobrar" checked={sinCobrar} onChange={(e) => setSinCobrar(e.target.checked)} />
         <span>
           Asignar tarifa sin cobrar (el pago queda pendiente) <AyudaI texto="Si la marcas, la persona recibe la tarifa ya (puede reservar o entrenar), pero el dinero no se da por cobrado: el pago queda como «pendiente» y lo cobras después desde el Historial. Si no la marcas, el pago se registra como cobrado ahora." />
         </span>
       </label>
+      )}
 
       <Mensajes estado={estado} />
       <button type="submit" className={styles.boton} disabled={pendiente || !tipo}>
-        {pendiente ? "Guardando…" : sinCobrar ? "Asignar sin cobrar" : "Añadir pago"}
+        {pendiente ? "Guardando…" : aPlazos ? "Crear pago a plazos" : sinCobrar ? "Asignar sin cobrar" : "Añadir pago"}
       </button>
     </form>
   );
@@ -267,6 +379,50 @@ function FormCobrar({ userId, pagoId, formas, hoy, ahora, metodoActual }: { user
       </button>
       <Mensajes estado={estado} />
     </form>
+  );
+}
+
+function FormVence({ userId, pagoId, vence }: { userId: string; pagoId: string; vence: string | null }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(cambiarVencimiento, {});
+  return (
+    <form action={accion} className={styles.formularioInterno}>
+      <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="pagoId" value={pagoId} />
+      <div className={styles.campo}>
+        <label htmlFor={`ve-${pagoId}`}>Vence el</label>
+        <input id={`ve-${pagoId}`} name="vence" type="date" defaultValue={vence ?? ""} required />
+      </div>
+      <button type="submit" className={styles.boton} disabled={pendiente}>
+        {pendiente ? "Guardando…" : "Guardar vencimiento"}
+      </button>
+      <Mensajes estado={estado} />
+    </form>
+  );
+}
+
+function FormCobrarTodas({ userId, formas, hoy, ahora, cuantas, total }: { userId: string; formas: FormaOpcion[]; hoy: string; ahora: string; cuantas: number; total: number }) {
+  const [estado, accion, pendiente] = useActionState<Estado, FormData>(cobrarTodasPendientes, {});
+  return (
+    <details className={styles.persona}>
+      <summary>
+        <strong>Cobrar todos los pendientes ({cuantas}) · {euros(total)}</strong>
+      </summary>
+      <form
+        action={accion}
+        className={styles.formularioInterno}
+        onSubmit={(e) => {
+          if (!window.confirm(`¿Marcar los ${cuantas} pagos pendientes como cobrados (${euros(total)})?`)) e.preventDefault();
+        }}
+      >
+        <input type="hidden" name="userId" value={userId} />
+        <SelectorForma formas={formas} id="todas" />
+        <CamposFechaHora hoy={hoy} ahora={ahora} id="todas" />
+        <button type="submit" className={styles.boton} disabled={pendiente}>
+          {pendiente ? "Guardando…" : "Marcar todos como cobrados"}
+        </button>
+        <Mensajes estado={estado} />
+      </form>
+    </details>
   );
 }
 
@@ -341,18 +497,27 @@ function FormAnular({ userId, pagoId }: { userId: string; pagoId: string }) {
 
 export function HistorialPersona({ userId, pagos, formas, hoy, ahora, abrirEditar }: { userId: string; pagos: FilaPagoPersona[]; formas: FormaOpcion[]; hoy: string; ahora: string; abrirEditar?: string }) {
   if (pagos.length === 0) return <p className={styles.ayuda}>Todavía no tiene ningún pago.</p>;
+  const pendientes = pagos.filter((x) => x.estado === "pendiente");
   return (
+    <>
+    {pendientes.length > 1 && <FormCobrarTodas userId={userId} formas={formas} hoy={hoy} ahora={ahora} cuantas={pendientes.length} total={pendientes.reduce((n, x) => n + x.importe, 0)} />}
     <ul className={styles.lista}>
       {pagos.map((p) => (
         <li key={p.id} id={`pago-${p.id}`} className={styles.persona}>
           <div className={styles.personaCabecera}>
             <div>
-              <strong>{p.concepto}</strong>
+              <strong>{p.concepto}{p.cuota ? ` · ${p.cuota}` : ""}</strong>
               <div className={styles.ayuda}>
                 {p.fecha} · {p.metodoNombre}
                 {p.periodo ? ` · corresponde a ${mesTexto(p.periodo)}` : ""}
               </div>
               {p.descuento > 0 && <div className={styles.ayuda}>Descuento −{euros(p.descuento)}</div>}
+              {p.estado === "pendiente" && p.vence && (
+                <div className={p.vence < hoy ? estilos.sinPagar : styles.ayuda}>
+                  {p.vence < hoy ? "Atrasado: venció el " : p.vence === hoy ? "Vence hoy: " : "Vence el "}
+                  {p.vence.split("-").reverse().join("/")}
+                </div>
+              )}
               {p.nota && <div className={styles.ayuda}>{p.nota}</div>}
             </div>
             <div className={estilos.derecha}>
@@ -366,6 +531,12 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora, abrirEdita
             <details>
               <summary className={styles.ayuda}>Cobrar</summary>
               <FormCobrar userId={userId} pagoId={p.id} formas={formas} hoy={hoy} ahora={ahora} metodoActual={p.metodo} />
+            </details>
+          )}
+          {p.estado === "pendiente" && p.vence && (
+            <details>
+              <summary className={styles.ayuda}>Cambiar vencimiento</summary>
+              <FormVence userId={userId} pagoId={p.id} vence={p.vence} />
             </details>
           )}
           {p.estado === "anulado" && p.tieneFactura && (
@@ -398,6 +569,7 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora, abrirEdita
         </li>
       ))}
     </ul>
+    </>
   );
 }
 

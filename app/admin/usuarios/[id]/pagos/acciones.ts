@@ -33,14 +33,109 @@ function cuando(fecha: string, hora: string): { instante: Date } | { error: stri
   return { instante: d };
 }
 
+type Plazo = { importe: string; descuento: string; vence: string; pagada: boolean };
+type DescuentoFila = { id: string; tipo: string; valor: number; activo: boolean; caduca_en: string | null; usos_max: number | null };
+
+// Lee y comprueba las cuotas que llegan del formulario (texto JSON). Sin cuotas, es un pago normal.
+function leerPlazos(texto: string): { plazos: Plazo[] | null } | { error: string } {
+  if (!texto.trim()) return { plazos: null };
+  let crudo: unknown;
+  try {
+    crudo = JSON.parse(texto);
+  } catch {
+    return { error: "Las cuotas no son válidas. Vuelve a intentarlo." };
+  }
+  if (!Array.isArray(crudo) || crudo.length < 1 || crudo.length > 12) return { error: "Elige entre 1 y 12 cuotas." };
+  const plazos: Plazo[] = [];
+  for (const [i, x] of crudo.entries()) {
+    const o = (x ?? {}) as Record<string, unknown>;
+    const p: Plazo = { importe: String(o.importe ?? ""), descuento: String(o.descuento ?? ""), vence: String(o.vence ?? "").trim(), pagada: o.pagada === true };
+    const euros = aCentimos(p.importe);
+    if (!Number.isFinite(euros) || euros < 0) return { error: `El importe de la cuota ${i + 1} no es válido.` };
+    if (p.descuento && !UUID.test(p.descuento)) return { error: `El descuento de la cuota ${i + 1} no es válido.` };
+    if (!instanteMadrid(p.vence, "00:00")) return { error: `La fecha de vencimiento de la cuota ${i + 1} no es válida.` };
+    plazos.push(p);
+  }
+  return { plazos };
+}
+
+// Rebaja de un descuento sobre un importe (en céntimos).
+function rebajaDe(d: DescuentoFila, bruto: number): number {
+  return d.tipo === "porcentaje" ? Math.round((bruto * d.valor) / 100) : Math.min(d.valor, bruto);
+}
+
+// Comprueba que los descuentos elegidos en las cuotas existen, están activos, no han caducado y tienen usos libres para todas las cuotas.
+async function comprobarDescuentos(admin: ReturnType<typeof createAdminClient>, plazos: Plazo[]): Promise<string | null> {
+  const ids = [...new Set(plazos.map((p) => p.descuento).filter(Boolean))];
+  if (ids.length === 0) return null;
+  const { data } = await admin.from("descuentos").select("id, tipo, valor, activo, caduca_en, usos_max").in("id", ids);
+  const hoy = claveDia(new Date().toISOString());
+  for (const id of ids) {
+    const d = ((data ?? []) as DescuentoFila[]).find((x) => x.id === id);
+    if (!d || !d.activo) return "Uno de los descuentos ya no está disponible.";
+    if (d.caduca_en && d.caduca_en < hoy) return "Uno de los descuentos ha caducado.";
+    if (d.usos_max !== null) {
+      const { count } = await admin.from("pagos").select("id", { count: "exact", head: true }).eq("descuento_id", id).neq("estado", "anulado");
+      const enEstePlan = plazos.filter((p) => p.descuento === id).length;
+      if ((count ?? 0) + enEstePlan > d.usos_max) return "Un descuento no tiene usos suficientes para todas las cuotas.";
+    }
+  }
+  return null;
+}
+
+// Anota el vencimiento de la primera cuota y crea las demás (pendientes, o cobradas si se marcaron como pagadas).
+async function crearCuotas(admin: ReturnType<typeof createAdminClient>, p: { userId: string; bonoId: string; adminId: string; metodo: string; instante: Date; plazos: Plazo[] }): Promise<string> {
+  const total = p.plazos.length;
+  const { data: primero } = await admin.from("pagos").select("id").eq("bono_id", p.bonoId).order("creado_en", { ascending: true }).limit(1).maybeSingle();
+  if (primero) await admin.from("pagos").update({ vence_en: p.plazos[0].vence, cuota_n: 1, cuotas_total: total }).eq("id", primero.id);
+
+  const ids = [...new Set(p.plazos.map((x) => x.descuento).filter(Boolean))];
+  const { data: ds } = ids.length ? await admin.from("descuentos").select("id, tipo, valor, activo, caduca_en, usos_max").in("id", ids) : { data: [] };
+  const descuentos = (ds ?? []) as DescuentoFila[];
+
+  let cobradas = p.plazos[0].pagada ? 1 : 0;
+  const fallos: string[] = [];
+  for (let i = 1; i < total; i++) {
+    const plazo = p.plazos[i];
+    const bruto = aCentimos(plazo.importe);
+    const d = plazo.descuento ? descuentos.find((x) => x.id === plazo.descuento) : undefined;
+    const rebaja = d ? rebajaDe(d, bruto) : 0;
+    const periodo = plazo.vence.slice(0, 7);
+    const { data: nuevo, error } = await admin
+      .from("pagos")
+      .insert({ user_id: p.userId, bono_id: p.bonoId, importe_centimos: bruto - rebaja, importe_original_centimos: bruto, descuento_centimos: rebaja, descuento_id: d ? d.id : null, metodo: p.metodo, estado: "pendiente", periodo, vence_en: plazo.vence, cuota_n: i + 1, cuotas_total: total })
+      .select("id")
+      .single();
+    if (error || !nuevo) {
+      fallos.push(`la cuota ${i + 1}`);
+      continue;
+    }
+    if (plazo.pagada) {
+      const { error: falloCobro } = await admin.rpc("cobrar_pago", { p_pago: nuevo.id, p_pagado_en: p.instante.toISOString(), p_metodo: p.metodo, p_periodo: periodo, p_nota: "", p_admin: p.adminId });
+      if (falloCobro) fallos.push(`el cobro de la cuota ${i + 1}`);
+      else cobradas++;
+    }
+  }
+  const base = `Pago a plazos creado: ${total} ${total === 1 ? "cuota" : "cuotas"}, ${cobradas} ${cobradas === 1 ? "cobrada" : "cobradas"} y ${total - cobradas} pendientes.`;
+  return fallos.length ? `${base} No se pudo crear ${fallos.join(", ")}: añádela desde Nuevo manual.` : base;
+}
+
 // «Nuevo pago»: se elige la tarifa y se cobra (o se asigna sin cobrar, dejando el pago pendiente).
 export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<Estado> {
   const { user } = await requireAdmin("usuarios");
   const userId = String(formData.get("userId") ?? "");
   const tipo = String(formData.get("tipo") ?? "");
-  const descuento = String(formData.get("descuento") ?? "");
+  let descuento = String(formData.get("descuento") ?? "");
   const metodo = String(formData.get("metodo") ?? "");
-  const sinCobrar = formData.get("sinCobrar") === "on";
+  let sinCobrar = formData.get("sinCobrar") === "on";
+  // Pago a plazos: varias cuotas, cada una con su importe, descuento, vencimiento y si ya está pagada.
+  const plazosLeidos = leerPlazos(String(formData.get("plazos") ?? ""));
+  if ("error" in plazosLeidos) return { error: plazosLeidos.error };
+  const plazos = plazosLeidos.plazos;
+  if (plazos) {
+    descuento = plazos[0].descuento;
+    sinCobrar = !plazos[0].pagada;
+  }
   const mes = Number(formData.get("mes"));
   const anio = Number(formData.get("anio"));
   const fin = String(formData.get("fin") ?? "").trim();
@@ -50,7 +145,7 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
   if (!(await formaActiva(metodo))) return { error: "Elige la forma de pago." };
   if (!(mes >= 1 && mes <= 12) || !(anio >= 2000 && anio <= 2100)) return { error: "El mes o el año al que corresponde no son válidos." };
 
-  const importe = aCentimos(String(formData.get("importe") ?? ""));
+  const importe = aCentimos(plazos ? plazos[0].importe : String(formData.get("importe") ?? ""));
   if (!Number.isFinite(importe) || importe < 0) return { error: "El importe no es válido." };
 
   const c = cuando(String(formData.get("fecha") ?? "").trim(), String(formData.get("hora") ?? "").trim());
@@ -63,6 +158,11 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
   if (hastaFin && desdeInicio && hastaFin.getTime() <= desdeInicio.getTime()) return { error: "La fecha de fin tiene que ser posterior al inicio del bono." };
   if (hastaFin && !desdeInicio && hastaFin.getTime() <= c.instante.getTime()) return { error: "La fecha de fin tiene que ser posterior al día del pago." };
   const admin = createAdminClient();
+
+  if (plazos) {
+    const fallo = await comprobarDescuentos(admin, plazos);
+    if (fallo) return { error: fallo };
+  }
 
   const { data: tarifa } = await admin.from("tipos_bono").select("precio_centimos, servicio, servicio2").eq("id", tipo).maybeSingle();
   if (!tarifa) return { error: "No se ha encontrado esa tarifa." };
@@ -92,7 +192,7 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
     p_nota: "",
     p_admin: user.id,
     p_descuento: descuento || null,
-    ...(importe !== (tarifa.precio_centimos as number) ? { p_precio: importe } : {}),
+    ...(plazos || importe !== (tarifa.precio_centimos as number) ? { p_precio: importe } : {}),
   });
   if (error) {
     if (ascendido) {
@@ -124,9 +224,13 @@ export async function pagoGuiado(_previo: Estado, formData: FormData): Promise<E
     }
   }
 
+  // Pago a plazos: la primera cuota ya existe; se anota su vencimiento y se crean las demás.
+  let resumenPlazos = "";
+  if (bonoId && plazos) resumenPlazos = await crearCuotas(admin, { userId, bonoId: bonoId as string, adminId: user.id, metodo, instante: c.instante, plazos });
+
   refrescar(userId);
   const pasoAAlumno = ascendido ? " Ahora es alumno/a (antes era invitado/a)." : "";
-  return { mensaje: (sinCobrar ? "Tarifa asignada. El pago queda pendiente de cobrar." : "Pago registrado y cobrado.") + pasoAAlumno };
+  return { mensaje: (plazos ? resumenPlazos : sinCobrar ? "Tarifa asignada. El pago queda pendiente de cobrar." : "Pago registrado y cobrado.") + pasoAAlumno };
 }
 
 // Cobrar un pago pendiente desde el historial, con la fecha, hora y forma que se elijan.
@@ -324,4 +428,49 @@ export async function editarPago(_previo: Estado, formData: FormData): Promise<E
   if (error) return { error: "No se ha podido guardar." };
   refrescar(userId);
   return { mensaje: "Pago actualizado." };
+}
+
+// Cobrar de una vez todos los pagos pendientes de una persona (todas las cuotas que le queden), con la misma fecha y forma de pago.
+export async function cobrarTodasPendientes(_previo: Estado, formData: FormData): Promise<Estado> {
+  const { user } = await requireAdmin("usuarios");
+  const userId = String(formData.get("userId") ?? "");
+  const metodo = String(formData.get("metodo") ?? "");
+  if (!UUID.test(userId)) return { error: "No se ha podido identificar a la persona." };
+  if (!(await formaActiva(metodo))) return { error: "Elige la forma de pago." };
+  const c = cuando(String(formData.get("fecha") ?? "").trim(), String(formData.get("hora") ?? "").trim());
+  if ("error" in c) return { error: c.error };
+
+  const admin = createAdminClient();
+  const { data: pendientes } = await admin.from("pagos").select("id, periodo").eq("user_id", userId).eq("estado", "pendiente").order("vence_en", { ascending: true, nullsFirst: false });
+  const lista = (pendientes ?? []) as { id: string; periodo: string | null }[];
+  if (lista.length === 0) return { error: "No tiene nada pendiente de cobrar." };
+
+  let cobrados = 0;
+  for (const p of lista) {
+    const { error } = await admin.rpc("cobrar_pago", { p_pago: p.id, p_pagado_en: c.instante.toISOString(), p_metodo: metodo, p_periodo: p.periodo ?? mesMadrid(c.instante), p_nota: "", p_admin: user.id });
+    if (!error) cobrados++;
+  }
+  refrescar(userId);
+  if (cobrados === 0) return { error: "No se ha podido cobrar ninguno. Inténtalo de nuevo." };
+  return { mensaje: cobrados === lista.length ? `Cobrados los ${cobrados} pagos pendientes.` : `Se han cobrado ${cobrados} de ${lista.length} pagos pendientes. Revisa el resto en el historial.` };
+}
+
+// Cambiar la fecha de vencimiento de un pago pendiente (por ejemplo, si la persona pide pagar unos días más tarde).
+export async function cambiarVencimiento(_previo: Estado, formData: FormData): Promise<Estado> {
+  await requireAdmin("usuarios");
+  const userId = String(formData.get("userId") ?? "");
+  const pagoId = String(formData.get("pagoId") ?? "");
+  const vence = String(formData.get("vence") ?? "").trim();
+  if (!UUID.test(userId) || !UUID.test(pagoId)) return { error: "No se ha encontrado ese pago." };
+  if (!instanteMadrid(vence, "00:00")) return { error: "La fecha de vencimiento no es válida." };
+
+  const admin = createAdminClient();
+  const { data: p } = await admin.from("pagos").select("id, user_id, estado").eq("id", pagoId).maybeSingle();
+  if (!p || p.user_id !== userId || p.estado !== "pendiente") return { error: "Solo se puede cambiar el vencimiento de un pago pendiente." };
+  const { error } = await admin.from("pagos").update({ vence_en: vence }).eq("id", pagoId);
+  if (error) return { error: "No se ha podido guardar el vencimiento." };
+  // Si estaba pausada por este retraso, al cambiar la fecha puede volver a activarse.
+  await admin.rpc("refrescar_bonos", { p_user: userId });
+  refrescar(userId);
+  return { mensaje: "Vencimiento cambiado." };
 }

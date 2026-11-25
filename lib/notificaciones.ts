@@ -33,7 +33,9 @@ export type TipoNotificacion =
   | "admin_caducan"
   | "admin_descongelado"
   | "admin_tarea"
-  | "admin_lead";
+  | "admin_lead"
+  | "cuota"
+  | "admin_cuota";
 
 // Se avisan siempre, la persona no los puede desactivar.
 const ESENCIALES = new Set<TipoNotificacion>(["clase_cancelada", "plaza_liberada", "aniversario"]);
