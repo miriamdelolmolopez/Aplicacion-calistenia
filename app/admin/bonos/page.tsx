@@ -33,6 +33,8 @@ type PagoPendiente = {
   creado_en: string;
   user_id: string | null;
   vence_en: string | null;
+  cubre_desde: string | null;
+  cubre_hasta: string | null;
   cuota_n: number | null;
   cuotas_total: number | null;
   profiles: { nombre: string | null; apellidos: string | null; email: string | null } | null;
@@ -59,7 +61,7 @@ export default async function AdminBonos() {
   const { data: pendientesDatos } = await supabase
     .from("pagos")
     .select(
-      "id, importe_centimos, descuento_centimos, metodo, creado_en, user_id, vence_en, cuota_n, cuotas_total, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))",
+      "id, importe_centimos, descuento_centimos, metodo, creado_en, user_id, vence_en, cubre_desde, cubre_hasta, cuota_n, cuotas_total, profiles(nombre, apellidos, email), bonos(tipos_bono(nombre))",
     )
     .eq("estado", "pendiente")
     .order("vence_en", { ascending: true, nullsFirst: false })
@@ -176,6 +178,11 @@ export default async function AdminBonos() {
                     {p.bonos?.tipos_bono?.nombre ?? "Pago"}
                     {p.cuotas_total && p.cuotas_total > 1 ? ` · cuota ${p.cuota_n ?? 1} de ${p.cuotas_total}` : ""} · {METODOS[p.metodo] ?? p.metodo} · {fechaCorta(p.creado_en)}
                   </div>
+                  {p.cubre_desde && p.cubre_hasta && (
+                    <div className={styles.ayuda}>
+                      Cubre del {p.cubre_desde.split("-").reverse().join("/")} al {p.cubre_hasta.split("-").reverse().join("/")}
+                    </div>
+                  )}
                   {p.vence_en && (
                     <div className={styles.ayuda} style={p.vence_en < hoyMadrid ? { color: "#b3261e", fontWeight: 600 } : undefined}>
                       {p.vence_en < hoyMadrid ? "Atrasado: venció el " : p.vence_en === hoyMadrid ? "Vence hoy: " : "Vence el "}

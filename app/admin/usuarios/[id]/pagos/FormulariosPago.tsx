@@ -30,9 +30,11 @@ export type FilaPagoPersona = {
   tieneFactura: boolean;
   vence: string | null; // AAAA-MM-DD (solo pagos con vencimiento)
   cuota: string | null; // «Cuota 2 de 3»
+  cubreDesde: string | null; // AAAA-MM-DD
+  cubreHasta: string | null;
 };
 
-type Plazo = { importe: string; descuento: string; vence: string; pagada: boolean };
+type Plazo = { importe: string; descuento: string; vence: string; desde: string; hasta: string; pagada: boolean };
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const mesTexto = (p: string | null) => (p ? `${MESES[Number(p.slice(5, 7)) - 1]} ${p.slice(0, 4)}` : "—");
@@ -151,23 +153,32 @@ export function FormGuiado({
   const anioActual = Number(hoy.slice(0, 4));
 
   // Reparte la tarifa en cuotas iguales (la última se lleva el resto) con un vencimiento al mes, empezando el día del pago.
-  function repartir(n: number, precio: number, desde: string): Plazo[] {
+  // Cada cuota cubre un mes a partir del inicio del bono; la última llega hasta el fin del bono.
+  function periodoDe(i: number, n: number, inicioBono: string, finBono: string): { desde: string; hasta: string } {
+    return { desde: masMeses(inicioBono, i), hasta: i === n - 1 && finBono ? finBono : masDias(masMeses(inicioBono, i + 1), -1) };
+  }
+  function repartir(n: number, precio: number, desde: string, inicioBono: string, finBono: string): Plazo[] {
     const base = Math.floor(precio / n);
     return Array.from({ length: n }, (_, i) => ({
       importe: aEuros(i === n - 1 ? precio - base * (n - 1) : base),
       descuento: "",
       vence: masMeses(desde, i),
+      ...periodoDe(i, n, inicioBono, finBono),
       pagada: i === 0,
     }));
   }
+  // Si cambia el inicio o el fin del bono, se recalculan los periodos de las cuotas.
+  function reperiodos(inicioBono: string, finBono: string) {
+    setPlazos((ps) => ps.map((p, i) => ({ ...p, ...periodoDe(i, ps.length, inicioBono, finBono) })));
+  }
   function activarPlazos(on: boolean) {
     setAPlazos(on);
-    if (on) setPlazos(repartir(numCuotas, tipo?.precio ?? 0, fecha));
+    if (on) setPlazos(repartir(numCuotas, tipo?.precio ?? 0, fecha, inicioValor, finValor));
   }
   function cambiarNumero(n: number) {
     const v = Math.min(12, Math.max(2, n || 2));
     setNumCuotas(v);
-    setPlazos(repartir(v, tipo?.precio ?? 0, fecha));
+    setPlazos(repartir(v, tipo?.precio ?? 0, fecha, inicioValor, finValor));
   }
   function tocar(i: number, cambio: Partial<Plazo>) {
     setPlazos((ps) => ps.map((p, j) => (j === i ? { ...p, ...cambio } : p)));
@@ -193,7 +204,10 @@ export function FormGuiado({
             setTipoId(e.target.value);
             setImporteTexto(null);
             setFin(null);
-            if (aPlazos) setPlazos(repartir(numCuotas, tipos.find((t) => t.id === e.target.value)?.precio ?? 0, fecha));
+            if (aPlazos) {
+              const nuevo = tipos.find((t) => t.id === e.target.value);
+              setPlazos(repartir(numCuotas, nuevo?.precio ?? 0, fecha, inicioValor, nuevo ? masDias(inicioValor, nuevo.validez) : ""));
+            }
           }}
           required
         >
@@ -208,7 +222,7 @@ export function FormGuiado({
       <div className={estilos.dos}>
         <div className={styles.campo}>
           <label htmlFor="pg-fecha">Día del pago <AyudaI texto="El día en que pagó. No puede ser futuro." /></label>
-          <input id="pg-fecha" name="fecha" type="date" value={fecha} max={hoy} onChange={(e) => { setFecha(e.target.value); setMes(null); setAnio(null); setFin(null); }} />
+          <input id="pg-fecha" name="fecha" type="date" value={fecha} max={hoy} onChange={(e) => { setFecha(e.target.value); setMes(null); setAnio(null); setFin(null); if (aPlazos && inicio === null && tipo) reperiodos(e.target.value, masDias(e.target.value, tipo.validez)); }} />
         </div>
         <div className={styles.campo}>
           <label htmlFor="pg-hora">Hora del pago <AyudaI texto="La hora a la que pagó. Sale en la factura." /></label>
@@ -267,6 +281,16 @@ export function FormGuiado({
                       <input id={`pl-vence-${i}`} type="date" value={p.vence} onChange={(e) => tocar(i, { vence: e.target.value })} />
                     </div>
                   </div>
+                  <div className={estilos.dos}>
+                    <div className={styles.campo}>
+                      <label htmlFor={`pl-desde-${i}`}>Cubre desde <AyudaI texto="El primer día del periodo que cubre esta cuota." /></label>
+                      <input id={`pl-desde-${i}`} type="date" value={p.desde} onChange={(e) => tocar(i, { desde: e.target.value })} />
+                    </div>
+                    <div className={styles.campo}>
+                      <label htmlFor={`pl-hasta-${i}`}>hasta <AyudaI texto="El último día del periodo que cubre esta cuota." /></label>
+                      <input id={`pl-hasta-${i}`} type="date" value={p.hasta} min={p.desde} onChange={(e) => tocar(i, { hasta: e.target.value })} />
+                    </div>
+                  </div>
                   {descuentos.length > 0 && (
                     <div className={styles.campo}>
                       <label htmlFor={`pl-desc-${i}`}>Descuento de esta cuota</label>
@@ -310,13 +334,13 @@ export function FormGuiado({
 
       <div className={styles.campo}>
         <label htmlFor="pg-inicio">Inicio del bono <AyudaI texto="El día en que empieza a contar el bono. Puede ser distinto al día del pago: pasado (si ya empezó) o futuro (queda en espera y se activa ese día). Por defecto, el día del pago." /></label>
-        <input id="pg-inicio" name="inicio" type="date" value={inicioValor} onChange={(e) => { setInicio(e.target.value); setFin(null); }} />
+        <input id="pg-inicio" name="inicio" type="date" value={inicioValor} onChange={(e) => { setInicio(e.target.value); setFin(null); if (aPlazos && tipo && e.target.value) reperiodos(e.target.value, masDias(e.target.value, tipo.validez)); }} />
         <span className={styles.ayuda}>Por defecto, el día del pago. Cámbialo si el bono empieza otro día.</span>
       </div>
 
       <div className={styles.campo}>
         <label htmlFor="pg-fin">Fecha de fin <AyudaI texto="Hasta qué día dura el servicio. Si no la cambias, son los días de validez de la tarifa." /></label>
-        <input id="pg-fin" name="fin" type="date" value={finValor} min={inicioValor} onChange={(e) => setFin(e.target.value)} />
+        <input id="pg-fin" name="fin" type="date" value={finValor} min={inicioValor} onChange={(e) => { setFin(e.target.value); if (aPlazos && e.target.value) reperiodos(inicioValor, e.target.value); }} />
         <span className={styles.ayuda}>Hasta cuándo dura. Por defecto, los días de validez de la tarifa.</span>
       </div>
 
@@ -512,6 +536,11 @@ export function HistorialPersona({ userId, pagos, formas, hoy, ahora, abrirEdita
                 {p.periodo ? ` · corresponde a ${mesTexto(p.periodo)}` : ""}
               </div>
               {p.descuento > 0 && <div className={styles.ayuda}>Descuento −{euros(p.descuento)}</div>}
+              {p.cubreDesde && p.cubreHasta && (
+                <div className={styles.ayuda}>
+                  Cubre del {p.cubreDesde.split("-").reverse().join("/")} al {p.cubreHasta.split("-").reverse().join("/")}
+                </div>
+              )}
               {p.estado === "pendiente" && p.vence && (
                 <div className={p.vence < hoy ? estilos.sinPagar : styles.ayuda}>
                   {p.vence < hoy ? "Atrasado: venció el " : p.vence === hoy ? "Vence hoy: " : "Vence el "}

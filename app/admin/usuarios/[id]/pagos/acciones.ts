@@ -33,7 +33,7 @@ function cuando(fecha: string, hora: string): { instante: Date } | { error: stri
   return { instante: d };
 }
 
-type Plazo = { importe: string; descuento: string; vence: string; pagada: boolean };
+type Plazo = { importe: string; descuento: string; vence: string; desde: string; hasta: string; pagada: boolean };
 type DescuentoFila = { id: string; tipo: string; valor: number; activo: boolean; caduca_en: string | null; usos_max: number | null };
 
 // Lee y comprueba las cuotas que llegan del formulario (texto JSON). Sin cuotas, es un pago normal.
@@ -49,11 +49,16 @@ function leerPlazos(texto: string): { plazos: Plazo[] | null } | { error: string
   const plazos: Plazo[] = [];
   for (const [i, x] of crudo.entries()) {
     const o = (x ?? {}) as Record<string, unknown>;
-    const p: Plazo = { importe: String(o.importe ?? ""), descuento: String(o.descuento ?? ""), vence: String(o.vence ?? "").trim(), pagada: o.pagada === true };
+    const p: Plazo = { importe: String(o.importe ?? ""), descuento: String(o.descuento ?? ""), vence: String(o.vence ?? "").trim(), desde: String(o.desde ?? "").trim(), hasta: String(o.hasta ?? "").trim(), pagada: o.pagada === true };
     const euros = aCentimos(p.importe);
     if (!Number.isFinite(euros) || euros < 0) return { error: `El importe de la cuota ${i + 1} no es válido.` };
     if (p.descuento && !UUID.test(p.descuento)) return { error: `El descuento de la cuota ${i + 1} no es válido.` };
     if (!instanteMadrid(p.vence, "00:00")) return { error: `La fecha de vencimiento de la cuota ${i + 1} no es válida.` };
+    // El periodo que cubre la cuota es opcional; si se pone, tiene que ser válido y acabar después de empezar.
+    const d = p.desde ? instanteMadrid(p.desde, "00:00") : null;
+    const h = p.hasta ? instanteMadrid(p.hasta, "00:00") : null;
+    if ((p.desde && !d) || (p.hasta && !h)) return { error: `Las fechas del periodo de la cuota ${i + 1} no son válidas.` };
+    if (d && h && h.getTime() < d.getTime()) return { error: `En la cuota ${i + 1}, el periodo tiene que acabar después de empezar.` };
     plazos.push(p);
   }
   return { plazos };
@@ -87,7 +92,7 @@ async function comprobarDescuentos(admin: ReturnType<typeof createAdminClient>, 
 async function crearCuotas(admin: ReturnType<typeof createAdminClient>, p: { userId: string; bonoId: string; adminId: string; metodo: string; instante: Date; plazos: Plazo[] }): Promise<string> {
   const total = p.plazos.length;
   const { data: primero } = await admin.from("pagos").select("id").eq("bono_id", p.bonoId).order("creado_en", { ascending: true }).limit(1).maybeSingle();
-  if (primero) await admin.from("pagos").update({ vence_en: p.plazos[0].vence, cuota_n: 1, cuotas_total: total }).eq("id", primero.id);
+  if (primero) await admin.from("pagos").update({ vence_en: p.plazos[0].vence, cuota_n: 1, cuotas_total: total, cubre_desde: p.plazos[0].desde || null, cubre_hasta: p.plazos[0].hasta || null }).eq("id", primero.id);
 
   const ids = [...new Set(p.plazos.map((x) => x.descuento).filter(Boolean))];
   const { data: ds } = ids.length ? await admin.from("descuentos").select("id, tipo, valor, activo, caduca_en, usos_max").in("id", ids) : { data: [] };
@@ -100,10 +105,10 @@ async function crearCuotas(admin: ReturnType<typeof createAdminClient>, p: { use
     const bruto = aCentimos(plazo.importe);
     const d = plazo.descuento ? descuentos.find((x) => x.id === plazo.descuento) : undefined;
     const rebaja = d ? rebajaDe(d, bruto) : 0;
-    const periodo = plazo.vence.slice(0, 7);
+    const periodo = (plazo.desde || plazo.vence).slice(0, 7);
     const { data: nuevo, error } = await admin
       .from("pagos")
-      .insert({ user_id: p.userId, bono_id: p.bonoId, importe_centimos: bruto - rebaja, importe_original_centimos: bruto, descuento_centimos: rebaja, descuento_id: d ? d.id : null, metodo: p.metodo, estado: "pendiente", periodo, vence_en: plazo.vence, cuota_n: i + 1, cuotas_total: total })
+      .insert({ user_id: p.userId, bono_id: p.bonoId, importe_centimos: bruto - rebaja, importe_original_centimos: bruto, descuento_centimos: rebaja, descuento_id: d ? d.id : null, metodo: p.metodo, estado: "pendiente", periodo, vence_en: plazo.vence, cubre_desde: plazo.desde || null, cubre_hasta: plazo.hasta || null, cuota_n: i + 1, cuotas_total: total })
       .select("id")
       .single();
     if (error || !nuevo) {

@@ -32,6 +32,8 @@ type PagoFila = {
   periodo: string | null;
   nota: string | null;
   vence_en: string | null;
+  cubre_desde: string | null;
+  cubre_hasta: string | null;
   cuota_n: number | null;
   cuotas_total: number | null;
   bonos: { tipo_bono_id: string; tipos_bono: { nombre: string } | null } | null;
@@ -57,7 +59,7 @@ export default async function PagosPersona({ params, searchParams }: { params: P
     admin.from("bonos").select("id, servicio, estado, clases_restantes, tipo_bono_id, caduca_en, creado_en, tipos_bono(nombre)").eq("user_id", id).order("creado_en", { ascending: false }),
     admin
       .from("pagos")
-      .select("id, bono_id, importe_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, periodo, nota, vence_en, cuota_n, cuotas_total, bonos(tipo_bono_id, tipos_bono(nombre))")
+      .select("id, bono_id, importe_centimos, descuento_centimos, metodo, estado, creado_en, pagado_en, periodo, nota, vence_en, cubre_desde, cubre_hasta, cuota_n, cuotas_total, bonos(tipo_bono_id, tipos_bono(nombre))")
       .eq("user_id", id)
       .order("creado_en", { ascending: false }),
     admin.from("descuentos").select("id, nombre, tipo, valor, caduca_en, usos_max, pagos(estado)").eq("activo", true).order("nombre"),
@@ -107,6 +109,8 @@ export default async function PagosPersona({ params, searchParams }: { params: P
       hora: textoHora(cuando),
       tieneFactura: conFactura.has(x.id),
       vence: x.vence_en,
+      cubreDesde: x.cubre_desde,
+      cubreHasta: x.cubre_hasta,
       cuota: x.cuotas_total && x.cuotas_total > 1 ? `Cuota ${x.cuota_n ?? 1} de ${x.cuotas_total}` : null,
     };
   });
