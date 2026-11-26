@@ -17,7 +17,40 @@ export function huella(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export type CampoEntrada = { clave: string; valor: string; tipo?: string };
+// Qué tipo de lead y qué etiquetas lleva un lead que llega por una conexión.
+// Si la petición trae «tipo» o «etiquetas» (y reconocemos el tipo), mandan sobre los de la conexión; si no, se usan los de la conexión.
+// Las etiquetas que lleguen y no existan se devuelven en «etiquetasNuevas» (quien llama las crea). Un tipo que no existe NO se crea:
+// se ignora y se usa el de la conexión (un texto libre de un formulario no debe llenar la lista de tipos).
+type Nombrado = { id: string; nombre: string };
+export function tipoYEtiquetasDeLead(
+  lead: { tipo: string; etiquetas: string[] },
+  conexion: { tipo_id: string | null; etiqueta_ids: string[] | null },
+  tipos: Nombrado[],
+  etiquetas: Nombrado[],
+): { tipoId: string | null; etiquetaIds: string[]; etiquetasNuevas: string[] } {
+  const delLead = lead.tipo ? tipos.find((t) => sinTildes(t.nombre) === sinTildes(lead.tipo)) : undefined;
+  const delaConexion = conexion.tipo_id ? tipos.find((t) => t.id === conexion.tipo_id) : undefined;
+  const tipoId = (delLead ?? delaConexion)?.id ?? null;
+
+  const pedidas = lead.etiquetas.map((e) => e.trim()).filter(Boolean);
+  if (pedidas.length === 0) {
+    const validas = new Set(etiquetas.map((e) => e.id));
+    return { tipoId, etiquetaIds: [...new Set(conexion.etiqueta_ids ?? [])].filter((id) => validas.has(id)), etiquetasNuevas: [] };
+  }
+  const etiquetaIds: string[] = [];
+  const etiquetasNuevas: string[] = [];
+  for (const nombre of pedidas) {
+    const hallada = etiquetas.find((e) => sinTildes(e.nombre) === sinTildes(nombre));
+    if (hallada) {
+      if (!etiquetaIds.includes(hallada.id)) etiquetaIds.push(hallada.id);
+    } else if (!etiquetasNuevas.some((n) => sinTildes(n) === sinTildes(nombre))) {
+      etiquetasNuevas.push(nombre);
+    }
+  }
+  return { tipoId, etiquetaIds, etiquetasNuevas };
+}
+
+export type CampoEntrada ={ clave: string; valor: string; tipo?: string };
 
 export type LeadEntrada = {
   nombre: string;

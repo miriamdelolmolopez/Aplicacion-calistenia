@@ -1918,3 +1918,35 @@ tr:hover .asaFila,
     grid-column: 1 / -1;
   }
 }
+
+/* Editar conexiones: tipo y etiquetas por defecto */
+
+/* Tipo y etiquetas por defecto de una conexión (al crearla, al editarla y en la lista) */
+.conexionElegir {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.conexionChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.conexionEditor {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conexionEditor > input {
+  min-height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 6px;
+}

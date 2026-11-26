@@ -1,7 +1,7 @@
 // Pruebas de la lectura de formularios externos. Se ejecutan con: npm test
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { camposDe, huella, leadDe, nuevaClave } from "./leadsEntrada.ts";
+import { camposDe, huella, leadDe, nuevaClave, tipoYEtiquetasDeLead } from "./leadsEntrada.ts";
 
 test("Tally: reconoce nombre, email, teléfono y guarda el resto como información", () => {
   const aviso = {
@@ -53,4 +53,47 @@ test("Las claves se generan distintas y solo se guarda su huella", () => {
   assert.equal(a.hash, huella(a.token));
   assert.notEqual(a.hash, a.token);
   assert.equal(a.ultimos4, a.token.slice(-4));
+});
+
+// ---- Tipo y etiquetas por defecto de la conexión ----
+const TIPOS = [
+  { id: "t-online", nombre: "Online" },
+  { id: "t-presencial", nombre: "Presencial" },
+];
+const ETIQUETAS = [
+  { id: "e-web", nombre: "web" },
+  { id: "e-cali", nombre: "Calistenia" },
+];
+const SIN_DATOS = { tipo: "", etiquetas: [] as string[] };
+
+test("Conexión con tipo y etiquetas: el lead las lleva sin que la petición las traiga", () => {
+  const r = tipoYEtiquetasDeLead(SIN_DATOS, { tipo_id: "t-presencial", etiqueta_ids: ["e-web", "e-cali"] }, TIPOS, ETIQUETAS);
+  assert.deepEqual(r, { tipoId: "t-presencial", etiquetaIds: ["e-web", "e-cali"], etiquetasNuevas: [] });
+});
+
+test("Conexión sin tipo ni etiquetas: se comporta como antes (nada)", () => {
+  assert.deepEqual(tipoYEtiquetasDeLead(SIN_DATOS, { tipo_id: null, etiqueta_ids: null }, TIPOS, ETIQUETAS), { tipoId: null, etiquetaIds: [], etiquetasNuevas: [] });
+  assert.deepEqual(tipoYEtiquetasDeLead(SIN_DATOS, { tipo_id: null, etiqueta_ids: [] }, TIPOS, ETIQUETAS), { tipoId: null, etiquetaIds: [], etiquetasNuevas: [] });
+});
+
+test("Lo que trae la petición manda sobre la conexión (sin tildes ni mayúsculas)", () => {
+  const r = tipoYEtiquetasDeLead({ tipo: "ONLINE", etiquetas: ["Calistenia"] }, { tipo_id: "t-presencial", etiqueta_ids: ["e-web"] }, TIPOS, ETIQUETAS);
+  assert.deepEqual(r, { tipoId: "t-online", etiquetaIds: ["e-cali"], etiquetasNuevas: [] });
+});
+
+test("Un tipo desconocido en la petición no se crea: se usa el de la conexión", () => {
+  const r = tipoYEtiquetasDeLead({ tipo: "Algo raro", etiquetas: [] }, { tipo_id: "t-presencial", etiqueta_ids: [] }, TIPOS, ETIQUETAS);
+  assert.equal(r.tipoId, "t-presencial");
+  const sin = tipoYEtiquetasDeLead({ tipo: "Algo raro", etiquetas: [] }, { tipo_id: null, etiqueta_ids: [] }, TIPOS, ETIQUETAS);
+  assert.equal(sin.tipoId, null);
+});
+
+test("Etiquetas nuevas de la petición se piden para crear (sin repetir); las existentes se reutilizan", () => {
+  const r = tipoYEtiquetasDeLead({ tipo: "", etiquetas: ["web", "Nueva", "nueva", "WEB"] }, { tipo_id: null, etiqueta_ids: ["e-cali"] }, TIPOS, ETIQUETAS);
+  assert.deepEqual(r, { tipoId: null, etiquetaIds: ["e-web"], etiquetasNuevas: ["Nueva"] });
+});
+
+test("Si una etiqueta o tipo de la conexión ya no existe (se borró), se ignora sin romper", () => {
+  const r = tipoYEtiquetasDeLead(SIN_DATOS, { tipo_id: "t-borrado", etiqueta_ids: ["e-web", "e-borrada"] }, TIPOS, ETIQUETAS);
+  assert.deepEqual(r, { tipoId: null, etiquetaIds: ["e-web"], etiquetasNuevas: [] });
 });

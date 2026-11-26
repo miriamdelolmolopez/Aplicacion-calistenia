@@ -4,16 +4,23 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import styles from "../admin.module.css";
 import estilos from "./leads.module.css";
-import { alternarConexion, crearConexion, eliminarConexion, regenerarConexion } from "./accionesConexiones";
+import { alternarConexion, crearConexion, editarConexion, eliminarConexion, regenerarConexion } from "./accionesConexiones";
+import Chip from "./Chip";
+import SelectorOpciones from "./SelectorOpciones";
+import type { ItemColor } from "./tipos";
 
-export type Conexion = { id: string; nombre: string; ultimos4: string; activo: boolean; recibidos: number; ultimo_uso: string | null };
+export type Conexion = { id: string; nombre: string; ultimos4: string; activo: boolean; recibidos: number; ultimo_uso: string | null; tipo_id?: string | null; etiqueta_ids?: string[] | null };
 
 const fecha = (iso: string | null) => (iso ? new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso)) : "nunca");
 
 // Panel para conectar formularios externos (Tally, la landing, Zapier…) con los leads.
-export default function ConectarFormularios({ conexiones, alCerrar }: { conexiones: Conexion[]; alCerrar?: () => void }) {
+export default function ConectarFormularios({ conexiones, tipos = [], etiquetas = [], alCerrar }: { conexiones: Conexion[]; tipos?: ItemColor[]; etiquetas?: ItemColor[]; alCerrar?: () => void }) {
   const router = useRouter();
   const [nombre, setNombre] = useState("");
+  const [tipoNuevo, setTipoNuevo] = useState<string | null>(null);
+  const [etiquetasNuevas, setEtiquetasNuevas] = useState<string[]>([]);
+  const [reinicio, setReinicio] = useState(0); // al crear una conexión se vacían los selectores
+  const [editando, setEditando] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [direccion, setDireccion] = useState<{ nombre: string; url: string } | null>(null);
   const [copiado, setCopiado] = useState(false);
@@ -22,13 +29,16 @@ export default function ConectarFormularios({ conexiones, alCerrar }: { conexion
   function crear() {
     setError("");
     empezar(async () => {
-      const r = await crearConexion(nombre);
+      const r = await crearConexion(nombre, tipoNuevo, etiquetasNuevas);
       if (!r.ok || !r.direccion) {
         setError(r.error ?? "No se ha podido crear.");
         return;
       }
       setDireccion({ nombre: nombre.trim(), url: r.direccion });
       setNombre("");
+      setTipoNuevo(null);
+      setEtiquetasNuevas([]);
+      setReinicio((n) => n + 1);
       setCopiado(false);
       router.refresh();
     });
@@ -88,6 +98,17 @@ export default function ConectarFormularios({ conexiones, alCerrar }: { conexion
           Crear conexión
         </button>
       </div>
+      <div className={estilos.conexionElegir} key={reinicio}>
+        <div className={styles.campo}>
+          <span style={{ fontSize: "0.9rem", fontWeight: 600 }}>Tipo de lead</span>
+          <SelectorOpciones tabla="tipos" opciones={tipos} multiple={false} valores={[]} alCambiar={(ids) => setTipoNuevo(ids[0] ?? null)} />
+        </div>
+        <div className={styles.campo}>
+          <span style={{ fontSize: "0.9rem", fontWeight: 600 }}>Etiquetas</span>
+          <SelectorOpciones tabla="etiquetas" opciones={etiquetas} multiple valores={[]} alCambiar={setEtiquetasNuevas} vacio="Sin etiquetas" />
+        </div>
+      </div>
+      <p className={styles.ayuda}>Los leads que lleguen por esta conexión se crearán con este tipo y estas etiquetas (opcional).</p>
       {error && <p className={styles.error}>{error}</p>}
 
       {direccion && (
@@ -119,7 +140,17 @@ export default function ConectarFormularios({ conexiones, alCerrar }: { conexion
 
       <ul className={estilos.listaConexiones}>
         {conexiones.length === 0 && <li className={estilos.vacioFiltro}>Todavía no tienes conexiones.</li>}
-        {conexiones.map((c) => (
+        {conexiones.map((c) => {
+          const tipo = tipos.find((t) => t.id === c.tipo_id);
+          const suyas = (c.etiqueta_ids ?? []).map((id) => etiquetas.find((e) => e.id === id)).filter((e): e is ItemColor => !!e);
+          if (editando === c.id) {
+            return (
+              <li key={c.id}>
+                <EditorConexion conexion={c} tipos={tipos} etiquetas={etiquetas} alTerminar={() => (setEditando(null), router.refresh())} />
+              </li>
+            );
+          }
+          return (
           <li key={c.id}>
             <div>
               <strong>{c.nombre}</strong>
@@ -128,8 +159,19 @@ export default function ConectarFormularios({ conexiones, alCerrar }: { conexion
                 · termina en …{c.ultimos4} · {c.recibidos} {c.recibidos === 1 ? "lead" : "leads"} · último: {fecha(c.ultimo_uso)}
               </small>
               {!c.activo && <span className={estilos.proximamente}>Desactivada</span>}
+              {(tipo || suyas.length > 0) && (
+                <div className={estilos.conexionChips}>
+                  {tipo && <Chip item={tipo} />}
+                  {suyas.map((e) => (
+                    <Chip key={e.id} item={e} />
+                  ))}
+                </div>
+              )}
             </div>
             <div className={estilos.acciones}>
+              <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => setEditando(c.id)} disabled={pendiente}>
+                Editar
+              </button>
               <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={() => alternar(c)} disabled={pendiente}>
                 {c.activo ? "Desactivar" : "Activar"}
               </button>
@@ -141,7 +183,8 @@ export default function ConectarFormularios({ conexiones, alCerrar }: { conexion
               </button>
             </div>
           </li>
-        ))}
+          );
+        })}
       </ul>
       {alCerrar && (
         <div className={estilos.acciones}>
@@ -151,5 +194,48 @@ export default function ConectarFormularios({ conexiones, alCerrar }: { conexion
         </div>
       )}
     </section>
+  );
+}
+
+// Edita el nombre, el tipo y las etiquetas de una conexión (su dirección no cambia).
+function EditorConexion({ conexion, tipos, etiquetas, alTerminar }: { conexion: Conexion; tipos: ItemColor[]; etiquetas: ItemColor[]; alTerminar: () => void }) {
+  const [nombre, setNombre] = useState(conexion.nombre);
+  const [tipo, setTipo] = useState<string | null>(conexion.tipo_id ?? null);
+  const [suyas, setSuyas] = useState<string[]>(conexion.etiqueta_ids ?? []);
+  const [error, setError] = useState("");
+  const [pendiente, empezar] = useTransition();
+
+  function guardar() {
+    setError("");
+    empezar(async () => {
+      const r = await editarConexion(conexion.id, nombre, tipo, suyas);
+      if (!r.ok) return setError(r.error ?? "No se ha podido guardar.");
+      alTerminar();
+    });
+  }
+
+  return (
+    <div className={estilos.conexionEditor}>
+      <input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={120} aria-label="Nombre de la conexión" />
+      <div className={estilos.conexionElegir}>
+        <div className={styles.campo}>
+          <span style={{ fontSize: "0.9rem", fontWeight: 600 }}>Tipo de lead</span>
+          <SelectorOpciones tabla="tipos" opciones={tipos} multiple={false} valores={conexion.tipo_id ? [conexion.tipo_id] : []} alCambiar={(ids) => setTipo(ids[0] ?? null)} />
+        </div>
+        <div className={styles.campo}>
+          <span style={{ fontSize: "0.9rem", fontWeight: 600 }}>Etiquetas</span>
+          <SelectorOpciones tabla="etiquetas" opciones={etiquetas} multiple valores={conexion.etiqueta_ids ?? []} alCambiar={setSuyas} vacio="Sin etiquetas" />
+        </div>
+      </div>
+      {error && <p className={styles.error}>{error}</p>}
+      <div className={estilos.acciones}>
+        <button type="button" className={styles.boton} onClick={guardar} disabled={pendiente || !nombre.trim()}>
+          Guardar
+        </button>
+        <button type="button" className={`${styles.boton} ${styles.botonSecundario}`} onClick={alTerminar} disabled={pendiente}>
+          Cancelar
+        </button>
+      </div>
+    </div>
   );
 }

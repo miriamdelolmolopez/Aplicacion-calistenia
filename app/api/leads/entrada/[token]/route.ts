@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { catalogosDe, duenoDeLeads, estadosDe } from "@/app/admin/leads/datos";
-import { camposDe, huella, leadDe, LIMITE_POR_MINUTO, MAX_BYTES, sinTildes } from "@/lib/leadsEntrada";
+import { camposDe, huella, leadDe, LIMITE_POR_MINUTO, MAX_BYTES, tipoYEtiquetasDeLead } from "@/lib/leadsEntrada";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailValido } from "@/lib/validaciones";
 
@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (!token || token.length > 100) return responder({ ok: false, error: "Dirección no válida." }, 404);
 
   const admin = createAdminClient();
-  const { data: conexion } = await admin.from("leads_conexiones").select("id, entrenador_id, nombre, activo, recibidos").eq("token_hash", huella(token)).maybeSingle();
+  const { data: conexion } = await admin.from("leads_conexiones").select("id, entrenador_id, nombre, activo, recibidos, tipo_id, etiqueta_ids").eq("token_hash", huella(token)).maybeSingle();
   if (!conexion || !conexion.activo) return responder({ ok: false, error: "Dirección no válida o desactivada." }, 404);
 
   // Límite de leads por minuto en esta conexión (por si alguien intenta llenarla de basura).
@@ -68,21 +68,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   } else {
     const estados = await estadosDe(entrenadorId);
     if (estados.length === 0) return responder({ ok: false, error: "No se ha podido crear el lead." }, 500);
-    // Su tipo y sus etiquetas se buscan por nombre en las listas del entrenador (las etiquetas que no existan se crean en gris).
+    // Su tipo y sus etiquetas: los de la conexión, salvo que la petición traiga los suyos (entonces mandan estos).
+    // Se buscan por nombre en las listas del entrenador; las etiquetas que no existan se crean en gris.
     const { etiquetas, tipos } = await catalogosDe(entrenadorId);
-    const tipoId = lead.tipo ? (tipos.find((t) => sinTildes(t.nombre) === sinTildes(lead.tipo))?.id ?? null) : null;
-    const etiquetaIds: string[] = [];
+    const elegido = tipoYEtiquetasDeLead(lead, { tipo_id: (conexion.tipo_id as string | null) ?? null, etiqueta_ids: (conexion.etiqueta_ids as string[] | null) ?? [] }, tipos, etiquetas);
+    const tipoId = elegido.tipoId;
+    const etiquetaIds = [...elegido.etiquetaIds];
     let total = etiquetas.length;
-    for (const nombre of lead.etiquetas) {
-      const existente = etiquetas.find((e) => sinTildes(e.nombre) === sinTildes(nombre));
-      if (existente) {
-        etiquetaIds.push(existente.id);
-      } else if (total < 40) {
-        const { data: nueva } = await admin.from("leads_etiquetas").insert({ entrenador_id: entrenadorId, nombre, color: "gris", orden: total }).select("id").maybeSingle();
-        if (nueva) {
-          etiquetaIds.push(nueva.id as string);
-          total += 1;
-        }
+    for (const nombre of elegido.etiquetasNuevas) {
+      if (total >= 40) break;
+      const { data: nueva } = await admin.from("leads_etiquetas").insert({ entrenador_id: entrenadorId, nombre, color: "gris", orden: total }).select("id").maybeSingle();
+      if (nueva) {
+        etiquetaIds.push(nueva.id as string);
+        total += 1;
       }
     }
     const { error } = await admin.from("leads").insert({
